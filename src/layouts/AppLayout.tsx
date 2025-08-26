@@ -10,7 +10,7 @@ export default function AppLayout() {
         >
           <Link to='/dashboard'>Dashboard</Link>
           <Link to='/reports'>Reports</Link>
-          <Link to='/sales'>Sales</Link>
+          <Link to='/profile'>Sales</Link>
         </nav>
       </aside>
 

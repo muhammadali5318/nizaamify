@@ -1,28 +1,27 @@
-import { ReactNode } from 'react'
+import { JSX, Suspense } from 'react'
 import { Navigate, useRoutes } from 'react-router'
-import AppLayout from 'src/layouts/AppLayout.tsx'
+import AppLayout from 'src/layouts/AppLayout'
+import About from 'src/pages/About'
+import Dashboard from 'src/pages/Dashboard'
+import Home from 'src/pages/Home'
+import NotFound from 'src/pages/NotFound'
+import Profile from 'src/pages/Profile'
+import { paths } from 'src/paths'
 
-// Dummy pages
-const Dashboard = () => <h1>Dashboard</h1>
-const Reports = () => <h1>Reports</h1>
-const Sales = () => <h1>Sales</h1>
-const SalesDetail = () => <h1>Sales Detail</h1>
-const NotFound = () => <h1>404 - Not Found</h1>
-
-export function Router(): ReactNode {
+export function Router(): JSX.Element | null {
   const routes = [
     {
-      path: '/',
+      path: paths.root,
       element: <AppLayout />,
       children: [
-        { index: true, element: <Navigate to='/dashboard' replace /> },
-        { path: 'dashboard', element: <Dashboard /> },
-        { path: 'reports', element: <Reports /> },
+        { index: true, element: <Navigate to={paths.dashboard} replace /> },
+        { path: paths.dashboard, element: <Dashboard /> },
+        { path: paths.home, element: <Home /> },
         {
-          path: 'sales',
+          path: paths.profile.root,
           children: [
-            { index: true, element: <Sales /> },
-            { path: ':id', element: <SalesDetail /> }
+            { index: true, element: <Profile /> },
+            { path: paths.profile.detail(), element: <About /> }
           ]
         }
       ]
@@ -30,5 +29,7 @@ export function Router(): ReactNode {
     { path: '*', element: <NotFound /> }
   ]
 
-  return useRoutes(routes)
+  return (
+    <Suspense fallback={<div>Loading...</div>}>{useRoutes(routes)}</Suspense>
+  )
 }
