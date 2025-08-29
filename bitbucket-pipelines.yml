@@ -13,7 +13,7 @@ definitions:
           - devops-scripts/**
         after-script:
           - apt install git -y
-          - export WEBHOOK_URL=$DIT_CHANNEL_WEBHOOK_URL
+          - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
           - chmod +x devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
           - ./devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
     - step: &trivyscan
@@ -23,7 +23,7 @@ definitions:
           - trivy fs --scanners vuln --vuln-type library --severity CRITICAL,HIGH --format table  --ignore-unfixed --include-dev-deps --exit-code 1  .
         after-script:
           - apk add git bash
-          - export WEBHOOK_URL=$DIT_CHANNEL_WEBHOOK_URL
+          - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
           - chmod +x devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
           - ./devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
     - step: &npminstall
@@ -36,7 +36,7 @@ definitions:
             - node_modules/** 
         after-script:
           - apt install git -y
-          - export WEBHOOK_URL=$DIT_CHANNEL_WEBHOOK_URL
+          - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
           - chmod +x devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
           - ./devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
 
@@ -46,7 +46,7 @@ definitions:
           - npm run lint
         after-script:
           - apt install git -y
-          - export WEBHOOK_URL=$DIT_CHANNEL_WEBHOOK_URL
+          - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
           - chmod +x devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
           - ./devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
 
@@ -75,7 +75,7 @@ definitions:
             - dist/**
         after-script:
           - apt install git -y
-          - export WEBHOOK_URL=$DIT_CHANNEL_WEBHOOK_URL
+          - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
           - chmod +x devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
           - ./devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
 
@@ -85,7 +85,7 @@ definitions:
           - npm test
         after-script:
           - apt install git -y
-          - export WEBHOOK_URL=$DIT_CHANNEL_WEBHOOK_URL
+          - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
           - chmod +x devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
           - ./devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
 
@@ -116,7 +116,7 @@ definitions:
           - cloudfront_id.txt
         after-script:
           - apt install git -y
-          - export WEBHOOK_URL=$DIT_CHANNEL_WEBHOOK_URL
+          - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
           - chmod +x devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
           - ./devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
           
@@ -133,7 +133,7 @@ definitions:
               PATHS: '/*'
         after-script:
           - apt install git -y
-          - export WEBHOOK_URL=$CM_CHANNEL_WEBHOOK_URL
+          - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
           - chmod +x devops-scripts/send-msteams-notifications/send-pipeline-completion-notification.sh
           - ./devops-scripts/send-msteams-notifications/send-pipeline-completion-notification.sh
 
