@@ -1,5 +1,7 @@
+import TestTheme from 'src/components/TestTheme'
+
 const Dashboard = () => {
-  return <div>Dashboard</div>
+  return <TestTheme />
 }
 
 export default Dashboard
