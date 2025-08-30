@@ -1,13 +1,56 @@
 :root {
-  --color-primary: green;
-  --color-primary-rgb: 25,118,210;
-  --color-primary-contrast: #ffffff;
+  --color-primary-main: #231F20;
+  --color-primary-light: #4d4d4d;
+  --color-primary-dark: #1C191A;
+  --color-primary-contrast-text: #ffffff;
 
-  --color-secondary: #9c27b0;
-  --color-secondary-rgb: 156,39,176;
+  --color-secondary-main: #9c27b0;
+  --color-secondary-light: #ba68c8;
+  --color-secondary-dark: #7b1fa2;
+  --color-secondary-contrast: #ffffff;
 
-  --color-bg: #f5f7fb;
-  --color-surface: #ffffff;
-  --color-text: #0f1720;
-  --color-muted: #6b7280;
+  --color-success-main: #2e7d32;
+  --color-success-light: #4caf50;
+  --color-success-dark: #1b5e20;
+  --color-success-contrast: #ffffff;
+
+  --color-info-main: #0288d1;
+  --color-info-light: #03a9f4;
+  --color-info-dark: #01579b;
+  --color-info-contrast: #ffffff;
+
+  --color-warning-main: #EF6C00;
+  --color-warning-light: #FF9800;
+  --color-warning-dark: #EF6C00;
+  --color-warning-contrast: #ffffff;
+
+  --color-error-main: #D32F2F;
+  --color-error-light: #EF5350;
+  --color-error-dark: #C62828;
+  --color-error-contrast: #ffffff;
+
+}
+
+/* 1. Use border-box for all elements */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* 2. Reset margin + padding */
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* 3. Define global font family */
+body {
+  font-family: 'Roboto', 'Inter';
+}
+
+/* 4. Make sure buttons, inputs, etc. inherit */
+button, input, textarea, select {
+  font-family: inherit;
 }
