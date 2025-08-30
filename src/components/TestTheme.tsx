@@ -112,12 +112,19 @@ export default function TestTheme() {
           value={radioValue}
           onChange={(e) => setRadioValue(e.target.value)}
         >
-          <FormControlLabel value='option1' control={<Radio />} label='Option 1' />
-          <FormControlLabel value='option2' control={<Radio />} label='Option 2' />
+          <FormControlLabel
+            value='option1'
+            control={<Radio />}
+            label='Option 1'
+          />
+          <FormControlLabel
+            value='option2'
+            control={<Radio />}
+            label='Option 2'
+          />
         </RadioGroup>
         <FormControlLabel control={<Switch />} label='Switch' />
       </Stack>
     </Box>
   )
 }
-  
