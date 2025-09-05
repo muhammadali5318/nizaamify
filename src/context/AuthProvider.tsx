@@ -8,6 +8,7 @@ import React, {
   useState
 } from 'react'
 import { useNavigate } from 'react-router'
+import PageLoader from 'src/components/common/page-loader'
 import { CONFIG } from 'src/config-global'
 import apiClient from 'src/services/api-client'
 
@@ -164,7 +165,7 @@ function AuthProviderContainer({ children }: Props) {
   )
 
   if (isLoading || tokenLoading || isInfoLoading) {
-    return <h1>loadingaik</h1>
+    return <PageLoader />
   }
 
   return (

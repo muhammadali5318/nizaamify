@@ -28,7 +28,13 @@ export function SplashScreen({
         }}
         {...other}
       >
-        <CircularProgress />
+        <CircularProgress
+          sx={{
+            color: 'black' // Set the spinner color to black
+          }}
+          size={30} // Set spinner size
+          thickness={4} // Adjust thickness
+        />
       </Box>
     </Box>
   )

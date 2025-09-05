@@ -16,10 +16,16 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = ({ component }) => {
           alignItems: 'center',
           width: '100vw',
           height: '100vh',
-          backgroundColor: '#141a21'
+          backgroundColor: '#fff'
         }}
       >
-        <CircularProgress />
+        <CircularProgress
+          sx={{
+            color: 'black' // Set the spinner color to black
+          }}
+          size={30} // Set spinner size
+          thickness={4} // Adjust thickness
+        />
       </div>
     )
   })
