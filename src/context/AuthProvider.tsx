@@ -103,7 +103,7 @@ function AuthProviderContainer({ children }: Props) {
     useAuth0()
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [tokenLoading, setTokenLoading] = useState<boolean>(true)
-  const [userInfo, setUserInfo] = useState()
+  const [userInfo] = useState()
   const [isInfoLoading, setIsInfoLoading] = useState<boolean>(true)
   const getAccessToken = useCallback(async (): Promise<string | null> => {
     try {
