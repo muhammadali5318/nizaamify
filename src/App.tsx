@@ -3,13 +3,16 @@ import { Router } from './router'
 import { ThemeProvider } from '@mui/material'
 import theme from './theme/muiTheme'
 import './styles/global.scss'
+import { AuthProvider } from './context/AuthProvider'
 
 function App() {
   return (
     <BrowserRouter>
-      <ThemeProvider theme={theme}>
-        <Router />
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider theme={theme}>
+          <Router />
+        </ThemeProvider>
+      </AuthProvider>
     </BrowserRouter>
   )
 }

@@ -7,5 +7,12 @@ export const paths = {
     root: '/profile',
     detail: (id: string | number = ':id') => `/profile/${id}`
   },
+  auth1: {
+    login: '/login'
+  },
+  auth: {
+    login: '/auth/login',
+    logout: '/auth/logout'
+  },
   page404: '/404'
 }
