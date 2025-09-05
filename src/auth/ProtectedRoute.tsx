@@ -1,32 +1,28 @@
-// src/auth/ProtectedRoute.tsx
-import React from 'react'
-import { Navigate, Outlet } from 'react-router'
-import { useAuth } from 'src/context/AuthProvider' // <- uses your app-level hook
-import { paths } from 'src/paths'
+import { withAuthenticationRequired } from '@auth0/auth0-react'
+import { CircularProgress } from '@mui/material'
+import { FC, ComponentType } from 'react'
 
-type Props = {
-  children?: React.ReactNode
+interface ProtectedRouteProps {
+  component: ComponentType
 }
 
-/**
- * ProtectedRoute
- * - shows a Spinner while auth is loading
- * - redirects to login if not authenticated
- * - renders children or <Outlet /> when authenticated
- */
-export function ProtectedRoute({ children }: Props) {
-  const { loading, authenticated } = useAuth()
+export const ProtectedRoute: FC<ProtectedRouteProps> = ({ component }) => {
+  const Component = withAuthenticationRequired(component, {
+    onRedirecting: () => (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: '#141a21'
+        }}
+      >
+        <CircularProgress />
+      </div>
+    )
+  })
 
-  if (loading) {
-    return <h1>Loading</h1>
-  }
-
-  if (!authenticated) {
-    // replace with paths.auth.login if you have it in your paths object
-    const loginPath = paths?.auth?.login ?? '/login'
-    return <Navigate to={loginPath} replace />
-  }
-
-  // If caller passed children, render them. Otherwise render nested routes via Outlet.
-  return children ? <>{children}</> : <Outlet />
+  return <Component />
 }

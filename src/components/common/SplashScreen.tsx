@@ -24,7 +24,6 @@ export function SplashScreen({
           position: 'fixed',
           alignItems: 'center',
           justifyContent: 'center',
-          bgcolor: '#141a21',
           ...sx
         }}
         {...other}

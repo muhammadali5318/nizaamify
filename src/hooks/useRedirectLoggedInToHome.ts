@@ -5,13 +5,12 @@ import { useAuth } from 'src/context/AuthProvider'
 const useRedirectLoggedInToHome = () => {
   const { authenticated, loading } = useAuth()
   const navigate = useNavigate()
-  const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === 'true'
 
   useEffect(() => {
-    if (!bypassAuth && authenticated && !loading) {
+    if (authenticated && !loading) {
       navigate('/')
     }
-  }, [authenticated, loading, bypassAuth, navigate])
+  }, [authenticated, loading, navigate])
 }
 
 export default useRedirectLoggedInToHome

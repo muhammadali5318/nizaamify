@@ -15,9 +15,9 @@ function RedirectComponent() {
   const { loading, authenticated } = useAuth()
   if (loading) return <h1>Loading...</h1>
   return authenticated ? (
-    <Navigate to={paths.dashboard} replace />
+    <Navigate to={paths.dashboard} />
   ) : (
-    <Navigate to={paths.auth.login} replace />
+    <Navigate to={paths.auth.login} />
   )
 }
 
@@ -26,13 +26,9 @@ export function Router() {
     { path: paths.root, element: <RedirectComponent /> },
     {
       path: paths.root,
-      element: (
-        <ProtectedRoute>
-          <AppLayout />
-        </ProtectedRoute>
-      ),
+      element: <ProtectedRoute component={AppLayout} />,
       children: [
-        { index: true, element: <Navigate to={paths.dashboard} replace /> },
+        { index: true, element: <Navigate to={paths.dashboard} /> },
         { path: paths.dashboard, element: <Dashboard /> },
         { path: paths.home, element: <Home /> },
         {

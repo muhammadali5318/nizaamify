@@ -1,16 +1,15 @@
 import { AppState, Auth0Provider, useAuth0 } from '@auth0/auth0-react'
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState
 } from 'react'
 import { useNavigate } from 'react-router'
 import { CONFIG } from 'src/config-global'
 import apiClient from 'src/services/api-client'
-import { endpoints } from 'src/services/backendUrl'
 
 /* ---------------------- Types ---------------------- */
 
@@ -63,29 +62,6 @@ export function useAuth() {
 /* ---------------------- High level AuthProvider (wraps Auth0Provider) ---------------------- */
 
 export function AuthProvider({ children }: Props) {
-  const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === 'true'
-
-  if (bypassAuth) {
-    return (
-      <AuthContext.Provider
-        value={{
-          user: {
-            id: 'dev-user',
-            displayName: 'Dev User',
-            role: 'admin',
-            raw: { mock: true },
-            accessToken: 'fake-token'
-          },
-          loading: false,
-          authenticated: true,
-          getAccessToken: async () => 'fake-token'
-        }}
-      >
-        {children}
-      </AuthContext.Provider>
-    )
-  }
-
   // 🔐 otherwise, run the real Auth0Provider flow
   const { domain, clientId, callbackUrl, audience } = CONFIG.auth
   const navigate = useNavigate()
@@ -95,6 +71,10 @@ export function AuthProvider({ children }: Props) {
     navigate(target, { replace: true })
   }
 
+  if (!(domain && clientId && callbackUrl && audience)) {
+    return <span>.env file or Auth0 configuration missing</span>
+  }
+
   return (
     <Auth0Provider
       domain={domain}
@@ -102,10 +82,13 @@ export function AuthProvider({ children }: Props) {
       authorizationParams={{
         redirect_uri: callbackUrl,
         audience,
-        scope: 'openid profile email'
-        // remove `prompt: 'login'` unless you explicitly want to force re-login
+        scope: 'openid profile email',
+        prompt: 'login'
       }}
       onRedirectCallback={onRedirectCallback}
+      useRefreshTokens={true}
+      useRefreshTokensFallback={true}
+      cacheLocation='localstorage'
     >
       <AuthProviderContainer>{children}</AuthProviderContainer>
     </Auth0Provider>
@@ -115,136 +98,80 @@ export function AuthProvider({ children }: Props) {
 /* ---------------------- Container (implements token logic) ---------------------- */
 
 function AuthProviderContainer({ children }: Props) {
-  const {
-    user: auth0User,
-    isAuthenticated,
-    isLoading: auth0IsLoading,
-    getAccessTokenSilently
-  } = useAuth0()
-
-  // simple typed local state
-  const [user, setUser] = useState<AppUser | null>(null)
-  const [internalLoading, setInternalLoading] = useState<boolean>(true)
-
-  // token lives here (ref so interceptor always sees latest)
-  const tokenRef = useRef<string | null>(null)
-  const axiosInterceptorId = useRef<number | null>(null)
-
-  // register an axios interceptor once to attach token from tokenRef
-  useEffect(() => {
-    const id = apiClient.interceptors.request.use((config) => {
-      if (tokenRef.current) {
-        // ensure headers object exists
-
-        config.headers = config.headers ?? {}
-        // attach bearer token
-        config.headers.Authorization = `Bearer ${tokenRef.current}`
-      }
-      return config
-    })
-    axiosInterceptorId.current = id
-    return () => {
-      if (axiosInterceptorId.current !== null) {
-        apiClient.interceptors.request.eject(axiosInterceptorId.current)
-      }
-    }
-  }, [])
-
-  // helper to safely fetch user info from backend
-  const fetchUserInfo = async (mountedRef: { current: boolean }) => {
+  const { user, isLoading, isAuthenticated, getAccessTokenSilently } =
+    useAuth0()
+  const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [tokenLoading, setTokenLoading] = useState<boolean>(true)
+  const [userInfo, setUserInfo] = useState()
+  const [isInfoLoading, setIsInfoLoading] = useState<boolean>(true)
+  const getAccessToken = useCallback(async (): Promise<string | null> => {
     try {
-      setInternalLoading(true)
-      const res = await apiClient.get(endpoints?.userInfo)
-      if (!mountedRef.current) return
-      if (res?.data?.status) {
-        const data = res.data.data
-        const appUser: AppUser = {
-          id: auth0User?.sub,
-          displayName: data?.user_data?.name ?? auth0User?.name ?? null,
-          role: data?.user_data?.roles ?? 'admin',
-          raw: data
-        }
-        setUser((prev) => ({ ...prev, ...appUser }))
+      let token: string | null = null
+      if (isAuthenticated) {
+        token = await getAccessTokenSilently()
+        setAccessToken(token)
+        apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
+      } else {
+        setAccessToken(null)
+        delete apiClient.defaults.headers.common.Authorization
       }
-    } catch (err) {
-      // handle errors gracefully
-    } finally {
-      if (mountedRef.current) setInternalLoading(false)
-    }
-  }
-
-  // central function to get token and fetch user info
-  const getAccessToken = async (): Promise<string | null> => {
-    try {
-      // ask auth0 for a token (silently)
-      const token = await getAccessTokenSilently({
-        audience: CONFIG.auth.audience
-      })
-      tokenRef.current = token
+      if (token) {
+        // getUserInfo()
+      } else {
+        setIsInfoLoading(false)
+      }
       return token
-    } catch (err) {
-      // on failure clear token
-      tokenRef.current = null
+    } catch (error) {
+      console.error('Error fetching access token:', error)
+      setAccessToken(null)
+      delete apiClient.defaults.headers.common.Authorization
       return null
+    } finally {
+      setTokenLoading(false)
     }
-  }
+  }, [getAccessTokenSilently, isAuthenticated])
 
-  // Effect: whenever auth0 state changes, ensure token + user info are in sync
   useEffect(() => {
-    const mountedRef = { current: true }
-    const sync = async () => {
-      // if not authenticated, clear everything
-      if (!isAuthenticated) {
-        tokenRef.current = null
-        setUser(null)
-        setInternalLoading(false)
-        return
-      }
+    getAccessToken()
+  }, [getAccessToken])
 
-      // get token
-      try {
-        setInternalLoading(true)
-        const token = await getAccessToken()
-        if (!mountedRef.current) return
+  const isFullyAuthenticated =
+    isAuthenticated && !tokenLoading && accessToken !== null
 
-        if (token) {
-          // fetch user info from backend which relies on axios interceptor attaching token
-          await fetchUserInfo(mountedRef)
-          // keep token on user object for convenience
-          setUser((prev) => ({ ...(prev ?? {}), accessToken: token }))
-        } else {
-          setUser(null)
-        }
-      } finally {
-        if (mountedRef.current) setInternalLoading(false)
-      }
-    }
+  const status =
+    isLoading || tokenLoading
+      ? 'loading'
+      : isFullyAuthenticated
+        ? 'authenticated'
+        : 'unauthenticated'
 
-    sync()
-
-    return () => {
-      mountedRef.current = false
-    }
-    // intentionally only depend on these few values so we run on auth state changes
-  }, [isAuthenticated, getAccessTokenSilently, auth0IsLoading, auth0User])
-
-  const loading = auth0IsLoading || internalLoading
-  const authenticated = isAuthenticated && !!tokenRef.current
-
-  const value = useMemo<AuthContextType>(
+  const memoizedValue = useMemo(
     () => ({
-      user,
-      loading,
-      authenticated,
+      loading: status === 'loading',
+      authenticated: status === 'authenticated',
+      unauthenticated: status === 'unauthenticated',
       getAccessToken
     }),
-    // list deps minimally
-    [user, loading, authenticated]
+    [
+      accessToken,
+      userInfo,
+      tokenLoading,
+      isInfoLoading,
+      status,
+      user?.name,
+      user?.sub
+    ]
   )
 
-  if (loading) return <h2>Loading new</h2>
+  if (isLoading || tokenLoading || isInfoLoading) {
+    return <h1>loadingaik</h1>
+  }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={memoizedValue}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export default AuthContext
