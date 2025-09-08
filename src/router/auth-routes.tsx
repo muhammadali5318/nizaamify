@@ -6,7 +6,11 @@ import AuthLayout from 'src/layouts/AuthLayout'
 
 const AuthPages = {
   Login: lazy(() => import('src/auth/Login')),
-  Logout: lazy(() => import('src/auth/Logout'))
+  Logout: lazy(() => import('src/auth/Logout')),
+  Signup: lazy(() => import('src/pages/signup')),
+  Congratulations: lazy(
+    () => import('src/pages/signup/components/Congratulations')
+  )
 }
 
 export const authRoutes = [
@@ -33,6 +37,22 @@ export const authRoutes = [
         element: (
           <AuthLayout>
             <AuthPages.Logout />
+          </AuthLayout>
+        )
+      },
+      {
+        path: 'signup',
+        element: (
+          <AuthLayout>
+            <AuthPages.Signup />
+          </AuthLayout>
+        )
+      },
+      {
+        path: 'signup/congratulations',
+        element: (
+          <AuthLayout>
+            <AuthPages.Congratulations />
           </AuthLayout>
         )
       }

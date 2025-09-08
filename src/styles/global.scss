@@ -1,4 +1,10 @@
 :root {
+
+  --color-text-primary:  rgba(0, 0, 0, 0.80);
+  --color-text-secondary:  rgba(0, 0, 0, 0.60);
+  --color-text-disabled:  rgba(0, 0, 0, 0.38);
+  
+  --color-primary-black: #000;
   --color-primary-main: #231F20;
   --color-primary-light: #4d4d4d;
   --color-primary-dark: #1C191A;
@@ -29,6 +35,13 @@
   --color-error-dark: #C62828;
   --color-error-contrast: #ffffff;
 
+  --grey-100: #F5F5F5;
+  --grey-border: #f7f7f7;
+
+  --components-stepper-connector: #bdbdbd;
+
+
+  --footer-height: 70px;
 }
 
 /* 1. Use border-box for all elements */
@@ -47,10 +60,23 @@ html, body {
 
 /* 3. Define global font family */
 body {
-  font-family: 'Roboto', 'Inter';
+  font-family: 'Roboto';
 }
 
 /* 4. Make sure buttons, inputs, etc. inherit */
 button, input, textarea, select {
   font-family: inherit;
+}
+
+.font-weight--700 {
+  font-weight: 700 !important;
+}
+
+.wrapper {
+  min-height: calc(100vh - var(--footer-height));
+}
+.footerRoot { height: var(--footer-height); }
+
+.info-main {
+  color: var(--color-info-main);
 }

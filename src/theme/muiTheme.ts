@@ -2,6 +2,17 @@
 import { createTheme } from '@mui/material/styles'
 
 const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#231F20',
+      light: '#4d4d4d',
+      dark: '#1C191A',
+      contrastText: '#fff'
+    }
+  },
+  typography: {
+    fontFamily: 'Roboto, Arial, sans-serif'
+  },
   components: {
     MuiButton: {
       styleOverrides: {
@@ -41,7 +52,6 @@ const theme = createTheme({
         }
       }
     },
-
     MuiSelect: {
       styleOverrides: {
         outlined: {

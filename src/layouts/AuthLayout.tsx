@@ -1,8 +1,7 @@
 import { Box } from '@mui/material'
 
 const AuthLayout = ({ children }) => {
-  const isLoading = true
-
+  const isLoading = false
   return (
     <Box
       sx={{
@@ -28,18 +27,14 @@ const AuthLayout = ({ children }) => {
             zIndex: 10
           }}
         >
-          <h2>Loadling</h2>
+          <h2>Loading</h2>
         </Box>
       )}
       <Box
         sx={{
-          p: 4,
-          boxShadow: 3,
-          borderRadius: 2,
-          backgroundColor: '#141a21',
-          maxWidth: 400,
-          width: '100%',
-          zIndex: 1
+          width: '100vw',
+          height: '100vh',
+          zIndex: 10
         }}
       >
         {children}
