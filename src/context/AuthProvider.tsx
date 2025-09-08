@@ -83,13 +83,13 @@ export function AuthProvider({ children }: Props) {
       authorizationParams={{
         redirect_uri: callbackUrl,
         audience,
-        scope: 'openid profile email',
+        scope: 'openid profile email offline_access',
         prompt: 'login'
       }}
       onRedirectCallback={onRedirectCallback}
       useRefreshTokens={true}
       useRefreshTokensFallback={true}
-      cacheLocation='localstorage'
+      cacheLocation='memory'
     >
       <AuthProviderContainer>{children}</AuthProviderContainer>
     </Auth0Provider>

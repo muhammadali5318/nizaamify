@@ -3,10 +3,12 @@ import React, { useEffect } from 'react'
 import { paths } from 'src/paths'
 
 const LoginButton: React.FC = () => {
-  const { loginWithRedirect } = useAuth0()
+  const { loginWithRedirect, isLoading, isAuthenticated } = useAuth0()
   const audience = import.meta.env.VITE_APP_AUTH0_AUDIENCE
 
   useEffect(() => {
+    if (isLoading) return
+    if (isAuthenticated) return
     const redirectToLogin = async () => {
       try {
         await loginWithRedirect({
@@ -23,7 +25,7 @@ const LoginButton: React.FC = () => {
     }
 
     redirectToLogin()
-  }, [loginWithRedirect, audience])
+  }, [loginWithRedirect, audience, isLoading, isAuthenticated])
 
   return null
 }
