@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
@@ -28,6 +28,10 @@ const SignupStepThree: React.FC<SignupStepThreeProps> = ({
   const {
     control,
     handleSubmit,
+    watch,
+    trigger,
+    getValues,
+    clearErrors,
     formState: { isValid }
   } = useForm<FormValues>({
     resolver: zodResolver(PasswordSchema),
@@ -41,6 +45,22 @@ const SignupStepThree: React.FC<SignupStepThreeProps> = ({
       gdpr: false
     }
   })
+
+  const passwordValue = watch('password')
+  useEffect(() => {
+    const confirm = getValues('confirmPassword')
+    // If confirmPassword is empty, skip (no need to trigger)
+    if (!confirm) return
+
+    if (passwordValue === confirm) {
+      // passwords match -> clear confirm error (if any)
+      clearErrors('confirmPassword')
+    } else {
+      // passwords don't match -> re-run validation to show correct error (or clear)
+      // trigger returns a boolean but we don't need it here
+      trigger('confirmPassword')
+    }
+  }, [passwordValue, getValues, trigger, clearErrors])
 
   const submit = (data: FormValues) => {
     if (onSubmit) onSubmit(data)
