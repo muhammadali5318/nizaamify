@@ -2,11 +2,14 @@
 export const paths = {
   root: '/',
   dashboard: '/dashboard',
-  home: '/home',
-  profile: {
-    root: '/profile',
-    detail: (id: string | number = ':id') => `/profile/${id}`
-  },
+  documents: '/documents',
+  reports: '/reports',
+  benchmarks: '/benchmarks',
+  teamManagement: '/team-management',
+  practiceSettings: '/practice-settings',
+  billing: '/billing',
+  settings: '/settings',
+  helpAndSupport: '/help-and-support',
   auth1: {
     login: '/login'
   },

@@ -49,7 +49,7 @@ export default function TestTheme() {
   const [radioValue, setRadioValue] = useState('option1')
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box>
       {/* TYPOGRAPHY */}
       <Typography variant='h4' gutterBottom>
         Typography Showcase
