@@ -4,7 +4,10 @@ export const SignupStepThreeSchema = z
   .object({
     password: z
       .string()
-      .min(8, 'Password must be at least 8 characters')
+      .min(
+        8,
+        'Password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character.'
+      )
       .refine((val) => /[A-Z]/.test(val), {
         message: 'Password must contain at least one uppercase letter'
       })
