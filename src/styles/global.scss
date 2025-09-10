@@ -86,9 +86,25 @@ button, input, textarea, select {
   color: var(--color-info-main);
 }
 
+.text-primary {
+  color: var(--color-text-primary);
+}
+
 .center-align-width--100 {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.width--100 {
+  width: 100%;
+}
+
+.text-underline {
+  text-decoration-line: underline;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }

@@ -1,6 +1,6 @@
 .congratulationsRoot {
   width: 100%;
-  height: calc(100% - 174px);
+  height: calc(100vh - 174px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -27,5 +27,9 @@
     align-items: center;
     gap: 8px;
     align-self: stretch;
+  }
+
+  .continueBtn {
+    width: 210px;
   }
 }
