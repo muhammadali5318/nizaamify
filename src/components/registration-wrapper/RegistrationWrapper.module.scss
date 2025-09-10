@@ -34,5 +34,5 @@
 
 .childrenContainer {
   width: 100%;
-  height: 100%;
+  height: calc(100vh - 70px); /* 70px matches your footer height */
 }

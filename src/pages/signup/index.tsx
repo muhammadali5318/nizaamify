@@ -56,7 +56,7 @@ const SignUp: React.FC = () => {
   }
 
   if (activeStep === 3) {
-    return <EmailVerification />
+    return <EmailVerification email='Sarah.Daniel@example.com' />
   }
   return (
     <RegistrationWrapper>
@@ -65,7 +65,7 @@ const SignUp: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'flex-start',
           width: '100%',
           height: '100%',
           px: 2

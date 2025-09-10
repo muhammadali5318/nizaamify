@@ -2,8 +2,8 @@ import { Box, Typography } from '@mui/material'
 import styles from './RegistrationHeader.module.scss'
 
 interface RegistrationHeaderProps {
-  heading: string
-  subHeading: string
+  heading?: string
+  subHeading?: string
 }
 
 const RegistrationHeader: React.FC<RegistrationHeaderProps> = ({
@@ -21,18 +21,20 @@ const RegistrationHeader: React.FC<RegistrationHeaderProps> = ({
       </Box>
 
       {/* Tagline */}
-      <Box className={styles.headerContainer}>
-        <Typography variant='h4' align='center'>
-          {heading}
-        </Typography>
-        <Typography
-          variant='body1'
-          align='center'
-          color='var(--text-secondary)'
-        >
-          {subHeading}
-        </Typography>
-      </Box>
+      {heading && subHeading && (
+        <Box className={styles.headerContainer}>
+          <Typography variant='h4' align='center'>
+            {heading}
+          </Typography>
+          <Typography
+            variant='body1'
+            align='center'
+            color='var(--text-secondary)'
+          >
+            {subHeading}
+          </Typography>
+        </Box>
+      )}
     </Box>
   )
 }

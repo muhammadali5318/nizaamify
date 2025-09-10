@@ -1,0 +1,29 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="60" cy="60" r="60" fill="#9D9D9D" fill-opacity="0.05"/>
+<foreignObject x="0" y="0" width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(4.21px);clip-path:url(#bgblur_0_749_24447_clip_path);height:100%;width:100%"></div></foreignObject><g data-figma-bg-blur-radius="8.42268">
+<circle cx="60.0004" cy="60.0008" r="50.0971" fill="#95FD97" fill-opacity="0.3"/>
+<circle cx="60.0004" cy="60.0008" r="50.0971" fill="url(#paint0_radial_749_24447)" fill-opacity="0.6"/>
+<circle cx="60.0004" cy="60.0008" r="50.0971" stroke="white" stroke-opacity="0.2" stroke-width="0.647899" stroke-linejoin="round"/>
+</g>
+<path d="M39.6867 47.8626C40.9664 46.4734 47.6241 50.5246 54.557 56.9113C61.49 63.2981 66.0726 69.6017 64.7929 70.9909" stroke="black" stroke-width="3.00097" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M59.7432 51.0068C59.7731 50.9551 59.8033 50.9033 59.8332 50.851C62.3422 46.4854 62.19 38.4718 59.3389 32.0455" stroke="#4CAF50" stroke-width="3.00097" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M65.001 56.3311C65.2866 56.1116 65.5692 55.8992 65.8474 55.6954C69.8871 52.7353 78.2663 51.9224 83.5553 55.6733" stroke="#4CAF50" stroke-width="3.00097" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M70.7382 30.3798C71.8377 31.3906 73.1487 32.3258 72.8547 33.8345C72.3352 36.5008 67.8424 35.6253 67.3229 38.2915C67.0184 39.8544 68.4587 40.7694 69.5981 41.7959" stroke="#4CAF50" stroke-width="3.00097" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M80.0604 44.3244C80.0051 44.7262 79.8475 45.1075 79.5332 45.4578C77.7189 47.4794 74.3124 44.422 72.498 46.4436C71.1505 47.9452 72.7411 49.9917 72.9052 51.7735" stroke="#4CAF50" stroke-width="3.00097" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M64.7932 70.992C63.5135 72.3811 56.856 68.3298 49.923 61.9431C42.9901 55.5563 38.4073 49.2528 39.687 47.8637L39.4738 48.5104L27.5647 84.463C27.2125 85.5263 28.2785 86.5082 29.3093 86.0702L64.1662 71.2574L64.7932 70.992Z" stroke="black" stroke-width="3.00097" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M59.9394 26.1326L61.9992 24.4719" stroke="black" stroke-width="3.00097" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M84.2141 72.5072L81.0052 71.6367" stroke="black" stroke-width="3.00097" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M93.6884 60.2038L91.0878 60.6913" stroke="#4CAF50" stroke-width="3.00097" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M41.2196 49.0377L43.5908 50.2118" stroke="#4CAF50" stroke-width="3.00097" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M86.6434 29.5382L84.1963 28.532" stroke="black" stroke-width="3.00097" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M66.9163 70.493L65.957 72.9586" stroke="#4CAF50" stroke-width="3.00097" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M46.2012 36.7393L48.8361 36.5017" stroke="black" stroke-width="3.00097" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M89.5383 47.7364L86.9014 47.5226" stroke="black" stroke-width="3.00097" stroke-linecap="round" stroke-linejoin="round"/>
+<defs>
+<clipPath id="bgblur_0_749_24447_clip_path" transform="translate(0 0)"><circle cx="60.0004" cy="60.0008" r="50.0971"/>
+</clipPath><radialGradient id="paint0_radial_749_24447" cx="0" cy="0" r="1" gradientTransform="matrix(-87.4049 60.9596 -56.6435 -82.8091 122.731 15.421)" gradientUnits="userSpaceOnUse">
+<stop stop-color="#EFEFEF"/>
+<stop offset="1" stop-color="#E5DFDF" stop-opacity="0"/>
+</radialGradient>
+</defs>
+</svg>
