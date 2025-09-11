@@ -185,6 +185,7 @@ const SignupStepOne: React.FC<SignupStepOneProps> = ({
                       label='Phone Number'
                       variant='outlined'
                       defaultCountry='GB'
+                      onlyCountries={['GB']}
                       placeholder='Enter phone number'
                       onChange={(val) => field.onChange(val ?? '')}
                       sx={{

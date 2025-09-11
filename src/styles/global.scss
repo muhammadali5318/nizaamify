@@ -1,13 +1,12 @@
 :root {
+  --color-text-primary: rgba(0, 0, 0, 0.8);
+  --color-text-secondary: rgba(0, 0, 0, 0.6);
+  --color-text-disabled: rgba(0, 0, 0, 0.38);
 
-  --color-text-primary:  rgba(0, 0, 0, 0.80);
-  --color-text-secondary:  rgba(0, 0, 0, 0.60);
-  --color-text-disabled:  rgba(0, 0, 0, 0.38);
-  
   --color-primary-black: #000;
-  --color-primary-main: #231F20;
+  --color-primary-main: #231f20;
   --color-primary-light: #4d4d4d;
-  --color-primary-dark: #1C191A;
+  --color-primary-dark: #1c191a;
   --color-primary-contrast-text: #ffffff;
 
   --color-secondary-main: #9c27b0;
@@ -25,22 +24,21 @@
   --color-info-dark: #01579b;
   --color-info-contrast: #ffffff;
 
-  --color-warning-main: #EF6C00;
-  --color-warning-light: #FF9800;
-  --color-warning-dark: #EF6C00;
+  --color-warning-main: #ef6c00;
+  --color-warning-light: #ff9800;
+  --color-warning-dark: #ef6c00;
   --color-warning-contrast: #ffffff;
 
-  --color-error-main: #D32F2F;
-  --color-error-light: #EF5350;
-  --color-error-dark: #C62828;
+  --color-error-main: #d32f2f;
+  --color-error-light: #ef5350;
+  --color-error-dark: #c62828;
   --color-error-contrast: #ffffff;
 
-  --grey-100: #F5F5F5;
-  --grey-300: #E0E0E0;
+  --grey-100: #f5f5f5;
+  --grey-300: #e0e0e0;
   --grey-border: #f7f7f7;
 
   --components-stepper-connector: #bdbdbd;
-
 
   --footer-height: 70px;
 }
@@ -53,7 +51,8 @@
 }
 
 /* 2. Reset margin + padding */
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
@@ -65,7 +64,10 @@ body {
 }
 
 /* 4. Make sure buttons, inputs, etc. inherit */
-button, input, textarea, select {
+button,
+input,
+textarea,
+select {
   font-family: inherit;
 }
 
@@ -80,7 +82,9 @@ button, input, textarea, select {
 .wrapper {
   min-height: calc(100vh - var(--footer-height));
 }
-.footerRoot { height: var(--footer-height); }
+.footerRoot {
+  height: var(--footer-height);
+}
 
 .info-main {
   color: var(--color-info-main);
@@ -107,4 +111,13 @@ button, input, textarea, select {
 
 .cursor-pointer {
   cursor: pointer;
+}
+
+.icon-dimension--88 {
+  width: 88px;
+  height: 88px;
+}
+
+.font-color--warning-dark {
+  color: var(--color-warning-dark);
 }
