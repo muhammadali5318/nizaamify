@@ -3,8 +3,8 @@ import { useEffect, useState, useRef } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { Dialog, Button, Box, Stack, Typography } from '@mui/material'
 
-const TOTAL_IDLE_TIME = 15 * 1000
-const WARNING_TIME = 10 * 1000
+const TOTAL_IDLE_TIME = 15 * 60 * 1000
+const WARNING_TIME = 14 * 60 * 1000
 
 export default function IdleSessionHandler() {
   const { logout, getAccessTokenSilently } = useAuth0()
