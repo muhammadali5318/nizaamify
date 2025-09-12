@@ -1,12 +1,4 @@
-.congratulationsRoot {
-  width: 100%;
-  height: calc(100vh - 174px);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  .congratulationsContainer {
+.congratulationsContainer {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -32,4 +24,3 @@
   .continueBtn {
     width: 210px;
   }
-}

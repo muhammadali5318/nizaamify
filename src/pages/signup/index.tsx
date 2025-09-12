@@ -17,7 +17,7 @@ import SignupStepOne from './components/SignupStepOne'
 import SignupStepTwo from './components/SignupStepTwo'
 import SignupStepThree from './components/SignupStepThree'
 import { steps } from './signUp-config'
-import EmailVerification from './components/EmailVerification'
+import SendVerificationEmail from './components/SendVerificationEmail'
 import RegistrationHeader from 'src/components/registration-wrapper/RegistrationHeader'
 
 const SignUp: React.FC = () => {
@@ -56,7 +56,7 @@ const SignUp: React.FC = () => {
   }
 
   if (activeStep === 3) {
-    return <EmailVerification email='Sarah.Daniel@example.com' />
+    return <SendVerificationEmail email='Sarah.Daniel@example.com' />
   }
   return (
     <RegistrationWrapper>

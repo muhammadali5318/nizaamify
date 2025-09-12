@@ -1,37 +1,35 @@
-.emailVerificationRoot {
+.congratulationsRoot {
+  width: 100%;
+  height: calc(100vh - 174px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .congratulationsContainer {
     display: flex;
-width: 636px;
-padding: 36px 48px;
-flex-direction: column;
-align-items: flex-start;
-gap: 20px;
-border-radius: 24px;
-border: 1px solid #F7F7F7;
-background: #FFF;
-box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.10);
-  margin-top: 28px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 636px;
+    padding: 36px 48px;
+    gap: 20px;
+    border-radius: 24px;
+    border: 1px solid #f7f7f7;
+    background: #fff;
+    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.1);
+  }
 
-
-.emailVerificationInfoContainer {
+  .congratsInfoContainer {
     display: flex;
-flex-direction: column;
-align-items: flex-start;
-gap: 2px;
-align-self: stretch;
-}
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    align-self: stretch;
+  }
 
-.emailVerificationActionContainer {
-    width: 100%;
-    display: flex;
-
-flex-direction: column;
-align-items: center;
-justify-content: center;
-gap: 8px;
-align-self: stretch;
-
-.resendButton {
-    width: 100%;
-}
-} 
+  .continueBtn {
+    width: 210px;
+  }
 }

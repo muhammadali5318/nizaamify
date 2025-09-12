@@ -8,8 +8,12 @@ const AuthPages = {
   Login: lazy(() => import('src/auth/Login')),
   Logout: lazy(() => import('src/auth/Logout')),
   Signup: lazy(() => import('src/pages/signup')),
-  Congratulations: lazy(
-    () => import('src/pages/signup/components/Congratulations')
+  InvitedUserOnboarding: lazy(() => import('src/pages/invited-user')),
+  EmailVerification: lazy(
+    () => import('src/pages/signup/components/EmailVerification')
+  ),
+  CreatePassword: lazy(
+    () => import('src/pages/invited-user/components/CreatePassword')
   )
 }
 
@@ -52,7 +56,15 @@ export const authRoutes = [
         path: 'signup/congratulations',
         element: (
           <AuthLayout>
-            <AuthPages.Congratulations />
+            <AuthPages.EmailVerification />
+          </AuthLayout>
+        )
+      },
+      {
+        path: 'invited-user-onboarding',
+        element: (
+          <AuthLayout>
+            <AuthPages.InvitedUserOnboarding />
           </AuthLayout>
         )
       }
