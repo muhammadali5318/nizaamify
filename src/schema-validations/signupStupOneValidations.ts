@@ -20,7 +20,10 @@ export const SignupStepOneSchema = z.object({
       {
         message: 'Please enter a valid phone number'
       }
-    )
+    ),
+  isPracticeOwnerOrDirector: z.boolean().refine((val) => val === true, {
+    message: 'Please confirm to continue'
+  })
 })
 
 export type SignupStepOneFormValues = z.infer<typeof SignupStepOneSchema>

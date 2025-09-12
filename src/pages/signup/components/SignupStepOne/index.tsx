@@ -9,12 +9,17 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  FormHelperText
+  FormHelperText,
+  Typography,
+  Checkbox,
+  FormControlLabel,
+  Alert
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import { ChevronRight, ArrowDropDown } from '@mui/icons-material'
 import { MuiTelInput } from 'mui-tel-input'
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
+import styles from './SignupStepOne.module.scss'
 
 import FormHeader from '../FormHeader'
 import {
@@ -39,23 +44,20 @@ const SignupStepOne: React.FC<SignupStepOneProps> = ({
       lastName: '',
       role: '',
       email: '',
-      phone: ''
+      phone: '',
+      isPracticeOwnerOrDirector: false
     }
   })
 
-  // ref to wrapper around the phone input so we can find and click the flag
   const phoneWrapperRef = React.useRef<HTMLDivElement | null>(null)
 
-  // click helper - finds the flag element inside the wrapper and clicks it
   const openCountryDropdown = () => {
     const root = phoneWrapperRef.current as HTMLElement | null
     if (!root) return
-    // the exact class used by mui-tel-input for the flag is `.MuiTelInput-Flag`
     const flagEl = root.querySelector<HTMLElement>('.MuiTelInput-Flag')
     if (flagEl) flagEl.click()
   }
 
-  // make keyboard activation work too
   const handleArrowKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
@@ -117,33 +119,80 @@ const SignupStepOne: React.FC<SignupStepOneProps> = ({
             />
           </Stack>
 
-          {/* Role Select */}
-          <FormControl fullWidth error={!!errors.role}>
-            <InputLabel id='role-label'>Role *</InputLabel>
+          <Box>
+            {/* Role Select */}
+            <FormControl fullWidth error={!!errors.role}>
+              <InputLabel id='role-label'>Role *</InputLabel>
+              <Controller
+                name='role'
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    labelId='role-label'
+                    label='Role *'
+                    variant='outlined'
+                  >
+                    <MenuItem value='admin'>Company Director</MenuItem>
+                    <MenuItem value='manager'>
+                      Practice Owner/Principal
+                    </MenuItem>
+                  </Select>
+                )}
+              />
+              <FormHelperText>{errors.role?.message}</FormHelperText>
+            </FormControl>
+            <Alert severity='info' className={styles.alertInfoContainer}>
+              <Typography
+                className={styles.alertInfoText}
+                component='div'
+                sx={{ margin: 0 }}
+              >
+                Only Practice Owners or Company Directors can register. If you
+                have another role, please ask your Practice Owner to invite you.
+              </Typography>
+            </Alert>
+
+            {/* Checkbox */}
             <Controller
-              name='role'
+              name='isPracticeOwnerOrDirector'
               control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  labelId='role-label'
-                  label='Role *'
-                  variant='outlined'
-                >
-                  <MenuItem value=''>
-                    <em>None</em>
-                  </MenuItem>
-                  <MenuItem value='admin'>Admin</MenuItem>
-                  <MenuItem value='manager'>Manager</MenuItem>
-                  <MenuItem value='user'>User</MenuItem>
-                </Select>
+              render={({ field, fieldState }) => (
+                <FormControl error={!!fieldState.error}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        {...field}
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    }
+                    label={
+                      <Typography variant='body1'>
+                        I am{' '}
+                        <span className='info-main font-weight--700'>
+                          Practice Owner
+                        </span>{' '}
+                        and/or{' '}
+                        <span className='info-main font-weight--700'>
+                          Company Director
+                        </span>{' '}
+                        *
+                      </Typography>
+                    }
+                  />
+                  <FormHelperText>{fieldState.error?.message}</FormHelperText>
+                </FormControl>
               )}
             />
-            <FormHelperText>{errors.role?.message}</FormHelperText>
-          </FormControl>
+          </Box>
 
           {/* Email & Phone */}
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            sx={{ marginTop: '14px !important' }}
+          >
             <Controller
               name='email'
               control={control}
@@ -161,7 +210,7 @@ const SignupStepOne: React.FC<SignupStepOneProps> = ({
               )}
             />
 
-            {/* PHONE FIELD */}
+            {/* Phone */}
             <Controller
               name='phone'
               control={control}
