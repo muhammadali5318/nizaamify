@@ -48,14 +48,14 @@ const SendVerificationEmail: React.FC<EmailVerificationProps> = ({ email }) => {
           </Box>
           <Box className={styles.emailVerificationActionContainer}>
             <Typography variant='subtitle1' color='var(--color-text-secondary)'>
-              Don’t receive an email?
+              Didn&apos;t receive an email?
             </Typography>
             <Button
               className={styles.resendButton}
               size='large'
               variant='contained'
             >
-              Resend Verification Email
+              Resend verification email
             </Button>
           </Box>
           <Box>
