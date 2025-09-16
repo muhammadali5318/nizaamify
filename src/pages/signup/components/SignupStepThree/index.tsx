@@ -1,29 +1,42 @@
-import React, { useEffect } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+// FILE: src/pages/SignUp/components/SignupStepThree.tsx
 import { zodResolver } from '@hookform/resolvers/zod'
+import { ChevronLeft, ChevronRight } from '@mui/icons-material'
+import { LoadingButton } from '@mui/lab'
 import {
   Box,
   Stack,
-  Button,
-  Checkbox,
   FormControlLabel,
-  Typography
+  Checkbox,
+  Typography,
+  Button
 } from '@mui/material'
-import FormHeader from '../FormHeader'
+import React, { useEffect } from 'react'
+import { useForm, Controller } from 'react-hook-form'
 import PasswordField from 'src/components/common/PasswordField'
-import { ChevronLeft, ChevronRight } from '@mui/icons-material'
-import { LoadingButton } from '@mui/lab'
 import {
   SignupStepThreeSchema as PasswordSchema,
   SignupStepThreeFormValues as FormValues
 } from 'src/schema-validations/signupStepThreeValidations'
-import { SignupStepThreeProps } from '../../types'
+import FormHeader from '../FormHeader'
+import { StepPropsBase } from '../../types'
+import { notify } from 'src/components/notistack/NotificationProvider'
 
-const SignupStepThree: React.FC<SignupStepThreeProps> = ({
+type Props = Pick<
+  StepPropsBase,
+  'formData' | 'setFormData' | 'onBack' | 'onSubmit' | 'activeStep'
+> & {
+  isSubmitting?: boolean
+  serverErrors?: Record<string, string>
+}
+
+const SignupStepThree: React.FC<Props> = ({
+  formData,
+  setFormData,
   onBack,
   onSubmit,
   activeStep,
-  setActiveStep
+  isSubmitting = false,
+  serverErrors = {}
 }) => {
   const {
     control,
@@ -32,40 +45,75 @@ const SignupStepThree: React.FC<SignupStepThreeProps> = ({
     trigger,
     getValues,
     clearErrors,
+    reset,
     formState: { isValid }
   } = useForm<FormValues>({
     resolver: zodResolver(PasswordSchema),
     mode: 'onChange',
     defaultValues: {
-      password: '',
-      confirmPassword: '',
-      terms: false,
-      privacy: false,
-      disclaimer: false,
-      gdpr: false
+      password: formData.password,
+      confirmPassword: formData.confirmPassword,
+      terms: formData.terms,
+      privacy: formData.privacy,
+      disclaimer: formData.disclaimer,
+      gdpr: formData.gdpr
     }
   })
+
+  useEffect(() => {
+    reset({
+      password: formData.password,
+      confirmPassword: formData.confirmPassword,
+      terms: formData.terms,
+      privacy: formData.privacy,
+      disclaimer: formData.disclaimer,
+      gdpr: formData.gdpr
+    })
+  }, [formData, reset])
 
   const passwordValue = watch('password')
   useEffect(() => {
     const confirm = getValues('confirmPassword')
-    // If confirmPassword is empty, skip (no need to trigger)
     if (!confirm) return
 
     if (passwordValue === confirm) {
-      // passwords match -> clear confirm error (if any)
       clearErrors('confirmPassword')
     } else {
-      // passwords don't match -> re-run validation to show correct error (or clear)
-      // trigger returns a boolean but we don't need it here
       trigger('confirmPassword')
     }
   }, [passwordValue, getValues, trigger, clearErrors])
 
   const submit = (data: FormValues) => {
-    if (onSubmit) onSubmit(data)
-    setActiveStep(3)
+    // Push step 3 values to parent and call parent's final submit handler
+    const patch = {
+      password: data.password,
+      confirmPassword: data.confirmPassword,
+      terms: data.terms,
+      privacy: data.privacy,
+      disclaimer: data.disclaimer,
+      gdpr: data.gdpr
+    }
+
+    setFormData(patch)
+    onSubmit?.(patch)
   }
+
+  const hasBlockingServerErrors =
+    Boolean(serverErrors?.email) || Boolean(serverErrors?.practice)
+
+  useEffect(() => {
+    if (serverErrors?.email) {
+      notify.error(`Email error: ${serverErrors.email}`)
+    }
+
+    if (serverErrors?.practice) {
+      notify.error(`Practice error: ${serverErrors.practice}`)
+    }
+
+    if (serverErrors?.general) {
+      notify.error(`Something went wrong: ${serverErrors.general}`)
+    }
+  }, [serverErrors])
 
   return (
     <Box>
@@ -165,7 +213,6 @@ const SignupStepThree: React.FC<SignupStepThreeProps> = ({
               variant='outlined'
               color='primary'
               onClick={onBack}
-              loadingPosition='end'
               startIcon={<ChevronLeft />}
             >
               Back
@@ -176,9 +223,8 @@ const SignupStepThree: React.FC<SignupStepThreeProps> = ({
               size='large'
               variant='contained'
               color='primary'
-              disabled={!isValid}
-              loading={false}
-              loadingPosition='end'
+              loading={isSubmitting}
+              disabled={!isValid || hasBlockingServerErrors}
               endIcon={<ChevronRight />}
             >
               Next

@@ -1,6 +1,19 @@
+// ------------------------------
+// FILE: src/pages/SignUp/components/SignupStepOne.tsx
 import React from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { LoadingButton } from '@mui/lab'
+import { ArrowDropDown, ChevronRight } from '@mui/icons-material'
+import { MuiTelInput } from 'mui-tel-input'
+import { parsePhoneNumberFromString } from 'libphonenumber-js'
+import styles from './SignupStepOne.module.scss'
+import FormHeader from '../FormHeader'
+import {
+  SignupStepOneSchema,
+  SignupStepOneFormValues as FormValues
+} from 'src/schema-validations/signupStupOneValidations'
+import { StepPropsBase } from '../../types'
 import {
   Box,
   Stack,
@@ -10,44 +23,52 @@ import {
   Select,
   MenuItem,
   FormHelperText,
+  Alert,
   Typography,
-  Checkbox,
   FormControlLabel,
-  Alert
+  Checkbox
 } from '@mui/material'
-import { LoadingButton } from '@mui/lab'
-import { ChevronRight, ArrowDropDown } from '@mui/icons-material'
-import { MuiTelInput } from 'mui-tel-input'
-import { parsePhoneNumberFromString } from 'libphonenumber-js'
-import styles from './SignupStepOne.module.scss'
 
-import FormHeader from '../FormHeader'
-import {
-  SignupStepOneSchema,
-  SignupStepOneFormValues as FormValues
-} from 'src/schema-validations/signupStupOneValidations'
-import { SignupStepOneProps } from '../../types'
+type Props = Pick<
+  StepPropsBase,
+  'formData' | 'setFormData' | 'onNext' | 'activeStep'
+>
 
-const SignupStepOne: React.FC<SignupStepOneProps> = ({
+const SignupStepOne: React.FC<Props> = ({
+  formData,
+  setFormData,
   onNext,
   activeStep
 }) => {
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors, isValid }
   } = useForm<FormValues>({
     resolver: zodResolver(SignupStepOneSchema),
     mode: 'onChange',
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      role: '',
-      email: '',
-      phone: '',
-      isPracticeOwnerOrDirector: false
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      role: formData.role,
+      email: formData.email,
+      phone: formData.phone,
+      isPracticeOwnerOrDirector: formData.isPracticeOwnerOrDirector
     }
   })
+
+  // When parent formData changes (e.g. user navigates back), reset local form to those values
+  React.useEffect(() => {
+    reset({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      role: formData.role,
+      email: formData.email,
+      phone: formData.phone,
+      isPracticeOwnerOrDirector: formData.isPracticeOwnerOrDirector
+    })
+  }, [formData, reset])
 
   const phoneWrapperRef = React.useRef<HTMLDivElement | null>(null)
 
@@ -68,8 +89,17 @@ const SignupStepOne: React.FC<SignupStepOneProps> = ({
   const onSubmit = (data: FormValues) => {
     const parsed = parsePhoneNumberFromString(data.phone || '')
     const normalizedPhone = parsed ? parsed.number : data.phone
-    // eslint-disable-next-line no-console
-    console.log('submit payload:', { ...data, phone: normalizedPhone })
+
+    // update parent with values from this step (only on step submit)
+    setFormData({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      role: data.role,
+      email: data.email,
+      phone: normalizedPhone,
+      isPracticeOwnerOrDirector: data.isPracticeOwnerOrDirector
+    })
+
     onNext?.()
   }
 
@@ -133,8 +163,10 @@ const SignupStepOne: React.FC<SignupStepOneProps> = ({
                     label='Role *'
                     variant='outlined'
                   >
-                    <MenuItem value='admin'>Company Director</MenuItem>
-                    <MenuItem value='manager'>
+                    <MenuItem value='COMPANY DIRECTOR'>
+                      Company Director
+                    </MenuItem>
+                    <MenuItem value='PRACTICE OWNER'>
                       Practice Owner/Principal
                     </MenuItem>
                   </Select>
@@ -142,6 +174,7 @@ const SignupStepOne: React.FC<SignupStepOneProps> = ({
               />
               <FormHelperText>{errors.role?.message}</FormHelperText>
             </FormControl>
+
             <Alert severity='info' className={styles.alertInfoContainer}>
               <Typography
                 className={styles.alertInfoText}
@@ -153,7 +186,6 @@ const SignupStepOne: React.FC<SignupStepOneProps> = ({
               </Typography>
             </Alert>
 
-            {/* Checkbox */}
             <Controller
               name='isPracticeOwnerOrDirector'
               control={control}
@@ -187,7 +219,6 @@ const SignupStepOne: React.FC<SignupStepOneProps> = ({
             />
           </Box>
 
-          {/* Email & Phone */}
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={2}
@@ -210,7 +241,6 @@ const SignupStepOne: React.FC<SignupStepOneProps> = ({
               )}
             />
 
-            {/* Phone */}
             <Controller
               name='phone'
               control={control}
@@ -225,7 +255,6 @@ const SignupStepOne: React.FC<SignupStepOneProps> = ({
               }}
               render={({ field, fieldState }) => (
                 <FormControl fullWidth error={!!fieldState.error}>
-                  {/* attach ref so we can locate the flag element inside MuiTelInput */}
                   <Box sx={{ position: 'relative' }} ref={phoneWrapperRef}>
                     <MuiTelInput
                       {...field}

@@ -8,22 +8,18 @@ import { AuthProvider } from './context/AuthProvider'
 import IdleSessionHandler from './components/Idle-session/IdleSessionHandler'
 import ErrorBoundary from './components/common/error-boundary'
 import { BrowserRouter } from 'react-router'
+import NotificationProvider from './components/notistack/NotificationProvider'
 
 function App(): JSX.Element {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <ErrorBoundary
-          onError={() => {
-            // Optional: call Sentry here, or your logging util
-          }}
-          onReset={() => {
-            // optional reset actions (clear caches, reset stores)
-          }}
-        >
+        <ErrorBoundary>
           <ThemeProvider theme={theme}>
-            <Router />
-            <IdleSessionHandler />
+            <NotificationProvider>
+              <Router />
+              <IdleSessionHandler />
+            </NotificationProvider>
           </ThemeProvider>
         </ErrorBoundary>
       </AuthProvider>

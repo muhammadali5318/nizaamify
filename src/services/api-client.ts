@@ -53,3 +53,13 @@ const apiClient = axios.create({
 apiClient.interceptors.response.use((response) => response, errorCallback)
 
 export default apiClient
+
+// Another API Client with for sign up without access token
+export const apiClientOpen = axios.create({
+  baseURL: CONFIG.serverUrl,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+
+apiClientOpen.interceptors.response.use((response) => response, errorCallback)

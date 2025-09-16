@@ -21,3 +21,40 @@ export type SignupStepOneProps = {
   onNext?: () => void
   activeStep: number
 }
+
+export type SignupFormDataSet = {
+  // Step 1
+  firstName: string
+  lastName: string
+  role: string
+  email: string
+  phone: string
+  isPracticeOwnerOrDirector: boolean
+
+  // Step 2
+  practiceName: string
+  street: string
+  city: string
+  country: string
+  postcode: string
+  practiceEmail: string
+
+  // Step 3
+  password: string
+  confirmPassword: string
+  terms: boolean
+  privacy: boolean
+  disclaimer: boolean
+  gdpr: boolean
+}
+
+export type SetFormDataSet = (patch: Partial<SignupFormDataSet>) => void
+
+export type StepPropsBase = {
+  formData: SignupFormDataSet
+  setFormData: SetFormDataSet
+  onNext?: (patch?: Partial<SignupFormDataSet>) => void
+  onBack?: () => void
+  onSubmit?: (patch?: Partial<SignupFormDataSet>) => void
+  activeStep: number
+}

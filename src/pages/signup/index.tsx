@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+// FILE: src/pages/SignUp/SignUp.tsx
+import React, { useCallback, useState } from 'react'
 import {
   Box,
   Stepper,
@@ -16,26 +17,134 @@ import {
 import SignupStepOne from './components/SignupStepOne'
 import SignupStepTwo from './components/SignupStepTwo'
 import SignupStepThree from './components/SignupStepThree'
-import { steps } from './signUp-config'
+import { generatePayloadForSignUp, steps } from './signUp-config'
 import SendVerificationEmail from './components/SendVerificationEmail'
 import RegistrationHeader from 'src/components/registration-wrapper/RegistrationHeader'
+import { SignupFormDataSet, SetFormDataSet } from './types'
+import { apiClientOpen } from 'src/services/api-client'
+import { endpoints } from 'src/services/backendUrl'
+import { sendVerificationEmail } from 'src/services/auth/emailVerification'
+
+const initialFormData: SignupFormDataSet = {
+  firstName: '',
+  lastName: '',
+  role: '',
+  email: '',
+  phone: '',
+  isPracticeOwnerOrDirector: false,
+  practiceName: '',
+  street: '',
+  city: '',
+  country: '',
+  postcode: '',
+  practiceEmail: '',
+  password: '',
+  confirmPassword: '',
+  terms: false,
+  privacy: false,
+  disclaimer: false,
+  gdpr: false
+}
 
 const SignUp: React.FC = () => {
   const [activeStep, setActiveStep] = useState<number>(0)
+  const [formData, setFormDataState] =
+    useState<SignupFormDataSet>(initialFormData)
 
-  const handleNext = () =>
-    setActiveStep((s) => Math.min(steps.length - 1, s + 1))
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const [serverErrors, setServerErrors] = useState<Record<string, string>>({})
+
+  const { createUser } = endpoints.signup
+
+  const setFormData = useCallback<SetFormDataSet>((patch) => {
+    setFormDataState((prev) => ({ ...prev, ...patch }))
+
+    setServerErrors((prev) => {
+      if (!patch) return prev
+      const keysToClear = ['email', 'practiceEmail', 'practiceName', 'postcode']
+      const newErrors = { ...prev }
+      Object.keys(patch).forEach((k) => {
+        if (keysToClear.includes(k)) {
+          delete newErrors.email
+          delete newErrors.practice
+        }
+      })
+      return newErrors
+    })
+  }, [])
+
+  const handleNext = useCallback(
+    (patch?: Partial<SignupFormDataSet>): void => {
+      if (patch) setFormData(patch)
+      setActiveStep((s) => Math.min(steps.length - 1, s + 1))
+    },
+    [setFormData, steps.length]
+  )
+
   const handleBack = () => setActiveStep((s) => Math.max(0, s - 1))
-  // const handleReset = () => setActiveStep(0)
-  // const isLast = activeStep === steps.length - 1
+
+  // Final submit: merge last patch (if provided), then submit combined payload to API
+  const handleSubmitAll = async (patch?: Partial<SignupFormDataSet>) => {
+    if (patch) setFormData(patch)
+
+    const finalForm: SignupFormDataSet = { ...formData, ...(patch || {}) }
+
+    const payload = generatePayloadForSignUp(finalForm)
+
+    setIsSubmitting(true)
+    setServerErrors({}) // clear previous server errors on new submit
+    try {
+      const response = await apiClientOpen.post(createUser, payload)
+      if (response.status === 201) {
+        setActiveStep(3)
+        sendVerificationEmail(finalForm?.email)
+      }
+    } catch (err: any) {
+      const respData = err?.error
+      const parsedErrors: Record<string, string> = {}
+
+      if (respData) {
+        const userEmailErr =
+          respData?.user?.email && Array.isArray(respData.user.email)
+            ? respData.user.email.join(' ')
+            : respData?.user?.email
+        if (userEmailErr) parsedErrors.email = userEmailErr
+
+        const practiceErr =
+          respData?.practice?.non_field_errors &&
+          Array.isArray(respData.practice.non_field_errors)
+            ? respData.practice.non_field_errors.join(' ')
+            : respData?.practice?.non_field_errors
+        if (practiceErr) parsedErrors.practice = practiceErr
+      }
+
+      if (!Object.keys(parsedErrors).length && respData?.message) {
+        parsedErrors.general = respData.message
+      }
+
+      setServerErrors(parsedErrors)
+      console.error('Signup failed', err)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const renderStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return <SignupStepOne onNext={handleNext} activeStep={activeStep} />
+        return (
+          <SignupStepOne
+            formData={formData}
+            setFormData={setFormData}
+            onNext={handleNext}
+            activeStep={activeStep}
+          />
+        )
       case 1:
         return (
           <SignupStepTwo
+            formData={formData}
+            setFormData={setFormData}
             onNext={handleNext}
             onBack={handleBack}
             activeStep={activeStep}
@@ -44,10 +153,13 @@ const SignUp: React.FC = () => {
       case 2:
         return (
           <SignupStepThree
+            formData={formData}
+            setFormData={setFormData}
             onBack={handleBack}
-            onSubmit={() => alert('submit placeholder')}
-            setActiveStep={setActiveStep}
+            onSubmit={handleSubmitAll}
             activeStep={activeStep}
+            isSubmitting={isSubmitting}
+            serverErrors={serverErrors}
           />
         )
       default:
@@ -56,8 +168,11 @@ const SignUp: React.FC = () => {
   }
 
   if (activeStep === 3) {
-    return <SendVerificationEmail email='Sarah.Daniel@example.com' />
+    return (
+      <SendVerificationEmail email={formData.email || 'user@example.com'} />
+    )
   }
+
   return (
     <RegistrationWrapper>
       <Box
@@ -95,7 +210,11 @@ const SignUp: React.FC = () => {
                     }}
                   >
                     <Typography
-                      color={`${activeStep >= index ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'}`}
+                      color={`${
+                        activeStep >= index
+                          ? 'var(--color-text-primary)'
+                          : 'var(--color-text-secondary)'
+                      }`}
                       variant='subtitle2'
                     >
                       {step.heading}

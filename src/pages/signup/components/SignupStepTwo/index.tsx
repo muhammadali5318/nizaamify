@@ -1,25 +1,32 @@
-import React from 'react'
-import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  Box,
-  Stack,
-  Button,
-  TextField,
-  FormControl,
-  FormHelperText,
-  Typography
-} from '@mui/material'
-import FormHeader from '../FormHeader'
 import { ChevronLeft, ChevronRight } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import {
-  SignupFormValues,
+  Box,
+  Stack,
+  TextField,
+  Typography,
+  FormControl,
+  FormHelperText,
+  Button
+} from '@mui/material'
+import React from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import {
+  SignupFormValues as StepTwoFormValues,
   SignupStepTwoSchema
 } from 'src/schema-validations/signupStepTwoValidations'
-import { SignupStepTwoProps } from '../../types'
+import { StepPropsBase } from '../..'
+import FormHeader from '../FormHeader'
 
-const SignupStepTwo: React.FC<SignupStepTwoProps> = ({
+type Props = Pick<
+  StepPropsBase,
+  'formData' | 'setFormData' | 'onNext' | 'onBack' | 'activeStep'
+>
+
+const SignupStepTwo: React.FC<Props> = ({
+  formData,
+  setFormData,
   onNext,
   onBack,
   activeStep
@@ -27,23 +34,41 @@ const SignupStepTwo: React.FC<SignupStepTwoProps> = ({
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors, isValid }
-  } = useForm<SignupFormValues>({
+  } = useForm<StepTwoFormValues>({
     resolver: zodResolver(SignupStepTwoSchema),
     mode: 'onChange',
     defaultValues: {
-      practiceName: '',
-      street: '',
-      city: '',
-      country: '',
-      postcode: '',
-      practiceEmail: ''
+      practiceName: formData.practiceName,
+      street: formData.street,
+      city: formData.city,
+      country: formData.country,
+      postcode: formData.postcode,
+      practiceEmail: formData.practiceEmail
     }
   })
 
-  const onSubmit = (data: SignupFormValues) => {
-    // eslint-disable-next-line no-console
-    console.log('Form submitted:', data)
+  React.useEffect(() => {
+    reset({
+      practiceName: formData.practiceName,
+      street: formData.street,
+      city: formData.city,
+      country: formData.country,
+      postcode: formData.postcode,
+      practiceEmail: formData.practiceEmail
+    })
+  }, [formData, reset])
+
+  const onSubmit = (data: StepTwoFormValues) => {
+    setFormData({
+      practiceName: data.practiceName,
+      street: data.street,
+      city: data.city,
+      country: data.country,
+      postcode: data.postcode,
+      practiceEmail: data.practiceEmail
+    })
     onNext?.()
   }
 
@@ -164,7 +189,6 @@ const SignupStepTwo: React.FC<SignupStepTwoProps> = ({
               variant='outlined'
               color='primary'
               onClick={onBack}
-              loadingPosition='end'
               startIcon={<ChevronLeft />}
             >
               Back
@@ -175,8 +199,6 @@ const SignupStepTwo: React.FC<SignupStepTwoProps> = ({
               variant='contained'
               color='primary'
               disabled={!isValid}
-              loading={false}
-              loadingPosition='end'
               endIcon={<ChevronRight />}
             >
               Next
