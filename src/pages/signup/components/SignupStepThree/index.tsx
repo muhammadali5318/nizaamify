@@ -99,21 +99,19 @@ const SignupStepThree: React.FC<Props> = ({
   }
 
   const hasBlockingServerErrors =
-    Boolean(serverErrors?.email) ||
-    Boolean(serverErrors?.practice) ||
-    Boolean(serverErrors.general)
+    Boolean(serverErrors?.email) || Boolean(serverErrors?.practice)
 
   useEffect(() => {
     if (serverErrors?.email) {
-      notify.error(`Email error: ${serverErrors.email}`)
+      notify.error(serverErrors.email)
     }
 
     if (serverErrors?.practice) {
-      notify.error(`Practice error: ${serverErrors.practice}`)
+      notify.error(serverErrors.practice)
     }
 
     if (serverErrors?.general) {
-      notify.error(`Something went wrong: ${serverErrors.general}`)
+      notify.error(serverErrors.general)
     }
   }, [serverErrors])
 
