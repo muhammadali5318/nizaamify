@@ -118,8 +118,9 @@ const SignUp: React.FC = () => {
         if (practiceErr) parsedErrors.practice = practiceErr
       }
 
-      if (!Object.keys(parsedErrors).length && respData?.message) {
-        parsedErrors.general = respData.message
+      if (!Object.keys(parsedErrors).length) {
+        parsedErrors.general =
+          respData?.message || 'Something went wrong. Please try again later.'
       }
 
       setServerErrors(parsedErrors)

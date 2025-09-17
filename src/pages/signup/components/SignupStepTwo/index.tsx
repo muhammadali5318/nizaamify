@@ -11,12 +11,12 @@ import {
   Button
 } from '@mui/material'
 import React from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, Controller, Resolver } from 'react-hook-form'
 import {
   SignupFormValues as StepTwoFormValues,
   SignupStepTwoSchema
 } from 'src/schema-validations/signupStepTwoValidations'
-import { StepPropsBase } from '../..'
+import { StepPropsBase } from '../../types'
 import FormHeader from '../FormHeader'
 
 type Props = Pick<
@@ -37,7 +37,9 @@ const SignupStepTwo: React.FC<Props> = ({
     reset,
     formState: { errors, isValid }
   } = useForm<StepTwoFormValues>({
-    resolver: zodResolver(SignupStepTwoSchema),
+    resolver: zodResolver(
+      SignupStepTwoSchema
+    ) as unknown as Resolver<StepTwoFormValues>,
     mode: 'onChange',
     defaultValues: {
       practiceName: formData.practiceName,
@@ -174,6 +176,7 @@ const SignupStepTwo: React.FC<Props> = ({
                 <TextField
                   {...field}
                   fullWidth
+                  required
                   label='Practice Email Address'
                   type='email'
                   error={!!errors.practiceEmail}
