@@ -9,6 +9,7 @@ type EmailVerificationStatusProps = {
   onButtonClick?: MouseEventHandler<HTMLButtonElement>
   children: ReactNode
   footer?: ReactNode
+  disabled?: boolean
 }
 
 const EmailVerificationStatus = ({
@@ -17,7 +18,8 @@ const EmailVerificationStatus = ({
   buttonText = 'Send new verification email',
   onButtonClick,
   children,
-  footer
+  footer,
+  disabled = false
 }: EmailVerificationStatusProps) => {
   return (
     <Box className={styles.verificationStatusRoot}>
@@ -33,6 +35,7 @@ const EmailVerificationStatus = ({
           size='large'
           variant='contained'
           onClick={onButtonClick}
+          disabled={disabled}
         >
           {buttonText}
         </Button>

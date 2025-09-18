@@ -87,7 +87,7 @@ const SendVerificationEmail: React.FC<Props> = ({ email }) => {
 
     setLoading(true)
     try {
-      await sendVerificationEmail(email)
+      await sendVerificationEmail({ email: email })
       startTimer(COOLDOWN_SECONDS)
       notify?.success?.('A new verification email has been sent to your inbox.')
     } catch (err) {

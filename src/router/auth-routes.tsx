@@ -53,7 +53,7 @@ export const authRoutes = [
         )
       },
       {
-        path: 'signup/congratulations',
+        path: 'verify-email',
         element: (
           <AuthLayout>
             <AuthPages.EmailVerification />

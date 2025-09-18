@@ -97,7 +97,7 @@ const SignUp: React.FC = () => {
       const response = await apiClientOpen.post(createUser, payload)
       if (response.status === 201) {
         setActiveStep(3)
-        sendVerificationEmail(finalForm?.email)
+        sendVerificationEmail({ email: finalForm?.email })
       }
     } catch (err: any) {
       const respData = err?.error

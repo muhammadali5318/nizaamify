@@ -7,7 +7,11 @@ const useRedirectLoggedInToHome = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (authenticated && !loading) {
+    if (
+      authenticated &&
+      !loading &&
+      location.pathname !== '/auth/email-not-verified'
+    ) {
       navigate('/')
     }
   }, [authenticated, loading, navigate])
