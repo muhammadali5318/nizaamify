@@ -4,19 +4,23 @@ import StepConnector, {
 } from '@mui/material/StepConnector'
 import { styled } from '@mui/material/styles'
 
-export const CustomStepperConnector = styled(StepConnector)(() => ({
+type CustomStepperConnectorProps = {
+  connectorHeight?: number
+}
+
+export const CustomStepperConnector = styled(StepConnector, {
+  shouldForwardProp: (prop) => prop !== 'connectorHeight'
+})<CustomStepperConnectorProps>(({ connectorHeight = 40 }) => ({
   [`&.${stepConnectorClasses.root}`]: {
     marginLeft: 10
   },
   [`& .${stepConnectorClasses.line}`]: {
-    minHeight: 40,
-    marginLeft: 'none',
+    minHeight: connectorHeight,
     border: 'none',
     width: 4,
     backgroundColor: 'var(--components-stepper-connector)',
     borderRadius: 12
   },
-
   [`&.${stepConnectorClasses.active} .${stepConnectorClasses.line}`]: {
     backgroundColor: 'var(--color-primary-black)'
   },

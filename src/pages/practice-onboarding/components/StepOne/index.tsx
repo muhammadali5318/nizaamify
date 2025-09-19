@@ -1,4 +1,3 @@
-// ------------------------------
 // FILE: src/pages/SignUp/components/SignupStepOne.tsx
 import React from 'react'
 import { useForm, Controller } from 'react-hook-form'
@@ -9,63 +8,55 @@ import { MuiTelInput } from 'mui-tel-input'
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
 import FormHeader from '../FormHeader'
 import {
-  SignupStepOneSchema,
-  SignupStepOneFormValues as FormValues
-} from 'src/schema-validations/signupStupOneValidations'
-import { StepPropsBase } from '../../types'
-import {
   Box,
   Stack,
   TextField,
   FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   FormHelperText,
-  Alert,
-  Typography,
-  FormControlLabel,
-  Checkbox
+  Button
 } from '@mui/material'
+import {
+  StepOneFormValues,
+  StepOneSchema
+} from 'src/schema-validations/practice-onboarding/stepOne'
 
-type Props = Pick<
-  StepPropsBase,
-  'formData' | 'setFormData' | 'onNext' | 'activeStep'
->
+type StepOneProps = {
+  formData: StepOneFormValues
+  setFormData: (patch: Partial<StepOneFormValues>) => void
+  onNext?: (patch?: Partial<StepOneFormValues>) => void
+  activeStep?: number
+  onSaveExitClick: () => void
+}
 
-const SignupStepOne: React.FC<Props> = ({
+const StepOne: React.FC<StepOneProps> = ({
   formData,
   setFormData,
   onNext,
-  activeStep
+  activeStep,
+  onSaveExitClick
 }) => {
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors, isValid }
-  } = useForm<FormValues>({
-    resolver: zodResolver(SignupStepOneSchema),
+  const { control, handleSubmit, reset } = useForm<StepOneFormValues>({
+    resolver: zodResolver(StepOneSchema),
     mode: 'onChange',
     defaultValues: {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      role: formData.role,
+      practiceName: formData.practiceName,
+      principalName: formData.principalName,
+      practiceManagerName: formData.practiceManagerName,
+      practiceAddress: formData.practiceAddress,
       email: formData.email,
-      phone: formData.phone,
-      isPracticeOwnerOrDirector: formData.isPracticeOwnerOrDirector
+      phone: formData.phone
     }
   })
 
   // When parent formData changes (e.g. user navigates back), reset local form to those values
   React.useEffect(() => {
     reset({
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      role: formData.role,
+      practiceName: formData.practiceName,
+      principalName: formData.principalName,
+      practiceManagerName: formData.practiceManagerName,
+      practiceAddress: formData.practiceAddress,
       email: formData.email,
-      phone: formData.phone,
-      isPracticeOwnerOrDirector: formData.isPracticeOwnerOrDirector
+      phone: formData.phone
     })
   }, [formData, reset])
 
@@ -85,20 +76,21 @@ const SignupStepOne: React.FC<Props> = ({
     }
   }
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = (data: StepOneFormValues) => {
     const parsed = parsePhoneNumberFromString(data.phone || '')
     const normalizedPhone = parsed ? parsed.number : data.phone
 
-    // update parent with values from this step (only on step submit)
+    // update parent state so data persists when navigating between steps
     setFormData({
-      firstName: data.firstName,
-      lastName: data.lastName,
-      role: data.role,
+      practiceName: data.practiceName,
+      principalName: data.principalName,
+      practiceManagerName: data.practiceManagerName,
+      practiceAddress: data.practiceAddress,
       email: data.email,
-      phone: normalizedPhone,
-      isPracticeOwnerOrDirector: data.isPracticeOwnerOrDirector
+      phone: normalizedPhone
     })
 
+    // then go to next step
     onNext?.()
   }
 
@@ -113,17 +105,17 @@ const SignupStepOne: React.FC<Props> = ({
         sx={{ mt: 2 }}
       >
         <Stack spacing={2.5}>
-          {/* First & Last Name */}
+          {/* Practice name */}
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <Controller
-              name='firstName'
+              name='practiceName'
               control={control}
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
                   fullWidth
                   variant='outlined'
-                  label='First name'
+                  label='Practice name'
                   required
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
@@ -131,15 +123,16 @@ const SignupStepOne: React.FC<Props> = ({
               )}
             />
 
+            {/* Principal & Practice Manager */}
             <Controller
-              name='lastName'
+              name='principalName'
               control={control}
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
                   fullWidth
                   variant='outlined'
-                  label='Last name'
+                  label='Principal name'
                   required
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
@@ -148,98 +141,51 @@ const SignupStepOne: React.FC<Props> = ({
             />
           </Stack>
 
-          <Box>
-            {/* Role Select */}
-            <FormControl fullWidth error={!!errors.role}>
-              <InputLabel id='role-label'>Role *</InputLabel>
-              <Controller
-                name='role'
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    labelId='role-label'
-                    label='Role *'
-                    variant='outlined'
-                  >
-                    <MenuItem value='COMPANY DIRECTOR'>
-                      Company Director
-                    </MenuItem>
-                    <MenuItem value='PRACTICE OWNER'>
-                      Practice Owner/Principal
-                    </MenuItem>
-                  </Select>
-                )}
+          <Controller
+            name='practiceManagerName'
+            control={control}
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                fullWidth
+                variant='outlined'
+                label='Practice manager name'
+                required
+                error={!!fieldState.error}
+                helperText={fieldState.error?.message}
               />
-              <FormHelperText>{errors.role?.message}</FormHelperText>
-            </FormControl>
+            )}
+          />
 
-            <Alert severity='info' className='alert-info-container'>
-              <Typography
-                className='alert-info-text font-weight--700'
-                component='div'
-                sx={{ margin: 0 }}
-              >
-                Only Practice Owners or Company Directors can register. If you
-                have another role, please ask your Practice Owner to invite you.
-              </Typography>
-            </Alert>
+          {/* Practice address - 300 char textarea */}
+          <Controller
+            name='practiceAddress'
+            control={control}
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                fullWidth
+                variant='outlined'
+                label='Practice address'
+                required
+                multiline
+                rows={4}
+                inputProps={{ maxLength: 300 }}
+                helperText={
+                  fieldState.error?.message ??
+                  `${(field.value ?? '').length}/300`
+                }
+                error={!!fieldState.error}
+              />
+            )}
+          />
 
-            <Controller
-              name='isPracticeOwnerOrDirector'
-              control={control}
-              render={({ field, fieldState }) => (
-                <FormControl error={!!fieldState.error}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        {...field}
-                        checked={field.value}
-                        onChange={(e) => field.onChange(e.target.checked)}
-                      />
-                    }
-                    label={
-                      <Typography variant='body1'>
-                        I am{' '}
-                        <span className='info-main font-weight--700'>
-                          Practice Owner
-                        </span>{' '}
-                        and/or{' '}
-                        <span className='info-main font-weight--700'>
-                          Company Director
-                        </span>{' '}
-                        *
-                      </Typography>
-                    }
-                  />
-                  <FormHelperText>{fieldState.error?.message}</FormHelperText>
-                </FormControl>
-              )}
-            />
-          </Box>
-
+          {/* Email & Contact Number */}
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={2}
-            sx={{ marginTop: '14px !important' }}
+            sx={{ marginTop: '6px !important' }}
           >
-            <Controller
-              name='email'
-              control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  variant='outlined'
-                  label='Email'
-                  required
-                  type='email'
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                />
-              )}
-            />
-
             <Controller
               name='phone'
               control={control}
@@ -259,7 +205,7 @@ const SignupStepOne: React.FC<Props> = ({
                       {...field}
                       fullWidth
                       required
-                      label='Phone Number'
+                      label='Contact number'
                       variant='outlined'
                       defaultCountry='GB'
                       onlyCountries={['GB']}
@@ -311,16 +257,38 @@ const SignupStepOne: React.FC<Props> = ({
                 </FormControl>
               )}
             />
+            <Controller
+              name='email'
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  variant='outlined'
+                  label='Email'
+                  type='email'
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
           </Stack>
 
           {/* Submit */}
-          <Stack direction='row' justifyContent='flex-end'>
+          <Stack direction='row' justifyContent='space-between'>
+            <Button
+              size='large'
+              variant='outlined'
+              color='primary'
+              onClick={onSaveExitClick}
+            >
+              Save & exit
+            </Button>
             <LoadingButton
               type='submit'
               size='large'
               variant='contained'
               color='primary'
-              disabled={!isValid}
               endIcon={<ChevronRight />}
             >
               Next
@@ -332,4 +300,4 @@ const SignupStepOne: React.FC<Props> = ({
   )
 }
 
-export default SignupStepOne
+export default StepOne

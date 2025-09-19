@@ -2,6 +2,8 @@
 export const paths = {
   root: '/',
   dashboard: '/dashboard',
+  practiceOnboarding: '/practice-onboarding',
+  practiceOnboardingStepper: '/practice-onboarding/stepper',
   documents: '/documents',
   reports: '/reports',
   benchmarks: '/benchmarks',

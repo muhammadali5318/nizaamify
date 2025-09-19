@@ -15,6 +15,8 @@ import Billing from 'src/pages/billing'
 import Settings from 'src/pages/settings'
 import HelpAndSupport from 'src/pages/HelpAndSupport'
 import Dashboard from 'src/pages/dashboard'
+import NominationFlow from 'src/pages/practice-onboarding/NominationFlow'
+import PracticeOnboardingFlow from 'src/pages/practice-onboarding/PracticeOnboardingFlow'
 
 function RedirectComponent() {
   const { loading, authenticated } = useAuth()
@@ -29,6 +31,14 @@ function RedirectComponent() {
 export function Router() {
   const routes = [
     { path: paths.root, element: <RedirectComponent /> },
+    {
+      path: paths.practiceOnboarding,
+      element: <ProtectedRoute component={NominationFlow} />
+    },
+    {
+      path: paths.practiceOnboardingStepper,
+      element: <ProtectedRoute component={PracticeOnboardingFlow} />
+    },
     {
       path: paths.root,
       element: <ProtectedRoute component={AppLayout} />,

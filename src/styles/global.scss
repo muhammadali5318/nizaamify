@@ -39,6 +39,8 @@
   --grey-border: #f7f7f7;
 
   --components-stepper-connector: #bdbdbd;
+  --_components-alert-info-color: #014361;
+  --primary-_states-outlinedBorder: rgba(0, 0, 0, 0.20);
 
   --footer-height: 70px;
 }
@@ -77,6 +79,10 @@ select {
 
 .font-weight--500 {
   font-weight: 500 !important;
+}
+
+.font-weight--400 {
+  font-weight: 400 !important;
 }
 
 .font-style--italic {
@@ -129,4 +135,32 @@ select {
 
 .text-decoration--none {
   text-decoration: none !important;
+}
+
+.text-decoration--underline {
+  text-decoration: underline !important;
+}
+
+.alert-info-container {
+    align-items: center;
+    margin-top: 8px;
+}
+
+.alert-info-text {
+  align-self: stretch;
+  color: var(--_components-alert-info-color);
+  font-feature-settings:
+    'liga' off,
+    'clig' off;
+  font-family: Roboto;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 150%; /* 24px */
+  letter-spacing: 0.15px;
+}
+
+
+.color-info--dark {
+  color: var(--color-info-dark);
 }
