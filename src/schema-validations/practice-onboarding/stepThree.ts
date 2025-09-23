@@ -3,14 +3,15 @@ import { z } from 'zod'
 
 export const StepThreeSchema = z.object({
   practiceManagementSoftware: z.enum([
+    '',
     'EXACT',
-    'Dentally',
+    'DENTALLY',
     'R4',
-    'careStream',
-    'Other'
+    'CARESTREAM',
+    'OTHER'
   ]),
-  accountingSoftware: z.enum(['Xero', 'QuickBooks', 'Other', 'None']),
-  useOfAccountantBookkeeper: z.enum(['internal', 'external', 'None'])
+  accountingSoftware: z.enum(['', 'XERO', 'QUICKBOOKS', 'NONE', 'OTHER']),
+  useOfAccountantBookkeeper: z.enum(['', 'INTERNAL', 'EXTERNAL', 'NONE'])
 })
 
 export type StepThreeFormValues = z.infer<typeof StepThreeSchema>

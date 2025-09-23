@@ -1,4 +1,3 @@
-// FILE: src/pages/SignUp/components/StepTwo.tsx
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeft, ChevronRight } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
@@ -20,13 +19,17 @@ import {
   StepTwoSchema
 } from 'src/schema-validations/practice-onboarding/stepTwo'
 import FormHeader from '../FormHeader'
+import { useUpdateStepTwo } from '../../hooks/useUpdateStepTwo'
+import isEqual from 'lodash/isEqual'
+import { useAuth0 } from '@auth0/auth0-react'
+import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 
 type StepTwoProps = {
   formData: StepTwoFormValues
   setFormData: (patch: Partial<StepTwoFormValues>) => void
   onNext?: (patch?: Partial<StepTwoFormValues>) => void
   onBack?: () => void
-  activeStep?: number
+  activeStep: number
   onSaveExitClick: () => void
 }
 
@@ -38,6 +41,10 @@ const StepTwo: React.FC<StepTwoProps> = ({
   activeStep,
   onSaveExitClick
 }) => {
+  const { user } = useAuth0()
+  const orgUuid = getUserOrgUuid(user)
+
+  const updateStepTwo = useUpdateStepTwo(orgUuid)
   const {
     control,
     handleSubmit,
@@ -49,37 +56,67 @@ const StepTwo: React.FC<StepTwoProps> = ({
     ) as unknown as Resolver<StepTwoFormValues>,
     mode: 'onChange',
     defaultValues: {
-      practiceType: (formData as any).practiceType ?? '',
-      yearsTrading: (formData as any).yearsTrading ?? '',
-      numberOfSurgeries: (formData as any).numberOfSurgeries ?? '',
-      numberOfAssociates: (formData as any).numberOfAssociates ?? '',
-      numberOfHygienistsTherapists:
-        (formData as any).numberOfHygienistsTherapists ?? '',
-      numberOfSpecialists: (formData as any).numberOfSpecialists ?? '',
-      premisesOwnership: (formData as any).premisesOwnership ?? ''
+      practiceType: formData.practiceType ?? '',
+      yearsTrading: formData.yearsTrading ?? '',
+      numberOfSurgeries: formData.numberOfSurgeries ?? '',
+      numberOfAssociates: formData.numberOfAssociates ?? '',
+      numberOfHygienistsTherapists: formData.numberOfHygienistsTherapists ?? '',
+      numberOfSpecialists: formData.numberOfSpecialists ?? '',
+      premisesOwnership: formData.premisesOwnership ?? ''
     }
   })
 
   React.useEffect(() => {
     reset({
-      practiceType: (formData as any).practiceType ?? '',
-      yearsTrading: (formData as any).yearsTrading ?? '',
-      numberOfSurgeries: (formData as any).numberOfSurgeries ?? '',
-      numberOfAssociates: (formData as any).numberOfAssociates ?? '',
-      numberOfHygienistsTherapists:
-        (formData as any).numberOfHygienistsTherapists ?? '',
-      numberOfSpecialists: (formData as any).numberOfSpecialists ?? '',
-      premisesOwnership: (formData as any).premisesOwnership ?? ''
+      practiceType: formData.practiceType ?? '',
+      yearsTrading: formData.yearsTrading ?? '',
+      numberOfSurgeries: formData.numberOfSurgeries ?? '',
+      numberOfAssociates: formData.numberOfAssociates ?? '',
+      numberOfHygienistsTherapists: formData.numberOfHygienistsTherapists ?? '',
+      numberOfSpecialists: formData.numberOfSpecialists ?? '',
+      premisesOwnership: formData.premisesOwnership ?? ''
     })
   }, [formData, reset])
 
   const onSubmit = (data: StepTwoFormValues) => {
-    // cast to any because parent type may not yet include these keys
-    setFormData({
-      ...(data as unknown as Record<string, any>)
-    })
-    onNext?.(data as unknown as Partial<typeof data>)
+    const newValues: StepTwoFormValues = {
+      practiceType: data.practiceType,
+      yearsTrading: data.yearsTrading,
+      numberOfSurgeries: data.numberOfSurgeries,
+      numberOfAssociates: data.numberOfAssociates,
+      numberOfHygienistsTherapists: data.numberOfHygienistsTherapists,
+      numberOfSpecialists: data.numberOfSpecialists,
+      premisesOwnership: data.premisesOwnership
+    }
+
+    if (isEqual(newValues, formData)) {
+      onNext?.()
+      return
+    }
+
+    setFormData(newValues)
+
+    updateStepTwo.mutate(
+      {
+        practice_type: newValues.practiceType,
+        years_of_trading: Number(newValues.yearsTrading),
+        number_of_surgeries: Number(newValues.numberOfSurgeries),
+        number_of_associates: Number(newValues.numberOfAssociates),
+        number_of_hygienists_therapists: Number(
+          newValues.numberOfHygienistsTherapists
+        ),
+        number_of_specialists: Number(newValues.numberOfSpecialists),
+        premises_ownership: newValues.premisesOwnership
+      },
+      {
+        onSuccess: () => {
+          onNext?.(newValues)
+        }
+      }
+    )
   }
+
+  const isSaving = updateStepTwo?.status === 'pending'
 
   return (
     <Box component='section'>
@@ -106,10 +143,14 @@ const StepTwo: React.FC<StepTwoProps> = ({
                     label='Practice type *'
                     variant='outlined'
                   >
-                    <MenuItem value='NHS'>NHS</MenuItem>
-                    <MenuItem value='Private'>Private</MenuItem>
-                    <MenuItem value='Mixed'>Mixed</MenuItem>
-                    <MenuItem value='Other'>Other</MenuItem>
+                    <MenuItem value='NHS-DOMINANT'>
+                      NHS-dominant (75%+ NHS revenue)
+                    </MenuItem>
+                    <MenuItem value='PRIVATE'>Private</MenuItem>
+                    <MenuItem value='MIXED'>Mixed</MenuItem>
+                    <MenuItem value='SQUAT'>
+                      Squat (less then 24 months trading)
+                    </MenuItem>
                   </Select>
                 )}
               />
@@ -227,10 +268,8 @@ const StepTwo: React.FC<StepTwoProps> = ({
                   label='Premises ownership *'
                   variant='outlined'
                 >
-                  <MenuItem value='Owned'>Owned</MenuItem>
-                  <MenuItem value='Leased'>Leased</MenuItem>
-                  <MenuItem value='Rented'>Rented</MenuItem>
-                  <MenuItem value='Other'>Other</MenuItem>
+                  <MenuItem value='OWN'>Own</MenuItem>
+                  <MenuItem value='RENT'>Rent</MenuItem>
                 </Select>
               )}
             />
@@ -267,6 +306,7 @@ const StepTwo: React.FC<StepTwoProps> = ({
                 size='large'
                 variant='contained'
                 color='primary'
+                loading={isSaving}
                 endIcon={<ChevronRight />}
               >
                 Next

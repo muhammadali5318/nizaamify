@@ -1,8 +1,9 @@
 import { Box, Typography } from '@mui/material'
 import styles from './RegistrationHeader.module.scss'
+import { ReactNode } from 'react'
 
 interface RegistrationHeaderProps {
-  heading?: string
+  heading?: string | ReactNode
   subHeading?: string
 }
 

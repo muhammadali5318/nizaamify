@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import styles from './NominationFlow.module.scss'
-import { Box } from '@mui/material'
+import { Box, CircularProgress } from '@mui/material'
 import RegistrationHeader from 'src/components/registration-wrapper/RegistrationHeader'
 import RegistrationWrapper from 'src/components/registration-wrapper/RegistrationWrapper'
 import Welcome from 'src/components/welcome'
 import ChooseOnboardingFlow from './components/chooseOnboardingFlow'
 import InvitationSent from 'src/components/invitation-sent'
+import { useInitialData } from 'src/hooks/useFetchInitialData'
+import { paths } from 'src/paths'
+import { useAuth } from 'src/context/AuthProvider'
 
 enum FlowStep {
   WELCOME = 'WELCOME',
@@ -15,8 +18,11 @@ enum FlowStep {
 }
 
 const NominationFlow = () => {
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [step, setStep] = useState<FlowStep>(FlowStep.WELCOME)
+  const [step, setStep] = useState<FlowStep>()
+  const { accessToken } = useAuth()
+  const { data: practiceData, isLoading } = useInitialData(!!accessToken)
 
   useEffect(() => {
     const paramStep = searchParams.get('step') as FlowStep | null
@@ -24,6 +30,14 @@ const NominationFlow = () => {
       setStep(paramStep)
     }
   }, [searchParams])
+
+  useEffect(() => {
+    if (practiceData?.onboarding_status === 'COMPLETED') {
+      navigate(`${paths.practiceOnboardingStepper}?status=Onboarding-completed`)
+    } else {
+      setStep(FlowStep.WELCOME)
+    }
+  }, [practiceData])
 
   const renderStep = () => {
     switch (step) {
@@ -57,7 +71,11 @@ const NominationFlow = () => {
         }}
       >
         <RegistrationHeader />
-        <Box className={styles.nominationFlowRoot}>{renderStep()}</Box>
+        {isLoading ? (
+          <CircularProgress />
+        ) : (
+          <Box className={styles.nominationFlowRoot}>{renderStep()}</Box>
+        )}
       </Box>
     </RegistrationWrapper>
   )

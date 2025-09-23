@@ -9,20 +9,24 @@ import IdleSessionHandler from './components/Idle-session/IdleSessionHandler'
 import ErrorBoundary from './components/common/error-boundary'
 import { BrowserRouter } from 'react-router'
 import NotificationProvider from './components/notistack/NotificationProvider'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from './utils/queryClient'
 
 function App(): JSX.Element {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <ErrorBoundary>
-          <ThemeProvider theme={theme}>
-            <NotificationProvider>
-              <Router />
-              <IdleSessionHandler />
-            </NotificationProvider>
-          </ThemeProvider>
-        </ErrorBoundary>
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ErrorBoundary>
+            <ThemeProvider theme={theme}>
+              <NotificationProvider>
+                <Router />
+                <IdleSessionHandler />
+              </NotificationProvider>
+            </ThemeProvider>
+          </ErrorBoundary>
+        </AuthProvider>
+      </QueryClientProvider>
     </BrowserRouter>
   )
 }

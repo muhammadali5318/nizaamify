@@ -62,7 +62,7 @@ const ChooseOnboardingFlow: React.FC<ChooseOnboardingFlowProps> = ({
           description='Set up the practice yourself (5–7 mins: data, preferences, setup).'
           imagePath='/assets/complete-onboarding.svg'
           alt='complete-onboarding'
-          onClick={() => navigate(`${paths.practiceOnboardingStepper}?step=1`)}
+          onClick={() => navigate(paths.practiceOnboardingStepper)}
         />
         <ChooseNominationCard
           heading='Nominate practice manager'

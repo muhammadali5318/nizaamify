@@ -1,12 +1,13 @@
 // FILE: src/pages/SignUp/SignUp.tsx
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   Box,
   Stepper,
   Step,
   StepLabel,
   Divider,
-  Typography
+  Typography,
+  CircularProgress
 } from '@mui/material'
 import RegistrationWrapper from 'src/components/registration-wrapper/RegistrationWrapper'
 import styles from './SignUp.module.scss'
@@ -14,23 +15,26 @@ import {
   CustomStepperConnector,
   StepperLabelSX
 } from 'src/components/common/CustomStepperConnector'
-import { generatePayloadForSignUp, steps } from './signUp-config'
+import { steps } from './practice-onboarding-config'
 import RegistrationHeader from 'src/components/registration-wrapper/RegistrationHeader'
 import NominateNowContainer from 'src/components/nominate-now'
-import StepFour from './components/Four'
-import StepOne from './components/StepOne'
-import StepTwo from './components/StepTwo'
-import StepThree from './components/Three'
 
-// import typed form value types from your zod validation modules
-import { StepOneFormValues } from 'src/schema-validations/practice-onboarding/stepOne'
-import { StepTwoFormValues } from 'src/schema-validations/practice-onboarding/stepTwo'
-import { StepThreeFormValues } from 'src/schema-validations/practice-onboarding/stepThree'
-import { StepFourFormValues } from 'src/schema-validations/practice-onboarding/stepFour'
 import SaveAndExitDialogue from './components/SaveAndExitDialogue/SaveAndExitDialogue'
 import NominatePracticeManagerDialog from 'src/components/nomiate-practice-manage'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
+import { useInitialData } from 'src/hooks/useFetchInitialData'
+import { mapPracticeApiToForm } from './mapPracticeToForm'
+import Congratulations from 'src/components/congratulations'
+import { useAuth } from 'src/context/AuthProvider'
+import {
+  StepOneFormValues,
+  StepTwoFormValues,
+  StepThreeFormValues,
+  StepFourFormValues
+} from 'src/schema-validations/practice-onboarding'
+import { StepOne, StepTwo, StepThree, StepFour } from './components'
+import { useAuth0 } from '@auth0/auth0-react'
 
 // initial values for each step — keep in sync with your schemas
 const initialStepOne: StepOneFormValues = {
@@ -53,20 +57,24 @@ const initialStepTwo: StepTwoFormValues = {
 }
 
 const initialStepThree: StepThreeFormValues = {
-  practiceManagementSoftware: 'EXACT',
-  accountingSoftware: 'Xero',
-  useOfAccountantBookkeeper: 'internal'
+  practiceManagementSoftware: '',
+  accountingSoftware: '',
+  useOfAccountantBookkeeper: ''
 }
 
 const initialStepFour: StepFourFormValues = {
-  frequencyOfFinancialReview: 'Monthly',
+  frequencyOfFinancialReview: '',
   primaryReasons: [],
-  confidenceReadingReports: 'Confident',
-  preferredInsightsFormat: 'Visual Dashboards'
+  confidenceReadingReports: '',
+  preferredInsightsFormat: ''
 }
 
 const PracticeOnboardingFlow: React.FC = () => {
+  const { user } = useAuth0()
   const navigate = useNavigate()
+  const { accessToken } = useAuth()
+  const { data: practice, isLoading } = useInitialData(!!accessToken)
+
   const [activeStep, setActiveStep] = useState<number>(0)
 
   // separate state for each step
@@ -87,15 +95,23 @@ const PracticeOnboardingFlow: React.FC = () => {
   const [openNominate, setOpenNominate] = useState(false)
 
   const handleSend = (payload: { email: string; role: string }) => {
-    // call your API to send invite
     // eslint-disable-next-line no-console
     console.log('send invite', payload)
     navigate(`${paths.practiceOnboarding}?step=INVITATION_SENT`)
   }
-  const handleDialogConfirm = () => {
-    // eslint-disable-next-line no-console
-    console.log('Saving progress...')
-    // maybe save to localStorage or API
+
+  useEffect(() => {
+    if (!practice) return
+    const mapped = mapPracticeApiToForm(practice)
+
+    setStepOne(mapped.stepOne)
+    setStepTwo(mapped.stepTwo)
+    setStepThree(mapped.stepThree)
+    setStepFour(mapped.stepFour)
+    setActiveStep(mapped.activeStep)
+  }, [practice])
+  const handleSaveAndExit = () => {
+    navigate(paths.dashboard)
     setOpenDialog(false)
   }
 
@@ -146,7 +162,7 @@ const PracticeOnboardingFlow: React.FC = () => {
             break
         }
       }
-      setActiveStep((s) => Math.min(steps.length - 1, s + 1))
+      setActiveStep((s) => s + 1)
     },
     [activeStep, setStepOne, setStepTwo, setStepThree, setStepFour]
   )
@@ -155,25 +171,11 @@ const PracticeOnboardingFlow: React.FC = () => {
     setActiveStep((s) => Math.max(0, s - 1))
   }, [])
 
-  // Final submit (merge all step data into single payload and POST)
   const handleSubmitAll = async (patch?: any) => {
-    // apply optional final patch to the relevant step state
     if (patch) {
-      // if we are on the final step when this is called, merge into stepFour
       setStepFour(patch as Partial<StepFourFormValues>)
     }
 
-    const finalForm = {
-      ...stepOneData,
-      ...stepTwoData,
-      ...stepThreeData,
-      ...stepFourData,
-      ...(patch || {})
-    }
-
-    const payload = generatePayloadForSignUp(finalForm)
-    // eslint-disable-next-line no-console
-    console.log(payload)
     setIsSubmitting(true)
     setServerErrors({})
   }
@@ -226,6 +228,7 @@ const PracticeOnboardingFlow: React.FC = () => {
             onSubmit={(patch?: Partial<StepFourFormValues>) =>
               handleSubmitAll(patch)
             }
+            onNext={(patch?: Partial<StepFourFormValues>) => handleNext(patch)}
             activeStep={activeStep}
             isSubmitting={isSubmitting}
             serverErrors={serverErrors}
@@ -250,68 +253,97 @@ const PracticeOnboardingFlow: React.FC = () => {
           px: 2
         }}
       >
-        <RegistrationHeader
-          heading='Welcome to monai!'
-          subHeading='Let’s get you onboarded!'
-        />
+        {practice?.onboarding_status === 'COMPLETED' ? (
+          <RegistrationHeader />
+        ) : (
+          <RegistrationHeader
+            heading={
+              <>
+                Welcome to monai{' '}
+                <span className='font-weight--700'>{user?.family_name}!</span>
+              </>
+            }
+            subHeading='Let’s set up your practice profile to personalise your experience'
+          />
+        )}
 
-        <Box className={styles.container}>
-          <Box className={styles.left}>
-            <Stepper
-              activeStep={activeStep}
-              orientation='vertical'
-              nonLinear
-              connector={<CustomStepperConnector connectorHeight={30} />}
-            >
-              {steps?.map((step, index) => (
-                <Step key={index} completed={activeStep > index}>
-                  <StepLabel
-                    slotProps={{
-                      stepIcon: {
-                        sx: { ...StepperLabelSX }
-                      }
-                    }}
-                  >
-                    <Typography
-                      color={`${
-                        activeStep >= index
-                          ? 'var(--color-text-primary)'
-                          : 'var(--color-text-secondary)'
-                      }`}
-                      variant='subtitle2'
-                    >
-                      {step.heading}
-                    </Typography>
-                    <Typography
-                      color='var(--color-text-primary)'
-                      variant='caption'
-                    >
-                      {step.subHeading}
-                    </Typography>
-                  </StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-            <Box>
-              <NominateNowContainer
-                onSelectNominee={() => setOpenNominate(true)}
+        {isLoading ? (
+          <Box
+            sx={{
+              py: 6
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        ) : activeStep === 4 ? (
+          <Box className={styles.completedContainer}>
+            <Congratulations message='You have completed onboarding now access the full system ' />
+          </Box>
+        ) : (
+          <>
+            <Box className={styles.container}>
+              <Box className={styles.left}>
+                <Stepper
+                  activeStep={activeStep}
+                  orientation='vertical'
+                  nonLinear
+                  connector={<CustomStepperConnector connectorHeight={30} />}
+                >
+                  {steps?.map((step, index) => (
+                    <Step key={index} completed={activeStep > index}>
+                      <StepLabel
+                        slotProps={{
+                          stepIcon: {
+                            sx: { ...StepperLabelSX }
+                          }
+                        }}
+                      >
+                        <Typography
+                          color={
+                            activeStep >= index
+                              ? 'var(--color-text-primary)'
+                              : 'var(--color-text-secondary)'
+                          }
+                          variant='subtitle2'
+                        >
+                          {step.heading}
+                        </Typography>
+                        <Typography
+                          color='var(--color-text-primary)'
+                          variant='caption'
+                        >
+                          {step.subHeading}
+                        </Typography>
+                      </StepLabel>
+                    </Step>
+                  ))}
+                </Stepper>
+                <Box>
+                  <NominateNowContainer
+                    onSelectNominee={() => setOpenNominate(true)}
+                  />
+                </Box>
+              </Box>
+
+              <Divider
+                orientation='vertical'
+                flexItem
+                className={styles.divider}
               />
-            </Box>
-          </Box>
 
-          <Divider orientation='vertical' flexItem className={styles.divider} />
-
-          <Box className={styles.right}>
-            <Box className={styles.placeholderBox}>
-              {renderStepContent(activeStep)}
+              <Box className={styles.right}>
+                <Box className={styles.placeholderBox}>
+                  {renderStepContent(activeStep)}
+                </Box>
+              </Box>
             </Box>
-          </Box>
-        </Box>
+          </>
+        )}
       </Box>
       <SaveAndExitDialogue
         open={openDialog}
         onClose={handleDialogClose}
-        onConfirm={handleDialogConfirm}
+        onConfirm={handleSaveAndExit}
       />
       <NominatePracticeManagerDialog
         open={openNominate}

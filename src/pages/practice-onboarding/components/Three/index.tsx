@@ -1,4 +1,3 @@
-// FILE: src/pages/SignUp/components/SignupStepThree.tsx
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeft, ChevronRight } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
@@ -21,6 +20,10 @@ import {
   StepThreeSchema,
   StepThreeFormValues as FormValues
 } from 'src/schema-validations/practice-onboarding/stepThree'
+import { useUpdateStepThree } from '../../hooks/useUpdateStepThree'
+import isEqual from 'lodash/isEqual'
+import { useAuth0 } from '@auth0/auth0-react'
+import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 
 type StepThreeProps = {
   formData: FormValues
@@ -28,7 +31,7 @@ type StepThreeProps = {
   onBack?: () => void
   onNext?: (patch?: Partial<FormValues>) => void
   onSubmit?: (patch?: Partial<FormValues>) => void
-  activeStep?: number
+  activeStep: number
   isSubmitting?: boolean
   serverErrors?: Record<string, string>
   onSaveExitClick: () => void
@@ -43,6 +46,10 @@ const StepThree: React.FC<StepThreeProps> = ({
   isSubmitting = false,
   onSaveExitClick
 }) => {
+  const { user } = useAuth0()
+  const orgUuid = getUserOrgUuid(user)
+
+  const updateStepThree = useUpdateStepThree(orgUuid)
   const {
     control,
     handleSubmit,
@@ -52,39 +59,54 @@ const StepThree: React.FC<StepThreeProps> = ({
     resolver: zodResolver(StepThreeSchema),
     mode: 'onChange',
     defaultValues: {
-      practiceManagementSoftware:
-        (formData as any).practiceManagementSoftware ?? 'EXACT',
-      accountingSoftware: (formData as any).accountingSoftware ?? 'Xero',
-      useOfAccountantBookkeeper:
-        (formData as any).useOfAccountantBookkeeper ?? 'internal'
+      practiceManagementSoftware: formData.practiceManagementSoftware,
+      accountingSoftware: formData.accountingSoftware,
+      useOfAccountantBookkeeper: formData.useOfAccountantBookkeeper
     }
   })
 
   useEffect(() => {
     reset({
-      practiceManagementSoftware:
-        (formData as any).practiceManagementSoftware ?? 'EXACT',
-      accountingSoftware: (formData as any).accountingSoftware ?? 'Xero',
-      useOfAccountantBookkeeper:
-        (formData as any).useOfAccountantBookkeeper ?? 'internal'
+      practiceManagementSoftware: formData.practiceManagementSoftware,
+      accountingSoftware: formData.accountingSoftware,
+      useOfAccountantBookkeeper: formData.useOfAccountantBookkeeper
     })
   }, [formData, reset])
 
   const submit = (data: FormValues) => {
-    const patch = {
+    const newValues: FormValues = {
       practiceManagementSoftware: data.practiceManagementSoftware,
       accountingSoftware: data.accountingSoftware,
       useOfAccountantBookkeeper: data.useOfAccountantBookkeeper
     }
 
-    setFormData(patch)
+    if (isEqual(newValues, formData)) {
+      onNext?.()
+      return
+    }
 
-    // Advance to next step (Step Four). Use onNext (not onSubmit).
-    onNext?.(patch)
+    // update parent state immediately so UI reflects inputs
+    setFormData(newValues)
 
-    // If you wanted this step to perform final submission instead,
-    // call onSubmit?.(patch) here (but your flow expects StepFour next).
+    // build API payload (backend keys)
+    const payload = {
+      management_software: newValues.practiceManagementSoftware,
+      accounting_software: newValues.accountingSoftware,
+      accountant_bookkeeper_use: newValues.useOfAccountantBookkeeper
+    }
+
+    // call PATCH -> advance only on success
+    updateStepThree.mutate(payload, {
+      onSuccess: () => {
+        onNext?.(newValues)
+      },
+      onError: (err) => {
+        console.error('Step 3 save failed', err)
+      }
+    })
   }
+
+  const isSaving = updateStepThree?.status === 'pending'
 
   return (
     <Box>
@@ -112,10 +134,10 @@ const StepThree: React.FC<StepThreeProps> = ({
                   label='Practice management software *'
                 >
                   <MenuItem value='EXACT'>EXACT</MenuItem>
-                  <MenuItem value='Dentally'>Dentally</MenuItem>
+                  <MenuItem value='DENTALLY'>Dentally</MenuItem>
                   <MenuItem value='R4'>R4</MenuItem>
-                  <MenuItem value='careStream'>careStream</MenuItem>
-                  <MenuItem value='Other'>Other</MenuItem>
+                  <MenuItem value='CARESTREAM'>careStream</MenuItem>
+                  <MenuItem value='OTHER'>Other</MenuItem>
                 </Select>
               )}
             />
@@ -138,10 +160,10 @@ const StepThree: React.FC<StepThreeProps> = ({
                   labelId='accounting-software-label'
                   label='Accounting software *'
                 >
-                  <MenuItem value='Xero'>Xero</MenuItem>
-                  <MenuItem value='QuickBooks'>QuickBooks</MenuItem>
-                  <MenuItem value='Other'>Other</MenuItem>
-                  <MenuItem value='None'>None</MenuItem>
+                  <MenuItem value='XERO'>Xero</MenuItem>
+                  <MenuItem value='QUICKBOOKS'>QuickBooks</MenuItem>
+                  <MenuItem value='OTHER'>Other</MenuItem>
+                  <MenuItem value='NONE'>None</MenuItem>
                 </Select>
               )}
             />
@@ -164,9 +186,9 @@ const StepThree: React.FC<StepThreeProps> = ({
                   labelId='use-accountant-label'
                   label='Use of accountant/bookkeeper *'
                 >
-                  <MenuItem value='internal'>internal</MenuItem>
-                  <MenuItem value='external'>external</MenuItem>
-                  <MenuItem value='None'>None</MenuItem>
+                  <MenuItem value='INTERNAL'>Internal</MenuItem>
+                  <MenuItem value='EXTERNAL'>External</MenuItem>
+                  <MenuItem value='NONE'>None</MenuItem>
                 </Select>
               )}
             />
@@ -223,7 +245,7 @@ const StepThree: React.FC<StepThreeProps> = ({
                 size='large'
                 variant='contained'
                 color='primary'
-                loading={isSubmitting}
+                loading={isSaving || isSubmitting}
                 disabled={!isValid}
                 endIcon={<ChevronRight />}
               >

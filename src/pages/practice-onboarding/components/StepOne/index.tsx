@@ -19,12 +19,16 @@ import {
   StepOneFormValues,
   StepOneSchema
 } from 'src/schema-validations/practice-onboarding/stepOne'
+import { useUpdateStepOne } from '../../hooks/useUpdateStepOne'
+import { isEqual } from 'lodash'
+import { useAuth0 } from '@auth0/auth0-react'
+import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 
 type StepOneProps = {
   formData: StepOneFormValues
   setFormData: (patch: Partial<StepOneFormValues>) => void
   onNext?: (patch?: Partial<StepOneFormValues>) => void
-  activeStep?: number
+  activeStep: number
   onSaveExitClick: () => void
 }
 
@@ -35,6 +39,10 @@ const StepOne: React.FC<StepOneProps> = ({
   activeStep,
   onSaveExitClick
 }) => {
+  const { user } = useAuth0()
+  const orgUuid = getUserOrgUuid(user)
+
+  const updateStepOne = useUpdateStepOne(orgUuid)
   const { control, handleSubmit, reset } = useForm<StepOneFormValues>({
     resolver: zodResolver(StepOneSchema),
     mode: 'onChange',
@@ -58,7 +66,7 @@ const StepOne: React.FC<StepOneProps> = ({
       email: formData.email,
       phone: formData.phone
     })
-  }, [formData, reset])
+  }, [formData, reset, user])
 
   const phoneWrapperRef = React.useRef<HTMLDivElement | null>(null)
 
@@ -80,19 +88,40 @@ const StepOne: React.FC<StepOneProps> = ({
     const parsed = parsePhoneNumberFromString(data.phone || '')
     const normalizedPhone = parsed ? parsed.number : data.phone
 
-    // update parent state so data persists when navigating between steps
-    setFormData({
+    const newValues: StepOneFormValues = {
       practiceName: data.practiceName,
       principalName: data.principalName,
       practiceManagerName: data.practiceManagerName,
       practiceAddress: data.practiceAddress,
       email: data.email,
       phone: normalizedPhone
-    })
+    }
 
-    // then go to next step
-    onNext?.()
+    if (isEqual(newValues, formData)) {
+      onNext?.()
+      return
+    }
+
+    setFormData(newValues)
+
+    updateStepOne.mutate(
+      {
+        practice_name: data.practiceName,
+        principal_name: data.principalName,
+        practice_manager_name: data.practiceManagerName,
+        address: data.practiceAddress,
+        contact_number: normalizedPhone || '',
+        email: data.email!
+      },
+      {
+        onSuccess: () => {
+          onNext?.()
+        }
+      }
+    )
   }
+
+  const isSaving = updateStepOne?.status === 'pending'
 
   return (
     <Box component='section'>
@@ -157,7 +186,7 @@ const StepOne: React.FC<StepOneProps> = ({
             )}
           />
 
-          {/* Practice address - 300 char textarea */}
+          {/* Practice address */}
           <Controller
             name='practiceAddress'
             control={control}
@@ -171,10 +200,7 @@ const StepOne: React.FC<StepOneProps> = ({
                 multiline
                 rows={4}
                 inputProps={{ maxLength: 300 }}
-                helperText={
-                  fieldState.error?.message ??
-                  `${(field.value ?? '').length}/300`
-                }
+                helperText={fieldState.error?.message}
                 error={!!fieldState.error}
               />
             )}
@@ -184,7 +210,7 @@ const StepOne: React.FC<StepOneProps> = ({
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={2}
-            sx={{ marginTop: '6px !important' }}
+            sx={{ marginTop: '20px !important' }}
           >
             <Controller
               name='phone'
@@ -289,6 +315,7 @@ const StepOne: React.FC<StepOneProps> = ({
               size='large'
               variant='contained'
               color='primary'
+              loading={isSaving}
               endIcon={<ChevronRight />}
             >
               Next

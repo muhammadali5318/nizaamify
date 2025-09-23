@@ -12,19 +12,12 @@ import ListSubheader from '@mui/material/ListSubheader'
 import styles from './AppLayout.module.scss'
 import LogoutIcon from '@mui/icons-material/Logout'
 import Box from '@mui/material/Box'
-import {
-  FormControl,
-  MenuItem,
-  Select,
-  Stack,
-  Tooltip,
-  Typography
-} from '@mui/material'
+import { FormControl, Select, Stack, Tooltip, Typography } from '@mui/material'
 import Topbar from './components/Topbar'
 import { Drawer, MenuItemData, menuSections } from './applayout-config'
 
 export default function AppLayout() {
-  const { logout } = useAuth0()
+  const { logout, user } = useAuth0()
   const location = useLocation()
 
   // Initialize from localStorage
@@ -94,7 +87,7 @@ export default function AppLayout() {
             <img src='/assets/practice-selector.svg' alt='practice selector' />
             <FormControl className={styles.muiSelectForm} fullWidth>
               <Select
-                defaultValue='practice1'
+                defaultValue={user?.organizations_with_roles[0].organization}
                 displayEmpty
                 className={styles.muiSelect}
                 sx={{
@@ -112,23 +105,13 @@ export default function AppLayout() {
                     variant='subtitle2'
                     sx={{ display: open ? 'inline' : 'none' }}
                   >
-                    {selected === 'practice1'
-                      ? 'Grayford Practice'
-                      : selected === 'practice2'
-                        ? 'Practice 2'
-                        : 'Practice 3'}
+                    {selected}
                   </Typography>
                 )}
               >
-                <MenuItem value='practice1'>
-                  <Typography variant='subtitle2'>Grayford Practice</Typography>
-                </MenuItem>
-                <MenuItem value='practice2'>
-                  <Typography variant='subtitle2'>Practice 2</Typography>
-                </MenuItem>
-                <MenuItem value='practice3'>
-                  <Typography variant='subtitle2'>Practice 3</Typography>
-                </MenuItem>
+                {/* <MenuItem value='practice1'>
+                  <Typography variant='subtitle2'></Typography>
+                </MenuItem> */}
               </Select>
             </FormControl>
           </Box>

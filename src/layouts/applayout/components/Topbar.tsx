@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material'
 import styles from './Topbar.module.scss'
+import { useAuth0 } from '@auth0/auth0-react'
 
 type topbarProps = {
   title: string
@@ -7,6 +8,8 @@ type topbarProps = {
 }
 
 const Topbar: React.FC<topbarProps> = ({ title, icon }) => {
+  const { user } = useAuth0()
+
   return (
     <Box className={styles.topbar}>
       <Box className={styles.topbarTitleContainer}>
@@ -21,7 +24,7 @@ const Topbar: React.FC<topbarProps> = ({ title, icon }) => {
 
         <Box className={styles.profileTitle}>
           <Typography variant='body1' className='font-weight--700'>
-            Muhammad Ali
+            {user?.name}
           </Typography>
           <Typography
             variant='caption'

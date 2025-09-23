@@ -2,19 +2,21 @@
 import { z } from 'zod'
 
 export const StepFourSchema = z.object({
-  frequencyOfFinancialReview: z.enum(['Monthly', 'Quarterly', 'Rarely']),
+  frequencyOfFinancialReview: z.enum(['', 'MONTHLY', 'YEARLY', 'RARELY']),
   primaryReasons: z
     .array(z.string())
     .min(1, 'Please select at least one reason'),
   confidenceReadingReports: z.enum([
-    'Confident',
-    'Not Confident',
-    'Very Confident'
+    '',
+    'VERY CONFIDENT',
+    'CONFIDENT',
+    'NOT CONFIDENT'
   ]),
   preferredInsightsFormat: z.enum([
-    'Visual Dashboards',
-    'Bullet-point summaries',
-    'Detailed Reports'
+    '',
+    'VISUAL DASHBOARDS',
+    'BULLET-POINT SUMMARIES',
+    'DETAILED REPORTS'
   ])
 })
 

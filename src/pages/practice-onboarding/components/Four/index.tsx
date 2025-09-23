@@ -24,31 +24,59 @@ import {
 } from 'src/schema-validations/practice-onboarding/stepFour'
 import { notify } from 'src/components/notistack/NotificationProvider'
 import { LoadingButton } from '@mui/lab'
+import { useUpdateStepFour } from '../../hooks/useUpdateStepFour'
+import { isEqual } from 'lodash'
+import { useAuth0 } from '@auth0/auth0-react'
+import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 
 type StepFourProps = {
   formData: FormValues
   setFormData: (patch: Partial<FormValues>) => void
   onBack?: () => void
   onSubmit?: (patch?: Partial<FormValues>) => void
-  activeStep?: number
+  activeStep: number
+  onNext?: (patch?: Partial<FormValues>) => void
   isSubmitting?: boolean
   serverErrors?: Record<string, string>
   onSaveExitClick: () => void
 }
 
-const LEFT_REASONS = ['Track profit', 'Save time', 'Understand performance']
-const RIGHT_REASONS = ['Reduce cost', 'Meet NHS targets', 'Other']
+const LEFT_REASONS = ['Track Profit', 'Save Time', 'Understand Performance']
+const RIGHT_REASONS = ['Reduce Cost', 'Meet NHS Targets', 'Other']
+
+// convert 'Monthly' -> 'MONTHLY', 'Rarely' -> 'RARELY', etc.
+const mapFrequencyToApi = (v: string) => v.toUpperCase()
+
+// convert 'Very Confident' -> 'VERY CONFIDENT'
+const mapConfidenceToApi = (v: string) => v.toUpperCase()
+
+// convert 'Visual Dashboards' -> 'VISUAL DASHBOARDS'
+const mapInsightsFormatToApi = (v: string) => v.toUpperCase()
+
+// Title-case each selected reason: 'Track profit' -> 'Track Profit'
+const toTitleCase = (s: string) =>
+  s
+    .split(' ')
+    .map((w) => (w.length ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(' ')
+
+const mapPrimaryReasonsToApi = (reasons: string[]) =>
+  reasons.map((r) => toTitleCase(r))
 
 const StepFour: React.FC<StepFourProps> = ({
   formData,
   setFormData,
   onBack,
-  onSubmit,
   activeStep,
-  isSubmitting = false,
+  onNext,
   serverErrors = {},
   onSaveExitClick
 }) => {
+  const { user } = useAuth0()
+  const orgUuid = getUserOrgUuid(user)
+
+  const updateStepFour = useUpdateStepFour(orgUuid)
+  const isSaving = updateStepFour.status === 'pending'
   const {
     control,
     handleSubmit,
@@ -87,16 +115,40 @@ const StepFour: React.FC<StepFourProps> = ({
   }, [serverErrors])
 
   const submit = (data: FormValues) => {
-    const patch = {
+    const patchForParent = {
       frequencyOfFinancialReview: data.frequencyOfFinancialReview,
       primaryReasons: data.primaryReasons,
       confidenceReadingReports: data.confidenceReadingReports,
       preferredInsightsFormat: data.preferredInsightsFormat
     }
 
-    setFormData(patch)
-    // This is the final step submit in your flow — call parent's onSubmit
-    onSubmit?.(patch)
+    // ✅ If no change, skip mutation, just navigate
+    if (isEqual(patchForParent, formData)) {
+      onNext?.()
+      return
+    }
+
+    // update parent state immediately
+    setFormData(patchForParent)
+
+    // build payload expected by backend
+    const payload = {
+      financial_review_frequency: mapFrequencyToApi(
+        data.frequencyOfFinancialReview
+      ),
+      primary_reasons: mapPrimaryReasonsToApi(data.primaryReasons ?? []),
+      confidence_reading_reports: mapConfidenceToApi(
+        data.confidenceReadingReports
+      ),
+      insights_format: mapInsightsFormatToApi(data.preferredInsightsFormat)
+    }
+
+    updateStepFour.mutate(payload, {
+      onSuccess: () => {
+        // ✅ navigate to Congratulations screen
+        onNext?.(patchForParent)
+      }
+    })
   }
 
   const hasBlockingServerErrors =
@@ -127,9 +179,9 @@ const StepFour: React.FC<StepFourProps> = ({
                   labelId='frequency-review-label'
                   label='Frequency of financial review *'
                 >
-                  <MenuItem value='Monthly'>Monthly</MenuItem>
-                  <MenuItem value='Quarterly'>Quarterly</MenuItem>
-                  <MenuItem value='Rarely'>Rarely</MenuItem>
+                  <MenuItem value='MONTHLY'>Monthly</MenuItem>
+                  <MenuItem value='YEARLY'>Yearly</MenuItem>
+                  <MenuItem value='RARELY'>Rarely</MenuItem>
                 </Select>
               )}
             />
@@ -225,9 +277,9 @@ const StepFour: React.FC<StepFourProps> = ({
                   labelId='confidence-reports-label'
                   label='Confidence reading reports *'
                 >
-                  <MenuItem value='Confident'>Confident</MenuItem>
-                  <MenuItem value='Not Confident'>Not Confident</MenuItem>
-                  <MenuItem value='Very Confident'>Very Confident</MenuItem>
+                  <MenuItem value='VERY CONFIDENT'>Very Confident</MenuItem>
+                  <MenuItem value='CONFIDENT'>Confident</MenuItem>
+                  <MenuItem value='NOT CONFIDENT'>Not Confident</MenuItem>
                 </Select>
               )}
             />
@@ -250,13 +302,13 @@ const StepFour: React.FC<StepFourProps> = ({
                   labelId='preferred-insights-label'
                   label='Preferred insights format *'
                 >
-                  <MenuItem value='Visual Dashboards'>
+                  <MenuItem value='VISUAL DASHBOARDS'>
                     Visual Dashboards
                   </MenuItem>
-                  <MenuItem value='Bullet-point summaries'>
+                  <MenuItem value='BULLET-POINT SUMMARIES'>
                     Bullet-point summaries
                   </MenuItem>
-                  <MenuItem value='Detailed Reports'>Detailed Reports</MenuItem>
+                  <MenuItem value='DETAILED REPORTS'>Detailed Reports</MenuItem>
                 </Select>
               )}
             />
@@ -294,8 +346,8 @@ const StepFour: React.FC<StepFourProps> = ({
                 size='large'
                 variant='contained'
                 color='primary'
-                loading={isSubmitting}
-                disabled={!isValid || hasBlockingServerErrors}
+                loading={isSaving}
+                disabled={isSaving || !isValid || hasBlockingServerErrors}
                 endIcon={<ChevronRight />}
               >
                 Next

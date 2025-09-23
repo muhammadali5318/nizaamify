@@ -10,6 +10,7 @@ import React, {
 import { useNavigate } from 'react-router'
 import PageLoader from 'src/components/common/page-loader'
 import { CONFIG } from 'src/config-global'
+import { useInitialData } from 'src/hooks/useFetchInitialData'
 import apiClient from 'src/services/api-client'
 
 /* ---------------------- Types ---------------------- */
@@ -28,6 +29,7 @@ type AuthContextType = {
   user: AppUser | null
   loading: boolean
   authenticated: boolean
+  accessToken: string | null
   getAccessToken: () => Promise<string | null>
 }
 
@@ -136,6 +138,8 @@ function AuthProviderContainer({ children }: Props) {
     getAccessToken()
   }, [getAccessToken])
 
+  useInitialData(!!accessToken)
+
   const isFullyAuthenticated =
     isAuthenticated && !tokenLoading && accessToken !== null
 
@@ -160,7 +164,8 @@ function AuthProviderContainer({ children }: Props) {
       isInfoLoading,
       status,
       user?.name,
-      user?.sub
+      user?.sub,
+      accessToken
     ]
   )
 
