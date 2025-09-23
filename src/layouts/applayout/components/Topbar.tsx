@@ -183,7 +183,8 @@ const Topbar: React.FC<topbarProps> = ({ title, icon }) => {
     setOpen((prev) => !prev)
   }
 
-  const handleClose = (event?: Event | React.SyntheticEvent) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleClose = (_event?: Event | React.SyntheticEvent) => {
     setOpen(false)
   }
 
