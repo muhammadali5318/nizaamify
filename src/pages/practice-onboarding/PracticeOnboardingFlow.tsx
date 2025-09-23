@@ -10,7 +10,7 @@ import {
   CircularProgress
 } from '@mui/material'
 import RegistrationWrapper from 'src/components/registration-wrapper/RegistrationWrapper'
-import styles from './SignUp.module.scss'
+import styles from './practiceOnboardingFlow.module.scss'
 import {
   CustomStepperConnector,
   StepperLabelSX

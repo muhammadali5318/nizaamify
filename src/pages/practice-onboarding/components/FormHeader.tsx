@@ -1,6 +1,6 @@
 // src/pages/SignUp/components/FormHeader.tsx
 import { steps } from '../practice-onboarding-config'
-import signupRootStyles from '../SignUp.module.scss'
+import signupRootStyles from '../practiceOnboardingFlow.module.scss'
 import { Box, Stack, Typography } from '@mui/material'
 import { FormHeaderProps } from '../types'
 import CircularProgressWithLabel from 'src/components/circular-progress-with-label/CircularProgressWithLabel'

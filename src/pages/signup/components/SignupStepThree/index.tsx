@@ -110,6 +110,10 @@ const SignupStepThree: React.FC<Props> = ({
       notify.error(serverErrors.practice)
     }
 
+    if (serverErrors?.password) {
+      notify.error(serverErrors?.password)
+    }
+
     if (serverErrors?.general) {
       notify.error(serverErrors.general)
     }

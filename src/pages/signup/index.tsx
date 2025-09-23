@@ -61,14 +61,35 @@ const SignUp: React.FC = () => {
 
     setServerErrors((prev) => {
       if (!patch) return prev
-      const keysToClear = ['email', 'practiceEmail', 'practiceName', 'postcode']
       const newErrors = { ...prev }
-      Object.keys(patch).forEach((k) => {
-        if (keysToClear.includes(k)) {
-          delete newErrors.email
-          delete newErrors.practice
-        }
-      })
+
+      // Always clear general error on any user input
+      delete newErrors.general
+
+      // Clear email-related server error when email changes
+      if ('email' in patch) {
+        delete newErrors.email
+      }
+
+      // Clear practice-related server error when any practice field changes
+      if (
+        'practiceEmail' in patch ||
+        'practiceName' in patch ||
+        'postcode' in patch
+      ) {
+        delete newErrors.practice
+      }
+
+      // Clear password error when user edits password or confirmPassword
+      if (
+        'password' in patch ||
+        'confirmPassword' in patch ||
+        'password' in newErrors ||
+        'confirmPassword' in newErrors
+      ) {
+        delete newErrors.password
+      }
+
       return newErrors
     })
   }, [])
@@ -83,7 +104,6 @@ const SignUp: React.FC = () => {
 
   const handleBack = () => setActiveStep((s) => Math.max(0, s - 1))
 
-  // Final submit: merge last patch (if provided), then submit combined payload to API
   const handleSubmitAll = async (patch?: Partial<SignupFormDataSet>) => {
     if (patch) setFormData(patch)
 
@@ -92,7 +112,7 @@ const SignUp: React.FC = () => {
     const payload = generatePayloadForSignUp(finalForm)
 
     setIsSubmitting(true)
-    setServerErrors({}) // clear previous server errors on new submit
+    setServerErrors({})
     try {
       const response = await apiClientOpen.post(createUser, payload)
       if (response.status === 201) {
@@ -108,7 +128,9 @@ const SignUp: React.FC = () => {
           respData?.user?.email && Array.isArray(respData.user.email)
             ? respData.user.email.join(' ')
             : respData?.user?.email
-        if (userEmailErr) parsedErrors.email = userEmailErr
+        if (userEmailErr)
+          parsedErrors.email =
+            'It looks like you already have an account. Try logging in or reset your password if needed.'
 
         const practiceErr =
           respData?.practice?.non_field_errors &&
@@ -116,6 +138,14 @@ const SignUp: React.FC = () => {
             ? respData.practice.non_field_errors.join(' ')
             : respData?.practice?.non_field_errors
         if (practiceErr) parsedErrors.practice = practiceErr
+
+        const userPasswordErr =
+          respData?.user?.password && Array.isArray(respData.user.password)
+            ? respData.user.password.join(' ')
+            : respData?.user?.password
+        if (userPasswordErr)
+          parsedErrors.password =
+            'Password is too common, please choose a stronger password'
       }
 
       if (!Object.keys(parsedErrors).length) {

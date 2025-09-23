@@ -8,6 +8,7 @@ export const SignupStepThreeSchema = z
         8,
         'Password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character.'
       )
+      .max(50, 'Password must not exceed 50 characters')
       .refine((val) => /[A-Z]/.test(val), {
         message: 'Password must contain at least one uppercase letter'
       })
