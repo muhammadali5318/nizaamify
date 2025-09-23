@@ -28,7 +28,7 @@ type ProfilePopperProps = {
   open: boolean
   onClose: (event?: Event | React.SyntheticEvent) => void
   onLogout: () => void
-  onSettings?: () => void
+  onSettings: () => void
   user?: any
 }
 
@@ -109,7 +109,7 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                 <Box px={'6px'}>
                   <MenuItem
                     onClick={() => {
-                      onSettings && onSettings()
+                      onSettings()
                       onClose()
                     }}
                   >
@@ -121,7 +121,7 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
 
                   <MenuItem
                     onClick={() => {
-                      onSettings && onSettings()
+                      onSettings()
                       onClose()
                     }}
                   >
@@ -188,14 +188,10 @@ const Topbar: React.FC<topbarProps> = ({ title, icon }) => {
   }
 
   const handleLogout = () => {
-    // auth0-react v2 uses logout with logoutParams, older versions accept returnTo directly.
-    // adjust if your project requires a different signature.
     logout({ logoutParams: { returnTo: window.location.origin } })
   }
 
   const handleSettings = () => {
-    // Example: close popper and navigate/open settings modal.
-    // You can replace this with useNavigate() or open a modal instead.
     setOpen(false)
   }
 
@@ -221,7 +217,7 @@ const Topbar: React.FC<topbarProps> = ({ title, icon }) => {
             color='var(--color-primary-light)'
             className='font-weight--700'
           >
-            Practice Admin
+            {user.organizations_with_roles[0].roles[0]}
           </Typography>
         </Box>
 
@@ -234,7 +230,7 @@ const Topbar: React.FC<topbarProps> = ({ title, icon }) => {
           aria-expanded={open ? 'true' : undefined}
           size='small'
         >
-          <Avatar src='/assets/profile-avatar.svg' alt='profile avatar' />
+          <Avatar src={user?.picture} alt='profile avatar' />
         </IconButton>
 
         {/* Use the separate ProfilePopper function/component */}

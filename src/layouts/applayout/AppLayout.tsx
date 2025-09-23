@@ -10,14 +10,13 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import ListSubheader from '@mui/material/ListSubheader'
 import styles from './AppLayout.module.scss'
-import LogoutIcon from '@mui/icons-material/Logout'
 import Box from '@mui/material/Box'
 import { FormControl, Select, Stack, Tooltip, Typography } from '@mui/material'
 import Topbar from './components/Topbar'
 import { Drawer, MenuItemData, menuSections } from './applayout-config'
 
 export default function AppLayout() {
-  const { logout, user } = useAuth0()
+  const { user } = useAuth0()
   const location = useLocation()
 
   // Initialize from localStorage
@@ -213,35 +212,6 @@ export default function AppLayout() {
               </Box>
             </List>
           ))}
-
-          {/* Logout */}
-          <List>
-            <ListItem disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                onClick={() =>
-                  logout({ logoutParams: { returnTo: window.location.origin } })
-                }
-                sx={{
-                  minHeight: 44,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                  color: 'red'
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 2 : 'auto',
-                    justifyContent: 'center',
-                    color: 'red'
-                  }}
-                >
-                  <LogoutIcon />
-                </ListItemIcon>
-                <ListItemText primary='Logout' sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
-          </List>
         </Stack>
       </Drawer>
 
