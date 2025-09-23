@@ -12,7 +12,8 @@ import {
   Divider,
   Grow,
   Button,
-  Stack
+  Stack,
+  Chip
 } from '@mui/material'
 import styles from './Topbar.module.scss'
 import { useAuth0 } from '@auth0/auth0-react'
@@ -68,24 +69,42 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                 sx={{ p: 0 }}
               >
                 {/* Profile summary */}
-                <Box sx={{ px: 1.5, py: 1 }}>
-                  <Stack direction='row' spacing={1} alignItems='center'>
-                    <Avatar src='/assets/profile-avatar.svg' alt='avatar' />
-                    <Box>
+                <Box sx={{ padding: '12px 10px' }}>
+                  <Stack direction='row' spacing={1.5} alignItems='start'>
+                    <Avatar src={user.picture} alt='avatar' />
+                    <Stack>
                       <Typography
-                        variant='subtitle2'
-                        className='font-weight--700'
+                        variant='body1'
+                        color='var(--color-text-primary)'
                       >
                         {user?.name}
                       </Typography>
-                      <Typography variant='caption' color='text.secondary'>
+                      <Typography
+                        variant='caption'
+                        color='var(--color-primary-light)'
+                        className='font-weight--700'
+                      >
                         {user?.email}
                       </Typography>
-                    </Box>
+                      <Box>
+                        <Chip
+                          label={user.organizations_with_roles[0].roles[0]}
+                          size='small'
+                          variant='outlined'
+                          sx={{
+                            fontWeight: 700,
+                            borderWidth: 2,
+                            borderColor: 'var(--color-primary)',
+                            borderStyle: 'solid',
+                            color: 'var(--color-primary)'
+                          }}
+                        />
+                      </Box>
+                    </Stack>
                   </Stack>
                 </Box>
 
-                <Divider sx={{ my: '10px' }} />
+                <Divider sx={{ my: '8px' }} />
 
                 <Box px={'6px'}>
                   <MenuItem
@@ -117,7 +136,7 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                   </MenuItem>
                 </Box>
 
-                <Divider sx={{ my: '10px' }} />
+                <Divider sx={{ my: '8px' }} />
 
                 <Box sx={{ p: '10px', pt: 0 }}>
                   <Button
