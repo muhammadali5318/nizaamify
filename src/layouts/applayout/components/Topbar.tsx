@@ -85,20 +85,41 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                   </Stack>
                 </Box>
 
-                <Divider sx={{ my: 1 }} />
+                <Divider sx={{ my: '10px' }} />
 
-                <MenuItem
-                  onClick={() => {
-                    onSettings && onSettings()
-                    onClose()
-                  }}
-                >
-                  Settings
-                </MenuItem>
+                <Box px={'6px'}>
+                  <MenuItem
+                    onClick={() => {
+                      onSettings && onSettings()
+                      onClose()
+                    }}
+                  >
+                    <img src='/assets/person.svg' alt='person icon' />
+                    <Typography variant='body2' color='text.primary' pl={1}>
+                      Profile
+                    </Typography>
+                  </MenuItem>
 
-                <Divider />
+                  <MenuItem
+                    onClick={() => {
+                      onSettings && onSettings()
+                      onClose()
+                    }}
+                  >
+                    <img
+                      src='/assets/settings-greyed.svg'
+                      alt='settings icon'
+                    />
 
-                <Box sx={{ px: 1, py: 1 }}>
+                    <Typography variant='body2' color='text.primary' pl={1}>
+                      Account Settings
+                    </Typography>
+                  </MenuItem>
+                </Box>
+
+                <Divider sx={{ my: '10px' }} />
+
+                <Box sx={{ p: '10px', pt: 0 }}>
                   <Button
                     fullWidth
                     variant='outlined'
