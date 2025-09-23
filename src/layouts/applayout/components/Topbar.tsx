@@ -104,8 +104,25 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                     variant='outlined'
                     onClick={onLogout}
                     aria-label='Logout'
+                    sx={{
+                      display: 'flex',
+                      padding: '4px 16px',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'flex-start',
+                      border: 'none',
+                      borderRadius: '10px',
+                      background: 'var(--grey-200)',
+                      gap: '6px',
+                      alignSelf: 'stretch'
+                    }}
                   >
-                    Logout
+                    <img
+                      src='/assets/logout-icon.svg'
+                      alt='Logout'
+                      style={{ width: 20, height: 20, objectFit: 'contain' }}
+                    />
+                    <span>Logout</span>
                   </Button>
                 </Box>
               </MenuList>
