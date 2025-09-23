@@ -16,9 +16,9 @@ import { FeatureFlagProvider } from './context/FeatureFlagProvider'
 function App(): JSX.Element {
   return (
     <BrowserRouter>
-      <FeatureFlagProvider initialContext={{ onboardingCompleted: false }}>
-        <AuthProvider>
-          <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <FeatureFlagProvider initialContext={{ onboardingCompleted: false }}>
+          <AuthProvider>
             <ErrorBoundary>
               <ThemeProvider theme={theme}>
                 <NotificationProvider>
@@ -27,9 +27,9 @@ function App(): JSX.Element {
                 </NotificationProvider>
               </ThemeProvider>
             </ErrorBoundary>
-          </QueryClientProvider>
-        </AuthProvider>
-      </FeatureFlagProvider>
+          </AuthProvider>
+        </FeatureFlagProvider>
+      </QueryClientProvider>
     </BrowserRouter>
   )
 }
