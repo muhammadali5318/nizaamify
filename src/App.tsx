@@ -11,22 +11,25 @@ import { BrowserRouter } from 'react-router'
 import NotificationProvider from './components/notistack/NotificationProvider'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './utils/queryClient'
+import { FeatureFlagProvider } from './context/FeatureFlagProvider'
 
 function App(): JSX.Element {
   return (
     <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
+      <FeatureFlagProvider initialContext={{ onboardingCompleted: false }}>
         <AuthProvider>
-          <ErrorBoundary>
-            <ThemeProvider theme={theme}>
-              <NotificationProvider>
-                <Router />
-                <IdleSessionHandler />
-              </NotificationProvider>
-            </ThemeProvider>
-          </ErrorBoundary>
+          <QueryClientProvider client={queryClient}>
+            <ErrorBoundary>
+              <ThemeProvider theme={theme}>
+                <NotificationProvider>
+                  <Router />
+                  <IdleSessionHandler />
+                </NotificationProvider>
+              </ThemeProvider>
+            </ErrorBoundary>
+          </QueryClientProvider>
         </AuthProvider>
-      </QueryClientProvider>
+      </FeatureFlagProvider>
     </BrowserRouter>
   )
 }

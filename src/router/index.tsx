@@ -4,6 +4,7 @@ import { authRoutes } from './auth-routes'
 import AppLayout from 'src/layouts/applayout/AppLayout'
 import NotFound from 'src/pages/NotFound'
 import { ProtectedRoute } from 'src/auth/ProtectedRoute'
+import { FeatureProtectedRoute } from 'src/components/FeatureProtectedRoute'
 import { useAuth } from 'src/context/AuthProvider'
 import { paths } from 'src/paths'
 import Documents from 'src/pages/documents'
@@ -44,15 +45,78 @@ export function Router() {
       element: <ProtectedRoute component={AppLayout} />,
       children: [
         { index: true, element: <Navigate to={paths.dashboard} /> },
-        { path: paths.dashboard, element: <Dashboard /> },
-        { path: paths.documents, element: <Documents /> },
-        { path: paths.reports, element: <Reports /> },
-        { path: paths.benchmarks, element: <Benchmarks /> },
-        { path: paths.teamManagement, element: <TeamManagement /> },
-        { path: paths.practiceSettings, element: <PracticeSettings /> },
-        { path: paths.billing, element: <Billing /> },
-        { path: paths.settings, element: <Settings /> },
-        { path: paths.helpAndSupport, element: <HelpAndSupport /> }
+        {
+          path: paths.dashboard,
+          element: (
+            <FeatureProtectedRoute moduleId='dashboard'>
+              <Dashboard />
+            </FeatureProtectedRoute>
+          )
+        },
+        {
+          path: paths.documents,
+          element: (
+            <FeatureProtectedRoute moduleId='documents'>
+              <Documents />
+            </FeatureProtectedRoute>
+          )
+        },
+        {
+          path: paths.reports,
+          element: (
+            <FeatureProtectedRoute moduleId='reports'>
+              <Reports />
+            </FeatureProtectedRoute>
+          )
+        },
+        {
+          path: paths.benchmarks,
+          element: (
+            <FeatureProtectedRoute moduleId='benchmarks'>
+              <Benchmarks />
+            </FeatureProtectedRoute>
+          )
+        },
+        {
+          path: paths.teamManagement,
+          element: (
+            <FeatureProtectedRoute moduleId='team-management'>
+              <TeamManagement />
+            </FeatureProtectedRoute>
+          )
+        },
+        {
+          path: paths.practiceSettings,
+          element: (
+            <FeatureProtectedRoute moduleId='practice-settings'>
+              <PracticeSettings />
+            </FeatureProtectedRoute>
+          )
+        },
+        {
+          path: paths.billing,
+          element: (
+            <FeatureProtectedRoute moduleId='billing'>
+              <Billing />
+            </FeatureProtectedRoute>
+          )
+        },
+        {
+          path: paths.settings,
+          element: (
+            <FeatureProtectedRoute moduleId='settings'>
+              <Settings />
+            </FeatureProtectedRoute>
+          )
+        },
+        {
+          path: paths.helpAndSupport,
+          element: (
+            <FeatureProtectedRoute moduleId='help-support'>
+              <HelpAndSupport />
+            </FeatureProtectedRoute>
+          )
+        }
       ]
     },
     ...authRoutes,

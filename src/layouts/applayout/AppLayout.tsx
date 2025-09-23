@@ -14,10 +14,14 @@ import Box from '@mui/material/Box'
 import { FormControl, Select, Stack, Tooltip, Typography } from '@mui/material'
 import Topbar from './components/Topbar'
 import { Drawer, MenuItemData, menuSections } from './applayout-config'
+import { useFeatureFlags } from '../../hooks/useFeatureFlags'
+import { useFeatureFlagContext } from '../../context/FeatureFlagProvider'
 
 export default function AppLayout() {
   const { user } = useAuth0()
   const location = useLocation()
+  const { userContext } = useFeatureFlagContext()
+  const { isModuleEnabled, getDisabledReason } = useFeatureFlags(userContext)
 
   // Initialize from localStorage
   const [open, setOpen] = React.useState<boolean>(() => {
@@ -145,6 +149,9 @@ export default function AppLayout() {
               >
                 {section.items.map((item) => {
                   const isActive = location.pathname.startsWith(item.to)
+                  const moduleEnabled = isModuleEnabled(item.moduleId)
+                  const disabledReason = getDisabledReason(item.moduleId)
+
                   return (
                     <ListItem
                       key={item.text}
@@ -152,15 +159,28 @@ export default function AppLayout() {
                       sx={{ display: 'block' }}
                     >
                       <Tooltip
-                        title={!open ? item.text : ''}
+                        title={
+                          !open
+                            ? moduleEnabled
+                              ? item.text
+                              : disabledReason || `${item.text} is disabled`
+                            : moduleEnabled
+                              ? ''
+                              : disabledReason || `${item.text} is disabled`
+                        }
                         placement='right'
                         arrow
                       >
                         <ListItemButton
-                          component={Link}
-                          to={item.to}
-                          selected={isActive}
-                          onClick={() => setActiveItem(item)}
+                          component={moduleEnabled ? Link : 'div'}
+                          to={moduleEnabled ? item.to : undefined}
+                          selected={isActive && moduleEnabled}
+                          onClick={
+                            moduleEnabled
+                              ? () => setActiveItem(item)
+                              : undefined
+                          }
+                          disabled={!moduleEnabled}
                           sx={{
                             minHeight: 44,
                             margin: '0 auto',
@@ -168,8 +188,13 @@ export default function AppLayout() {
                             width: open ? 'auto' : '56px',
                             borderRadius: '12px',
                             transition: 'background-color 0.2s ease',
+                            opacity: moduleEnabled ? 1 : 0.5,
+                            cursor: moduleEnabled ? 'pointer' : 'not-allowed',
                             '&.Mui-selected': {
                               backgroundColor: 'var(--grey-300)'
+                            },
+                            '&.Mui-disabled': {
+                              opacity: 0.5
                             }
                           }}
                         >
@@ -177,16 +202,20 @@ export default function AppLayout() {
                             sx={{
                               minWidth: 0,
                               mr: open ? 2 : 0,
-                              justifyContent: 'center'
+                              justifyContent: 'center',
+                              opacity: moduleEnabled ? 1 : 0.5
                             }}
                           >
                             <img
-                              src={`/assets/${isActive ? item.activeIcon : item.inactiveIcon}`}
+                              src={`/assets/${isActive && moduleEnabled ? item.activeIcon : item.inactiveIcon}`}
                               alt={`${item.text} icon`}
                               style={{
                                 width: 24,
                                 height: 24,
-                                display: 'block'
+                                display: 'block',
+                                filter: moduleEnabled
+                                  ? 'none'
+                                  : 'grayscale(100%)'
                               }}
                             />
                           </ListItemIcon>
@@ -195,8 +224,10 @@ export default function AppLayout() {
                               <Typography
                                 variant='subtitle2'
                                 color={
-                                  isActive
-                                    ? 'var(--color-primary-black)'
+                                  moduleEnabled
+                                    ? isActive
+                                      ? 'var(--color-primary-black)'
+                                      : 'var(--color-primary-light)'
                                     : 'var(--color-primary-light)'
                                 }
                               >
