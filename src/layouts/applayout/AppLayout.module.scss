@@ -13,6 +13,10 @@
   background: white;
   padding: 10px;
   height: calc(100% - 72px);
+
+   @media (max-width: 768px) {
+    border-radius: 0;
+  }
 }
 
 .toggleBtn {

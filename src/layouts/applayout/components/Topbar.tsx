@@ -13,7 +13,8 @@ import {
   Grow,
   Button,
   Stack,
-  Chip
+  Chip,
+  useMediaQuery
 } from '@mui/material'
 import styles from './Topbar.module.scss'
 import { useAuth0 } from '@auth0/auth0-react'
@@ -21,6 +22,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 type topbarProps = {
   title: string
   icon: string
+  rightSlot?: React.ReactNode // ✅ optional slot for mobile menu button
 }
 
 type ProfilePopperProps = {
@@ -174,10 +176,11 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
   )
 }
 
-const Topbar: React.FC<topbarProps> = ({ title, icon }) => {
+const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
   const { user, logout } = useAuth0()
   const [open, setOpen] = useState(false)
   const anchorRef = useRef<HTMLButtonElement | null>(null)
+  const isMobile = useMediaQuery('(max-width:600px)')
 
   const handleToggle = () => {
     setOpen((prev) => !prev)
@@ -197,19 +200,53 @@ const Topbar: React.FC<topbarProps> = ({ title, icon }) => {
   }
 
   return (
-    <Box className={styles.topbar}>
+    <Box
+      className={styles.topbar}
+      sx={{
+        pl: {
+          xs: '16px',
+          sm: '24px',
+          md: 0
+        }
+      }}
+    >
       <Box className={styles.topbarTitleContainer}>
-        <img src={`/assets/${icon}`} alt={`${icon} active icon`} />
-        <Typography variant='h5' className='font-weight--700'>
+        {rightSlot}
+
+        {isMobile && (
+          <Box>
+            <img src='/assets/monai-logo.svg' alt='monai logo' />
+          </Box>
+        )}
+        <Box
+          sx={{
+            display: { xs: 'none', sm: 'flex' }
+          }}
+        >
+          <img src={`/assets/${icon}`} alt={`${icon} active icon`} />
+        </Box>
+
+        <Typography
+          variant='h5'
+          className='font-weight--700'
+          sx={{
+            display: { xs: 'none', sm: 'block' }
+          }}
+        >
           {title}
         </Typography>
       </Box>
 
       <Box className={styles.topbarActionContainer}>
         <img src='/assets/search.svg' alt='search icon' />
-        <img src='/assets/notification.svg' alt='Notification icon' />
 
-        <Box className={styles.profileTitle}>
+        {/* this box should be hidden when in mobile version below 768 *  */}
+        <Box
+          className={styles.profileTitle}
+          sx={{
+            display: { xs: 'none', sm: 'block' }
+          }}
+        >
           <Typography variant='body1' className='font-weight--700'>
             {user?.name}
           </Typography>
@@ -218,7 +255,7 @@ const Topbar: React.FC<topbarProps> = ({ title, icon }) => {
             color='var(--color-primary-light)'
             className='font-weight--700'
           >
-            {user.organizations_with_roles[0].roles[0]}
+            {user?.organizations_with_roles[0].roles[0]}
           </Typography>
         </Box>
 
