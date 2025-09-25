@@ -3,13 +3,14 @@ import {
   FeatureRule,
   ModuleConfig
 } from '../types/feature-flags'
+import { FEATURE_RULE_IDS } from '../constants/feature-rules'
 
 const rules: FeatureRule[] = [
   {
-    id: 'onboarding-completed',
+    id: FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
     description: 'Practice onboarding has been completed',
     evaluate: (context) => {
-      return context.onboardingCompleted
+      return context.onboardingCompleted === true
     }
   }
 ]
@@ -22,17 +23,17 @@ const modules: ModuleConfig[] = [
   {
     id: 'documents',
     name: 'Documents',
-    requiredRules: ['onboarding-completed']
+    requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
   },
   {
     id: 'reports',
     name: 'Reports',
-    requiredRules: ['onboarding-completed']
+    requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
   },
   {
     id: 'benchmarks',
     name: 'Benchmarks',
-    requiredRules: ['onboarding-completed']
+    requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
   },
   {
     id: 'team-management',
@@ -41,7 +42,7 @@ const modules: ModuleConfig[] = [
   {
     id: 'practice-settings',
     name: 'Practice Settings',
-    requiredRules: ['onboarding-completed']
+    requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
   },
   {
     id: 'billing',

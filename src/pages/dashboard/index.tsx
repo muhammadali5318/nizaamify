@@ -1,13 +1,13 @@
 import PendingOnboardingBanner from 'src/components/dashboard/PendingOnboardingBanner'
-import { useFeatureFlagContext } from 'src/context/FeatureFlagProvider'
-import { isOnboardingCompleted } from 'src/utils/isOnboardingCompleted'
+import { useFeatureRule } from 'src/hooks/useFeatureRule'
+import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
 
 const Dashboard = () => {
-  const { userContext } = useFeatureFlagContext()
+  const { isEnabled: onboardingCompleted } = useFeatureRule(
+    FEATURE_RULE_IDS.ONBOARDING_COMPLETED
+  )
 
-  const completed = isOnboardingCompleted(userContext)
-
-  return <>{!completed && <PendingOnboardingBanner />}</>
+  return <>{!onboardingCompleted && <PendingOnboardingBanner />}</>
 }
 
 export default Dashboard

@@ -17,7 +17,7 @@ function App(): JSX.Element {
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <FeatureFlagProvider initialContext={{ onboardingCompleted: false }}>
+        <FeatureFlagProvider>
           <AuthProvider>
             <ErrorBoundary>
               <ThemeProvider theme={theme}>

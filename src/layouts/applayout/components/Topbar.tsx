@@ -255,7 +255,7 @@ const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
             color='var(--color-primary-light)'
             className='font-weight--700'
           >
-            {user?.organizations_with_roles[0].roles[0]}
+            {user?.organizations_with_roles[0]?.roles[0]}
           </Typography>
         </Box>
 

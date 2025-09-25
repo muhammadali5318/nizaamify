@@ -166,13 +166,8 @@ export default function AppLayout() {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             {section.items.map((item) => {
               const isActive = location.pathname.startsWith(item.to)
-              // If your MenuItemData includes moduleId, keep using it — otherwise these calls will be no-ops
-              const moduleEnabled = (item as any).moduleId
-                ? isModuleEnabled((item as any).moduleId)
-                : true
-              const disabledReason = (item as any).moduleId
-                ? getDisabledReason((item as any).moduleId)
-                : undefined
+              const moduleEnabled = isModuleEnabled(item.moduleId)
+              const disabledReason = getDisabledReason(item.moduleId)
 
               return (
                 <ListItem

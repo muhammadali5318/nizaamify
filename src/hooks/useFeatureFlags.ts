@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { UserContext, ModulePermission, ModuleId } from '../types/feature-flags'
 import { featureFlagConfig } from '../config/feature-flag-config'
+import { FeatureFlagService } from '../services/FeatureFlagService'
 
 export function useFeatureFlags(userContext: UserContext) {
   const modulePermissions = useMemo(() => {
@@ -21,8 +22,8 @@ export function useFeatureFlags(userContext: UserContext) {
 
       if (isEnabled && moduleConfig.requiredRules?.length) {
         for (const ruleId of moduleConfig.requiredRules) {
-          const rule = featureFlagConfig.rules.find((r) => r.id === ruleId)
-          if (rule && !rule.evaluate(userContext)) {
+          const rule = FeatureFlagService.findRule(ruleId)
+          if (rule && !FeatureFlagService.evaluateRule(ruleId, userContext)) {
             isEnabled = false
             disabledReason = moduleConfig.disabledMessage || rule.description
             break

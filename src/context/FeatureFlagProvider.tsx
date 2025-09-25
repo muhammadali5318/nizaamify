@@ -1,5 +1,12 @@
-import { createContext, useContext, useState, ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect
+} from 'react'
 import { UserContext } from '../types/feature-flags'
+import { FeatureFlagService } from '../services/FeatureFlagService'
 
 type FeatureFlagContextType = {
   userContext: UserContext
@@ -22,6 +29,25 @@ export function FeatureFlagProvider({
   initialContext = {}
 }: FeatureFlagProviderProps) {
   const [userContext, setUserContext] = useState<UserContext>(initialContext)
+
+  // Validate feature flag configuration on provider initialization
+  useEffect(() => {
+    const validation = FeatureFlagService.validateConfiguration()
+    if (!validation.isValid) {
+      console.error(
+        'Feature flag configuration validation failed:',
+        validation.errors
+      )
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(
+          'Feature flag configuration issues detected. Please fix the following:'
+        )
+        validation.errors.forEach((error) => console.warn('- ' + error))
+      }
+    } else if (process.env.NODE_ENV === 'development') {
+      console.warn('Feature flag configuration is valid')
+    }
+  }, [])
 
   const updateUserContext = (updates: Partial<UserContext>) => {
     setUserContext((prev) => ({ ...prev, ...updates }))

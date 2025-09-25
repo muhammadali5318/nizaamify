@@ -1,245 +1,279 @@
 # Feature Flag System
 
-A flexible feature flag system for controlling module access based on custom conditions like subscription tiers, onboarding status, or any other business logic.
+A flag system for controlling module access with robust caching, type safety, and error handling.
 
 ## Overview
 
-The feature flag system allows you to:
-- Enable/disable sidebar modules based on custom conditions
-- Display helpful messages when modules are disabled
-- Dynamically update user context to enable/disable features
-- Support complex evaluation logic
+The feature flag system provides:
+- **Type-safe** rule evaluation with strict TypeScript interfaces
+- **High-performance** caching with stable key generation
+- **Enterprise-grade** error handling and validation
+- **Developer-friendly** hooks and service layer architecture
+- **Production-ready** monitoring and fail-safe defaults
 
-## Core Components
+## Architecture
 
-### 1. Types (`src/types/feature-flags.ts`)
-- `UserContext`: Flexible object that can hold any user-related data
-- `FeatureRule`: Defines conditions for enabling features
-- `ModuleConfig`: Maps modules to their access rules
-- `ModulePermission`: Result of permission evaluation
-- `ModuleId`: TypeScript union type for all available module IDs
+### Core Components
 
-### 2. Context Provider (`src/context/FeatureFlagProvider.tsx`)
-- Manages user context state globally
-- Provides methods to update context values
-- Wraps the entire application for consistent access
-- Initialized without initial context (empty by default)
+#### 1. **Service Layer** (`src/services/FeatureFlagService.ts`)
+- **Centralized rule evaluation** with comprehensive error handling
+- **Intelligent caching** with 5-second TTL and stable key generation
+- **Configuration validation** to catch misconfigurations early
+- **Fail-safe defaults** ensuring system reliability
 
-### 3. Hook (`src/hooks/useFeatureFlags.ts`)
-- Evaluates module permissions based on current user context
-- Provides utilities to check if modules are enabled
-- Returns comprehensive permission information for all modules
+#### 2. **Enhanced Types** (`src/types/feature-flags.ts`)
+- **Strict UserContext** interface with known properties (`onboardingCompleted`)
+- **Type-safe FeatureRuleId** for better compile-time checks
+- **Extensible design** allowing future property additions
 
-### 4. Configuration (`src/config/feature-flag-config.ts`)
-- Central place to define rules and module configurations
-- Pre-configured with all application modules
-- Easily customizable for your business logic
+#### 3. **Constants** (`src/constants/feature-rules.ts`)
+- **Centralized rule IDs** preventing typos and inconsistencies
+- **Single source of truth** for all feature rule references
+- **TypeScript auto-completion** for better developer experience
 
-### 5. Route Protection (`src/components/FeatureProtectedRoute.tsx`)
-- Wraps components to enforce feature-based access control
-- Redirects to appropriate pages when access is denied
-- Integrates seamlessly with React Router
+#### 4. **Specialized Hooks**
+- **`useFeatureRule`** (`src/hooks/useFeatureRule.ts`) - Single rule evaluation with error handling
+- **`useFeatureFlags`** (`src/hooks/useFeatureFlags.ts`) - Module permissions using service layer
+- **Context Provider** (`src/context/FeatureFlagProvider.tsx`) - Global state management
+
+#### 5. **Validation & Monitoring** (`src/utils/validateFeatureFlags.ts`)
+- **Startup validation** in development mode
+- **Configuration integrity** checks
+- **Developer warnings** for misconfigurations
 
 ## Usage Examples
 
-### Basic Setup
+### 1. **Using useFeatureRule Hook** (Recommended)
 
 ```tsx
-import { FeatureFlagProvider } from './context/FeatureFlagProvider'
-import { AuthProvider } from './context/AuthProvider'
-import Router from './router'
+import { useFeatureRule } from 'src/hooks/useFeatureRule'
+import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
 
-function App() {
+function OnboardingBanner() {
+  const { isEnabled: onboardingComplete, error } = useFeatureRule(
+    FEATURE_RULE_IDS.ONBOARDING_COMPLETED
+  )
+
+  // Show banner when onboarding is NOT completed, or if there's an error (fail-safe)
+  const shouldShowBanner = !onboardingComplete || !!error
+
+  if (!shouldShowBanner) return null
+
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <FeatureFlagProvider>
-          <ErrorBoundary>
-            <ThemeProvider theme={theme}>
-              <NotificationProvider>
-                <Router />
-                <IdleSessionHandler />
-              </NotificationProvider>
-            </ThemeProvider>
-          </ErrorBoundary>
-        </FeatureFlagProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <Alert severity="warning">
+      <AlertTitle>Complete your onboarding to unlock all features</AlertTitle>
+    </Alert>
   )
 }
 ```
 
-### Adding Subscription Tier Rules
+### 2. **Adding New Feature Rules**
 
 ```tsx
-import { featureFlagConfig } from './config/feature-flag-config'
+// 1. Add to constants
+export const FEATURE_RULE_IDS = {
+  ONBOARDING_COMPLETED: 'onboarding-completed',
+  PREMIUM_SUBSCRIPTION: 'premium-subscription', // New rule
+} as const
 
-// Add rules to the global configuration
-featureFlagConfig.rules.push(
+// 2. Add to configuration
+const rules: FeatureRule[] = [
   {
-    id: 'is-premium',
+    id: FEATURE_RULE_IDS.PREMIUM_SUBSCRIPTION,
     description: 'Premium subscription required',
-    evaluate: (context) => context.subscriptionTier === 'premium'
-  },
-  {
-    id: 'is-enterprise',
-    description: 'Enterprise subscription required',
-    evaluate: (context) => context.subscriptionTier === 'enterprise'
+    evaluate: (context) => {
+      return context.subscriptionTier === 'premium' // Add to UserContext type
+    }
   }
-)
+]
 
-// Configure modules to use the rules
-const reportsModule = featureFlagConfig.modules.find(m => m.id === 'reports')
-if (reportsModule) {
-  reportsModule.requiredRules = ['is-premium']
-  reportsModule.disabledMessage = 'Upgrade to Premium to access Reports'
+// 3. Use in modules
+{
+  id: 'reports',
+  name: 'Reports',
+  requiredRules: [FEATURE_RULE_IDS.PREMIUM_SUBSCRIPTION]
 }
 ```
 
-### Adding Onboarding Rules
+### 3. **Service Layer Direct Usage**
 
 ```tsx
-featureFlagConfig.rules.push(
-  {
-    id: 'email-verified',
-    description: 'Email verification required',
-    evaluate: (context) => context.onboarding?.emailVerified === true
-  },
-  {
-    id: 'profile-complete',
-    description: 'Profile setup required',
-    evaluate: (context) => context.onboarding?.profileComplete === true
-  }
-)
+import { FeatureFlagService } from 'src/services/FeatureFlagService'
+import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
 
-// Apply to modules
-const documentsModule = featureFlagConfig.modules.find(m => m.id === 'documents')
-if (documentsModule) {
-  documentsModule.requiredRules = ['email-verified', 'profile-complete']
-  documentsModule.disabledMessage = 'Complete your profile to access Documents'
+// Advanced usage - direct service access
+function someUtilityFunction(userContext: UserContext) {
+  const isOnboardingComplete = FeatureFlagService.evaluateRule(
+    FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
+    userContext
+  )
+
+  if (!isOnboardingComplete) {
+    // Handle onboarding incomplete logic
+  }
 }
 ```
 
-### Dynamic Context Updates
+### 4. **Module Permissions**
 
 ```tsx
-function UserDashboard() {
-  const { setContextValue, updateUserContext } = useFeatureFlagContext()
+import { useFeatureFlags } from 'src/hooks/useFeatureFlags'
+import { useFeatureFlagContext } from 'src/context/FeatureFlagProvider'
 
-  const handleSubscriptionUpgrade = () => {
-    setContextValue('subscriptionTier', 'premium')
-  }
-
-  const handleOnboardingComplete = () => {
-    updateUserContext({
-      onboarding: {
-        emailVerified: true,
-        profileComplete: true
-      }
-    })
-  }
+function Sidebar() {
+  const { userContext } = useFeatureFlagContext()
+  const { isModuleEnabled, getDisabledReason } = useFeatureFlags(userContext)
 
   return (
-    <div>
-      <button onClick={handleSubscriptionUpgrade}>Upgrade to Premium</button>
-      <button onClick={handleOnboardingComplete}>Complete Onboarding</button>
-    </div>
+    <nav>
+      {menuItems.map(item => (
+        <MenuItem
+          key={item.id}
+          disabled={!isModuleEnabled(item.moduleId)}
+          tooltip={getDisabledReason(item.moduleId)}
+        >
+          {item.name}
+        </MenuItem>
+      ))}
+    </nav>
   )
 }
 ```
 
-### Complex Custom Rules
+## Key Features
+
+### **Intelligent Caching**
+- **Stable cache keys** - Same context data always generates same cache key
+- **5-second TTL** - Automatic cache expiration prevents stale data
+- **Memory management** - Auto-cleanup prevents memory leaks
 
 ```tsx
-featureFlagConfig.rules.push({
-  id: 'advanced-feature-access',
-  description: 'Complex access logic',
-  evaluate: (context) => {
-    const { user, subscription, trial, permissions } = context
-
-    // Premium users always have access
-    if (subscription?.tier === 'premium') return true
-
-    // Trial users with specific conditions
-    if (trial?.isActive && trial?.daysLeft > 3) {
-      return user?.completedTutorial === true
-    }
-
-    // Custom permission override
-    return permissions?.includes('advanced-features')
-  }
-})
+// These now create the same cache key (order doesn't matter):
+{onboardingCompleted: true, userId: "123"}
+{userId: "123", onboardingCompleted: true}
 ```
 
-## Integration with Sidebar and Routing
+### **Error Handling & Validation**
+- **Fail-safe defaults** - Rules default to `false` on error
+- **Configuration validation** - Catches invalid rules at startup
+- **Comprehensive logging** - Detailed error messages for debugging
 
-The system automatically integrates with your application:
+### **Type Safety**
+- **Strict interfaces** - Known properties like `onboardingCompleted`
+- **Compile-time checks** - TypeScript catches rule ID typos
+- **Extensible design** - Easy to add new context properties
 
-### Sidebar Integration (`src/layouts/applayout/AppLayout.tsx`)
-- Disabled modules show with reduced opacity (50%) and grayscale icons
-- Tooltips display disabled reasons when hovering over disabled items
-- Click behavior is disabled for restricted modules (`cursor: not-allowed`)
-- Navigation links are conditionally rendered based on module access
-- Visual feedback shows module state with proper styling
+## Integration Points
 
-### Route Protection (`src/router/index.tsx`)
-- All routes are wrapped with `FeatureProtectedRoute` component
+### **Sidebar Integration** (`src/layouts/applayout/AppLayout.tsx`)
+- Disabled modules show with visual feedback (opacity, grayscale)
+- Tooltips display reasons for disabled state
+- Navigation is conditionally rendered based on permissions
+
+### **Route Protection** (`src/components/FeatureProtectedRoute.tsx`)
 - Prevents direct URL access to disabled modules
 - Redirects users away from inaccessible pages
-- Each route specifies its required `moduleId` for access control
+- Integrates seamlessly with React Router
 
-### Menu Configuration (`src/layouts/applayout/applayout-config.ts`)
-- Each menu item now includes a `moduleId` property
-- Links sidebar navigation to feature flag system
-- Supports proper TypeScript typing with `ModuleId` type
+### **Component Examples**
+- **OnboardingBanner** - Shows when onboarding is incomplete
+- **FeatureProtectedRoute** - Wraps routes with access control
+- **Sidebar** - Dynamically enables/disables menu items
 
 ## API Reference
 
-### FeatureFlagProvider Props
-- `initialContext`: Initial user context object
-- `children`: React components to wrap
+### **FeatureFlagService**
+```tsx
+class FeatureFlagService {
+  // Evaluate a specific rule with caching
+  static evaluateRule(ruleId: FeatureRuleId, context: UserContext): boolean
 
-### useFeatureFlagContext() Returns
-- `userContext`: Current user context
-- `updateUserContext(updates)`: Merge updates with current context
-- `setContextValue(key, value)`: Set specific context value
-- `getContextValue(key)`: Get specific context value
+  // Find a rule by ID
+  static findRule(ruleId: FeatureRuleId): FeatureRule | undefined
 
-### useFeatureFlags(userContext) Returns
-- `modulePermissions`: Array of all module permissions
-- `isModuleEnabled(moduleId)`: Check if specific module is enabled
-- `getDisabledReason(moduleId)`: Get reason why module is disabled
-- `getEnabledModules()`: Get list of enabled module IDs
-- `getDisabledModules()`: Get list of disabled modules with reasons
+  // Validate entire configuration
+  static validateConfiguration(): { isValid: boolean; errors: string[] }
+
+  // Clear evaluation cache
+  static clearCache(): void
+}
+```
+
+### **useFeatureRule Hook**
+```tsx
+function useFeatureRule(ruleId: FeatureRuleId): {
+  isEnabled: boolean
+  loading: boolean
+  error?: string
+}
+```
+
+### **useFeatureFlags Hook**
+```tsx
+function useFeatureFlags(userContext: UserContext): {
+  modulePermissions: ModulePermission[]
+  isModuleEnabled(moduleId: ModuleId): boolean
+  getDisabledReason(moduleId: ModuleId): string | undefined
+  getEnabledModules(): ModuleId[]
+  getDisabledModules(): ModulePermission[]
+}
+```
+
+### **FeatureFlagProvider**
+```tsx
+type FeatureFlagContextType = {
+  userContext: UserContext
+  updateUserContext: (updates: Partial<UserContext>) => void
+  setContextValue: (key: string, value: any) => void
+  getContextValue: (key: string) => any
+}
+```
+
+## Best Practices
+
+### **✅ Do:**
+- Use `useFeatureRule` for single rule evaluation
+- Import rule IDs from `FEATURE_RULE_IDS` constants
+- Handle error states with fail-safe behavior
+- Validate configuration in development
+- Use descriptive rule descriptions
+- Keep UserContext properties typed and minimal
+
+### **❌ Don't:**
+- Access `featureFlagConfig` directly in components
+- Hard-code rule ID strings
+- Ignore error states from hooks
+- Skip configuration validation
+- Mix business logic with feature flag evaluation
+
+### **Performance Tips:**
+- Rules are cached automatically - no need for manual memoization
+- Context changes invalidate cache - keep context updates minimal
+- Use `useFeatureRule` for single rules, `useFeatureFlags` for modules
+
+### **Testing Tips:**
+- Configuration validation catches issues early
+- Service layer is easily mockable for tests
+- Clear cache between test runs if needed
 
 ## Module IDs
 
 Available module IDs:
-- `dashboard`
-- `documents`
-- `reports`
-- `benchmarks`
-- `team-management`
-- `practice-settings`
-- `billing`
-- `settings`
-- `help-support`
+- `dashboard` - Main dashboard
+- `documents` - Document management
+- `reports` - Analytics and reports (requires onboarding)
+- `benchmarks` - Benchmarking tools
+- `team-management` - Team and user management
+- `practice-settings` - Practice configuration
+- `billing` - Billing and payments
+- `settings` - User settings
+- `help-support` - Help and support
 
-## Best Practices
+## Future Enhancements
 
-1. **Define rules early**: Set up your feature rules before configuring modules
-2. **Use descriptive IDs**: Make rule IDs self-explanatory
-3. **Provide helpful messages**: Always include `disabledMessage` for better UX
-4. **Test thoroughly**: Verify all permission combinations work as expected
-5. **Keep context minimal**: Only include necessary data in user context
-6. **Update context reactively**: Update permissions when user state changes
-
-## Testing
-
-A test component (`src/test-feature-flags.tsx`) is available to demonstrate and test the feature flag system:
-- Shows current user context state
-- Provides buttons to simulate different user scenarios
-- Displays real-time module permission updates
-- Helps verify feature flag behavior during development
-
-To use the test component, import and render it in your development environment to see how different context changes affect module permissions.
+The system is designed for extensibility. Planned improvements:
+- **Dynamic configuration** - Load rules from remote API
+- **A/B testing support** - Percentage-based rule evaluation
+- **Analytics integration** - Track feature usage and performance
+- **Advanced targeting** - User segments, geographic rules
+- **Testing utilities** - Mock rules for unit/integration tests

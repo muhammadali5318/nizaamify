@@ -1,5 +1,7 @@
-export type UserContext = {
-  [key: string]: any
+export interface UserContext {
+  onboardingCompleted?: boolean
+  // Allow additional properties for future expansion
+  [key: string]: unknown
 }
 
 export type ModuleId =
@@ -13,8 +15,10 @@ export type ModuleId =
   | 'settings'
   | 'help-support'
 
+export type FeatureRuleId = string
+
 export type FeatureRule = {
-  id: string
+  id: FeatureRuleId
   description: string
   evaluate: (context: UserContext) => boolean
 }
@@ -22,7 +26,7 @@ export type FeatureRule = {
 export type ModuleConfig = {
   id: ModuleId
   name: string
-  requiredRules?: string[]
+  requiredRules?: FeatureRuleId[]
   disabledMessage?: string
   isEnabled?: (context: UserContext) => boolean
 }

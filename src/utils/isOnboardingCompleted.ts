@@ -1,10 +1,11 @@
 // src/utils/isOnboardingCompleted.ts
-import { featureFlagConfig } from 'src/config/feature-flag-config'
+import { FeatureFlagService } from 'src/services/FeatureFlagService'
+import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
+import { UserContext } from 'src/types/feature-flags'
 
-export const isOnboardingCompleted = (userContext) => {
-  const onboardingRule = featureFlagConfig.rules.find(
-    (r) => r.id === 'onboarding-completed'
+export const isOnboardingCompleted = (userContext: UserContext) => {
+  return FeatureFlagService.evaluateRule(
+    FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
+    userContext
   )
-
-  return onboardingRule ? onboardingRule.evaluate(userContext) : false
 }
