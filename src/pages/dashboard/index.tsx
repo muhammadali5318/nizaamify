@@ -1,33 +1,13 @@
-import Placeholder from 'src/components/common/Placeholder'
-import FeatureBanner from 'src/components/dashboard/FeatureBanner'
+import PendingOnboardingBanner from 'src/components/dashboard/PendingOnboardingBanner'
+import { useFeatureFlagContext } from 'src/context/FeatureFlagProvider'
+import { isOnboardingCompleted } from 'src/utils/isOnboardingCompleted'
 
 const Dashboard = () => {
-  const bannerConfigs = [
-    {
-      id: 'onboarding-required',
-      title:
-        'Practice onboarding required to access Financial Insights, Benchmarking and Document Analysis.',
-      message: '',
-      requiredFeatureRule: 'onboarding-completed',
-      invertRule: true, // Show banner when onboarding is NOT completed
-      variant: 'warning' as const,
-      secondaryAction: {
-        label: 'Nominate manager',
-        onClick: () => console.warn('Nominate manager clicked')
-      },
-      primaryAction: {
-        label: 'Complete onboarding',
-        onClick: () => console.warn('Complete onboarding clicked')
-      }
-    }
-  ]
+  const { userContext } = useFeatureFlagContext()
 
-  return (
-    <div>
-      <FeatureBanner banners={bannerConfigs} />
-      <Placeholder title='Dashboard' />
-    </div>
-  )
+  const completed = isOnboardingCompleted(userContext)
+
+  return <>{!completed && <PendingOnboardingBanner />}</>
 }
 
 export default Dashboard

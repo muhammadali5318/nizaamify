@@ -21,7 +21,8 @@ const modules: ModuleConfig[] = [
   },
   {
     id: 'documents',
-    name: 'Documents'
+    name: 'Documents',
+    requiredRules: ['onboarding-completed']
   },
   {
     id: 'reports',
@@ -30,7 +31,8 @@ const modules: ModuleConfig[] = [
   },
   {
     id: 'benchmarks',
-    name: 'Benchmarks'
+    name: 'Benchmarks',
+    requiredRules: ['onboarding-completed']
   },
   {
     id: 'team-management',
@@ -38,7 +40,8 @@ const modules: ModuleConfig[] = [
   },
   {
     id: 'practice-settings',
-    name: 'Practice Settings'
+    name: 'Practice Settings',
+    requiredRules: ['onboarding-completed']
   },
   {
     id: 'billing',

@@ -6,22 +6,9 @@ import { paths } from 'src/paths'
 import NominatePracticeManagerDialog from 'src/components/nomiate-practice-manage'
 import React from 'react'
 
-type ChooseOnboardingFlowProps = {
-  onContinue: () => void
-}
-
-const ChooseOnboardingFlow: React.FC<ChooseOnboardingFlowProps> = ({
-  onContinue
-}) => {
+const ChooseOnboardingFlow = () => {
   const navigate = useNavigate()
   const [openNominate, setOpenNominate] = React.useState(false)
-
-  const handleSend = (payload: { email: string; role: string }) => {
-    // call your API to send invite
-    // eslint-disable-next-line no-console
-    console.log('send invite', payload)
-    onContinue()
-  }
 
   return (
     <Stack
@@ -86,7 +73,6 @@ const ChooseOnboardingFlow: React.FC<ChooseOnboardingFlowProps> = ({
       <NominatePracticeManagerDialog
         open={openNominate}
         onClose={() => setOpenNominate(false)}
-        onSend={handleSend}
       />
     </Stack>
   )

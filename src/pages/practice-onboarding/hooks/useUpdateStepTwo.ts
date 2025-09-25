@@ -1,6 +1,7 @@
 // FILE: src/hooks/useUpdateStepTwo.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import apiClient from 'src/services/api-client'
+import { endpoints } from 'src/services/backendUrl'
 
 type StepTwoPayload = {
   practice_type: string
@@ -18,7 +19,7 @@ export const useUpdateStepTwo = (practiceId: string) => {
   return useMutation({
     mutationFn: async (payload: StepTwoPayload) => {
       const { data } = await apiClient.patch(
-        `user-workstation/v1/practices/${practiceId}/onboarding/steps/2/`,
+        endpoints.practiceOnboarding.stepTwo(practiceId),
         payload
       )
       return data

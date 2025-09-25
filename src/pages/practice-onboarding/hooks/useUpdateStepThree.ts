@@ -1,6 +1,7 @@
 // src/hooks/useUpdateStepThree.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import apiClient from 'src/services/api-client'
+import { endpoints } from 'src/services/backendUrl'
 
 export type StepThreePayload = {
   management_software: string
@@ -15,7 +16,7 @@ export const useUpdateStepThree = (practiceId?: string) => {
     mutationFn: async (payload: StepThreePayload) => {
       if (!practiceId) throw new Error('Missing practiceId for step 3 update')
       const { data } = await apiClient.patch(
-        `user-workstation/v1/practices/${practiceId}/onboarding/steps/3/`,
+        endpoints.practiceOnboarding.stepThree(practiceId),
         payload
       )
       return data

@@ -2,10 +2,18 @@ import { Stack, Box, Button, Typography, Divider } from '@mui/material'
 import styles from './invitationSent.module.scss'
 import RenderUlList from '../render-ul-list'
 import { paths } from 'src/paths'
-import { useNavigate } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 
-const InvitationSent = () => {
+type InvitationSentProps = {
+  practiceName: string
+}
+
+const InvitationSent = ({ practiceName }: InvitationSentProps) => {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  const email = searchParams.get('email') || ''
+  const role = searchParams.get('role') || ''
 
   return (
     <Stack className={styles.invitationSentRoot}>
@@ -22,15 +30,9 @@ const InvitationSent = () => {
         </Typography>
         <Typography color='var(--color-text-secondary)' variant='subtitle1'>
           An invitation has been sent to{' '}
-          <span className={styles.invitationTypography}>
-            Sarah.Daniel@example.com
-          </span>{' '}
-          to join{' '}
-          <span className={styles.invitationTypography}>
-            Greyford Dental Practice
-          </span>{' '}
-          as a{' '}
-          <span className={styles.invitationTypography}>Practice Manager.</span>
+          <span className={styles.invitationTypography}>{email}</span> to join{' '}
+          <span className={styles.invitationTypography}>{practiceName}</span> as
+          a <span className={styles.invitationTypography}>{role}.</span>
         </Typography>
         <Typography color='var(--color-text-secondary)' variant='subtitle1'>
           They’ll receive an email with instructions to set up their account.
@@ -68,7 +70,7 @@ const InvitationSent = () => {
           variant='contained'
           type='submit'
           aria-label='send-invitation'
-          onClick={() => navigate(`${paths.practiceOnboardingStepper}?step=1`)}
+          onClick={() => navigate(paths.practiceOnboardingStepper)}
         >
           Continue onboarding myself
         </Button>

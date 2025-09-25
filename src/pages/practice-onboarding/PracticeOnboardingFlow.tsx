@@ -94,12 +94,6 @@ const PracticeOnboardingFlow: React.FC = () => {
 
   const [openNominate, setOpenNominate] = useState(false)
 
-  const handleSend = (payload: { email: string; role: string }) => {
-    // eslint-disable-next-line no-console
-    console.log('send invite', payload)
-    navigate(`${paths.practiceOnboarding}?step=INVITATION_SENT`)
-  }
-
   useEffect(() => {
     if (!practice) return
     const mapped = mapPracticeApiToForm(practice)
@@ -343,12 +337,12 @@ const PracticeOnboardingFlow: React.FC = () => {
       <SaveAndExitDialogue
         open={openDialog}
         onClose={handleDialogClose}
+        onOpenNominate={() => setOpenNominate(true)}
         onConfirm={handleSaveAndExit}
       />
       <NominatePracticeManagerDialog
         open={openNominate}
         onClose={() => setOpenNominate(false)}
-        onSend={handleSend}
       />
     </RegistrationWrapper>
   )

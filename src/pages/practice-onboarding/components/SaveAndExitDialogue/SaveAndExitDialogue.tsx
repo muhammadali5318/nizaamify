@@ -14,13 +14,20 @@ type SaveAndExitDialogueProps = {
   open: boolean
   onClose: () => void
   onConfirm: () => void
+  onOpenNominate: () => void
 }
 
 const SaveAndExitDialogue: React.FC<SaveAndExitDialogueProps> = ({
   open,
   onClose,
-  onConfirm
+  onConfirm,
+  onOpenNominate
 }) => {
+  const handleOnNominate = () => {
+    onOpenNominate()
+    onClose()
+  }
+
   return (
     <Dialog
       open={open}
@@ -49,21 +56,31 @@ const SaveAndExitDialogue: React.FC<SaveAndExitDialogueProps> = ({
       <DialogContent sx={{ padding: '0px 48px 0px 48px' }}>
         <Stack spacing={1}>
           <Typography variant='h4' className='font-weight--700'>
-            Want to finish this later?{' '}
+            Want to finish this later?
           </Typography>
           <Typography variant='subtitle1' color='var(--color-text-primary)'>
             Your progress will be saved, and you can return anytime to continue.
           </Typography>
           <Typography variant='subtitle1' color='var(--color-text-primary)'>
-            ⚠️ Practice setup is essential without completing onboarding, monai
-            won’t work properly for your team.
+            ⚠️ Practice setup is essential — without completing onboarding,
+            Monai won’t work properly for your team.
           </Typography>
           <Typography variant='subtitle1' color='var(--color-text-primary)'>
             You can also nominate a Practice Manager later to finish the setup
             on your behalf by clicking{' '}
-            <span className='color-info--dark font-weight--700 text-decoration--underline'>
+            <Button
+              variant='text'
+              onClick={handleOnNominate}
+              sx={{
+                padding: 0,
+                minWidth: 'auto',
+                textDecoration: 'underline',
+                fontWeight: 700,
+                color: 'var(--color-info-dark)'
+              }}
+            >
               here
-            </span>
+            </Button>
             .
           </Typography>
 

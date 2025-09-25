@@ -20,7 +20,7 @@ enum FlowStep {
 const NominationFlow = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [step, setStep] = useState<FlowStep>()
+  const [step, setStep] = useState<FlowStep>(FlowStep.WELCOME)
   const { accessToken } = useAuth()
   const { data: practiceData, isLoading } = useInitialData(!!accessToken)
 
@@ -34,8 +34,6 @@ const NominationFlow = () => {
   useEffect(() => {
     if (practiceData?.onboarding_status === 'COMPLETED') {
       navigate(`${paths.practiceOnboardingStepper}?status=Onboarding-completed`)
-    } else {
-      setStep(FlowStep.WELCOME)
     }
   }, [practiceData])
 
@@ -46,13 +44,9 @@ const NominationFlow = () => {
           <Welcome onContinue={() => setStep(FlowStep.CHOOSE_ONBOARDING)} />
         )
       case FlowStep.CHOOSE_ONBOARDING:
-        return (
-          <ChooseOnboardingFlow
-            onContinue={() => setStep(FlowStep.INVITATION_SENT)}
-          />
-        )
+        return <ChooseOnboardingFlow />
       case FlowStep.INVITATION_SENT:
-        return <InvitationSent />
+        return <InvitationSent practiceName={practiceData?.practice_name} />
       default:
         return null
     }

@@ -21,7 +21,6 @@ import {
   StepThreeFormValues as FormValues
 } from 'src/schema-validations/practice-onboarding/stepThree'
 import { useUpdateStepThree } from '../../hooks/useUpdateStepThree'
-import isEqual from 'lodash/isEqual'
 import { useAuth0 } from '@auth0/auth0-react'
 import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 
@@ -78,11 +77,6 @@ const StepThree: React.FC<StepThreeProps> = ({
       practiceManagementSoftware: data.practiceManagementSoftware,
       accountingSoftware: data.accountingSoftware,
       useOfAccountantBookkeeper: data.useOfAccountantBookkeeper
-    }
-
-    if (isEqual(newValues, formData)) {
-      onNext?.()
-      return
     }
 
     // update parent state immediately so UI reflects inputs

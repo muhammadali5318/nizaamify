@@ -73,7 +73,7 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                 {/* Profile summary */}
                 <Box sx={{ padding: '12px 10px' }}>
                   <Stack direction='row' spacing={1.5} alignItems='start'>
-                    <Avatar src={user.picture} alt='avatar' />
+                    <Avatar src={user?.picture} alt='avatar' />
                     <Stack>
                       <Typography
                         variant='body1'
@@ -90,7 +90,7 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                       </Typography>
                       <Box>
                         <Chip
-                          label={user.organizations_with_roles[0].roles[0]}
+                          label={user?.organizations_with_roles[0]?.roles[0]}
                           size='small'
                           variant='outlined'
                           sx={{

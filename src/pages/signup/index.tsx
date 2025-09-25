@@ -125,8 +125,8 @@ const SignUp: React.FC = () => {
 
       if (respData) {
         const userEmailErr =
-          respData?.user?.email && Array.isArray(respData.user.email)
-            ? respData.user.email.join(' ')
+          respData?.user?.email && Array.isArray(respData?.user?.email)
+            ? respData?.user?.email.join(' ')
             : respData?.user?.email
         if (userEmailErr)
           parsedErrors.email =
@@ -134,14 +134,14 @@ const SignUp: React.FC = () => {
 
         const practiceErr =
           respData?.practice?.non_field_errors &&
-          Array.isArray(respData.practice.non_field_errors)
-            ? respData.practice.non_field_errors.join(' ')
+          Array.isArray(respData?.practice?.non_field_errors)
+            ? respData?.practice?.non_field_errors.join(' ')
             : respData?.practice?.non_field_errors
         if (practiceErr) parsedErrors.practice = practiceErr
 
         const userPasswordErr =
-          respData?.user?.password && Array.isArray(respData.user.password)
-            ? respData.user.password.join(' ')
+          respData?.user?.password && Array.isArray(respData?.user?.password)
+            ? respData?.user?.password.join(' ')
             : respData?.user?.password
         if (userPasswordErr)
           parsedErrors.password =
