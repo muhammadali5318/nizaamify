@@ -2,16 +2,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeft, ChevronRight } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
-import {
-  Box,
-  Stack,
-  FormControlLabel,
-  Checkbox,
-  Typography,
-  Button
-} from '@mui/material'
+import { Box, Stack, Button, FormHelperText } from '@mui/material'
 import React, { useEffect } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import PasswordField from 'src/components/common/PasswordField'
 import {
   SignupStepThreeSchema as PasswordSchema,
@@ -20,6 +13,7 @@ import {
 import FormHeader from '../FormHeader'
 import { StepPropsBase } from '../../types'
 import { notify } from 'src/components/notistack/NotificationProvider'
+import AgreementsCheckboxes from 'src/components/agreement-checkboxes'
 
 type Props = Pick<
   StepPropsBase,
@@ -46,7 +40,7 @@ const SignupStepThree: React.FC<Props> = ({
     getValues,
     clearErrors,
     reset,
-    formState: { isValid }
+    formState: { isValid, isSubmitted }
   } = useForm<FormValues>({
     resolver: zodResolver(PasswordSchema),
     mode: 'onChange',
@@ -59,6 +53,15 @@ const SignupStepThree: React.FC<Props> = ({
       gdpr: formData.gdpr
     }
   })
+
+  const [terms, privacy, disclaimer, gdpr] = watch([
+    'terms',
+    'privacy',
+    'disclaimer',
+    'gdpr'
+  ])
+
+  const allChecked = Boolean(terms && privacy && disclaimer && gdpr)
 
   useEffect(() => {
     reset({
@@ -142,74 +145,15 @@ const SignupStepThree: React.FC<Props> = ({
             control={control}
           />
 
-          <Stack>
-            <Controller
-              name='terms'
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Checkbox {...field} checked={field.value} />}
-                  label={
-                    <Typography variant='body1'>
-                      I agree to the{' '}
-                      <span className='info-main font-weight--700'>
-                        Terms of Service
-                      </span>
-                    </Typography>
-                  }
-                />
-              )}
-            />
-            <Controller
-              name='privacy'
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Checkbox {...field} checked={field.value} />}
-                  label={
-                    <Typography variant='body1'>
-                      I agree to the{' '}
-                      <span className='info-main font-weight--700'>
-                        Privacy Policy
-                      </span>
-                    </Typography>
-                  }
-                />
-              )}
-            />
-            <Controller
-              name='disclaimer'
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Checkbox {...field} checked={field.value} />}
-                  label={
-                    <Typography variant='body1'>
-                      I acknowledge the{' '}
-                      <span className='info-main font-weight--700'>
-                        Financial Disclaimer
-                      </span>
-                    </Typography>
-                  }
-                />
-              )}
-            />
-            <Controller
-              name='gdpr'
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Checkbox {...field} checked={field.value} />}
-                  label={
-                    <Typography variant='body1'>
-                      I consent to data usage under{' '}
-                      <span className='info-main font-weight--700'>GDPR</span>
-                    </Typography>
-                  }
-                />
-              )}
-            />
-          </Stack>
+          <Box>
+            <AgreementsCheckboxes control={control} hideIndividualErrors />
+
+            {!allChecked && isSubmitted && (
+              <FormHelperText error sx={{ mt: 1 }}>
+                Please confirm to continue
+              </FormHelperText>
+            )}
+          </Box>
 
           <Stack direction='row' justifyContent='space-between'>
             <Button

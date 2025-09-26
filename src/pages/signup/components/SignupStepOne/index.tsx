@@ -4,8 +4,7 @@ import React from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { LoadingButton } from '@mui/lab'
-import { ArrowDropDown, ChevronRight } from '@mui/icons-material'
-import { MuiTelInput } from 'mui-tel-input'
+import { ChevronRight } from '@mui/icons-material'
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
 import FormHeader from '../FormHeader'
 import {
@@ -27,6 +26,7 @@ import {
   FormControlLabel,
   Checkbox
 } from '@mui/material'
+import PhoneField from 'src/components/phone-field'
 
 type Props = Pick<
   StepPropsBase,
@@ -68,22 +68,6 @@ const SignupStepOne: React.FC<Props> = ({
       isPracticeOwnerOrDirector: formData.isPracticeOwnerOrDirector
     })
   }, [formData, reset])
-
-  const phoneWrapperRef = React.useRef<HTMLDivElement | null>(null)
-
-  const openCountryDropdown = () => {
-    const root = phoneWrapperRef.current as HTMLElement | null
-    if (!root) return
-    const flagEl = root.querySelector<HTMLElement>('.MuiTelInput-Flag')
-    if (flagEl) flagEl.click()
-  }
-
-  const handleArrowKey = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      openCountryDropdown()
-    }
-  }
 
   const onSubmit = (data: FormValues) => {
     const parsed = parsePhoneNumberFromString(data.phone || '')
@@ -240,77 +224,7 @@ const SignupStepOne: React.FC<Props> = ({
               )}
             />
 
-            <Controller
-              name='phone'
-              control={control}
-              rules={{
-                validate: (v: string) => {
-                  if (!v) return 'Phone required'
-                  const phone = parsePhoneNumberFromString(v)
-                  return phone && phone.isValid()
-                    ? true
-                    : 'Please enter a valid phone number'
-                }
-              }}
-              render={({ field, fieldState }) => (
-                <FormControl fullWidth error={!!fieldState.error}>
-                  <Box sx={{ position: 'relative' }} ref={phoneWrapperRef}>
-                    <MuiTelInput
-                      {...field}
-                      fullWidth
-                      required
-                      label='Phone Number'
-                      variant='outlined'
-                      defaultCountry='GB'
-                      onlyCountries={['GB']}
-                      placeholder='Enter phone number'
-                      onChange={(val) => field.onChange(val ?? '')}
-                      sx={{
-                        '& .MuiTelInput-Flag': {
-                          borderRadius: '50%',
-                          width: 24,
-                          height: 24,
-                          overflow: 'hidden',
-                          boxShadow: '0 0 0 2px rgba(0,0,0,0.15)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        },
-                        '& .MuiTelInput-Flag img': {
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          borderRadius: '50%'
-                        },
-                        '& .MuiInputBase-input': {
-                          paddingLeft: '24px'
-                        }
-                      }}
-                    />
-
-                    <ArrowDropDown
-                      onClick={openCountryDropdown}
-                      onKeyDown={handleArrowKey}
-                      role='button'
-                      tabIndex={0}
-                      aria-label='Open country list'
-                      sx={{
-                        position: 'absolute',
-                        left: 54,
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        fontSize: 28,
-                        color: 'text.secondary',
-                        cursor: 'pointer',
-                        pointerEvents: 'auto'
-                      }}
-                    />
-                  </Box>
-
-                  <FormHelperText>{fieldState.error?.message}</FormHelperText>
-                </FormControl>
-              )}
-            />
+            <PhoneField control={control} name='phone' />
           </Stack>
 
           {/* Submit */}

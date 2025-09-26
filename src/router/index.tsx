@@ -1,5 +1,6 @@
-import { Suspense } from 'react'
-import { Navigate, useRoutes } from 'react-router'
+// Router.tsx
+import { Suspense, lazy, useMemo } from 'react'
+import { Navigate, useRoutes, RouteObject } from 'react-router'
 import { authRoutes } from './auth-routes'
 import AppLayout from 'src/layouts/applayout/AppLayout'
 import NotFound from 'src/pages/NotFound'
@@ -7,123 +8,156 @@ import { ProtectedRoute } from 'src/auth/ProtectedRoute'
 import { FeatureProtectedRoute } from 'src/components/FeatureProtectedRoute'
 import { useAuth } from 'src/context/AuthProvider'
 import { paths } from 'src/paths'
-import Documents from 'src/pages/documents'
-import Reports from 'src/pages/reports'
-import Benchmarks from 'src/pages/benchmarks'
-import TeamManagement from 'src/pages/team-management'
-import PracticeSettings from 'src/pages/practice-settings'
-import Billing from 'src/pages/billing'
-import Settings from 'src/pages/settings'
-import HelpAndSupport from 'src/pages/HelpAndSupport'
-import Dashboard from 'src/pages/dashboard'
-import NominationFlow from 'src/pages/practice-onboarding/NominationFlow'
-import PracticeOnboardingFlow from 'src/pages/practice-onboarding/PracticeOnboardingFlow'
+import ErrorBoundary from 'src/components/common/error-boundary'
+import { SplashScreen } from 'src/components/common/SplashScreen'
+
+// lazy pages
+const Dashboard = lazy(() => import('src/pages/dashboard'))
+const Documents = lazy(() => import('src/pages/documents'))
+const Reports = lazy(() => import('src/pages/reports'))
+const Benchmarks = lazy(() => import('src/pages/benchmarks'))
+const TeamManagement = lazy(() => import('src/pages/team-management'))
+const PracticeSettings = lazy(() => import('src/pages/practice-settings'))
+const Billing = lazy(() => import('src/pages/billing'))
+const Settings = lazy(() => import('src/pages/settings'))
+const HelpAndSupport = lazy(() => import('src/pages/HelpAndSupport'))
+const NominationFlow = lazy(
+  () => import('src/pages/practice-onboarding/NominationFlow')
+)
+const PracticeOnboardingFlow = lazy(
+  () => import('src/pages/practice-onboarding/PracticeOnboardingFlow')
+)
 
 function RedirectComponent() {
   const { loading, authenticated } = useAuth()
-  if (loading) return <h1>Loading...</h1>
+  if (loading) return <SplashScreen />
   return authenticated ? (
-    <Navigate to={paths.dashboard} />
+    <Navigate to={paths.dashboard} replace />
   ) : (
-    <Navigate to={paths.auth.login} />
+    <Navigate to={paths.auth.login} replace />
   )
 }
 
 export function Router() {
-  const routes = [
-    { path: paths.root, element: <RedirectComponent /> },
-    {
-      path: paths.practiceOnboarding,
-      element: <ProtectedRoute component={NominationFlow} />
-    },
-    {
-      path: paths.practiceOnboardingStepper,
-      element: <ProtectedRoute component={PracticeOnboardingFlow} />
-    },
-    {
-      path: paths.root,
-      element: <ProtectedRoute component={AppLayout} />,
-      children: [
-        { index: true, element: <Navigate to={paths.dashboard} /> },
-        {
-          path: paths.dashboard,
-          element: (
-            <FeatureProtectedRoute moduleId='dashboard'>
-              <Dashboard />
-            </FeatureProtectedRoute>
-          )
-        },
-        {
-          path: paths.documents,
-          element: (
-            <FeatureProtectedRoute moduleId='documents'>
-              <Documents />
-            </FeatureProtectedRoute>
-          )
-        },
-        {
-          path: paths.reports,
-          element: (
-            <FeatureProtectedRoute moduleId='reports'>
-              <Reports />
-            </FeatureProtectedRoute>
-          )
-        },
-        {
-          path: paths.benchmarks,
-          element: (
-            <FeatureProtectedRoute moduleId='benchmarks'>
-              <Benchmarks />
-            </FeatureProtectedRoute>
-          )
-        },
-        {
-          path: paths.teamManagement,
-          element: (
-            <FeatureProtectedRoute moduleId='team-management'>
-              <TeamManagement />
-            </FeatureProtectedRoute>
-          )
-        },
-        {
-          path: paths.practiceSettings,
-          element: (
-            <FeatureProtectedRoute moduleId='practice-settings'>
-              <PracticeSettings />
-            </FeatureProtectedRoute>
-          )
-        },
-        {
-          path: paths.billing,
-          element: (
-            <FeatureProtectedRoute moduleId='billing'>
-              <Billing />
-            </FeatureProtectedRoute>
-          )
-        },
-        {
-          path: paths.settings,
-          element: (
-            <FeatureProtectedRoute moduleId='settings'>
-              <Settings />
-            </FeatureProtectedRoute>
-          )
-        },
-        {
-          path: paths.helpAndSupport,
-          element: (
-            <FeatureProtectedRoute moduleId='help-support'>
-              <HelpAndSupport />
-            </FeatureProtectedRoute>
-          )
-        }
-      ]
-    },
-    ...authRoutes,
-    { path: '*', element: <NotFound /> }
-  ]
+  // memoize to avoid re-creating route objects on every render
+  const routes: RouteObject[] = useMemo(
+    () => [
+      { path: paths.root, element: <RedirectComponent /> },
+
+      // practice onboarding routes (can be outside layout)
+      {
+        path: paths.practiceOnboarding,
+        element: (
+          <ProtectedRoute>
+            <NominationFlow />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: paths.practiceOnboardingStepper,
+        element: (
+          <ProtectedRoute>
+            <PracticeOnboardingFlow />
+          </ProtectedRoute>
+        )
+      },
+
+      {
+        path: '/',
+        element: (
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          { index: true, element: <Navigate to={paths.dashboard} replace /> },
+          {
+            path: paths.dashboard,
+            element: (
+              <FeatureProtectedRoute moduleId='dashboard'>
+                <Dashboard />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.documents,
+            element: (
+              <FeatureProtectedRoute moduleId='documents'>
+                <Documents />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.reports,
+            element: (
+              <FeatureProtectedRoute moduleId='reports'>
+                <Reports />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.benchmarks,
+            element: (
+              <FeatureProtectedRoute moduleId='benchmarks'>
+                <Benchmarks />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.teamManagement,
+            element: (
+              <FeatureProtectedRoute moduleId='team-management'>
+                <TeamManagement />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.practiceSettings,
+            element: (
+              <FeatureProtectedRoute moduleId='practice-settings'>
+                <PracticeSettings />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.billing,
+            element: (
+              <FeatureProtectedRoute moduleId='billing'>
+                <Billing />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.settings,
+            element: (
+              <FeatureProtectedRoute moduleId='settings'>
+                <Settings />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.helpAndSupport,
+            element: (
+              <FeatureProtectedRoute moduleId='help-support'>
+                <HelpAndSupport />
+              </FeatureProtectedRoute>
+            )
+          }
+        ]
+      },
+
+      // auth routes spread
+      ...authRoutes,
+
+      // final fallback
+      { path: '*', element: <NotFound /> }
+    ],
+    []
+  )
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>{useRoutes(routes)}</Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={<SplashScreen />}>{useRoutes(routes)}</Suspense>
+    </ErrorBoundary>
   )
 }

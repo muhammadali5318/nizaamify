@@ -22,7 +22,6 @@ type AppUser = {
   displayName?: string | null
   role?: string
   raw?: any
-  accessToken?: string | null
 }
 
 type AuthContextType = {
@@ -46,9 +45,6 @@ function validateAuthConfig(config: Record<string, any>) {
 try {
   validateAuthConfig(CONFIG.auth)
 } catch (e) {
-  // Dev-time visibility. In production you might want to fail faster.
-  // Keep the app from crashing immediately though.
-
   console.error((e as Error).message)
 }
 
@@ -62,10 +58,9 @@ export function useAuth() {
   return ctx
 }
 
-/* ---------------------- High level AuthProvider (wraps Auth0Provider) ---------------------- */
+/* ---------------------- Top-level AuthProvider (wraps Auth0Provider) ---------------------- */
 
 export function AuthProvider({ children }: Props) {
-  // 🔐 otherwise, run the real Auth0Provider flow
   const { domain, clientId, callbackUrl, audience } = CONFIG.auth
   const navigate = useNavigate()
 
@@ -85,8 +80,7 @@ export function AuthProvider({ children }: Props) {
       authorizationParams={{
         redirect_uri: callbackUrl,
         audience,
-        scope: 'openid profile email offline_access',
-        prompt: 'login'
+        scope: 'openid profile email offline_access'
       }}
       onRedirectCallback={onRedirectCallback}
       useRefreshTokens={true}
@@ -103,73 +97,88 @@ export function AuthProvider({ children }: Props) {
 function AuthProviderContainer({ children }: Props) {
   const { user, isLoading, isAuthenticated, getAccessTokenSilently } =
     useAuth0()
+
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [tokenLoading, setTokenLoading] = useState<boolean>(true)
-  const [userInfo] = useState()
   const [isInfoLoading, setIsInfoLoading] = useState<boolean>(true)
+
   const getAccessToken = useCallback(async (): Promise<string | null> => {
+    setTokenLoading(true)
     try {
-      let token: string | null = null
-      if (isAuthenticated) {
-        token = await getAccessTokenSilently()
+      if (!isAuthenticated) {
+        setAccessToken(null)
+        delete apiClient.defaults.headers.common.Authorization
+        return null
+      }
+      const token = await getAccessTokenSilently()
+      if (token) {
         setAccessToken(token)
         apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
+        // optionally fetch user info here
+        setIsInfoLoading(false)
+        return token
       } else {
         setAccessToken(null)
         delete apiClient.defaults.headers.common.Authorization
-      }
-      if (token) {
-        // getUserInfo()
-      } else {
         setIsInfoLoading(false)
+        return null
       }
-      return token
     } catch (error) {
       console.error('Error fetching access token:', error)
       setAccessToken(null)
       delete apiClient.defaults.headers.common.Authorization
+      setIsInfoLoading(false)
       return null
     } finally {
       setTokenLoading(false)
     }
   }, [getAccessTokenSilently, isAuthenticated])
 
+  // fetch token when authentication state changes
   useEffect(() => {
-    getAccessToken()
-  }, [getAccessToken])
+    // Only fetch when isAuthenticated changes to true
+    if (isAuthenticated) {
+      void getAccessToken()
+    } else {
+      // not authenticated -> clear token
+      setAccessToken(null)
+      delete apiClient.defaults.headers.common.Authorization
+      setTokenLoading(false)
+      setIsInfoLoading(false)
+    }
+  }, [isAuthenticated, getAccessToken])
 
+  // load initial app data when accessToken becomes available (or not)
   useInitialData(!!accessToken)
 
   const isFullyAuthenticated =
     isAuthenticated && !tokenLoading && accessToken !== null
 
   const status =
-    isLoading || tokenLoading
+    isLoading || tokenLoading || isInfoLoading
       ? 'loading'
       : isFullyAuthenticated
         ? 'authenticated'
         : 'unauthenticated'
 
-  const memoizedValue = useMemo(
+  const memoizedValue = useMemo<AuthContextType>(
     () => ({
+      user: user
+        ? {
+            id: (user as any).sub,
+            displayName: (user as any).name || (user as any).nickname || null,
+            raw: user
+          }
+        : null,
       loading: status === 'loading',
       authenticated: status === 'authenticated',
-      unauthenticated: status === 'unauthenticated',
+      accessToken,
       getAccessToken
     }),
-    [
-      accessToken,
-      userInfo,
-      tokenLoading,
-      isInfoLoading,
-      status,
-      user?.name,
-      user?.sub,
-      accessToken
-    ]
+    [user, status, accessToken, getAccessToken]
   )
 
-  if (isLoading || tokenLoading || isInfoLoading) {
+  if (status === 'loading') {
     return <PageLoader />
   }
 

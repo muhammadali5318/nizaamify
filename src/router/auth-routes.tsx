@@ -61,7 +61,7 @@ export const authRoutes = [
         )
       },
       {
-        path: 'invited-user-onboarding',
+        path: 'invite-user',
         element: (
           <AuthLayout>
             <AuthPages.InvitedUserOnboarding />

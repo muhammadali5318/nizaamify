@@ -22,7 +22,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 type topbarProps = {
   title: string
   icon: string
-  rightSlot?: React.ReactNode // ✅ optional slot for mobile menu button
+  rightSlot?: React.ReactNode
 }
 
 type ProfilePopperProps = {
@@ -240,7 +240,6 @@ const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
       <Box className={styles.topbarActionContainer}>
         <img src='/assets/search.svg' alt='search icon' />
 
-        {/* this box should be hidden when in mobile version below 768 *  */}
         <Box
           className={styles.profileTitle}
           sx={{

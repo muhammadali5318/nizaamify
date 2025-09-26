@@ -1,12 +1,6 @@
 import { LoadingButton } from '@mui/lab'
-import {
-  Box,
-  Stack,
-  FormControlLabel,
-  Checkbox,
-  Typography
-} from '@mui/material'
-import { Controller, useForm } from 'react-hook-form'
+import { Box, Stack, Typography, FormHelperText } from '@mui/material'
+import { useForm } from 'react-hook-form'
 import PasswordField from 'src/components/common/PasswordField'
 import { zodResolver } from '@hookform/resolvers/zod'
 import styles from './CreatePassoword.module.scss'
@@ -14,18 +8,19 @@ import {
   SignupStepThreeFormValues,
   SignupStepThreeSchema
 } from 'src/schema-validations/signupStepThreeValidations'
+import AgreementsCheckboxes from 'src/components/agreement-checkboxes'
 
-// ✅ Define props type
 type CreatePasswordProps = {
-  setStep: React.Dispatch<React.SetStateAction<number>>
+  setStep?: React.Dispatch<React.SetStateAction<number>>
+  onNext: (data: SignupStepThreeFormValues) => Promise<any> | any
 }
 
-const CreatePassword: React.FC<CreatePasswordProps> = ({ setStep }) => {
-  // ✅ Setup useForm with zod
+const CreatePassword: React.FC<CreatePasswordProps> = ({ onNext }) => {
   const {
     control,
     handleSubmit,
-    formState: { isValid }
+    watch,
+    formState: { isValid, isSubmitted, isSubmitting }
   } = useForm<SignupStepThreeFormValues>({
     resolver: zodResolver(SignupStepThreeSchema),
     mode: 'onChange',
@@ -39,19 +34,24 @@ const CreatePassword: React.FC<CreatePasswordProps> = ({ setStep }) => {
     }
   })
 
-  // ✅ Submit handler
-  const onSubmit = (data: SignupStepThreeFormValues) => {
-    // eslint-disable-next-line no-console
-    console.log('Form submitted:', data)
-
-    // Move to Congratulations step
-    setStep(3)
+  const onSubmit = async (data: SignupStepThreeFormValues) => {
+    await onNext(data)
   }
+
+  // ✅ Watch checkboxes
+  const [terms, privacy, disclaimer, gdpr] = watch([
+    'terms',
+    'privacy',
+    'disclaimer',
+    'gdpr'
+  ])
+
+  const allChecked = Boolean(terms && privacy && disclaimer && gdpr)
 
   return (
     <Box>
       <Box
-        className={styles.createPasswordContainer}
+        className={`${styles.formContainerInviteUser} ${styles.createPasswordWidth}`}
         component='form'
         onSubmit={handleSubmit(onSubmit)}
       >
@@ -84,70 +84,26 @@ const CreatePassword: React.FC<CreatePasswordProps> = ({ setStep }) => {
           </Stack>
 
           <Stack>
-            {['terms', 'privacy', 'disclaimer', 'gdpr'].map((name) => (
-              <Controller
-                key={name}
-                name={name as keyof SignupStepThreeFormValues}
-                control={control}
-                render={({ field }) => (
-                  <FormControlLabel
-                    control={<Checkbox {...field} checked={field.value} />}
-                    label={
-                      <Typography variant='body1'>
-                        {name === 'terms' && (
-                          <>
-                            I agree to the{' '}
-                            <span className='info-main font-weight--700'>
-                              Terms of Service
-                            </span>
-                          </>
-                        )}
-                        {name === 'privacy' && (
-                          <>
-                            I agree to the{' '}
-                            <span className='info-main font-weight--700'>
-                              Privacy Policy
-                            </span>
-                          </>
-                        )}
-                        {name === 'disclaimer' && (
-                          <>
-                            I acknowledge the{' '}
-                            <span className='info-main font-weight--700'>
-                              Financial Disclaimer
-                            </span>
-                          </>
-                        )}
-                        {name === 'gdpr' && (
-                          <>
-                            I consent to data usage under{' '}
-                            <span className='info-main font-weight--700'>
-                              GDPR
-                            </span>
-                          </>
-                        )}
-                      </Typography>
-                    }
-                  />
-                )}
-              />
-            ))}
+            <AgreementsCheckboxes control={control} hideIndividualErrors />
+
+            {!allChecked && isSubmitted && (
+              <FormHelperText error sx={{ mt: 1 }}>
+                Please confirm to continue
+              </FormHelperText>
+            )}
           </Stack>
 
-          <Box className='center-align-width--100'>
-            <LoadingButton
-              type='submit'
-              size='large'
-              variant='contained'
-              color='primary'
-              disabled={!isValid}
-              loading={false}
-              className='width--100'
-              loadingPosition='end'
-            >
-              Save & continue
-            </LoadingButton>
-          </Box>
+          <LoadingButton
+            fullWidth
+            type='submit'
+            size='large'
+            variant='contained'
+            color='primary'
+            loading={isSubmitting}
+            disabled={!isValid || isSubmitting || !allChecked}
+          >
+            Save & continue
+          </LoadingButton>
         </Stack>
       </Box>
     </Box>

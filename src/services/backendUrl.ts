@@ -17,6 +17,7 @@ export const endpoints = {
   userInvitation: (id: string) => `${API_BASE}/practices/${id}/invite/`,
   currentPractice: (id: string) => `${API_BASE}/practices/${id}/`,
   userInfo: apiVersion,
+  inviteUser: (id: string) => `user-workstation/v1/invited-users/${id}/`,
   signup: {
     createUser: `user-workstation/${apiVersion}/users/signup/`,
     verifyEmail: `user-workstation/${apiVersion}/users/verify-email/`

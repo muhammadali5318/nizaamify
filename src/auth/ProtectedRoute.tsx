@@ -1,22 +1,40 @@
 // File: src/auth/ProtectedRoute.tsx
 import { withAuthenticationRequired } from '@auth0/auth0-react'
 import { CircularProgress } from '@mui/material'
-import { FC, ComponentType } from 'react'
+import { FC, ComponentType, ReactNode } from 'react'
 import { Navigate } from 'react-router'
 import useAuthErrorRedirect from 'src/hooks/useHandleAuth0ErrorRedirect'
 
 interface ProtectedRouteProps {
-  component: ComponentType
+  component?: ComponentType<any>
+  children?: ReactNode
 }
 
-export const ProtectedRoute: FC<ProtectedRouteProps> = ({ component }) => {
+export const ProtectedRoute: FC<ProtectedRouteProps> = function ProtectedRoute({
+  component,
+  children
+}) {
   const redirectTo = useAuthErrorRedirect()
 
   if (redirectTo) {
     return <Navigate to={redirectTo} replace />
   }
 
-  const Component = withAuthenticationRequired(component, {
+  let InnerComponent: ComponentType<any> | null = null
+
+  if (children) {
+    InnerComponent = function ProtectedRouteInner() {
+      return <>{children}</>
+    }
+  } else if (component) {
+    InnerComponent = component
+  }
+
+  if (!InnerComponent) {
+    return null
+  }
+
+  const AuthenticatedComponent = withAuthenticationRequired(InnerComponent, {
     onRedirecting: () => (
       <div
         style={{
@@ -28,18 +46,18 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = ({ component }) => {
           backgroundColor: '#fff'
         }}
       >
-        <CircularProgress
-          sx={{
-            color: 'black' // Set the spinner color to black
-          }}
-          size={30}
-          thickness={4}
-        />
+        <CircularProgress sx={{ color: 'black' }} size={30} thickness={4} />
       </div>
     )
   })
 
-  return <Component />
+  // Give the HOC-returned component a displayName for clearer DevTools & to satisfy eslint.
+  ;(AuthenticatedComponent as any).displayName =
+    (AuthenticatedComponent as any).displayName ||
+    'ProtectedRoute.Authenticated'
+
+  return <AuthenticatedComponent />
 }
+;(ProtectedRoute as any).displayName = 'ProtectedRoute'
 
 export default ProtectedRoute
