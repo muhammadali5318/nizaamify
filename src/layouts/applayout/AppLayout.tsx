@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
-import { useAuth0 } from '@auth0/auth0-react'
 import CssBaseline from '@mui/material/CssBaseline'
 import IconButton from '@mui/material/IconButton'
 import List from '@mui/material/List'
@@ -29,12 +28,15 @@ import {
 import { useFeatureFlags } from '../../hooks/useFeatureFlags'
 import { useFeatureFlagContext } from '../../context/FeatureFlagProvider'
 import MobileTopBar from './components/MobileTopbar'
+import { useInitialData } from 'src/hooks/useFetchInitialData'
+import { useAuth } from 'src/context/AuthProvider'
 
 export default function AppLayout() {
-  const { user } = useAuth0()
   const location = useLocation()
   const { userContext } = useFeatureFlagContext()
   const { isModuleEnabled, getDisabledReason } = useFeatureFlags(userContext)
+  const { accessToken } = useAuth()
+  const { data: practiceData } = useInitialData(!!accessToken)
 
   const isMobile = useMediaQuery('(max-width:768px)')
 
@@ -113,7 +115,7 @@ export default function AppLayout() {
         <img src='/assets/practice-selector.svg' alt='practice selector' />
         <FormControl className={styles.muiSelectForm} fullWidth>
           <Select
-            defaultValue={user?.organizations_with_roles?.[0]?.organization}
+            defaultValue={practiceData?.practice_name}
             displayEmpty
             className={styles.muiSelect}
             sx={{

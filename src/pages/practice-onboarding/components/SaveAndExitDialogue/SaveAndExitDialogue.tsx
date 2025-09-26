@@ -9,6 +9,8 @@ import {
   Typography,
   Alert
 } from '@mui/material'
+import { isPracticeOwner } from 'src/utils/helper'
+import { useAuth0 } from '@auth0/auth0-react'
 
 type SaveAndExitDialogueProps = {
   open: boolean
@@ -23,6 +25,7 @@ const SaveAndExitDialogue: React.FC<SaveAndExitDialogueProps> = ({
   onConfirm,
   onOpenNominate
 }) => {
+  const { user } = useAuth0()
   const handleOnNominate = () => {
     onOpenNominate()
     onClose()
@@ -65,35 +68,39 @@ const SaveAndExitDialogue: React.FC<SaveAndExitDialogueProps> = ({
             ⚠️ Practice setup is essential — without completing onboarding,
             Monai won’t work properly for your team.
           </Typography>
-          <Typography variant='subtitle1' color='var(--color-text-primary)'>
-            You can also nominate a Practice Manager later to finish the setup
-            on your behalf by clicking{' '}
-            <Button
-              variant='text'
-              onClick={handleOnNominate}
-              sx={{
-                padding: 0,
-                minWidth: 'auto',
-                textDecoration: 'underline',
-                fontWeight: 700,
-                color: 'var(--color-info-dark)'
-              }}
-            >
-              here
-            </Button>
-            .
-          </Typography>
-
-          <Alert severity='info' className='alert-info-container'>
-            <Typography
-              className='alert-info-text font-weight--500'
-              component='div'
-              sx={{ margin: 0 }}
-            >
-              As Practice Owner, you always keep full control and can step back
-              in anytime.
+          {isPracticeOwner(user) && (
+            <Typography variant='subtitle1' color='var(--color-text-primary)'>
+              You can also nominate a Practice Manager later to finish the setup
+              on your behalf by clicking{' '}
+              <Button
+                variant='text'
+                onClick={handleOnNominate}
+                sx={{
+                  padding: 0,
+                  minWidth: 'auto',
+                  textDecoration: 'underline',
+                  fontWeight: 700,
+                  color: 'var(--color-info-dark)'
+                }}
+              >
+                here
+              </Button>
+              .
             </Typography>
-          </Alert>
+          )}
+
+          {isPracticeOwner(user) && (
+            <Alert severity='info' className='alert-info-container'>
+              <Typography
+                className='alert-info-text font-weight--500'
+                component='div'
+                sx={{ margin: 0 }}
+              >
+                As Practice Owner, you always keep full control and can step
+                back in anytime.
+              </Typography>
+            </Alert>
+          )}
         </Stack>
       </DialogContent>
 

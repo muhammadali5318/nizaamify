@@ -1,6 +1,6 @@
 export interface UserContext {
   onboardingCompleted?: boolean
-  // Allow additional properties for future expansion
+  role?: string
   [key: string]: unknown
 }
 

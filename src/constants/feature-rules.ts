@@ -1,5 +1,6 @@
 export const FEATURE_RULE_IDS = {
-  ONBOARDING_COMPLETED: 'onboarding-completed'
+  ONBOARDING_COMPLETED: 'onboarding-completed',
+  NOT_MANAGER: 'not-manager' // 👈 new rule
 } as const
 
 export type FeatureRuleId =

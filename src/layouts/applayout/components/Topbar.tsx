@@ -238,8 +238,6 @@ const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
       </Box>
 
       <Box className={styles.topbarActionContainer}>
-        <img src='/assets/search.svg' alt='search icon' />
-
         <Box
           className={styles.profileTitle}
           sx={{

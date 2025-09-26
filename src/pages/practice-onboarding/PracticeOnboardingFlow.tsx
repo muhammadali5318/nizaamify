@@ -35,6 +35,7 @@ import {
 } from 'src/schema-validations/practice-onboarding'
 import { StepOne, StepTwo, StepThree, StepFour } from './components'
 import { useAuth0 } from '@auth0/auth0-react'
+import { isPracticeOwner } from 'src/utils/helper'
 
 // initial values for each step — keep in sync with your schemas
 const initialStepOne: StepOneFormValues = {
@@ -313,9 +314,11 @@ const PracticeOnboardingFlow: React.FC = () => {
                   ))}
                 </Stepper>
                 <Box>
-                  <NominateNowContainer
-                    onSelectNominee={() => setOpenNominate(true)}
-                  />
+                  {isPracticeOwner(user) && (
+                    <NominateNowContainer
+                      onSelectNominee={() => setOpenNominate(true)}
+                    />
+                  )}
                 </Box>
               </Box>
 

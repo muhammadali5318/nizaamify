@@ -12,6 +12,11 @@ const rules: FeatureRule[] = [
     evaluate: (context) => {
       return context.onboardingCompleted === true
     }
+  },
+  {
+    id: FEATURE_RULE_IDS.NOT_MANAGER,
+    description: 'Managers cannot access restricted modules',
+    evaluate: (context) => context.role !== 'manager' // 👈 expects `role` in UserContext
   }
 ]
 
@@ -28,7 +33,10 @@ const modules: ModuleConfig[] = [
   {
     id: 'reports',
     name: 'Reports',
-    requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
+    requiredRules: [
+      FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
+      FEATURE_RULE_IDS.NOT_MANAGER
+    ]
   },
   {
     id: 'benchmarks',
@@ -37,12 +45,16 @@ const modules: ModuleConfig[] = [
   },
   {
     id: 'team-management',
-    name: 'Team Management'
+    name: 'Team Management',
+    requiredRules: [FEATURE_RULE_IDS.NOT_MANAGER]
   },
   {
     id: 'practice-settings',
     name: 'Practice Settings',
-    requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
+    requiredRules: [
+      FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
+      FEATURE_RULE_IDS.NOT_MANAGER
+    ]
   },
   {
     id: 'billing',
