@@ -38,6 +38,9 @@ export default function AppLayout() {
   const { accessToken } = useAuth()
   const { data: practiceData } = useInitialData(!!accessToken)
 
+  // eslint-disable-next-line no-console
+  console.log(practiceData)
+
   const isMobile = useMediaQuery('(max-width:768px)')
 
   // Desktop open state persisted to localStorage
