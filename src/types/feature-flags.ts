@@ -14,6 +14,7 @@ export type ModuleId =
   | 'billing'
   | 'settings'
   | 'help-support'
+  | 'nomination-flow'
 
 export type FeatureRuleId = string
 

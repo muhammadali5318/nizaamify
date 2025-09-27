@@ -67,6 +67,11 @@ const modules: ModuleConfig[] = [
   {
     id: 'help-support',
     name: 'Help & Support'
+  },
+  {
+    id: 'nomination-flow',
+    name: 'nomination flow',
+    requiredRules: [FEATURE_RULE_IDS.NOT_MANAGER]
   }
 ]
 

@@ -23,6 +23,7 @@ export function useFeatureFlags(userContext: UserContext) {
       if (isEnabled && moduleConfig.requiredRules?.length) {
         for (const ruleId of moduleConfig.requiredRules) {
           const rule = FeatureFlagService.findRule(ruleId)
+
           if (rule && !FeatureFlagService.evaluateRule(ruleId, userContext)) {
             isEnabled = false
             disabledReason = moduleConfig.disabledMessage || rule.description

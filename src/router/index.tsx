@@ -48,9 +48,11 @@ export function Router() {
       {
         path: paths.practiceOnboarding,
         element: (
-          <ProtectedRoute>
-            <NominationFlow />
-          </ProtectedRoute>
+          <FeatureProtectedRoute moduleId='nomination-flow'>
+            <ProtectedRoute>
+              <NominationFlow />
+            </ProtectedRoute>
+          </FeatureProtectedRoute>
         )
       },
       {
