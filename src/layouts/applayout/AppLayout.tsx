@@ -12,6 +12,7 @@ import styles from './AppLayout.module.scss'
 import Box from '@mui/material/Box'
 import {
   FormControl,
+  MenuItem,
   Select,
   Stack,
   Tooltip,
@@ -37,6 +38,13 @@ export default function AppLayout() {
   const { isModuleEnabled, getDisabledReason } = useFeatureFlags(userContext)
   const { accessToken } = useAuth()
   const { data: practiceData } = useInitialData(!!accessToken)
+  const [selectedPractice, setSelectedPractice] = React.useState<string>('')
+
+  React.useEffect(() => {
+    if (practiceData?.practice_name) {
+      setSelectedPractice(practiceData.practice_name)
+    }
+  }, [practiceData])
 
   // eslint-disable-next-line no-console
   console.log(practiceData)
@@ -118,28 +126,31 @@ export default function AppLayout() {
         <img src='/assets/practice-selector.svg' alt='practice selector' />
         <FormControl className={styles.muiSelectForm} fullWidth>
           <Select
-            defaultValue={practiceData?.practice_name}
+            value={selectedPractice}
+            onChange={(e) => setSelectedPractice(e.target.value)}
             displayEmpty
             className={styles.muiSelect}
             sx={{
               borderRadius: '16px',
               pl: 2,
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderRadius: '16px'
-              },
-              '& .MuiSelect-icon': {
-                right: 0
-              }
+              '& .MuiOutlinedInput-notchedOutline': { borderRadius: '16px' },
+              '& .MuiSelect-icon': { right: 0 }
             }}
             renderValue={(selected) => (
               <Typography
                 variant='subtitle2'
                 sx={{ display: showLabels ? 'inline' : 'none' }}
               >
-                {selected as string}
+                {selected || 'Select practice'}
               </Typography>
             )}
-          />
+          >
+            {practiceData && (
+              <MenuItem value={practiceData.practice_name}>
+                {practiceData.practice_name}
+              </MenuItem>
+            )}
+          </Select>
         </FormControl>
       </Box>
 
