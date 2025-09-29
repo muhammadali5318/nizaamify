@@ -1,3 +1,4 @@
+// FILE: src/pages/SignUp/components/SignupStepTwo.tsx
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeft, ChevronRight } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
@@ -35,6 +36,7 @@ const SignupStepTwo: React.FC<Props> = ({
     control,
     handleSubmit,
     reset,
+    getValues, // <-- added
     formState: { errors, isValid }
   } = useForm<StepTwoFormValues>({
     resolver: zodResolver(
@@ -73,6 +75,22 @@ const SignupStepTwo: React.FC<Props> = ({
     })
     onNext?.()
   }
+
+  // --- NEW: save current values without validating when navigating back ---
+  const handleBackAndSave = () => {
+    const values = getValues()
+    const patch = {
+      practiceName: values.practiceName ?? '',
+      street: values.street ?? '',
+      city: values.city ?? '',
+      country: values.country ?? '',
+      postcode: values.postcode ?? '',
+      practiceEmail: values.practiceEmail ?? ''
+    }
+    setFormData(patch)
+    onBack?.()
+  }
+  // --------------------------------------------------------------------
 
   return (
     <Box component='section'>
@@ -191,7 +209,7 @@ const SignupStepTwo: React.FC<Props> = ({
               size='large'
               variant='outlined'
               color='primary'
-              onClick={onBack}
+              onClick={handleBackAndSave}
               startIcon={<ChevronLeft />}
             >
               Back

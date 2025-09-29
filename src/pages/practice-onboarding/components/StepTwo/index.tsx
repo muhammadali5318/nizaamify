@@ -1,3 +1,4 @@
+// FILE: src/pages/SignUp/components/SignupStepTwo.tsx
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeft, ChevronRight } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
@@ -23,6 +24,9 @@ import { useUpdateStepTwo } from '../../hooks/useUpdateStepTwo'
 import isEqual from 'lodash/isEqual'
 import { useAuth0 } from '@auth0/auth0-react'
 import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
+import { useNavigate } from 'react-router'
+import { paths } from 'src/paths'
+import SaveAndExitDialogue from '../SaveAndExitDialogue/SaveAndExitDialogue' // adjust path if needed
 
 type StepTwoProps = {
   formData: StepTwoFormValues
@@ -30,7 +34,7 @@ type StepTwoProps = {
   onNext?: (patch?: Partial<StepTwoFormValues>) => void
   onBack?: () => void
   activeStep: number
-  onSaveExitClick: () => void
+  onOpenNominate: () => void
 }
 
 const StepTwo: React.FC<StepTwoProps> = ({
@@ -39,10 +43,11 @@ const StepTwo: React.FC<StepTwoProps> = ({
   onNext,
   onBack,
   activeStep,
-  onSaveExitClick
+  onOpenNominate
 }) => {
   const { user } = useAuth0()
   const orgUuid = getUserOrgUuid(user)
+  const navigate = useNavigate()
 
   const updateStepTwo = useUpdateStepTwo(orgUuid)
   const {
@@ -77,6 +82,11 @@ const StepTwo: React.FC<StepTwoProps> = ({
       premisesOwnership: formData.premisesOwnership ?? ''
     })
   }, [formData, reset])
+
+  // local modal state
+  const [openDialog, setOpenDialog] = React.useState(false)
+  const handleOpenDialog = () => setOpenDialog(true)
+  const handleCloseDialog = () => setOpenDialog(false)
 
   const onSubmit = (data: StepTwoFormValues) => {
     const newValues: StepTwoFormValues = {
@@ -116,6 +126,54 @@ const StepTwo: React.FC<StepTwoProps> = ({
     )
   }
 
+  const handleSaveExit = () => {
+    const onValid = (data: StepTwoFormValues) => {
+      const newValues: StepTwoFormValues = {
+        practiceType: data.practiceType,
+        yearsTrading: data.yearsTrading,
+        numberOfSurgeries: data.numberOfSurgeries,
+        numberOfAssociates: data.numberOfAssociates,
+        numberOfHygienistsTherapists: data.numberOfHygienistsTherapists,
+        numberOfSpecialists: data.numberOfSpecialists,
+        premisesOwnership: data.premisesOwnership
+      }
+
+      // if nothing changed, just navigate away
+      if (isEqual(newValues, formData)) {
+        navigate(paths.dashboard)
+        return
+      }
+
+      setFormData(newValues)
+
+      updateStepTwo.mutate(
+        {
+          practice_type: newValues.practiceType,
+          years_of_trading: Number(newValues.yearsTrading),
+          number_of_surgeries: Number(newValues.numberOfSurgeries),
+          number_of_associates: Number(newValues.numberOfAssociates),
+          number_of_hygienists_therapists: Number(
+            newValues.numberOfHygienistsTherapists
+          ),
+          number_of_specialists: Number(newValues.numberOfSpecialists),
+          premises_ownership: newValues.premisesOwnership
+        },
+        {
+          onSuccess: () => {
+            navigate(paths.dashboard)
+          }
+        }
+      )
+    }
+
+    const onInvalid = () => {
+      navigate(paths.dashboard)
+      handleCloseDialog()
+    }
+
+    handleSubmit(onValid, onInvalid)()
+  }
+
   const isSaving = updateStepTwo?.status === 'pending'
 
   return (
@@ -143,14 +201,10 @@ const StepTwo: React.FC<StepTwoProps> = ({
                     label='Practice type *'
                     variant='outlined'
                   >
-                    <MenuItem value='NHS-DOMINANT'>
-                      NHS-dominant (75%+ NHS revenue)
-                    </MenuItem>
+                    <MenuItem value='NHS-DOMINANT'>Predominantly NHS</MenuItem>
                     <MenuItem value='PRIVATE'>Private</MenuItem>
                     <MenuItem value='MIXED'>Mixed</MenuItem>
-                    <MenuItem value='SQUAT'>
-                      Squat (less then 24 months trading)
-                    </MenuItem>
+                    <MenuItem value='SQUAT'>Squat</MenuItem>
                   </Select>
                 )}
               />
@@ -283,7 +337,7 @@ const StepTwo: React.FC<StepTwoProps> = ({
               size='large'
               variant='outlined'
               color='primary'
-              onClick={onSaveExitClick}
+              onClick={handleOpenDialog}
             >
               Save & exit
             </Button>
@@ -315,6 +369,20 @@ const StepTwo: React.FC<StepTwoProps> = ({
           </Stack>
         </Stack>
       </Box>
+
+      {/* Local Save & Exit dialog */}
+      <SaveAndExitDialogue
+        open={openDialog}
+        onClose={handleCloseDialog}
+        onOpenNominate={() => {
+          handleCloseDialog()
+          onOpenNominate?.()
+        }}
+        onConfirm={() => {
+          handleSaveExit()
+        }}
+        confirmLoading={isSaving}
+      />
     </Box>
   )
 }

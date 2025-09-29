@@ -11,19 +11,22 @@ import {
 } from '@mui/material'
 import { isPracticeOwner } from 'src/utils/helper'
 import { useAuth0 } from '@auth0/auth0-react'
+import { LoadingButton } from '@mui/lab'
 
 type SaveAndExitDialogueProps = {
   open: boolean
   onClose: () => void
   onConfirm: () => void
   onOpenNominate: () => void
+  confirmLoading?: boolean
 }
 
 const SaveAndExitDialogue: React.FC<SaveAndExitDialogueProps> = ({
   open,
   onClose,
   onConfirm,
-  onOpenNominate
+  onOpenNominate,
+  confirmLoading
 }) => {
   const { user } = useAuth0()
   const handleOnNominate = () => {
@@ -66,7 +69,7 @@ const SaveAndExitDialogue: React.FC<SaveAndExitDialogueProps> = ({
           </Typography>
           <Typography variant='subtitle1' color='var(--color-text-primary)'>
             ⚠️ Practice setup is essential — without completing onboarding,
-            Monai won’t work properly for your team.
+            Monai tech won’t work properly for your team.
           </Typography>
           {isPracticeOwner(user) && (
             <Typography variant='subtitle1' color='var(--color-text-primary)'>
@@ -118,14 +121,15 @@ const SaveAndExitDialogue: React.FC<SaveAndExitDialogueProps> = ({
           <Button onClick={onClose} variant='outlined' fullWidth>
             Continue onboarding
           </Button>
-          <Button
+          <LoadingButton
             onClick={onConfirm}
             color='primary'
             variant='contained'
             fullWidth
+            loading={confirmLoading}
           >
             Save & exit
-          </Button>
+          </LoadingButton>
         </Stack>
 
         <Typography

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const SignupStepThreeSchema = z
+export const inviteUserPasswordSetupSchema = z
   .object({
     password: z
       .string()
@@ -18,23 +18,13 @@ export const SignupStepThreeSchema = z
       .refine((val) => /[!@#$%^&*(),.?":{}|<>]/.test(val), {
         message: 'Password must contain at least one special character'
       }),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-    terms: z.boolean().refine((val) => val === true, {
-      message: 'You must agree to Terms of service'
-    }),
-    privacy: z.boolean().refine((val) => val === true, {
-      message: 'You must agree to Privacy policy'
-    }),
-    disclaimer: z.boolean().refine((val) => val === true, {
-      message: 'You must acknowledge Financial Disclaimer'
-    }),
-    gdpr: z.boolean().refine((val) => val === true, {
-      message: 'You must consent to GDPR'
-    })
+    confirmPassword: z.string().min(1, 'Please confirm your password')
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ['confirmPassword']
   })
 
-export type SignupStepThreeFormValues = z.infer<typeof SignupStepThreeSchema>
+export type inviteUserPasswordSetupSchemaFormValues = z.infer<
+  typeof inviteUserPasswordSetupSchema
+>

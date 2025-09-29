@@ -1,4 +1,3 @@
-// FILE: src/pages/SignUp/components/SignupStepOne.tsx
 import React from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -8,14 +7,6 @@ import { MuiTelInput } from 'mui-tel-input'
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
 import FormHeader from '../FormHeader'
 import {
-  Box,
-  Stack,
-  TextField,
-  FormControl,
-  FormHelperText,
-  Button
-} from '@mui/material'
-import {
   StepOneFormValues,
   StepOneSchema
 } from 'src/schema-validations/practice-onboarding/stepOne'
@@ -23,13 +14,24 @@ import { useUpdateStepOne } from '../../hooks/useUpdateStepOne'
 import { isEqual } from 'lodash'
 import { useAuth0 } from '@auth0/auth0-react'
 import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
+import { useNavigate } from 'react-router'
+import { paths } from 'src/paths'
+import SaveAndExitDialogue from '../SaveAndExitDialogue/SaveAndExitDialogue' // adjust path if needed
+import {
+  Box,
+  Stack,
+  TextField,
+  FormControl,
+  FormHelperText,
+  Button
+} from '@mui/material'
 
 type StepOneProps = {
   formData: StepOneFormValues
   setFormData: (patch: Partial<StepOneFormValues>) => void
   onNext?: (patch?: Partial<StepOneFormValues>) => void
   activeStep: number
-  onSaveExitClick: () => void
+  onOpenNominate: () => void
 }
 
 const StepOne: React.FC<StepOneProps> = ({
@@ -37,10 +39,11 @@ const StepOne: React.FC<StepOneProps> = ({
   setFormData,
   onNext,
   activeStep,
-  onSaveExitClick
+  onOpenNominate
 }) => {
   const { user } = useAuth0()
   const orgUuid = getUserOrgUuid(user)
+  const navigate = useNavigate()
 
   const updateStepOne = useUpdateStepOne(orgUuid)
   const { control, handleSubmit, reset } = useForm<StepOneFormValues>({
@@ -56,7 +59,6 @@ const StepOne: React.FC<StepOneProps> = ({
     }
   })
 
-  // When parent formData changes (e.g. user navigates back), reset local form to those values
   React.useEffect(() => {
     reset({
       practiceName: formData.practiceName,
@@ -69,14 +71,12 @@ const StepOne: React.FC<StepOneProps> = ({
   }, [formData, reset, user])
 
   const phoneWrapperRef = React.useRef<HTMLDivElement | null>(null)
-
   const openCountryDropdown = () => {
     const root = phoneWrapperRef.current as HTMLElement | null
     if (!root) return
     const flagEl = root.querySelector<HTMLElement>('.MuiTelInput-Flag')
     if (flagEl) flagEl.click()
   }
-
   const handleArrowKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
@@ -84,6 +84,12 @@ const StepOne: React.FC<StepOneProps> = ({
     }
   }
 
+  // Local modal state
+  const [openDialog, setOpenDialog] = React.useState(false)
+  const handleOpenDialog = () => setOpenDialog(true)
+  const handleCloseDialog = () => setOpenDialog(false)
+
+  // Next (existing behavior)
   const onSubmit = (data: StepOneFormValues) => {
     const parsed = parsePhoneNumberFromString(data.phone || '')
     const normalizedPhone = parsed ? parsed.number : data.phone
@@ -93,7 +99,7 @@ const StepOne: React.FC<StepOneProps> = ({
       principalName: data.principalName,
       practiceManagerName: data.practiceManagerName,
       practiceAddress: data.practiceAddress,
-      email: data.email,
+      email: data.email!,
       phone: normalizedPhone
     }
 
@@ -121,6 +127,53 @@ const StepOne: React.FC<StepOneProps> = ({
     )
   }
 
+  const handleSaveExit = () => {
+    const onValid = (data: StepOneFormValues) => {
+      const parsed = parsePhoneNumberFromString(data.phone || '')
+      const normalizedPhone = parsed ? parsed.number : data.phone
+
+      const newValues: StepOneFormValues = {
+        practiceName: data.practiceName,
+        principalName: data.principalName,
+        practiceManagerName: data.practiceManagerName,
+        practiceAddress: data.practiceAddress,
+        email: data.email!,
+        phone: normalizedPhone
+      }
+
+      // if nothing changed, just navigate
+      if (isEqual(newValues, formData)) {
+        navigate(paths.dashboard)
+        return
+      }
+
+      setFormData(newValues)
+
+      updateStepOne.mutate(
+        {
+          practice_name: data.practiceName,
+          principal_name: data.principalName,
+          practice_manager_name: data.practiceManagerName,
+          address: data.practiceAddress,
+          contact_number: normalizedPhone || '',
+          email: data.email!
+        },
+        {
+          onSuccess: () => {
+            navigate(paths.dashboard)
+          }
+        }
+      )
+    }
+
+    const onInvalid = () => {
+      navigate(paths.dashboard)
+      handleCloseDialog()
+    }
+
+    handleSubmit(onValid, onInvalid)()
+  }
+
   const isSaving = updateStepOne?.status === 'pending'
 
   return (
@@ -134,6 +187,7 @@ const StepOne: React.FC<StepOneProps> = ({
         sx={{ mt: 2 }}
       >
         <Stack spacing={2.5}>
+          {/* ...form fields unchanged... */}
           {/* Practice name */}
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <Controller
@@ -152,7 +206,6 @@ const StepOne: React.FC<StepOneProps> = ({
               )}
             />
 
-            {/* Principal & Practice Manager */}
             <Controller
               name='principalName'
               control={control}
@@ -186,7 +239,6 @@ const StepOne: React.FC<StepOneProps> = ({
             )}
           />
 
-          {/* Practice address */}
           <Controller
             name='practiceAddress'
             control={control}
@@ -206,7 +258,6 @@ const StepOne: React.FC<StepOneProps> = ({
             )}
           />
 
-          {/* Email & Contact Number */}
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={2}
@@ -300,13 +351,12 @@ const StepOne: React.FC<StepOneProps> = ({
             />
           </Stack>
 
-          {/* Submit */}
           <Stack direction='row' justifyContent='space-between'>
             <Button
               size='large'
               variant='outlined'
               color='primary'
-              onClick={onSaveExitClick}
+              onClick={handleOpenDialog} // opens local dialog
             >
               Save & exit
             </Button>
@@ -323,6 +373,19 @@ const StepOne: React.FC<StepOneProps> = ({
           </Stack>
         </Stack>
       </Box>
+
+      <SaveAndExitDialogue
+        open={openDialog}
+        onClose={handleCloseDialog}
+        onOpenNominate={() => {
+          handleCloseDialog()
+          onOpenNominate?.()
+        }}
+        onConfirm={() => {
+          handleSaveExit()
+        }}
+        confirmLoading={isSaving}
+      />
     </Box>
   )
 }

@@ -14,7 +14,7 @@ export type MenuItemData = {
 
 export const menuSections: { title: string; items: MenuItemData[] }[] = [
   {
-    title: 'Main Menu',
+    title: 'Main menu',
     items: [
       {
         text: 'Dashboard',
@@ -50,14 +50,14 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
     title: 'Management',
     items: [
       {
-        text: 'Team Management',
+        text: 'Team management',
         to: paths.teamManagement,
         activeIcon: 'active-team-management.svg',
         inactiveIcon: 'inactive-team-management.svg',
         moduleId: 'team-management'
       },
       {
-        text: 'Practice Settings',
+        text: 'Practice settings',
         to: paths.practiceSettings,
         activeIcon: 'active-practice-management.svg',
         inactiveIcon: 'inactive-practice-management.svg',
@@ -88,7 +88,7 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
     title: 'Support',
     items: [
       {
-        text: 'Help & Support',
+        text: 'Help & support',
         to: paths.helpAndSupport,
         activeIcon: 'active-help-support.svg',
         inactiveIcon: 'inactive-help-support.svg',

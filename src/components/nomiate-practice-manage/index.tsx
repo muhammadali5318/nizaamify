@@ -73,7 +73,7 @@ export default function NominatePracticeManagerDialog({
     mode: 'onChange',
     defaultValues: {
       email: '',
-      role: ''
+      role: 'PRACTICE MANAGER'
     }
   })
 
@@ -81,7 +81,7 @@ export default function NominatePracticeManagerDialog({
     if (!open) {
       reset({
         email: '',
-        role: ''
+        role: 'PRACTICE MANAGER'
       })
     }
   }, [open, reset])
@@ -180,16 +180,11 @@ export default function NominatePracticeManagerDialog({
                     {...field}
                     labelId='role-select-label'
                     label='Role'
-                    value={field.value ?? ''}
-                    onChange={(e) => {
-                      field.onChange(e)
-                    }}
+                    value={field.value ?? 'PRACTICE MANAGER'}
+                    disabled
                   >
                     <MenuItem value='PRACTICE MANAGER'>
                       Practice Manager
-                    </MenuItem>
-                    <MenuItem value='PRACTICE OWNER'>
-                      Practice Owner/Principal
                     </MenuItem>
                   </Select>
                   {errors.role && (

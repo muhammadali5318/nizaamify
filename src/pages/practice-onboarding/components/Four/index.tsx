@@ -1,4 +1,3 @@
-// FILE: src/pages/SignUp/components/Four.tsx
 import React, { useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -28,6 +27,9 @@ import { useUpdateStepFour } from '../../hooks/useUpdateStepFour'
 import { isEqual } from 'lodash'
 import { useAuth0 } from '@auth0/auth0-react'
 import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
+import { useNavigate } from 'react-router'
+import { paths } from 'src/paths'
+import SaveAndExitDialogue from '../SaveAndExitDialogue/SaveAndExitDialogue'
 
 type StepFourProps = {
   formData: FormValues
@@ -38,28 +40,20 @@ type StepFourProps = {
   onNext?: (patch?: Partial<FormValues>) => void
   isSubmitting?: boolean
   serverErrors?: Record<string, string>
-  onSaveExitClick: () => void
+  onOpenNominate: () => void
 }
 
 const LEFT_REASONS = ['Track Profit', 'Save Time', 'Understand Performance']
 const RIGHT_REASONS = ['Reduce Cost', 'Meet NHS Targets', 'Other']
 
-// convert 'Monthly' -> 'MONTHLY', 'Rarely' -> 'RARELY', etc.
 const mapFrequencyToApi = (v: string) => v.toUpperCase()
-
-// convert 'Very Confident' -> 'VERY CONFIDENT'
 const mapConfidenceToApi = (v: string) => v.toUpperCase()
-
-// convert 'Visual Dashboards' -> 'VISUAL DASHBOARDS'
 const mapInsightsFormatToApi = (v: string) => v.toUpperCase()
-
-// Title-case each selected reason: 'Track profit' -> 'Track Profit'
 const toTitleCase = (s: string) =>
   s
     .split(' ')
     .map((w) => (w.length ? w[0].toUpperCase() + w.slice(1) : w))
     .join(' ')
-
 const mapPrimaryReasonsToApi = (reasons: string[]) =>
   reasons.map((r) => toTitleCase(r))
 
@@ -70,13 +64,15 @@ const StepFour: React.FC<StepFourProps> = ({
   activeStep,
   onNext,
   serverErrors = {},
-  onSaveExitClick
+  onOpenNominate
 }) => {
   const { user } = useAuth0()
   const orgUuid = getUserOrgUuid(user)
 
   const updateStepFour = useUpdateStepFour(orgUuid)
   const isSaving = updateStepFour.status === 'pending'
+  const navigate = useNavigate()
+
   const {
     control,
     handleSubmit,
@@ -122,16 +118,13 @@ const StepFour: React.FC<StepFourProps> = ({
       preferredInsightsFormat: data.preferredInsightsFormat
     }
 
-    // ✅ If no change, skip mutation, just navigate
     if (isEqual(patchForParent, formData)) {
       onNext?.()
       return
     }
 
-    // update parent state immediately
     setFormData(patchForParent)
 
-    // build payload expected by backend
     const payload = {
       financial_review_frequency: mapFrequencyToApi(
         data.frequencyOfFinancialReview
@@ -145,10 +138,56 @@ const StepFour: React.FC<StepFourProps> = ({
 
     updateStepFour.mutate(payload, {
       onSuccess: () => {
-        // ✅ navigate to Congratulations screen
         onNext?.(patchForParent)
       }
     })
+  }
+
+  // local dialog state + Save & Exit handler (with onInvalid behaviour)
+  const [openDialog, setOpenDialog] = React.useState(false)
+  const handleOpenDialog = () => setOpenDialog(true)
+  const handleCloseDialog = () => setOpenDialog(false)
+
+  const handleSaveExit = () => {
+    const onValid = (data: FormValues) => {
+      const patchForParent = {
+        frequencyOfFinancialReview: data.frequencyOfFinancialReview,
+        primaryReasons: data.primaryReasons,
+        confidenceReadingReports: data.confidenceReadingReports,
+        preferredInsightsFormat: data.preferredInsightsFormat
+      }
+
+      if (isEqual(patchForParent, formData)) {
+        navigate(paths.dashboard)
+        return
+      }
+
+      setFormData(patchForParent)
+
+      const payload = {
+        financial_review_frequency: mapFrequencyToApi(
+          data.frequencyOfFinancialReview
+        ),
+        primary_reasons: mapPrimaryReasonsToApi(data.primaryReasons ?? []),
+        confidence_reading_reports: mapConfidenceToApi(
+          data.confidenceReadingReports
+        ),
+        insights_format: mapInsightsFormatToApi(data.preferredInsightsFormat)
+      }
+
+      updateStepFour.mutate(payload, {
+        onSuccess: () => {
+          navigate(paths.dashboard)
+        }
+      })
+    }
+
+    const onInvalid = () => {
+      navigate(paths.dashboard)
+      handleCloseDialog()
+    }
+
+    handleSubmit(onValid, onInvalid)()
   }
 
   const hasBlockingServerErrors =
@@ -193,7 +232,7 @@ const StepFour: React.FC<StepFourProps> = ({
           {/* Primary reasons for using monai */}
           <Box>
             <Typography variant='h6' className='font-weight--700'>
-              Primary reasons for using monai:
+              Primary reasons for using Monai tech:
             </Typography>
 
             <Controller
@@ -213,7 +252,6 @@ const StepFour: React.FC<StepFourProps> = ({
                   <Box
                     sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}
                   >
-                    {/* Left column */}
                     <Stack spacing={1} sx={{ flex: 1 }}>
                       {LEFT_REASONS.map((label) => (
                         <FormControlLabel
@@ -229,7 +267,6 @@ const StepFour: React.FC<StepFourProps> = ({
                       ))}
                     </Stack>
 
-                    {/* Right column */}
                     <Stack spacing={1} sx={{ flex: 1 }}>
                       {RIGHT_REASONS.map((label) => (
                         <FormControlLabel
@@ -322,7 +359,7 @@ const StepFour: React.FC<StepFourProps> = ({
               size='large'
               variant='outlined'
               color='primary'
-              onClick={onSaveExitClick}
+              onClick={handleOpenDialog}
             >
               Save & exit
             </Button>
@@ -356,6 +393,20 @@ const StepFour: React.FC<StepFourProps> = ({
           </Stack>
         </Stack>
       </Box>
+
+      {/* Local Save & Exit dialog */}
+      <SaveAndExitDialogue
+        open={openDialog}
+        onClose={handleCloseDialog}
+        onOpenNominate={() => {
+          onOpenNominate()
+          handleCloseDialog()
+        }}
+        onConfirm={() => {
+          handleSaveExit()
+        }}
+        confirmLoading={isSaving}
+      />
     </Box>
   )
 }

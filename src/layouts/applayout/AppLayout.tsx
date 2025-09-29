@@ -26,16 +26,90 @@ import {
   MenuItemData,
   menuSections
 } from './applayout-config'
-import { useFeatureFlags } from '../../hooks/useFeatureFlags'
 import { useFeatureFlagContext } from '../../context/FeatureFlagProvider'
 import MobileTopBar from './components/MobileTopbar'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
 import { useAuth } from 'src/context/AuthProvider'
+import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
+import { featureFlagConfig } from 'src/config/feature-flag-config'
+import { FeatureFlagService } from 'src/services/FeatureFlagService'
+
+/**
+ * This component keeps the original styling exactly the same as the original file
+ * but uses FeatureFlagService + featureFlagConfig to decide whether to hide,
+ * disable, or enable modules.
+ */
+
+type ModuleRenderState = 'hidden' | 'disabled' | 'enabled'
+
+function evaluateModuleStateWithReason(
+  moduleId: string,
+  userContext: Record<string, any>
+): { state: ModuleRenderState; reason?: string } {
+  const moduleConfig = featureFlagConfig.modules.find(
+    (m) => m.id === (moduleId as any)
+  )
+  if (!moduleConfig) return { state: 'enabled' }
+
+  const requiredRules = moduleConfig.requiredRules || []
+  let sawDisable = false
+  let reason: string | undefined
+
+  for (const ruleId of requiredRules) {
+    const ok = FeatureFlagService.evaluateRule(ruleId, userContext)
+    if (ok) continue
+
+    const rule = FeatureFlagService.findRule(ruleId)
+    const visibility = (rule as any)?.visibility as
+      | 'hide'
+      | 'disable'
+      | undefined
+
+    // explicit visibility metadata
+    if (visibility === 'hide') {
+      reason =
+        moduleConfig.disabledMessage ||
+        rule?.description ||
+        `${moduleConfig.name} is disabled`
+      return { state: 'hidden', reason }
+    }
+    if (visibility === 'disable') {
+      reason =
+        moduleConfig.disabledMessage ||
+        rule?.description ||
+        `${moduleConfig.name} is disabled`
+      sawDisable = true
+      continue
+    }
+
+    // backwards compatibility mapping
+    if (ruleId === FEATURE_RULE_IDS.NOT_MANAGER) {
+      reason =
+        moduleConfig.disabledMessage ||
+        rule?.description ||
+        `${moduleConfig.name} is not available for your role`
+      return { state: 'hidden', reason }
+    }
+    if (ruleId === FEATURE_RULE_IDS.ONBOARDING_COMPLETED) {
+      reason = 'Complete onboarding to access this module'
+      sawDisable = true
+      continue
+    }
+
+    // unknown failing rule -> treat as disable
+    reason =
+      moduleConfig.disabledMessage ||
+      rule?.description ||
+      `${moduleConfig.name} is disabled`
+    sawDisable = true
+  }
+
+  return { state: sawDisable ? 'disabled' : 'enabled', reason }
+}
 
 export default function AppLayout() {
   const location = useLocation()
   const { userContext } = useFeatureFlagContext()
-  const { isModuleEnabled, getDisabledReason } = useFeatureFlags(userContext)
   const { accessToken } = useAuth()
   const { data: practiceData } = useInitialData(!!accessToken)
   const [selectedPractice, setSelectedPractice] = React.useState<string>('')
@@ -155,128 +229,203 @@ export default function AppLayout() {
       </Box>
 
       {/* Menu Sections */}
-      {menuSections?.map((section) => (
-        <List
-          key={section.title}
-          subheader={
-            <ListSubheader
-              sx={{
-                bgcolor: 'transparent',
-                fontWeight: 'bold',
-                color: 'text.secondary',
-                fontSize: '0.75rem',
-                lineHeight: 2,
-                textAlign: showLabels ? 'left' : 'center',
-                padding: '0px'
-              }}
-            >
-              <Typography
-                variant='subtitle2'
-                color='var(--color-primary-light)'
-              >
-                {section.title}
-              </Typography>
-            </ListSubheader>
-          }
-        >
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            {section.items.map((item) => {
-              const isActive = location.pathname.startsWith(item.to)
-              const moduleEnabled = isModuleEnabled(item.moduleId)
-              const disabledReason = getDisabledReason(item.moduleId)
+      {menuSections?.map((section) => {
+        // if every item in this section is hidden, skip rendering the section and its title
+        const hasVisibleItem = section.items.some((item) => {
+          const { state } = evaluateModuleStateWithReason(
+            item.moduleId,
+            userContext || {}
+          )
+          return state !== 'hidden'
+        })
+        if (!hasVisibleItem) return null
 
-              return (
-                <ListItem
-                  key={item.text}
-                  disablePadding
-                  sx={{ display: 'block' }}
+        return (
+          <List
+            key={section.title}
+            subheader={
+              <ListSubheader
+                sx={{
+                  bgcolor: 'transparent',
+                  fontWeight: 'bold',
+                  color: 'text.secondary',
+                  fontSize: '0.75rem',
+                  lineHeight: 2,
+                  textAlign: showLabels ? 'left' : 'center',
+                  padding: '0px'
+                }}
+              >
+                <Typography
+                  variant='subtitle2'
+                  color='var(--color-primary-light)'
                 >
-                  <Tooltip
-                    title={
-                      !showLabels
-                        ? moduleEnabled
-                          ? item.text
-                          : disabledReason || `${item.text} is disabled`
-                        : moduleEnabled
-                          ? ''
-                          : disabledReason || `${item.text} is disabled`
-                    }
-                    placement='right'
-                    arrow
-                  >
-                    <ListItemButton
-                      component={moduleEnabled ? Link : 'div'}
-                      to={moduleEnabled ? item.to : undefined}
-                      selected={isActive && moduleEnabled}
-                      onClick={
-                        moduleEnabled
-                          ? () => {
-                              setActiveItem(item)
-                              if (isMobile) setMobileOpen(false)
-                            }
-                          : undefined
-                      }
-                      disabled={!moduleEnabled}
-                      sx={{
-                        minHeight: 44,
-                        margin: '0 auto',
-                        justifyContent: showLabels ? 'initial' : 'center',
-                        width: showLabels ? 'auto' : '56px',
-                        borderRadius: '12px',
-                        transition: 'background-color 0.2s ease',
-                        opacity: moduleEnabled ? 1 : 0.5,
-                        cursor: moduleEnabled ? 'pointer' : 'not-allowed',
-                        '&.Mui-selected': {
-                          backgroundColor: 'var(--grey-300)'
-                        },
-                        '&.Mui-disabled': {
-                          opacity: 0.5
-                        }
-                      }}
+                  {section.title}
+                </Typography>
+              </ListSubheader>
+            }
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              {section.items.map((item) => {
+                const isActive = location.pathname.startsWith(item.to)
+
+                // Decide rendering based on feature rules and role/onboarding
+                const { state, reason } = evaluateModuleStateWithReason(
+                  item.moduleId,
+                  userContext || {}
+                )
+
+                // Hidden -> don't render single item
+                if (state === 'hidden') return null
+
+                const showTooltip = !showLabels
+
+                // Disabled (show but not clickable)
+                if (state === 'disabled') {
+                  return (
+                    <ListItem
+                      key={item.text}
+                      disablePadding
+                      sx={{ display: 'block' }}
                     >
-                      <ListItemIcon
+                      <Tooltip
+                        title={
+                          showTooltip
+                            ? reason || `${item.text} is disabled`
+                            : reason || `${item.text} is disabled`
+                        }
+                        placement='right'
+                        arrow
+                      >
+                        <ListItemButton
+                          component={'div'}
+                          selected={false}
+                          disabled
+                          sx={{
+                            minHeight: 44,
+                            margin: '0 auto',
+                            justifyContent: showLabels ? 'initial' : 'center',
+                            width: showLabels ? 'auto' : '56px',
+                            borderRadius: '12px',
+                            transition: 'background-color 0.2s ease',
+                            opacity: 0.5,
+                            cursor: 'not-allowed',
+                            '&.Mui-selected': {
+                              backgroundColor: 'var(--grey-300)'
+                            },
+                            '&.Mui-disabled': {
+                              opacity: 0.5
+                            }
+                          }}
+                        >
+                          <ListItemIcon
+                            sx={{
+                              minWidth: 0,
+                              mr: showLabels ? 2 : 0,
+                              justifyContent: 'center',
+                              opacity: 0.5
+                            }}
+                          >
+                            <img
+                              src={`/assets/${isActive ? item.activeIcon : item.inactiveIcon}`}
+                              alt={`${item.text} icon`}
+                              style={{
+                                width: 24,
+                                height: 24,
+                                display: 'block',
+                                filter: 'grayscale(100%)'
+                              }}
+                            />
+                          </ListItemIcon>
+                          {showLabels && (
+                            <ListItemText>
+                              <Typography
+                                variant='subtitle2'
+                                color={'var(--color-primary-light)'}
+                              >
+                                {item.text}
+                              </Typography>
+                            </ListItemText>
+                          )}
+                        </ListItemButton>
+                      </Tooltip>
+                    </ListItem>
+                  )
+                }
+
+                // Enabled state: render like original
+                return (
+                  <ListItem
+                    key={item.text}
+                    disablePadding
+                    sx={{ display: 'block' }}
+                  >
+                    <Tooltip
+                      title={!showLabels ? item.text : ''}
+                      placement='right'
+                      arrow
+                    >
+                      <ListItemButton
+                        component={Link}
+                        to={item.to}
+                        selected={isActive}
+                        onClick={() => {
+                          setActiveItem(item)
+                          if (isMobile) setMobileOpen(false)
+                        }}
                         sx={{
-                          minWidth: 0,
-                          mr: showLabels ? 2 : 0,
-                          justifyContent: 'center',
-                          opacity: moduleEnabled ? 1 : 0.5
+                          minHeight: 44,
+                          margin: '0 auto',
+                          justifyContent: showLabels ? 'initial' : 'center',
+                          width: showLabels ? 'auto' : '56px',
+                          borderRadius: '12px',
+                          transition: 'background-color 0.2s ease',
+                          opacity: 1,
+                          cursor: 'pointer',
+                          '&.Mui-selected': {
+                            backgroundColor: 'var(--grey-300)'
+                          },
+                          '&.Mui-disabled': {
+                            opacity: 0.5
+                          }
                         }}
                       >
-                        <img
-                          src={`/assets/${isActive && moduleEnabled ? item.activeIcon : item.inactiveIcon}`}
-                          alt={`${item.text} icon`}
-                          style={{
-                            width: 24,
-                            height: 24,
-                            display: 'block',
-                            filter: moduleEnabled ? 'none' : 'grayscale(100%)'
+                        <ListItemIcon
+                          sx={{
+                            minWidth: 0,
+                            mr: showLabels ? 2 : 0,
+                            justifyContent: 'center',
+                            opacity: 1
                           }}
-                        />
-                      </ListItemIcon>
-                      {showLabels && (
-                        <ListItemText>
-                          <Typography
-                            variant='subtitle2'
-                            color={
-                              moduleEnabled
-                                ? isActive
+                        >
+                          <img
+                            src={`/assets/${isActive ? item.activeIcon : item.inactiveIcon}`}
+                            alt={`${item.text} icon`}
+                            style={{ width: 24, height: 24, display: 'block' }}
+                          />
+                        </ListItemIcon>
+                        {showLabels && (
+                          <ListItemText>
+                            <Typography
+                              variant='subtitle2'
+                              color={
+                                isActive
                                   ? 'var(--color-primary-black)'
                                   : 'var(--color-primary-light)'
-                                : 'var(--color-primary-light)'
-                            }
-                          >
-                            {item.text}
-                          </Typography>
-                        </ListItemText>
-                      )}
-                    </ListItemButton>
-                  </Tooltip>
-                </ListItem>
-              )
-            })}
-          </Box>
-        </List>
-      ))}
+                              }
+                            >
+                              {item.text}
+                            </Typography>
+                          </ListItemText>
+                        )}
+                      </ListItemButton>
+                    </Tooltip>
+                  </ListItem>
+                )
+              })}
+            </Box>
+          </List>
+        )
+      })}
     </Stack>
   )
 

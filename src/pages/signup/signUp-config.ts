@@ -1,9 +1,9 @@
 import { SignupFormDataSet } from './types'
 
 export const steps = [
-  { heading: 'User Information', subHeading: 'Basic user details' },
-  { heading: 'Practice Information', subHeading: 'Basic practice details' },
-  { heading: 'Password Setup', subHeading: 'Password details' }
+  { heading: 'User information', subHeading: 'Basic user details' },
+  { heading: 'Practice information', subHeading: 'Basic practice details' },
+  { heading: 'Password setup', subHeading: 'Password details' }
 ]
 
 export const generatePayloadForSignUp = (form: SignupFormDataSet) => {

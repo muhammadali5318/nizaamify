@@ -114,7 +114,7 @@ const SendVerificationEmail: React.FC<Props> = ({ email }) => {
         }}
       >
         <RegistrationHeader
-          heading='Welcome to monai!'
+          heading='Welcome to Monai tech!'
           subHeading='Let’s get you onboarded!'
         />
         <Box className={styles.emailVerificationRoot}>

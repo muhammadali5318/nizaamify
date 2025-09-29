@@ -19,10 +19,7 @@ import { steps } from './practice-onboarding-config'
 import RegistrationHeader from 'src/components/registration-wrapper/RegistrationHeader'
 import NominateNowContainer from 'src/components/nominate-now'
 
-import SaveAndExitDialogue from './components/SaveAndExitDialogue/SaveAndExitDialogue'
 import NominatePracticeManagerDialog from 'src/components/nomiate-practice-manage'
-import { useNavigate } from 'react-router'
-import { paths } from 'src/paths'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
 import { mapPracticeApiToForm } from './mapPracticeToForm'
 import Congratulations from 'src/components/congratulations'
@@ -72,7 +69,6 @@ const initialStepFour: StepFourFormValues = {
 
 const PracticeOnboardingFlow: React.FC = () => {
   const { user } = useAuth0()
-  const navigate = useNavigate()
   const { accessToken } = useAuth()
   const { data: practice, isLoading } = useInitialData(!!accessToken)
 
@@ -88,11 +84,6 @@ const PracticeOnboardingFlow: React.FC = () => {
   const [stepFourData, setStepFourData] =
     useState<StepFourFormValues>(initialStepFour)
 
-  const [openDialog, setOpenDialog] = useState(false)
-
-  const handleSaveExitClick = () => setOpenDialog(true)
-  const handleDialogClose = () => setOpenDialog(false)
-
   const [openNominate, setOpenNominate] = useState(false)
 
   useEffect(() => {
@@ -105,10 +96,6 @@ const PracticeOnboardingFlow: React.FC = () => {
     setStepFour(mapped.stepFour)
     setActiveStep(mapped.activeStep)
   }, [practice])
-  const handleSaveAndExit = () => {
-    navigate(paths.dashboard)
-    setOpenDialog(false)
-  }
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [serverErrors, setServerErrors] = useState<Record<string, string>>({})
@@ -184,7 +171,7 @@ const PracticeOnboardingFlow: React.FC = () => {
             setFormData={setStepOne}
             onNext={(patch?: Partial<StepOneFormValues>) => handleNext(patch)}
             activeStep={activeStep}
-            onSaveExitClick={handleSaveExitClick}
+            onOpenNominate={() => setOpenNominate(true)}
           />
         )
       case 1:
@@ -195,7 +182,7 @@ const PracticeOnboardingFlow: React.FC = () => {
             onNext={(patch?: Partial<StepTwoFormValues>) => handleNext(patch)}
             onBack={handleBack}
             activeStep={activeStep}
-            onSaveExitClick={handleSaveExitClick}
+            onOpenNominate={() => setOpenNominate(true)}
           />
         )
       case 2:
@@ -205,13 +192,10 @@ const PracticeOnboardingFlow: React.FC = () => {
             setFormData={setStepThree}
             onBack={handleBack}
             onNext={(patch?: Partial<StepThreeFormValues>) => handleNext(patch)}
-            onSubmit={() =>
-              /* noop here; final submit happens in StepFour */ null
-            }
             activeStep={activeStep}
             isSubmitting={isSubmitting}
             serverErrors={serverErrors}
-            onSaveExitClick={handleSaveExitClick}
+            onOpenNominate={() => setOpenNominate(true)}
           />
         )
       case 3:
@@ -227,7 +211,7 @@ const PracticeOnboardingFlow: React.FC = () => {
             activeStep={activeStep}
             isSubmitting={isSubmitting}
             serverErrors={serverErrors}
-            onSaveExitClick={handleSaveExitClick}
+            onOpenNominate={() => setOpenNominate(true)}
           />
         )
       default:
@@ -254,7 +238,7 @@ const PracticeOnboardingFlow: React.FC = () => {
           <RegistrationHeader
             heading={
               <>
-                Welcome to monai{' '}
+                Welcome to Monai tech{' '}
                 <span className='font-weight--700'>{user?.family_name}!</span>
               </>
             }
@@ -337,12 +321,6 @@ const PracticeOnboardingFlow: React.FC = () => {
           </>
         )}
       </Box>
-      <SaveAndExitDialogue
-        open={openDialog}
-        onClose={handleDialogClose}
-        onOpenNominate={() => setOpenNominate(true)}
-        onConfirm={handleSaveAndExit}
-      />
       <NominatePracticeManagerDialog
         open={openNominate}
         onClose={() => setOpenNominate(false)}

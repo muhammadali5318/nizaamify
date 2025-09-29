@@ -66,8 +66,8 @@ const ChooseOnboardingFlow = () => {
           component='div'
           sx={{ margin: 0 }}
         >
-          Complete your practice onboarding to unlock the full Monai experience
-          or nominate your Practice Manager to get started right away
+          Complete your practice onboarding to unlock the full Monai tech
+          experience or nominate your Practice Manager to get started right away
         </Typography>
       </Alert>
       <NominatePracticeManagerDialog

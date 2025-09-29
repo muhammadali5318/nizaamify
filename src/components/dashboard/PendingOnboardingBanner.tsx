@@ -19,7 +19,7 @@ const PendingOnboardingBanner = () => {
         />
         <Typography variant='subtitle1' color='var(--color-warning-dark)'>
           <span className='font-weight--700'> Practice onboarding </span>{' '}
-          required to access financial insights, Benchmarking and document
+          required to access financial insights, benchmarking and document
           analysis.
         </Typography>
       </Box>

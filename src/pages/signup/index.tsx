@@ -218,7 +218,7 @@ const SignUp: React.FC = () => {
         }}
       >
         <RegistrationHeader
-          heading='Welcome to monai!'
+          heading='Welcome to Monai tech!'
           subHeading='Let’s get you onboarded!'
         />
 

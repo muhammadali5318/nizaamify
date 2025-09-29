@@ -1,4 +1,5 @@
 // FILE: src/schema-validations/stepOne.ts
+import parsePhoneNumberFromString from 'libphonenumber-js'
 import { z } from 'zod'
 
 export const StepOneSchema = z.object({
@@ -9,7 +10,18 @@ export const StepOneSchema = z.object({
     .string()
     .min(1, 'Practice address is required')
     .max(300, 'Practice address must be 300 characters or less'),
-  phone: z.string().min(1, 'Contact number is required'),
+  phone: z
+    .string()
+    .nonempty('Phone is required')
+    .refine(
+      (val) => {
+        const phoneNumber = parsePhoneNumberFromString(val || '')
+        return phoneNumber?.isValid() ?? false
+      },
+      {
+        message: 'Please enter a valid phone number'
+      }
+    ),
   email: z
     .string()
     .optional()

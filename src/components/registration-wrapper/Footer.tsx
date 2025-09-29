@@ -6,11 +6,11 @@ const Footer = () => {
     <Box className={styles.footerRoot}>
       <Stack direction={'row'} gap={1.1}>
         <Typography variant='subtitle2' color='var(--color-text-secondary)'>
-          Privacy Policy
+          Privacy policy
         </Typography>
         <Divider orientation='vertical' flexItem />
         <Typography variant='subtitle2' color='var(--color-text-secondary)'>
-          Terms & Conditions
+          Terms & conditions
         </Typography>
       </Stack>
       <Typography
@@ -18,7 +18,7 @@ const Footer = () => {
         color='var(--color-text-secondary)'
         align='center'
       >
-        Copyright © {new Date().getFullYear()} Monai Inc. All rights reserved.
+        Copyright © {new Date().getFullYear()} Monai tech. All rights reserved.
       </Typography>
     </Box>
   )

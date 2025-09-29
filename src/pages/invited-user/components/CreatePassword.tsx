@@ -1,52 +1,36 @@
 import { LoadingButton } from '@mui/lab'
-import { Box, Stack, Typography, FormHelperText } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { useForm } from 'react-hook-form'
 import PasswordField from 'src/components/common/PasswordField'
 import { zodResolver } from '@hookform/resolvers/zod'
 import styles from './CreatePassoword.module.scss'
 import {
-  SignupStepThreeFormValues,
-  SignupStepThreeSchema
-} from 'src/schema-validations/signupStepThreeValidations'
-import AgreementsCheckboxes from 'src/components/agreement-checkboxes'
+  inviteUserPasswordSetupSchemaFormValues,
+  inviteUserPasswordSetupSchema
+} from 'src/schema-validations/inviteUserPasswordSetup'
 
 type CreatePasswordProps = {
   setStep?: React.Dispatch<React.SetStateAction<number>>
-  onNext: (data: SignupStepThreeFormValues) => Promise<any> | any
+  onNext: (data: inviteUserPasswordSetupSchemaFormValues) => Promise<any> | any
 }
 
 const CreatePassword: React.FC<CreatePasswordProps> = ({ onNext }) => {
   const {
     control,
     handleSubmit,
-    watch,
-    formState: { isValid, isSubmitted, isSubmitting }
-  } = useForm<SignupStepThreeFormValues>({
-    resolver: zodResolver(SignupStepThreeSchema),
+    formState: { isValid, isSubmitting }
+  } = useForm<inviteUserPasswordSetupSchemaFormValues>({
+    resolver: zodResolver(inviteUserPasswordSetupSchema),
     mode: 'onChange',
     defaultValues: {
       password: '',
-      confirmPassword: '',
-      terms: false,
-      privacy: false,
-      disclaimer: false,
-      gdpr: false
+      confirmPassword: ''
     }
   })
 
-  const onSubmit = async (data: SignupStepThreeFormValues) => {
+  const onSubmit = async (data: inviteUserPasswordSetupSchemaFormValues) => {
     await onNext(data)
   }
-
-  // ✅ Watch checkboxes
-  const [terms, privacy, disclaimer, gdpr] = watch([
-    'terms',
-    'privacy',
-    'disclaimer',
-    'gdpr'
-  ])
-
-  const allChecked = Boolean(terms && privacy && disclaimer && gdpr)
 
   return (
     <Box>
@@ -83,16 +67,6 @@ const CreatePassword: React.FC<CreatePasswordProps> = ({ onNext }) => {
             />
           </Stack>
 
-          <Stack>
-            <AgreementsCheckboxes control={control} hideIndividualErrors />
-
-            {!allChecked && isSubmitted && (
-              <FormHelperText error sx={{ mt: 1 }}>
-                Please confirm to continue
-              </FormHelperText>
-            )}
-          </Stack>
-
           <LoadingButton
             fullWidth
             type='submit'
@@ -100,7 +74,7 @@ const CreatePassword: React.FC<CreatePasswordProps> = ({ onNext }) => {
             variant='contained'
             color='primary'
             loading={isSubmitting}
-            disabled={!isValid || isSubmitting || !allChecked}
+            disabled={!isValid || isSubmitting}
           >
             Save & continue
           </LoadingButton>

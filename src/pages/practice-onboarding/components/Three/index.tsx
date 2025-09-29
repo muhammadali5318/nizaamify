@@ -23,6 +23,9 @@ import {
 import { useUpdateStepThree } from '../../hooks/useUpdateStepThree'
 import { useAuth0 } from '@auth0/auth0-react'
 import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
+import { useNavigate } from 'react-router'
+import { paths } from 'src/paths'
+import SaveAndExitDialogue from '../SaveAndExitDialogue/SaveAndExitDialogue'
 
 type StepThreeProps = {
   formData: FormValues
@@ -33,7 +36,7 @@ type StepThreeProps = {
   activeStep: number
   isSubmitting?: boolean
   serverErrors?: Record<string, string>
-  onSaveExitClick: () => void
+  onOpenNominate: () => void
 }
 
 const StepThree: React.FC<StepThreeProps> = ({
@@ -43,10 +46,11 @@ const StepThree: React.FC<StepThreeProps> = ({
   onNext,
   activeStep,
   isSubmitting = false,
-  onSaveExitClick
+  onOpenNominate
 }) => {
   const { user } = useAuth0()
   const orgUuid = getUserOrgUuid(user)
+  const navigate = useNavigate()
 
   const updateStepThree = useUpdateStepThree(orgUuid)
   const {
@@ -71,6 +75,11 @@ const StepThree: React.FC<StepThreeProps> = ({
       useOfAccountantBookkeeper: formData.useOfAccountantBookkeeper
     })
   }, [formData, reset])
+
+  // local dialog state
+  const [openDialog, setOpenDialog] = React.useState(false)
+  const handleOpenDialog = () => setOpenDialog(true)
+  const handleCloseDialog = () => setOpenDialog(false)
 
   const submit = (data: FormValues) => {
     const newValues: FormValues = {
@@ -98,6 +107,40 @@ const StepThree: React.FC<StepThreeProps> = ({
         console.error('Step 3 save failed', err)
       }
     })
+  }
+
+  // Save & Exit handler: validate & save, then navigate to dashboard
+  // If validation fails, close modal and focus first errored field.
+  const handleSaveExit = () => {
+    const onValid = (data: FormValues) => {
+      const newValues: FormValues = {
+        practiceManagementSoftware: data.practiceManagementSoftware,
+        accountingSoftware: data.accountingSoftware,
+        useOfAccountantBookkeeper: data.useOfAccountantBookkeeper
+      }
+
+      // update parent state
+      setFormData(newValues)
+
+      const payload = {
+        management_software: newValues.practiceManagementSoftware,
+        accounting_software: newValues.accountingSoftware,
+        accountant_bookkeeper_use: newValues.useOfAccountantBookkeeper
+      }
+
+      updateStepThree.mutate(payload, {
+        onSuccess: () => {
+          navigate(paths.dashboard)
+        }
+      })
+    }
+
+    const onInvalid = () => {
+      navigate(paths.dashboard)
+      handleCloseDialog()
+    }
+
+    handleSubmit(onValid, onInvalid)()
   }
 
   const isSaving = updateStepThree?.status === 'pending'
@@ -215,7 +258,7 @@ const StepThree: React.FC<StepThreeProps> = ({
               size='large'
               variant='outlined'
               color='primary'
-              onClick={onSaveExitClick}
+              onClick={handleOpenDialog}
             >
               Save & exit
             </Button>
@@ -249,6 +292,20 @@ const StepThree: React.FC<StepThreeProps> = ({
           </Stack>
         </Stack>
       </Box>
+
+      {/* Local Save & Exit dialog */}
+      <SaveAndExitDialogue
+        open={openDialog}
+        onClose={handleCloseDialog}
+        onOpenNominate={() => {
+          onOpenNominate()
+          handleCloseDialog()
+        }}
+        onConfirm={() => {
+          handleSaveExit()
+        }}
+        confirmLoading={isSaving}
+      />
     </Box>
   )
 }

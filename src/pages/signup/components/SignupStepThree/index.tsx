@@ -122,6 +122,23 @@ const SignupStepThree: React.FC<Props> = ({
     }
   }, [serverErrors])
 
+  // --- add this above the return (inside the component) ---
+  const handleBackAndSave = () => {
+    const values = getValues()
+
+    const patch = {
+      password: values.password ?? '',
+      confirmPassword: values.confirmPassword ?? '',
+      terms: Boolean(values.terms),
+      privacy: Boolean(values.privacy),
+      disclaimer: Boolean(values.disclaimer),
+      gdpr: Boolean(values.gdpr)
+    }
+
+    setFormData(patch)
+    onBack?.()
+  }
+
   return (
     <Box>
       <FormHeader activeStep={activeStep} />
@@ -160,7 +177,7 @@ const SignupStepThree: React.FC<Props> = ({
               size='large'
               variant='outlined'
               color='primary'
-              onClick={onBack}
+              onClick={handleBackAndSave}
               startIcon={<ChevronLeft />}
             >
               Back

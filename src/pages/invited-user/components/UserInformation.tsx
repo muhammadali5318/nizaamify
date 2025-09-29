@@ -34,7 +34,7 @@ const UserInformationSchema = z.object({
     message: 'You must accept Terms'
   }),
   privacy: z.boolean().refine((val) => val === true, {
-    message: 'You must accept Privacy Policy'
+    message: 'You must accept Privacy policy'
   }),
   disclaimer: z.boolean().refine((val) => val === true, {
     message: 'You must accept Disclaimer'

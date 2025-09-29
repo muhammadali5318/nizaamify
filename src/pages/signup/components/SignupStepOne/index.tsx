@@ -23,7 +23,6 @@ import {
   FormHelperText,
   Alert,
   Typography,
-  FormControlLabel,
   Checkbox
 } from '@mui/material'
 import PhoneField from 'src/components/phone-field'
@@ -174,28 +173,26 @@ const SignupStepOne: React.FC<Props> = ({
               control={control}
               render={({ field, fieldState }) => (
                 <FormControl error={!!fieldState.error}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        {...field}
-                        checked={field.value}
-                        onChange={(e) => field.onChange(e.target.checked)}
-                      />
-                    }
-                    label={
-                      <Typography variant='body1'>
-                        I am{' '}
-                        <span className='info-main font-weight--700'>
-                          Practice Owner
-                        </span>{' '}
-                        and/or{' '}
-                        <span className='info-main font-weight--700'>
-                          Company Director
-                        </span>{' '}
-                        *
-                      </Typography>
-                    }
-                  />
+                  <Stack direction='row' alignItems='center'>
+                    <Checkbox
+                      checked={field.value}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      slotProps={{ input: { ref: field.ref } }}
+                    />
+                    <Typography variant='body1'>
+                      I am{' '}
+                      <span className='info-main font-weight--700'>
+                        Practice Owner
+                      </span>{' '}
+                      and/or{' '}
+                      <span className='info-main font-weight--700'>
+                        Company Director
+                      </span>{' '}
+                      *
+                    </Typography>
+                  </Stack>
                   <FormHelperText>{fieldState.error?.message}</FormHelperText>
                 </FormControl>
               )}

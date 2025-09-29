@@ -1,11 +1,5 @@
 import React from 'react'
-import {
-  Stack,
-  FormControlLabel,
-  Checkbox,
-  Typography,
-  FormHelperText
-} from '@mui/material'
+import { Stack, Checkbox, Typography, FormHelperText } from '@mui/material'
 import { Controller, Control, Path, FieldValues } from 'react-hook-form'
 
 type AgreementKeys = 'terms' | 'privacy' | 'disclaimer' | 'gdpr'
@@ -24,25 +18,31 @@ const LABELS: Record<AgreementKeys, React.ReactNode> = {
   terms: (
     <>
       I agree to the{' '}
-      <span className='info-main font-weight--700'>Terms of Service</span>
+      <span className='info-main font-weight--700 cursor-pointer'>
+        Terms of service
+      </span>
     </>
   ),
   privacy: (
     <>
       I agree to the{' '}
-      <span className='info-main font-weight--700'>Privacy Policy</span>
+      <span className='info-main font-weight--700 cursor-pointer'>
+        Privacy policy
+      </span>
     </>
   ),
   disclaimer: (
     <>
       I acknowledge the{' '}
-      <span className='info-main font-weight--700'>Financial Disclaimer</span>
+      <span className='info-main font-weight--700 cursor-pointer'>
+        Financial disclaimer
+      </span>
     </>
   ),
   gdpr: (
     <>
       I consent to data usage under{' '}
-      <span className='info-main font-weight--700'>GDPR</span>
+      <span className='info-main font-weight--700 cursor-pointer'>GDPR</span>
     </>
   )
 }
@@ -67,18 +67,16 @@ function AgreementsCheckboxes<TFieldValues extends FieldValues>({
       control={control}
       render={({ field, fieldState }) => (
         <>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={!!field.value}
-                onChange={(e) => field.onChange(e.target.checked)}
-                onBlur={field.onBlur}
-                name={field.name}
-                inputRef={field.ref}
-              />
-            }
-            label={<Typography variant='body1'>{LABELS[key]}</Typography>}
-          />
+          <Stack direction='row' alignItems='center'>
+            <Checkbox
+              checked={!!field.value}
+              onChange={(e) => field.onChange(e.target.checked)}
+              onBlur={field.onBlur}
+              name={field.name}
+              slotProps={{ input: { ref: field.ref } }}
+            />
+            <Typography variant='body1'>{LABELS[key]}</Typography>
+          </Stack>
           {!hideIndividualErrors && fieldState.error && (
             <FormHelperText error>
               {(fieldState.error as any)?.message}
