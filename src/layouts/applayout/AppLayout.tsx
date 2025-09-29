@@ -34,12 +34,6 @@ import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
 import { featureFlagConfig } from 'src/config/feature-flag-config'
 import { FeatureFlagService } from 'src/services/FeatureFlagService'
 
-/**
- * This component keeps the original styling exactly the same as the original file
- * but uses FeatureFlagService + featureFlagConfig to decide whether to hide,
- * disable, or enable modules.
- */
-
 type ModuleRenderState = 'hidden' | 'disabled' | 'enabled'
 
 function evaluateModuleStateWithReason(
@@ -65,7 +59,6 @@ function evaluateModuleStateWithReason(
       | 'disable'
       | undefined
 
-    // explicit visibility metadata
     if (visibility === 'hide') {
       reason =
         moduleConfig.disabledMessage ||
@@ -82,7 +75,6 @@ function evaluateModuleStateWithReason(
       continue
     }
 
-    // backwards compatibility mapping
     if (ruleId === FEATURE_RULE_IDS.NOT_MANAGER) {
       reason =
         moduleConfig.disabledMessage ||
@@ -96,7 +88,6 @@ function evaluateModuleStateWithReason(
       continue
     }
 
-    // unknown failing rule -> treat as disable
     reason =
       moduleConfig.disabledMessage ||
       rule?.description ||
@@ -120,12 +111,9 @@ export default function AppLayout() {
     }
   }, [practiceData])
 
-  // eslint-disable-next-line no-console
-  console.log(practiceData)
-
   const isMobile = useMediaQuery('(max-width:768px)')
+  const isCollapsedBreakpoint = useMediaQuery('(max-width:1024px)')
 
-  // Desktop open state persisted to localStorage
   const [open, setOpen] = React.useState<boolean>(() => {
     const stored = localStorage.getItem('drawerOpen')
     return stored ? JSON.parse(stored) : true
@@ -135,6 +123,17 @@ export default function AppLayout() {
   const [mobileOpen, setMobileOpen] = React.useState(false)
 
   const [activeItem, setActiveItem] = React.useState<MenuItemData | null>(null)
+
+  React.useEffect(() => {
+    const stored = localStorage.getItem('drawerOpen')
+    const parsed = stored ? JSON.parse(stored) : true
+
+    if (isCollapsedBreakpoint) {
+      setOpen(false)
+    } else {
+      setOpen(parsed)
+    }
+  }, [isCollapsedBreakpoint])
 
   // Toggle desktop drawer & persist
   const toggleDrawer = () => {
@@ -163,7 +162,6 @@ export default function AppLayout() {
     }
   }, [location.pathname])
 
-  // Reusable drawer content
   const renderDrawerContent = (showLabels: boolean) => (
     <Stack spacing={2}>
       {/* Sidebar Header */}
@@ -230,7 +228,6 @@ export default function AppLayout() {
 
       {/* Menu Sections */}
       {menuSections?.map((section) => {
-        // if every item in this section is hidden, skip rendering the section and its title
         const hasVisibleItem = section.items.some((item) => {
           const { state } = evaluateModuleStateWithReason(
             item.moduleId,
@@ -267,19 +264,14 @@ export default function AppLayout() {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
               {section.items.map((item) => {
                 const isActive = location.pathname.startsWith(item.to)
-
-                // Decide rendering based on feature rules and role/onboarding
                 const { state, reason } = evaluateModuleStateWithReason(
                   item.moduleId,
                   userContext || {}
                 )
-
-                // Hidden -> don't render single item
                 if (state === 'hidden') return null
 
                 const showTooltip = !showLabels
 
-                // Disabled (show but not clickable)
                 if (state === 'disabled') {
                   return (
                     <ListItem
@@ -312,9 +304,7 @@ export default function AppLayout() {
                             '&.Mui-selected': {
                               backgroundColor: 'var(--grey-300)'
                             },
-                            '&.Mui-disabled': {
-                              opacity: 0.5
-                            }
+                            '&.Mui-disabled': { opacity: 0.5 }
                           }}
                         >
                           <ListItemIcon
@@ -352,7 +342,6 @@ export default function AppLayout() {
                   )
                 }
 
-                // Enabled state: render like original
                 return (
                   <ListItem
                     key={item.text}
@@ -384,9 +373,7 @@ export default function AppLayout() {
                           '&.Mui-selected': {
                             backgroundColor: 'var(--grey-300)'
                           },
-                          '&.Mui-disabled': {
-                            opacity: 0.5
-                          }
+                          '&.Mui-disabled': { opacity: 0.5 }
                         }}
                       >
                         <ListItemIcon

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Controller } from 'react-hook-form'
 
 const PasswordField: React.FC<{
-  name: 'password' | 'confirmPassword'
+  name: 'password' | 'confirmPassword' | 'newPassword' | 'currentPassword'
   label: string
   control: any
   helperText?: string
@@ -26,9 +26,6 @@ const PasswordField: React.FC<{
             fieldState.error?.message ? fieldState.error?.message : helperText
           }
           slotProps={{
-            inputLabel: {
-              shrink: true
-            },
             input: {
               autoComplete: 'off',
               endAdornment: (

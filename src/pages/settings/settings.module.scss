@@ -1,0 +1,69 @@
+.settingsRoot {
+  display: flex;
+  padding: 24px 158px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  flex-shrink: 0;
+
+  .settingsContent {
+    width: 100%;
+    max-width: 650px;
+    min-width: 650px;
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 1200px) {
+  .settingsRoot {
+    padding: 24px 75px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .settingsRoot {
+    padding: 24px 24px;
+    .settingsContent {
+      max-width: 600px;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .settingsRoot {
+    padding: 24px 18px;
+    .settingsContent {
+      max-width: 100%;
+      width: 100%;
+    }
+  }
+
+  .settingsRoot .settingsContent,
+  .settingsRoot .MuiList-root {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .settingsRoot {
+    /* ensure the menu (MUI List) sits above and is scrollable */
+    .MuiList-root {
+      /* horizontal scroll and smooth touch scrolling */
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding-left: 4px;
+      padding-right: 8px;
+      margin-bottom: 8px;
+    }
+
+    /* each list item inline-block behavior for better touch targets */
+    .MuiListItemButton-root {
+      display: inline-flex;
+      vertical-align: middle;
+      white-space: nowrap;
+      /* spacing handled in component sx, but add safe fallback */
+      margin-right: 8px;
+    }
+  }
+}

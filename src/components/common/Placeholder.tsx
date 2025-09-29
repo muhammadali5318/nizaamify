@@ -1,16 +1,10 @@
-import { Box, Button, Typography } from '@mui/material'
-import { useAuth } from 'src/context/AuthProvider'
-import { useInitialData } from 'src/hooks/useFetchInitialData'
-import { queryClient } from 'src/utils/queryClient'
+import { Box, Typography } from '@mui/material'
 
 type PlaceholderProps = {
   title: string
 }
 
 const Placeholder = ({ title }: PlaceholderProps) => {
-  const { accessToken } = useAuth()
-  const { data: practice } = useInitialData(!!accessToken)
-
   return (
     <Box
       sx={{
@@ -33,13 +27,6 @@ const Placeholder = ({ title }: PlaceholderProps) => {
         <Typography variant='body1' color='var(--text-secondary)'>
           {title} view here soon
         </Typography>
-        <Button
-          onClick={() =>
-            queryClient.refetchQueries({ queryKey: ['initialData'] })
-          }
-        >
-          {practice?.practice_name}
-        </Button>
       </Box>
     </Box>
   )
