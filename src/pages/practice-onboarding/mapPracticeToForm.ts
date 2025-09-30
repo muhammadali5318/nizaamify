@@ -35,12 +35,18 @@ const normalizeString = (v?: string | null, fallback = '') =>
 const toNumberOrZero = (v?: number | null) =>
   typeof v === 'number' && !Number.isNaN(v) ? v : 0
 
-type ManagementSoftware = 'EXACT' | 'DENTALLY' | 'R4' | 'CARESTREAM' | 'OTHER'
-type AccountingSoftware = 'XERO' | 'QUICKBOOKS' | 'OTHER' | 'NONE'
-type AccountantBookkeeperUse = 'INTERNAL' | 'EXTERNAL' | 'NONE'
+type ManagementSoftware =
+  | ''
+  | 'EXACT'
+  | 'DENTALLY'
+  | 'R4'
+  | 'CARESTREAM'
+  | 'OTHER'
+type AccountingSoftware = '' | 'XERO' | 'QUICKBOOKS' | 'OTHER' | 'NONE'
+type AccountantBookkeeperUse = '' | 'INTERNAL' | 'EXTERNAL' | 'NONE'
 
 const mapManagementSoftware = (v?: string | null): ManagementSoftware => {
-  if (!v) return 'EXACT'
+  if (!v) return ''
   const n = v.toUpperCase()
   if (['EXACT', 'DENTALLY', 'R4', 'CARESTREAM', 'OTHER'].includes(n)) {
     return n as ManagementSoftware
@@ -49,7 +55,7 @@ const mapManagementSoftware = (v?: string | null): ManagementSoftware => {
 }
 
 const mapAccountingSoftware = (v?: string | null): AccountingSoftware => {
-  if (!v) return 'XERO'
+  if (!v) return ''
   const n = v.toUpperCase()
   if (['XERO', 'QUICKBOOKS', 'OTHER', 'NONE'].includes(n)) {
     return n as AccountingSoftware
@@ -60,7 +66,7 @@ const mapAccountingSoftware = (v?: string | null): AccountingSoftware => {
 const mapAccountantBookkeeperUse = (
   v?: string | null
 ): AccountantBookkeeperUse => {
-  if (!v) return 'INTERNAL'
+  if (!v) return ''
   const n = v.toUpperCase()
   if (['INTERNAL', 'EXTERNAL', 'NONE'].includes(n)) {
     return n as AccountantBookkeeperUse
@@ -68,27 +74,40 @@ const mapAccountantBookkeeperUse = (
   return 'NONE'
 }
 
-const mapFinancialReviewFrequency = (v?: string | null) => {
-  if (!v) return 'MONTHLY'
+type FinancialReviewFrequency = '' | 'MONTHLY' | 'YEARLY' | 'RARELY'
+type ConfidenceReadingReports =
+  | ''
+  | 'VERY CONFIDENT'
+  | 'CONFIDENT'
+  | 'NOT CONFIDENT'
+
+const mapFinancialReviewFrequency = (
+  v?: string | null
+): FinancialReviewFrequency => {
+  if (!v) return ''
   const n = v.toUpperCase()
-  if (['MONTHLY', 'YEARLY', 'RARELY'].includes(n)) return n
-  return 'MONTHLY'
+  return (
+    ['MONTHLY', 'YEARLY', 'RARELY'].includes(n) ? n : ''
+  ) as FinancialReviewFrequency
 }
 
-const mapConfidenceReadingReports = (v?: string | null) => {
-  if (!v) return 'CONFIDENT'
+const mapConfidenceReadingReports = (
+  v?: string | null
+): ConfidenceReadingReports => {
+  if (!v) return ''
   const n = v.toUpperCase()
-  if (['CONFIDENT', 'NOT CONFIDENT', 'VERY CONFIDENT'].includes(n)) return n
-  return 'CONFIDENT'
+  return (
+    ['CONFIDENT', 'NOT CONFIDENT', 'VERY CONFIDENT'].includes(n) ? n : ''
+  ) as ConfidenceReadingReports
 }
 
 const mapInsightsFormat = (v?: string | null) => {
-  if (!v) return 'VISUAL DASHBOARDS'
+  if (!v) return ''
   const n = v.toUpperCase()
   if (n.includes('VISUAL')) return 'VISUAL DASHBOARDS'
   if (n.includes('PDF') || n.includes('REPORT')) return 'DETAILED REPORTS'
   if (n.includes('BULLET')) return 'BULLET-POINT SUMMARIES'
-  return 'VISUAL DASHBOARDS'
+  return ''
 }
 
 /**

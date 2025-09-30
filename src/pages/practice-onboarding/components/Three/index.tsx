@@ -26,6 +26,7 @@ import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
 import SaveAndExitDialogue from '../SaveAndExitDialogue/SaveAndExitDialogue'
+import { isEqual } from 'lodash'
 
 type StepThreeProps = {
   formData: FormValues
@@ -86,6 +87,11 @@ const StepThree: React.FC<StepThreeProps> = ({
       practiceManagementSoftware: data.practiceManagementSoftware,
       accountingSoftware: data.accountingSoftware,
       useOfAccountantBookkeeper: data.useOfAccountantBookkeeper
+    }
+
+    if (isEqual(newValues, formData)) {
+      onNext?.()
+      return
     }
 
     // update parent state immediately so UI reflects inputs

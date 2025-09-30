@@ -76,7 +76,7 @@ const TeamManagement: React.FC = () => {
             startIcon={<PersonAddIcon />}
             onClick={handleOpenInviteDialog}
           >
-            Invite Team Members
+            Invite team members
           </Button>
         </Box>
 

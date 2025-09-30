@@ -94,7 +94,7 @@ const PracticeOnboardingFlow: React.FC = () => {
     setStepTwo(mapped.stepTwo)
     setStepThree(mapped.stepThree)
     setStepFour(mapped.stepFour)
-    setActiveStep(mapped.activeStep)
+    setActiveStep((prev) => (prev ? prev : mapped.activeStep))
   }, [practice])
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)

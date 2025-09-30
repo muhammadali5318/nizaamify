@@ -46,7 +46,12 @@ const StepOne: React.FC<StepOneProps> = ({
   const navigate = useNavigate()
 
   const updateStepOne = useUpdateStepOne(orgUuid)
-  const { control, handleSubmit, reset } = useForm<StepOneFormValues>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { isValid }
+  } = useForm<StepOneFormValues>({
     resolver: zodResolver(StepOneSchema),
     mode: 'onChange',
     defaultValues: {
@@ -356,7 +361,7 @@ const StepOne: React.FC<StepOneProps> = ({
               size='large'
               variant='outlined'
               color='primary'
-              onClick={handleOpenDialog} // opens local dialog
+              onClick={handleOpenDialog}
             >
               Save & exit
             </Button>
@@ -366,6 +371,7 @@ const StepOne: React.FC<StepOneProps> = ({
               variant='contained'
               color='primary'
               loading={isSaving}
+              disabled={!isValid}
               endIcon={<ChevronRight />}
             >
               Next

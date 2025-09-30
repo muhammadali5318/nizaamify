@@ -59,7 +59,7 @@ const InvitationSuccessDialog: React.FC<InvitationSuccessDialogProps> =
         <DialogContent sx={{ p: 0, pt: 1 }}>
           <Stack spacing={1}>
             <Typography variant='h4' fontWeight={700}>
-              Invitation Sent!
+              Invitation sent!
             </Typography>
             <Typography variant='body2' color='text.secondary'>
               An invitation has been sent to{' '}

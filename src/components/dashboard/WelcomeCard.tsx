@@ -7,7 +7,7 @@ const WelcomeCard = () => {
       <Box className={styles.WelcomeCardContainer}>
         <Stack spacing={'6px'}>
           <Typography variant='h4' className='font-weight--700'>
-            Welcome to Monai tech!
+            Welcome to Monai Tech!
           </Typography>
           <Typography variant='h6' className='font-weight--500'>
             Track performance, monitor key metrics, and get tailored insights

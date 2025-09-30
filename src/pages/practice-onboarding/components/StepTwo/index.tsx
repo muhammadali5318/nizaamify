@@ -54,7 +54,7 @@ const StepTwo: React.FC<StepTwoProps> = ({
     control,
     handleSubmit,
     reset,
-    formState: { errors }
+    formState: { errors, isValid }
   } = useForm<StepTwoFormValues>({
     resolver: zodResolver(
       StepTwoSchema
@@ -138,7 +138,6 @@ const StepTwo: React.FC<StepTwoProps> = ({
         premisesOwnership: data.premisesOwnership
       }
 
-      // if nothing changed, just navigate away
       if (isEqual(newValues, formData)) {
         navigate(paths.dashboard)
         return
@@ -361,6 +360,7 @@ const StepTwo: React.FC<StepTwoProps> = ({
                 variant='contained'
                 color='primary'
                 loading={isSaving}
+                disabled={!isValid}
                 endIcon={<ChevronRight />}
               >
                 Next

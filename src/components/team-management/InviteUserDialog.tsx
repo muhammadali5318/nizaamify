@@ -108,7 +108,7 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = React.memo(
               style={{ width: 48, height: 48 }}
             />
             <Typography variant='h5' fontWeight={700}>
-              Invite New Team Member
+              Invite new team member
             </Typography>
             <Typography variant='subtitle1' color='text.secondary'>
               Send an invitation to join your practice team
