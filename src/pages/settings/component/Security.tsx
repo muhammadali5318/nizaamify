@@ -1,11 +1,13 @@
 // FILE: src/components/settings/ChangePassword.tsx
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { LoadingButton } from '@mui/lab'
-import { Box, Stack, Button } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import PasswordField from 'src/components/common/PasswordField'
+import { useUpdateUserProfile } from '../hooks/useUserProfile'
+import { notify } from 'src/components/notistack/NotificationProvider'
 
 export const ChangePasswordSchema = z
   .object({
@@ -32,21 +34,14 @@ export const ChangePasswordSchema = z
     message: "Passwords don't match",
     path: ['confirmPassword']
   })
+  .refine((data) => data.newPassword !== data.currentPassword, {
+    message: 'New password cannot be the same as current password',
+    path: ['newPassword']
+  })
 
 export type ChangePasswordFormValues = z.infer<typeof ChangePasswordSchema>
 
-type Props = {
-  isSubmitting?: boolean
-  serverErrors?: Record<string, string>
-  onSubmit?: (payload: { currentPassword: string; newPassword: string }) => void
-  onCancel?: () => void
-}
-
-const Security: React.FC<Props> = ({
-  isSubmitting = false,
-  onSubmit,
-  onCancel
-}) => {
+const Security = () => {
   const {
     control,
     handleSubmit,
@@ -55,6 +50,7 @@ const Security: React.FC<Props> = ({
     reset,
     trigger,
     clearErrors,
+    setError,
     formState: { isValid, isDirty }
   } = useForm<ChangePasswordFormValues>({
     resolver: zodResolver(ChangePasswordSchema),
@@ -65,6 +61,8 @@ const Security: React.FC<Props> = ({
       confirmPassword: ''
     }
   })
+
+  const { mutateAsync, isPending } = useUpdateUserProfile()
 
   const newPassword = watch('newPassword')
   useEffect(() => {
@@ -78,11 +76,45 @@ const Security: React.FC<Props> = ({
     }
   }, [newPassword, getValues, trigger, clearErrors])
 
+  const defaultSubmit = async (data: ChangePasswordFormValues) => {
+    const payload = {
+      current_password: data.currentPassword,
+      new_password: data.newPassword,
+      confirm_password: data.confirmPassword
+    }
+
+    try {
+      await mutateAsync(payload as any)
+      notify.success('Password changed successfully')
+      reset({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      })
+    } catch (err: any) {
+      if (err?.error?.current_password) {
+        setError('currentPassword', {
+          type: 'server',
+          message: err.error.current_password[0]
+        })
+      } else if (
+        err?.error?.toLowerCase()?.includes('password has previously')
+      ) {
+        setError('newPassword', {
+          type: 'server',
+          message: 'Password has been used before. Please choose a new one.'
+        })
+      } else {
+        setError('currentPassword', {
+          type: 'server',
+          message: err?.message || 'Failed to change password'
+        })
+      }
+    }
+  }
+
   const submit = (data: ChangePasswordFormValues) => {
-    onSubmit?.({
-      currentPassword: data.currentPassword,
-      newPassword: data.newPassword
-    })
+    defaultSubmit(data)
   }
 
   return (
@@ -114,26 +146,11 @@ const Security: React.FC<Props> = ({
           />
 
           <Stack direction='row' spacing={2.5}>
-            <Button
-              size='large'
-              variant='outlined'
-              onClick={() => {
-                reset({
-                  currentPassword: '',
-                  newPassword: '',
-                  confirmPassword: ''
-                })
-                onCancel?.()
-              }}
-            >
-              Cancel
-            </Button>
-
             <LoadingButton
               type='submit'
               size='large'
               variant='contained'
-              loading={isSubmitting}
+              loading={isPending}
               disabled={!isDirty || !isValid}
             >
               Save

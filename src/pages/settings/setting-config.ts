@@ -4,7 +4,7 @@ import PracticeInformation from './component/PracticeInformation'
 import ProfileInformation from './component/ProfileInformation'
 import Security from './component/Security'
 import SubscriptionBilling from './component/SubscriptionBilling'
-import { MenuItem } from './type'
+import { UserApiProfile, MenuItem, UserProfileForm } from './type'
 
 export const SETTINGS_MENU: MenuItem[] = [
   {
@@ -41,3 +41,21 @@ export const SETTINGS_MENU: MenuItem[] = [
     component: Security
   }
 ]
+
+export const mapUserApiToForm = (
+  api?: UserApiProfile | null
+): UserProfileForm => ({
+  firstName: api?.first_name ?? '',
+  lastName: api?.last_name ?? '',
+  email: api?.email ?? '',
+  role: api?.role ?? '',
+  phone: api?.contact_number ?? ''
+})
+
+export const mapUserFormToApi = (
+  form: UserProfileForm
+): Partial<UserApiProfile> => ({
+  first_name: form.firstName,
+  last_name: form.lastName,
+  contact_number: form.phone
+})

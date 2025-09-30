@@ -1,42 +1,52 @@
-import React from 'react'
+// src/components/ProfileInformation.tsx
+import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, Controller, Control, Path } from 'react-hook-form'
 import { z } from 'zod'
-import { Box, Stack, TextField, Button, MenuItem } from '@mui/material'
+import { Box, Stack, TextField, MenuItem } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import PhoneField from 'src/components/phone-field'
+import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
+import { useAuth } from 'src/context/AuthProvider'
+import { capitalizeFirstLetter } from 'src/utils/stringUtils'
+import { mapUserApiToForm, mapUserFormToApi } from '../setting-config'
+import { useUpdateUserProfile, useUserProfile } from '../hooks/useUserProfile'
+import parsePhoneNumberFromString from 'libphonenumber-js'
+import { notify } from 'src/components/notistack/NotificationProvider'
 
-// --- Zod schema ---
 const profileSchema = z.object({
-  firstName: z.string().min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
-  email: z.string().email('Enter a valid email'),
+  firstName: z
+    .string()
+    .nonempty('First name is required')
+    .max(148, 'Last name must be less than 149 characters'),
+  lastName: z
+    .string()
+    .nonempty('Last name is required')
+    .max(148, 'Last name must be less than 149 characters'),
+  email: z
+    .string()
+    .nonempty('Email is required')
+    .pipe(z.email('Please enter a valid email')),
   role: z.string().optional(),
-  phone: z.string().optional()
+  phone: z
+    .string()
+    .nonempty('Phone is required')
+    .refine(
+      (val) => {
+        const phoneNumber = parsePhoneNumberFromString(val || '')
+        return phoneNumber?.isValid() ?? false
+      },
+      {
+        message: 'Please enter a valid phone number'
+      }
+    )
 })
 
 type ProfileForm = z.infer<typeof profileSchema>
 
-type Props = {
-  /** initial data to populate form (optional) */
-  initialData?: Partial<ProfileForm>
-  /** optional save handler from parent */
-  onSave?: (values: ProfileForm) => Promise<void> | void
-  /** optional cancel handler from parent */
-  onCancel?: () => void
-}
+const ProfileInformation = () => {
+  const { accessToken } = useAuth()
 
-const ROLE_OPTIONS = [
-  { value: 'user', label: 'User' },
-  { value: 'manager', label: 'Manager' },
-  { value: 'admin', label: 'Admin' }
-]
-
-const ProfileInformation: React.FC<Props> = ({
-  initialData = {},
-  onSave,
-  onCancel
-}) => {
   const {
     control,
     handleSubmit,
@@ -45,51 +55,55 @@ const ProfileInformation: React.FC<Props> = ({
   } = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      firstName: initialData.firstName ?? '',
-      lastName: initialData.lastName ?? '',
-      email: initialData.email ?? '',
-      role: initialData.role ?? '',
-      phone: initialData.phone ?? ''
+      firstName: '',
+      lastName: '',
+      email: '',
+      role: '',
+      phone: ''
     },
     mode: 'onChange'
   })
 
-  const submit = async (values: ProfileForm) => {
-    try {
-      if (onSave) {
-        await onSave(values)
-      } else {
-        // eslint-disable-next-line no-console
-        console.log('values')
-      }
-      reset(values)
-    } catch (err) {
-      console.error('Failed to save profile', err)
-    }
-  }
+  const { data: apiProfile, isLoading: isFetching } = useUserProfile()
 
-  const handleCancel = () => {
-    // revert to initialData (or empty values)
+  const { mutateAsync: updateProfile, isPending: isUpdating } =
+    useUpdateUserProfile()
+  const { data: userData } = useFetchUserWithActivePracticeData(!!accessToken)
+
+  const practiceRole =
+    userData?.active_practices && userData.active_practices.length > 0
+      ? userData.active_practices[0].user_role
+      : undefined
+
+  useEffect(() => {
+    if (!apiProfile && !practiceRole) return
+
+    const mapped = apiProfile ? mapUserApiToForm(apiProfile) : {}
+
+    const roleValue = practiceRole
+
     reset({
-      firstName: initialData.firstName ?? '',
-      lastName: initialData.lastName ?? '',
-      email: initialData.email ?? '',
-      role: initialData.role ?? '',
-      phone: initialData.phone ?? ''
+      ...mapped,
+      role: roleValue
     })
-    if (onCancel) onCancel()
+  }, [apiProfile, practiceRole])
+
+  const submit = async (values: ProfileForm) => {
+    const payload = mapUserFormToApi(values)
+    await updateProfile(payload)
+    notify.success('Your profile has been updated successfully.')
+    reset(values)
   }
 
   return (
     <Box>
       <form onSubmit={handleSubmit(submit)} noValidate>
         <Stack spacing={2}>
-          {/* name fields: stacked on small screens, side-by-side on md+ */}
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <Box flex={1}>
               <Controller
                 name='firstName'
-                control={control}
+                control={control as unknown as Control<ProfileForm>}
                 render={({ field }) => (
                   <TextField
                     {...field}
@@ -98,7 +112,7 @@ const ProfileInformation: React.FC<Props> = ({
                     required
                     error={!!errors.firstName}
                     helperText={errors.firstName?.message}
-                    slotProps={{ htmlInput: { 'aria-label': 'first-name' } }}
+                    inputProps={{ 'aria-label': 'first-name' }}
                   />
                 )}
               />
@@ -107,7 +121,7 @@ const ProfileInformation: React.FC<Props> = ({
             <Box flex={1}>
               <Controller
                 name='lastName'
-                control={control}
+                control={control as unknown as Control<ProfileForm>}
                 render={({ field }) => (
                   <TextField
                     {...field}
@@ -116,7 +130,7 @@ const ProfileInformation: React.FC<Props> = ({
                     required
                     error={!!errors.lastName}
                     helperText={errors.lastName?.message}
-                    slotProps={{ htmlInput: { 'aria-label': 'last-name' } }}
+                    inputProps={{ 'aria-label': 'last-name' }}
                   />
                 )}
               />
@@ -126,16 +140,17 @@ const ProfileInformation: React.FC<Props> = ({
           <Box>
             <Controller
               name='email'
-              control={control}
+              control={control as unknown as Control<ProfileForm>}
               render={({ field }) => (
                 <TextField
                   {...field}
                   label='Email'
                   fullWidth
                   required
+                  disabled
                   error={!!errors.email}
                   helperText={errors.email?.message}
-                  slotProps={{ htmlInput: { 'aria-label': 'email' } }}
+                  inputProps={{ 'aria-label': 'email' }}
                 />
               )}
             />
@@ -144,43 +159,44 @@ const ProfileInformation: React.FC<Props> = ({
           <Box>
             <Controller
               name='role'
-              control={control}
+              control={control as unknown as Control<ProfileForm>}
               render={({ field }) => (
                 <TextField
                   {...field}
                   label='Role'
                   select
                   fullWidth
-                  required
                   helperText={errors.role?.message}
-                  slotProps={{ htmlInput: { 'aria-label': 'role' } }}
+                  inputProps={{ 'aria-label': 'role' }}
+                  disabled
                 >
-                  <MenuItem value=''>Select role</MenuItem>
-                  {ROLE_OPTIONS.map((r) => (
-                    <MenuItem key={r.value} value={r.value}>
-                      {r.label}
+                  {practiceRole && (
+                    <MenuItem value={practiceRole}>
+                      {capitalizeFirstLetter(practiceRole)}
                     </MenuItem>
-                  ))}
+                  )}
                 </TextField>
               )}
             />
           </Box>
 
           <Box>
-            <PhoneField control={control} name={'phone'} label='Phone number' />
+            <PhoneField
+              control={control as unknown as Control<ProfileForm>}
+              name={'phone' as Path<ProfileForm>}
+              label='Phone number'
+            />
           </Box>
 
           <Stack direction={'row'} spacing={2.5} mt={2}>
-            <Button variant='outlined' size='large' onClick={handleCancel}>
-              Cancel
-            </Button>
-
             <LoadingButton
               type='submit'
               variant='contained'
               size='large'
-              loading={isSubmitting}
-              disabled={!isDirty || !isValid || isSubmitting}
+              loading={isSubmitting || isFetching || isUpdating}
+              disabled={
+                !isDirty || !isValid || isSubmitting || isFetching || isUpdating
+              }
             >
               Save
             </LoadingButton>
