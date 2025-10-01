@@ -60,11 +60,10 @@ definitions:
               export VITE_AUTH0_CLIENT_ID=
               export VITE_AUTH0_AUDIENCE=
             elif [[ "${ENV}" == "dev" ]]; then
-              export VITE_APP_AUTH0_DOMAIN=$DEV_VITE_AUTH0_DOMAIN
-              export VITE_APP_AUTH0_CLIENT_ID=$DEV_VITE_AUTH0_CLIENT_ID
-              export VITE_APP_AUTH0_AUDIENCE=$DEV_VITE_AUTH0_AUDIENCE
-              export VITE_APP_API_URL=$DEV_VITE_API_URL
-              export VITE_APP_AUTH0_CALLBACK_URL=$DEV_VITE_CALLBACK_URL
+              export VITE_AUTH0_DOMAIN=$DEV_VITE_AUTH0_DOMAIN
+              export VITE_AUTH0_CLIENT_ID=$DEV_VITE_AUTH0_CLIENT_ID
+              export VITE_AUTH0_AUDIENCE=$DEV_VITE_AUTH0_AUDIENCE
+              export VITE_BASE_URL=$DEV_VITE_BASE_URL
             elif [[ "${ENV}" == "qa" ]]; then
               export VITE_APP_AUTH0_DOMAIN=$QA_VITE_AUTH0_DOMAIN
               export VITE_APP_AUTH0_CLIENT_ID=$QA_VITE_AUTH0_CLIENT_ID
