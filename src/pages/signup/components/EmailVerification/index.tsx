@@ -289,6 +289,25 @@ const EmailVerification: React.FC = () => {
               iconSrc='/assets/danger.svg'
               iconAlt='Invalid link'
               buttonText='Go to Sign In'
+              footer={
+                <>
+                  <Typography variant='subtitle1' color='textSecondary'>
+                    Don’t have an account?{' '}
+                    <Link
+                      to={'/auth/signup'}
+                      className='font-weight--700 info-main cursor-pointer text-decoration--none'
+                    >
+                      Sign up
+                    </Link>
+                  </Typography>
+                  <Typography variant='subtitle1' color='textSecondary'>
+                    Having trouble? Please{' '}
+                    <span className='font-weight--700 info-main cursor-pointer'>
+                      Contact support.
+                    </span>
+                  </Typography>
+                </>
+              }
               onButtonClick={() => navigate('/auth/login')}
             >
               <>
@@ -299,17 +318,6 @@ const EmailVerification: React.FC = () => {
                   Verification link is not valid. It may be broken or has
                   already been used.
                 </Typography>
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant='subtitle1' color='textSecondary'>
-                    Don’t have an account?{' '}
-                    <Link
-                      to={'/auth/signup'}
-                      className='font-weight--700 info-main cursor-pointer text-decoration--none'
-                    >
-                      Sign up
-                    </Link>
-                  </Typography>
-                </Box>
               </>
             </EmailVerificationStatus>
           ) : status === 'requestThrottled' ? (
