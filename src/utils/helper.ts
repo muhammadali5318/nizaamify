@@ -20,3 +20,9 @@ export const isPracticeOwner = (user?: User): boolean => {
     )
   })
 }
+
+export const isPracticeManager = (userData) => {
+  return userData?.active_practices[0].user_role
+    .toLowerCase()
+    .includes('manager')
+}

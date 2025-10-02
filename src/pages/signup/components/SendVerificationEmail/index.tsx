@@ -163,7 +163,7 @@ const SendVerificationEmail: React.FC<Props> = ({ email }) => {
             <Typography variant='subtitle1' color='var(--color-text-secondary)'>
               If you still haven’t received the email, please{' '}
               <span className='info-main font-weight--700'>
-                Contact Support.
+                Contact support.
               </span>
             </Typography>
           </Box>

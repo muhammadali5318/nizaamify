@@ -1,8 +1,7 @@
 // FILE: src/components/settings/ChangePassword.tsx
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { LoadingButton } from '@mui/lab'
-import { Box, Stack } from '@mui/material'
+import { Box, Button, Stack } from '@mui/material'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import PasswordField from 'src/components/common/PasswordField'
@@ -146,7 +145,7 @@ const Security = () => {
           />
 
           <Stack direction='row' spacing={2.5}>
-            <LoadingButton
+            <Button
               type='submit'
               size='large'
               variant='contained'
@@ -154,7 +153,7 @@ const Security = () => {
               disabled={!isDirty || !isValid}
             >
               Save
-            </LoadingButton>
+            </Button>
           </Stack>
         </Stack>
       </Box>

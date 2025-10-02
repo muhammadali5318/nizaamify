@@ -20,7 +20,10 @@ const MobileTopBar: React.FC<topbarProps> = ({ title, icon }) => {
           xs: '16px',
           sm: '24px',
           md: 0
-        }
+        },
+        position: 'sticky',
+        top: '72px',
+        zIndex: 1000
       }}
     >
       <Box className={styles.topbarTitleContainer}>

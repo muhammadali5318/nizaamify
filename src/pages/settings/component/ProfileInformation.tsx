@@ -3,8 +3,7 @@ import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, Controller, Control, Path } from 'react-hook-form'
 import { z } from 'zod'
-import { Box, Stack, TextField, MenuItem } from '@mui/material'
-import { LoadingButton } from '@mui/lab'
+import { Box, Stack, TextField, MenuItem, Button } from '@mui/material'
 import PhoneField from 'src/components/phone-field'
 import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
 import { useAuth } from 'src/context/AuthProvider'
@@ -112,7 +111,11 @@ const ProfileInformation = () => {
                     required
                     error={!!errors.firstName}
                     helperText={errors.firstName?.message}
-                    inputProps={{ 'aria-label': 'first-name' }}
+                    slotProps={{
+                      input: {
+                        'aria-label': 'first-name'
+                      }
+                    }}
                   />
                 )}
               />
@@ -130,7 +133,11 @@ const ProfileInformation = () => {
                     required
                     error={!!errors.lastName}
                     helperText={errors.lastName?.message}
-                    inputProps={{ 'aria-label': 'last-name' }}
+                    slotProps={{
+                      input: {
+                        'aria-label': 'last-name'
+                      }
+                    }}
                   />
                 )}
               />
@@ -150,7 +157,11 @@ const ProfileInformation = () => {
                   disabled
                   error={!!errors.email}
                   helperText={errors.email?.message}
-                  inputProps={{ 'aria-label': 'email' }}
+                  slotProps={{
+                    input: {
+                      'aria-label': 'email'
+                    }
+                  }}
                 />
               )}
             />
@@ -167,12 +178,20 @@ const ProfileInformation = () => {
                   select
                   fullWidth
                   helperText={errors.role?.message}
-                  inputProps={{ 'aria-label': 'role' }}
+                  slotProps={{
+                    input: {
+                      'aria-label': 'role'
+                    }
+                  }}
                   disabled
                 >
-                  {practiceRole && (
+                  {practiceRole ? (
                     <MenuItem value={practiceRole}>
                       {capitalizeFirstLetter(practiceRole)}
+                    </MenuItem>
+                  ) : (
+                    <MenuItem value='' disabled>
+                      No role available
                     </MenuItem>
                   )}
                 </TextField>
@@ -189,7 +208,7 @@ const ProfileInformation = () => {
           </Box>
 
           <Stack direction={'row'} spacing={2.5} mt={2}>
-            <LoadingButton
+            <Button
               type='submit'
               variant='contained'
               size='large'
@@ -199,7 +218,7 @@ const ProfileInformation = () => {
               }
             >
               Save
-            </LoadingButton>
+            </Button>
           </Stack>
         </Stack>
       </form>

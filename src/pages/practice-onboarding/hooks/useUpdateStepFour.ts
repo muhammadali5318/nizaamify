@@ -24,6 +24,7 @@ export const useUpdateStepFour = (practiceId?: string) => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['initialData'] })
+      qc.invalidateQueries({ queryKey: ['UserWithActivePracticeData'] })
     }
   })
 }

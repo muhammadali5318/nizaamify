@@ -203,7 +203,7 @@ const EmailVerification: React.FC = () => {
                   <Typography variant='subtitle1' color='textSecondary'>
                     If you still haven’t received the email, please{' '}
                     <span className='font-weight--700 info-main cursor-pointer'>
-                      Contact Support.
+                      Contact support.
                     </span>
                   </Typography>
                 </>
@@ -243,7 +243,7 @@ const EmailVerification: React.FC = () => {
                   <Typography variant='subtitle1' color='textSecondary'>
                     If you still haven’t received the email, please{' '}
                     <span className='font-weight--700 info-main cursor-pointer'>
-                      Contact Support.
+                      Contact support.
                     </span>
                   </Typography>
                 </>

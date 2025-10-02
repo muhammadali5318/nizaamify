@@ -138,7 +138,7 @@ const SaveAndExitDialogue: React.FC<SaveAndExitDialogueProps> = ({
           color='var(--color-text-secondary)'
         >
           Having trouble? Please{' '}
-          <span className='info-main font-weight--700'>Contact Support.</span>
+          <span className='info-main font-weight--700'>Contact support.</span>
         </Typography>
       </DialogActions>
     </Dialog>
