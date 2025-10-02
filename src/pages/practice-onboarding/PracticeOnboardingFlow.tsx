@@ -238,7 +238,7 @@ const PracticeOnboardingFlow: React.FC = () => {
           <RegistrationHeader
             heading={
               <>
-                Welcome to Monai tech{' '}
+                Welcome to Monai Tech{' '}
                 <span className='font-weight--700'>{user?.family_name}!</span>
               </>
             }

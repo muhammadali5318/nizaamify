@@ -19,7 +19,7 @@ const Welcome: React.FC<WelcomeProps> = ({ onContinue }) => {
       </Box>
       <Box className={styles.congratsInfoContainer}>
         <Typography variant='h4' textAlign={'center'}>
-          Welcome to Monai tech,{' '}
+          Welcome to Monai Tech,{' '}
           <span className='font-weight--700'>{user?.name}!</span>{' '}
         </Typography>
         <Typography

@@ -17,7 +17,7 @@ const Welcome: React.FC<WelcomeProps> = ({
     <Box className={styles.invitedUserOnboardingContainer}>
       <img src='/assets/Home.svg' alt='home icon' />
       <Box className={styles.invitedUserOnboardingInfo}>
-        <Typography variant='h4'>Welcome to Monai tech!</Typography>
+        <Typography variant='h4'>Welcome to Monai Tech!</Typography>
         <Typography variant='h5'>
           You’ve been invited to join{' '}
           <span className='font-weight--700'>{practiceName}.</span>

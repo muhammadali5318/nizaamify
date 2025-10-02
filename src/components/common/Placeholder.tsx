@@ -23,7 +23,7 @@ const Placeholder = ({ title }: PlaceholderProps) => {
           alignItems: 'center'
         }}
       >
-        <Typography variant='h4'>Information Here</Typography>
+        <Typography variant='h4'>Information here</Typography>
         <Typography variant='body1' color='var(--text-secondary)'>
           {title} view here soon
         </Typography>
