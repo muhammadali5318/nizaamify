@@ -6,6 +6,8 @@ import {
   PracticeApi,
   PracticeFormValues
 } from '../setting-config'
+import { notify } from 'src/components/notistack/NotificationProvider'
+import { endpoints } from 'src/services/backendUrl'
 
 /* --- GET hook (v5-style single object) --- */
 export const usePractice = (practiceId?: string) => {
@@ -13,9 +15,7 @@ export const usePractice = (practiceId?: string) => {
     queryKey: ['practice', practiceId],
     queryFn: async () => {
       if (!practiceId) throw new Error('Missing practiceId')
-      const resp = await apiClient.get(
-        `user-workstation/v1/practices/${practiceId}/profile/`
-      )
+      const resp = await apiClient.get(endpoints.practiceProfile(practiceId))
       return resp?.data?.data
     },
     enabled: Boolean(practiceId),
@@ -36,13 +36,14 @@ export const useUpdatePractice = (practiceId?: string) => {
       if (!practiceId) throw new Error('Missing practiceId')
       const body = mapFormToApiPayload(payload)
       const resp = await apiClient.put(
-        `user-workstation/v1/practices/${practiceId}/profile/`,
+        endpoints.practiceProfile(practiceId),
         body
       )
       return resp?.data?.data
     },
     onSuccess: (data) => {
       if (!practiceId) return
+      notify.success('Practice information updated successfully!')
       qc.setQueryData(['practice', practiceId], data)
       qc.invalidateQueries({ queryKey: ['practice', practiceId] })
     }

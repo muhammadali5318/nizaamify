@@ -267,7 +267,7 @@ const EmailVerification: React.FC = () => {
             <EmailVerificationStatus
               iconSrc='/assets/verified.svg'
               iconAlt='Verified'
-              buttonText='Go to Sign In'
+              buttonText='Go to sign in'
               onButtonClick={() => navigate('/auth/login')}
             >
               <>
@@ -288,7 +288,7 @@ const EmailVerification: React.FC = () => {
             <EmailVerificationStatus
               iconSrc='/assets/danger.svg'
               iconAlt='Invalid link'
-              buttonText='Go to Sign In'
+              buttonText='Go to sign in'
               footer={
                 <>
                   <Typography variant='subtitle1' color='textSecondary'>
@@ -324,8 +324,19 @@ const EmailVerification: React.FC = () => {
             <EmailVerificationStatus
               iconSrc='/assets/danger.svg'
               iconAlt='Request throttled'
-              buttonText='Go to Sign In'
+              buttonText='Go to sign in'
               onButtonClick={() => navigate('/auth/login')}
+              footer={
+                <Typography variant='subtitle1' color='textSecondary'>
+                  Don’t have an account?{' '}
+                  <Link
+                    to={'/auth/signup'}
+                    className='font-weight--700 info-main cursor-pointer text-decoration--none'
+                  >
+                    Sign up
+                  </Link>
+                </Typography>
+              }
             >
               <>
                 <Typography variant='h4' className='font-weight--700'>
@@ -336,17 +347,6 @@ const EmailVerification: React.FC = () => {
                     ? `Your request was throttled. Please try again in about ${throttleMinutes} minute${throttleMinutes > 1 ? 's' : ''}.`
                     : 'Your request was throttled. Please wait before trying again.'}
                 </Typography>
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant='subtitle1' color='textSecondary'>
-                    Don’t have an account?{' '}
-                    <Link
-                      to={'/auth/signup'}
-                      className='font-weight--700 info-main cursor-pointer text-decoration--none'
-                    >
-                      Sign up
-                    </Link>
-                  </Typography>
-                </Box>
               </>
             </EmailVerificationStatus>
           ) : status === 'congrats' ? (

@@ -16,6 +16,7 @@ export const endpoints = {
   },
   userInvitation: (id: string) => `${API_BASE}/practices/${id}/invite/`,
   currentPractice: (id: string) => `${API_BASE}/practices/${id}/`,
+  practiceProfile: (id: string) => `${API_BASE}/practices/${id}/profile/`,
   userInfo: apiVersion,
   inviteUser: (id: string) => `${API_BASE}/invited-users/${id}/`,
   userWithActivePractices: (id: string) => `${API_BASE}/users/${id}/`,
