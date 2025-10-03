@@ -1,8 +1,7 @@
 // File: src/auth/ProtectedRoute.tsx
-import { withAuthenticationRequired } from '@auth0/auth0-react'
+import { useAuth0, withAuthenticationRequired } from '@auth0/auth0-react'
 import { CircularProgress } from '@mui/material'
 import { FC, ComponentType, ReactNode } from 'react'
-import { Navigate } from 'react-router'
 import useAuthErrorRedirect from 'src/hooks/useHandleAuth0ErrorRedirect'
 
 interface ProtectedRouteProps {
@@ -14,10 +13,17 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = function ProtectedRoute({
   component,
   children
 }) {
+  const { logout } = useAuth0()
+
   const redirectTo = useAuthErrorRedirect()
 
   if (redirectTo) {
-    return <Navigate to={redirectTo} replace />
+    logout({
+      logoutParams: {
+        returnTo: `${window.location.origin}${redirectTo}`
+      }
+    })
+    return null
   }
 
   let InnerComponent: ComponentType<any> | null = null
