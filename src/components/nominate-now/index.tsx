@@ -15,12 +15,14 @@ const NominateNowContainer: React.FC<NominateNowContainerProps> = ({
           color='var(--_components-alert-info-color)'
           variant='subtitle1'
           className='font-weight--700'
+          textAlign={'start'}
         >
           Having trouble?
         </Typography>
         <Typography
           color='var(--_components-alert-info-color)'
           variant='caption'
+          textAlign={'start'}
         >
           You can nominate your practice manager to complete the onboarding on
           your behalf.

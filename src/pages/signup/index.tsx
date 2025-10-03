@@ -1,19 +1,9 @@
 // FILE: src/pages/SignUp/SignUp.tsx
 import React, { useCallback, useState } from 'react'
-import {
-  Box,
-  Stepper,
-  Step,
-  StepLabel,
-  Divider,
-  Typography
-} from '@mui/material'
+import { Box, Divider, useMediaQuery, useTheme } from '@mui/material'
 import RegistrationWrapper from 'src/components/registration-wrapper/RegistrationWrapper'
 import styles from './SignUp.module.scss'
-import {
-  CustomStepperConnector,
-  StepperLabelSX
-} from 'src/components/common/CustomStepperConnector'
+import AdaptiveStepper from 'src/components/common/AdaptiveStepper'
 import SignupStepOne from './components/SignupStepOne'
 import SignupStepTwo from './components/SignupStepTwo'
 import SignupStepThree from './components/SignupStepThree'
@@ -53,6 +43,9 @@ const SignUp: React.FC = () => {
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [serverErrors, setServerErrors] = useState<Record<string, string>>({})
+
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   const { createUser } = endpoints.signup
 
@@ -223,47 +216,17 @@ const SignUp: React.FC = () => {
         />
 
         <Box className={styles.container}>
-          {/* LEFT: Vertical Stepper */}
+          {/* LEFT: Adaptive Stepper */}
           <Box className={styles.left}>
-            <Stepper
-              activeStep={activeStep}
-              orientation='vertical'
-              nonLinear
-              connector={<CustomStepperConnector />}
-            >
-              {steps?.map((step, index) => (
-                <Step key={index} completed={activeStep > index}>
-                  <StepLabel
-                    slotProps={{
-                      stepIcon: {
-                        sx: { ...StepperLabelSX }
-                      }
-                    }}
-                  >
-                    <Typography
-                      color={`${
-                        activeStep >= index
-                          ? 'var(--color-text-primary)'
-                          : 'var(--color-text-secondary)'
-                      }`}
-                      variant='subtitle2'
-                    >
-                      {step.heading}
-                    </Typography>
-                    <Typography
-                      color='var(--color-text-primary)'
-                      variant='caption'
-                    >
-                      {step.subHeading}
-                    </Typography>
-                  </StepLabel>
-                </Step>
-              ))}
-            </Stepper>
+            <AdaptiveStepper activeStep={activeStep} steps={steps} />
           </Box>
 
           {/* CENTER: Divider */}
-          <Divider orientation='vertical' flexItem className={styles.divider} />
+          <Divider
+            orientation={isMobile ? 'horizontal' : 'horizontal'}
+            flexItem
+            className={styles.divider}
+          />
 
           {/* RIGHT: Render different component per step */}
           <Box className={styles.right}>

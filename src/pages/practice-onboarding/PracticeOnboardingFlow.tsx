@@ -1,20 +1,9 @@
 // FILE: src/pages/SignUp/SignUp.tsx
 import React, { useCallback, useEffect, useState } from 'react'
-import {
-  Box,
-  Stepper,
-  Step,
-  StepLabel,
-  Divider,
-  Typography,
-  CircularProgress
-} from '@mui/material'
+import { Box, Divider, CircularProgress } from '@mui/material'
 import RegistrationWrapper from 'src/components/registration-wrapper/RegistrationWrapper'
 import styles from './practiceOnboardingFlow.module.scss'
-import {
-  CustomStepperConnector,
-  StepperLabelSX
-} from 'src/components/common/CustomStepperConnector'
+import AdaptiveStepper from 'src/components/common/AdaptiveStepper'
 import { steps } from './practice-onboarding-config'
 import RegistrationHeader from 'src/components/registration-wrapper/RegistrationHeader'
 import NominateNowContainer from 'src/components/nominate-now'
@@ -262,41 +251,11 @@ const PracticeOnboardingFlow: React.FC = () => {
           <>
             <Box className={styles.container}>
               <Box className={styles.left}>
-                <Stepper
+                <AdaptiveStepper
                   activeStep={activeStep}
-                  orientation='vertical'
-                  nonLinear
-                  connector={<CustomStepperConnector connectorHeight={30} />}
-                >
-                  {steps?.map((step, index) => (
-                    <Step key={index} completed={activeStep > index}>
-                      <StepLabel
-                        slotProps={{
-                          stepIcon: {
-                            sx: { ...StepperLabelSX }
-                          }
-                        }}
-                      >
-                        <Typography
-                          color={
-                            activeStep >= index
-                              ? 'var(--color-text-primary)'
-                              : 'var(--color-text-secondary)'
-                          }
-                          variant='subtitle2'
-                        >
-                          {step.heading}
-                        </Typography>
-                        <Typography
-                          color='var(--color-text-primary)'
-                          variant='caption'
-                        >
-                          {step.subHeading}
-                        </Typography>
-                      </StepLabel>
-                    </Step>
-                  ))}
-                </Stepper>
+                  steps={steps}
+                  connectorHeight={30}
+                />
                 <Box>
                   {isPracticeOwner(user) && (
                     <NominateNowContainer
