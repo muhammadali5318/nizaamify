@@ -164,7 +164,7 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                       alt='Logout'
                       style={{ width: 20, height: 20, objectFit: 'contain' }}
                     />
-                    <span>Logout</span>
+                    <span>Sign out</span>
                   </Button>
                 </Box>
               </MenuList>
