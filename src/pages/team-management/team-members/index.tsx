@@ -1,13 +1,18 @@
-import { Paper, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import React from 'react'
+import TeamManagementContentWrapper from '../components/TeamManagementContentWrapper'
 
 const TeamMembers: React.FC = () => (
-  <Paper elevation={1} sx={{ p: 2 }}>
-    <Typography variant='h6'>Team Members</Typography>
-    <Typography variant='body2' sx={{ mt: 1 }}>
-      Table + filters go here — implement search, role filter, and actions.
+  <TeamManagementContentWrapper
+    imageSrc='/assets/team-members-list.svg'
+    imageAlt='team-members-list'
+    title='Team members'
+    subtitle='Manage your practice team members and their access'
+  >
+    <Typography p={2} variant='h6'>
+      Team members
     </Typography>
-  </Paper>
+  </TeamManagementContentWrapper>
 )
 
 export default TeamMembers

@@ -1,13 +1,18 @@
-import { Paper, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import React from 'react'
+import TeamManagementContentWrapper from '../components/TeamManagementContentWrapper'
 
 const RolesPermissions: React.FC = () => (
-  <Paper elevation={1} sx={{ p: 2 }}>
-    <Typography variant='h6'>Roles & Permissions</Typography>
-    <Typography variant='body2' sx={{ mt: 1 }}>
-      Role list, permission matrix, and role assignment UI.
+  <TeamManagementContentWrapper
+    imageSrc='/assets/bg-black-clock-icon.svg'
+    imageAlt='sent invitation icons'
+    title='Roles & permissions'
+    subtitle='Manage role-based access control for your practice'
+  >
+    <Typography p={2} variant='h6'>
+      Roles and Permissions
     </Typography>
-  </Paper>
+  </TeamManagementContentWrapper>
 )
 
 export default RolesPermissions

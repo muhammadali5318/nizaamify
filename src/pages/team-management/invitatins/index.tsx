@@ -1,13 +1,18 @@
-import { Paper, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import React from 'react'
+import TeamManagementContentWrapper from '../components/TeamManagementContentWrapper'
 
 const SentInvitations: React.FC = () => (
-  <Paper elevation={1} sx={{ p: 2 }}>
-    <Typography variant='h6'>Sent Invitations</Typography>
-    <Typography variant='body2' sx={{ mt: 1 }}>
-      Show pending invites, resend/cancel actions, and invitation date.
+  <TeamManagementContentWrapper
+    imageSrc='/assets/bg-black-clock-icon.svg'
+    imageAlt='sent invitation icons'
+    title='Sent Invitations'
+    subtitle='Manage invitations that have been sent to users'
+  >
+    <Typography p={2} variant='h6'>
+      Sent Invitations
     </Typography>
-  </Paper>
+  </TeamManagementContentWrapper>
 )
 
 export default SentInvitations
