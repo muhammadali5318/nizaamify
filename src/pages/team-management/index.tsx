@@ -1,117 +1,141 @@
-import { useState, useCallback } from 'react'
-import { Box, Container, Button, Alert, Snackbar } from '@mui/material'
-import { PersonAdd as PersonAddIcon } from '@mui/icons-material'
-import InviteUserDialog from 'src/components/team-management/InviteUserDialog'
-import InvitationSuccessDialog from 'src/components/team-management/InvitationSuccessDialog'
-import type {
-  InviteUserFormData,
-  InvitedUserData
-} from 'src/components/team-management/common/team-management'
+import React from 'react'
+import styles from './teamManagement.module.scss'
+import { Box, Tabs, Tab } from '@mui/material'
+import { styled } from '@mui/material/styles'
+import ModuleHeader from 'src/components/moduleHeader'
+import StatsCard from 'src/components/team-management/StatsCard'
+import SentInvitations from './invitatins'
+import RolesPermissions from './role-and-permissin'
+import { TabKey, tabsData } from './team-management-config'
+import TeamMembers from './team-members'
+
+function a11yProps(index: number) {
+  return {
+    id: `team-tab-${index}`,
+    'aria-controls': `team-tabpanel-${index}`
+  }
+}
+
+const TabPanel: React.FC<{
+  value: TabKey
+  index: TabKey
+  children?: React.ReactNode
+}> = ({ value, index, children }) => {
+  return (
+    <div
+      role='tabpanel'
+      hidden={value !== index}
+      id={`team-tabpanel-${index}`}
+      aria-labelledby={`team-tab-${index}`}
+    >
+      {value === index && <Box sx={{ mt: 2 }}>{children}</Box>}
+    </div>
+  )
+}
+
+const CenteredTab = styled(Tab)(() => ({
+  textTransform: 'none',
+  alignItems: 'center',
+  gap: 1,
+
+  minHeight: 42,
+
+  '& .MuiTab-iconWrapper': {
+    minWidth: 20,
+    height: 20,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    lineHeight: 1,
+    verticalAlign: 'middle'
+  },
+
+  '&.Mui-selected': {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: '12px',
+    border: '1px solid var(--grey-300, #E0E0E0)',
+    background: 'var(--grey-200, #EEE)',
+    minHeight: 42
+  }
+}))
 
 const TeamManagement: React.FC = () => {
-  const [inviteDialogOpen, setInviteDialogOpen] = useState<boolean>(false)
-  const [successDialogOpen, setSuccessDialogOpen] = useState<boolean>(false)
-  const [invitedUserData, setInvitedUserData] =
-    useState<InvitedUserData | null>(null)
-  const [inviteLoading, setInviteLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
-  const [inviteError, setInviteError] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [tab, setTab] = React.useState<TabKey>(0)
 
-  const handleInviteUser = useCallback(
-    async (data: InviteUserFormData): Promise<void> => {
-      try {
-        setInviteLoading(true)
-        setInviteError(null)
-
-        // TODO: Replace with actual API call
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
-        setInvitedUserData({ email: data.email, role: data.role })
-        setSuccessDialogOpen(true)
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Failed to send invitation'
-        setInviteError(errorMessage)
-        throw error // Re-throw to prevent dialog from closing
-      } finally {
-        setInviteLoading(false)
-      }
-    },
-    []
-  )
-
-  const handleCloseSnackbar = useCallback((): void => {
-    setSuccessMessage(null)
-    setError(null)
-  }, [])
-
-  const handleCloseInviteDialog = useCallback((): void => {
-    setInviteDialogOpen(false)
-    setInviteError(null)
-  }, [])
-
-  const handleCloseSuccessDialog = useCallback((): void => {
-    setSuccessDialogOpen(false)
-    setInvitedUserData(null)
-  }, [])
-
-  const handleOpenInviteDialog = useCallback((): void => {
-    setInviteDialogOpen(true)
-  }, [])
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+    setTab(newValue as TabKey)
+  }
 
   return (
-    <Container maxWidth='lg' sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 2
-          }}
-        >
-          <Button
-            variant='contained'
-            startIcon={<PersonAddIcon />}
-            onClick={handleOpenInviteDialog}
-          >
-            Invite team members
-          </Button>
-        </Box>
+    <Box className={styles.teamManagementRoot}>
+      <ModuleHeader
+        avatarSrc='/assets/team-management.svg'
+        heading='Grayford practice management'
+        subheading='Manage your practice team members, roles, and permissions'
+      />
 
-        {error && (
-          <Alert severity='error' sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
+      <Box className={styles.statsCardRoot}>
+        <StatsCard iconSrc='team-member.svg' label='Team Members' value='03' />
+        <StatsCard
+          iconSrc='active-member.svg'
+          label='Active members'
+          value='03'
+        />
+        <StatsCard
+          iconSrc='pending-member.svg'
+          label='Pending invites'
+          value='03'
+        />
       </Box>
 
-      <InviteUserDialog
-        open={inviteDialogOpen}
-        onClose={handleCloseInviteDialog}
-        onInvite={handleInviteUser}
-        loading={inviteLoading}
-        error={inviteError}
-      />
+      <Box
+        sx={{
+          width: '100%'
+        }}
+      >
+        <Tabs
+          value={tab}
+          onChange={handleTabChange}
+          aria-label='Team management tabs'
+          variant='scrollable'
+          scrollButtons='auto'
+          textColor='primary'
+          indicatorColor='primary'
+          slotProps={{
+            indicator: {
+              style: { display: 'none' }
+            }
+          }}
+        >
+          {tabsData.map((t) => (
+            <CenteredTab
+              key={t.key}
+              label={t.label}
+              icon={
+                <img
+                  src={tab === t.key ? t.activeIcon : t.inactiveIcon}
+                  alt={`${t.label} icon`}
+                />
+              }
+              iconPosition='start'
+              {...a11yProps(t.key)}
+            />
+          ))}
+        </Tabs>
 
-      {invitedUserData && (
-        <InvitationSuccessDialog
-          open={successDialogOpen}
-          onClose={handleCloseSuccessDialog}
-          invitedEmail={invitedUserData.email}
-          role={invitedUserData.role}
-          practiceName='Greyford Dental Practice'
-        />
-      )}
-
-      <Snackbar
-        open={!!successMessage}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        message={successMessage}
-      />
-    </Container>
+        <TabPanel value={tab} index={0}>
+          <TeamMembers />
+        </TabPanel>
+        <TabPanel value={tab} index={1}>
+          <SentInvitations />
+        </TabPanel>
+        <TabPanel value={tab} index={2}>
+          <RolesPermissions />
+        </TabPanel>
+      </Box>
+    </Box>
   )
 }
 

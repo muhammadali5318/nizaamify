@@ -42,7 +42,7 @@ const Dashboard = () => {
     userData?.active_practices[0].user_role.toLowerCase().includes('manager')
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={2} p={3}>
       {!onboardingCompleted && isPracticeOwner(user) && (
         <PendingOnboardingBanner />
       )}
