@@ -39,7 +39,7 @@ const InvitedUserOnboarding = () => {
       try {
         setLoading(true)
         const resp = await apiClient.get(endpoints.inviteUser(invitationId), {
-          params: { token },
+          params: { token }
         })
         if (!ignore) {
           setInvitationInfo(resp?.data?.data ?? null)
