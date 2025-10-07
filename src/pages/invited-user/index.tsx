@@ -38,7 +38,9 @@ const InvitedUserOnboarding = () => {
     const fetchUserDetails = async () => {
       try {
         setLoading(true)
-        const resp = await apiClient.get(endpoints.inviteUser(invitationId))
+        const resp = await apiClient.get(endpoints.inviteUser(invitationId), {
+          params: { token },
+        })
         if (!ignore) {
           setInvitationInfo(resp?.data?.data ?? null)
           setStep(1)
