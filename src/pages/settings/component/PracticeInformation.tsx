@@ -113,23 +113,23 @@ const PracticeInformation = () => {
           <Typography variant='h6' className='font-weight--700'>
             Practice details
           </Typography>
-          <Controller
-            name='practiceName'
-            control={control}
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                fullWidth
-                variant='outlined'
-                label='Practice name'
-                required
-                error={!!fieldState.error}
-                helperText={fieldState.error?.message}
-              />
-            )}
-          />
-
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <Controller
+              name='practiceName'
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  variant='outlined'
+                  label='Practice name'
+                  required
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+
             <Controller
               name='principalName'
               control={control}
@@ -145,23 +145,23 @@ const PracticeInformation = () => {
                 />
               )}
             />
-
-            <Controller
-              name='practiceManagerName'
-              control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  variant='outlined'
-                  label='Practice manager name'
-                  required
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                />
-              )}
-            />
           </Stack>
+
+          <Controller
+            name='practiceManagerName'
+            control={control}
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                fullWidth
+                variant='outlined'
+                label='Practice manager name'
+                required
+                error={!!fieldState.error}
+                helperText={fieldState.error?.message}
+              />
+            )}
+          />
 
           <Controller
             name='practiceAddress'
@@ -277,31 +277,31 @@ const PracticeInformation = () => {
           <Typography variant='h6' className='font-weight--700'>
             Practice profile
           </Typography>
-          <FormControl fullWidth error={!!errors.practiceType}>
-            <InputLabel id='practice-type-label'>Practice type *</InputLabel>
-            <Controller
-              name='practiceType'
-              control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  labelId='practice-type-label'
-                  label='Practice type *'
-                  variant='outlined'
-                >
-                  <MenuItem value='NHS-DOMINANT'>Predominantly NHS</MenuItem>
-                  <MenuItem value='PRIVATE'>Private</MenuItem>
-                  <MenuItem value='MIXED'>Mixed</MenuItem>
-                  <MenuItem value='SQUAT'>Squat</MenuItem>
-                </Select>
-              )}
-            />
-            <FormHelperText>
-              {errors.practiceType?.message as React.ReactNode}
-            </FormHelperText>
-          </FormControl>
 
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <FormControl fullWidth error={!!errors.practiceType}>
+              <InputLabel id='practice-type-label'>Practice type *</InputLabel>
+              <Controller
+                name='practiceType'
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    labelId='practice-type-label'
+                    label='Practice type *'
+                    variant='outlined'
+                  >
+                    <MenuItem value='NHS-DOMINANT'>Predominantly NHS</MenuItem>
+                    <MenuItem value='PRIVATE'>Private</MenuItem>
+                    <MenuItem value='MIXED'>Mixed</MenuItem>
+                    <MenuItem value='SQUAT'>Squat</MenuItem>
+                  </Select>
+                )}
+              />
+              <FormHelperText>
+                {errors.practiceType?.message as React.ReactNode}
+              </FormHelperText>
+            </FormControl>
             <Controller
               name='yearsTrading'
               control={control}
@@ -322,6 +322,9 @@ const PracticeInformation = () => {
                 />
               )}
             />
+          </Stack>
+
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <Controller
               name='numberOfSurgeries'
               control={control}
@@ -344,9 +347,6 @@ const PracticeInformation = () => {
                 />
               )}
             />
-          </Stack>
-
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <Controller
               name='numberOfAssociates'
               control={control}
@@ -369,6 +369,9 @@ const PracticeInformation = () => {
                 />
               )}
             />
+          </Stack>
+
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <Controller
               name='numberOfHygienistsTherapists'
               control={control}
@@ -392,9 +395,6 @@ const PracticeInformation = () => {
                 />
               )}
             />
-          </Stack>
-
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <Controller
               name='numberOfSpecialists'
               control={control}
@@ -417,30 +417,30 @@ const PracticeInformation = () => {
                 />
               )}
             />
-
-            <FormControl fullWidth error={!!errors.premisesOwnership}>
-              <InputLabel id='premises-ownership-label'>
-                Premises ownership *
-              </InputLabel>
-              <Controller
-                name='premisesOwnership'
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    labelId='premises-ownership-label'
-                    label='Premises ownership'
-                  >
-                    <MenuItem value='OWN'>Own</MenuItem>
-                    <MenuItem value='RENT'>Rent</MenuItem>
-                  </Select>
-                )}
-              />
-              <FormHelperText>
-                {errors.premisesOwnership?.message as React.ReactNode}
-              </FormHelperText>
-            </FormControl>
           </Stack>
+
+          <FormControl fullWidth error={!!errors.premisesOwnership}>
+            <InputLabel id='premises-ownership-label'>
+              Premises ownership *
+            </InputLabel>
+            <Controller
+              name='premisesOwnership'
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  labelId='premises-ownership-label'
+                  label='Premises ownership'
+                >
+                  <MenuItem value='OWN'>Own</MenuItem>
+                  <MenuItem value='RENT'>Rent</MenuItem>
+                </Select>
+              )}
+            />
+            <FormHelperText>
+              {errors.premisesOwnership?.message as React.ReactNode}
+            </FormHelperText>
+          </FormControl>
         </Stack>
 
         <Divider />
@@ -531,7 +531,7 @@ const PracticeInformation = () => {
 
         <Stack spacing={2}>
           <Typography variant='h6' className='font-weight--700'>
-            Practice systems{' '}
+            Financial habits & preferences
           </Typography>
 
           <FormControl fullWidth error={!!errors.frequencyOfFinancialReview}>
