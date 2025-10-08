@@ -1,5 +1,4 @@
-// TeamMembers.tsx
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState, useEffect, JSX } from 'react'
 import {
   Box,
   TextField,
@@ -17,7 +16,6 @@ import {
   Tooltip,
   TablePagination
 } from '@mui/material'
-import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import {
   DataGrid,
@@ -166,7 +164,11 @@ export default function TeamMembers(): JSX.Element {
   )
 
   useEffect(() => {
+    // keep totalRecords in sync AND remove selection for rows that are no longer in the filtered dataset
     setTotalRecords(sorted.length)
+    setSelectedMemberIds((prev) =>
+      prev.filter((id) => sorted.some((r) => r.id === id))
+    )
   }, [sorted])
 
   // fake server fetch when sorting changes (shows loader briefly and keeps client-side behavior)
@@ -190,8 +192,20 @@ export default function TeamMembers(): JSX.Element {
   // selection helpers
   const toggleId = (id: string, checked: boolean) => {
     setSelectedMemberIds((prev) =>
-      checked ? [...prev, id] : prev.filter((p) => p !== id)
+      checked
+        ? Array.from(new Set([...prev, id]))
+        : prev.filter((p) => p !== id)
     )
+  }
+
+  // select / deselect all filtered rows
+  const toggleSelectAll = (checked: boolean) => {
+    if (checked) {
+      // select all filtered (sorted) row ids (so respects filters)
+      setSelectedMemberIds(sorted.map((r) => r.id))
+    } else {
+      setSelectedMemberIds([])
+    }
   }
 
   // row class name example (theme-specific styling can be added in SCSS)
@@ -199,15 +213,45 @@ export default function TeamMembers(): JSX.Element {
     return params.row.status === 'Disabled' ? styles.rowDisabled : ''
   }
 
+  // helper to render an image icon (keeps markup DRY)
+  const ImgIcon = ({ src, alt }: { src: string; alt?: string }) => (
+    <Box
+      component='img'
+      src={src}
+      alt={alt || ''}
+      sx={{ width: 18, height: 18, display: 'block' }}
+    />
+  )
+
   // --- DataGrid columns ---
   const columns: GridColDef[] = [
     {
       field: 'select',
       headerName: '',
-      width: 64,
       sortable: false,
       filterable: false,
-      renderHeader: () => null,
+      renderHeader: () => {
+        const total = sorted.length
+        const selectedCount = selectedMemberIds.length
+        const checked = total > 0 && selectedCount === total
+        const indeterminate = selectedCount > 0 && selectedCount < total
+
+        return (
+          <Checkbox
+            size='small'
+            checked={checked}
+            indeterminate={indeterminate}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => {
+              const checked = e.target.checked
+              toggleSelectAll(checked)
+            }}
+            sx={{ padding: 1 }}
+            disabled={total === 0}
+            inputProps={{ 'aria-label': 'select all members' }}
+          />
+        )
+      },
       renderCell: (params) => {
         const checked = selectedMemberIds.includes(params.row.id)
         return (
@@ -218,26 +262,26 @@ export default function TeamMembers(): JSX.Element {
             sx={{ padding: 1 }}
           />
         )
-      }
+      },
+      width: 64
     },
     {
       field: 'member',
-      headerName: 'Member',
-      flex: 1.8,
-      minWidth: 240,
+      headerName: 'Members',
+      flex: 1,
       sortable: false,
       renderCell: (params: GridCellParams) => (
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          <Avatar sx={{ width: 36, height: 36 }}>
-            {String(params.row.name || ' ? ')
-              .split(' ')
-              .map((n: string) => n[0])
-              .slice(0, 2)
-              .join('')}
-          </Avatar>
-          <Box>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          {/* avatar commented out — re-enable if needed */}
+          {/* <Avatar sx={{ width: 36, height: 36 }}>{String(params.row.name || ' ? ').split(' ').map((n: string) => n[0]).slice(0,2).join('')}</Avatar> */}
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <Typography variant='body2'>{params.row.name}</Typography>
-            <Typography variant='caption' color='text.secondary'>
+            <Typography
+              variant='caption'
+              color='text.secondary'
+              sx={{ lineHeight: 1 }}
+            >
               {params.row.email}
             </Typography>
           </Box>
@@ -248,7 +292,6 @@ export default function TeamMembers(): JSX.Element {
       field: 'role',
       headerName: 'Role',
       flex: 1,
-      minWidth: 140,
       sortable: true,
       renderCell: (params: GridCellParams) => (
         <Typography variant='body2'>{params.row.role}</Typography>
@@ -258,7 +301,6 @@ export default function TeamMembers(): JSX.Element {
       field: 'status',
       headerName: 'Status',
       flex: 1,
-      minWidth: 140,
       sortable: true,
       renderCell: (params: GridCellParams) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -269,32 +311,55 @@ export default function TeamMembers(): JSX.Element {
     {
       field: 'actions',
       headerName: 'Actions',
-      flex: 0.8,
-      minWidth: 120,
+      flex: 1,
       sortable: false,
       renderCell: (params: GridCellParams) => (
         <Box
           sx={{
             display: 'flex',
             gap: 1,
-            justifyContent: 'flex-end',
-            width: '100%'
+            justifyContent: 'flex-start',
+            width: '100%',
+            alignItems: 'center'
           }}
         >
-          <Tooltip title='Edit'>
+          <Tooltip title='View'>
             <IconButton
               size='small'
-              onClick={() => console.log('edit', params.row.id)}
+              onClick={() => console.log('view', params.row.id)}
+              aria-label='view member'
             >
-              <EditIcon fontSize='small' />
+              <ImgIcon src='/assets/transparent-eye.svg' alt='view' />
             </IconButton>
           </Tooltip>
+
+          <Tooltip title='Invite / Add'>
+            <IconButton
+              size='small'
+              onClick={() => console.log('invite', params.row.id)}
+              aria-label='invite member'
+            >
+              <ImgIcon src='/assets/person-add.svg' alt='invite' />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title='Swap'>
+            <IconButton
+              size='small'
+              onClick={() => console.log('swap', params.row.id)}
+              aria-label='swap member'
+            >
+              <ImgIcon src='/assets/swap-icon.svg' alt='swap' />
+            </IconButton>
+          </Tooltip>
+
           <Tooltip title='Delete'>
             <IconButton
               size='small'
-              onClick={() => console.log('delete', params.row.id)}
+              onClick={() => console.log('swap', params.row.id)}
+              aria-label='flag icon'
             >
-              <DeleteIcon fontSize='small' />
+              <ImgIcon src='/assets/green-flag.svg' alt='flag icon' />
             </IconButton>
           </Tooltip>
         </Box>
@@ -432,7 +497,7 @@ export default function TeamMembers(): JSX.Element {
           pageSizeOptions={[5, 10, 25, { value: -1, label: 'All' }]}
           disableColumnMenu
           disableColumnResize
-          rowHeight={76}
+          rowHeight={56}
           hideFooter={true}
           getRowId={(row) => row.id}
           sortingMode='server'
@@ -446,19 +511,18 @@ export default function TeamMembers(): JSX.Element {
           sortModel={sortModel}
           sx={{
             border: 'none',
-            // <-- hide the vertical column separator / resize handle
-            '& .MuiDataGrid-columnSeparator': {
-              display: 'none'
+            // hide the vertical column separator / resize handle
+            '& .MuiDataGrid-columnSeparator': { display: 'none' },
+
+            // vertically center headers & cells
+            '& .MuiDataGrid-columnHeader, & .MuiDataGrid-cell': {
+              display: 'flex',
+              alignItems: 'center'
             },
 
-            // optional: remove any visual header borders/right-lines
-            '& .MuiDataGrid-columnHeader': {
-              borderRight: 'none'
-            },
-            '& .MuiDataGrid-cell': {
-              borderRight: 'none',
-              outline: 'none'
-            }
+            // remove visual header/cell right borders
+            '& .MuiDataGrid-columnHeader': { borderRight: 'none' },
+            '& .MuiDataGrid-cell': { borderRight: 'none', outline: 'none' }
           }}
         />
 
