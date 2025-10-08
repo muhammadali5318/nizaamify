@@ -206,7 +206,7 @@ export default function TeamMembers(): JSX.Element {
       </Box>
 
       {/* DataGrid */}
-      <Box sx={{ width: '100%', mt: 3 }}>
+      <Box sx={{ width: '100%' }}>
         <DataGrid
           rows={practiceList}
           columns={columns}
