@@ -1,5 +1,5 @@
 // TeamMembers.tsx
-import React, { useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import {
   Box,
   TextField,
@@ -8,11 +8,27 @@ import {
   Select,
   MenuItem,
   Checkbox,
-  ListItemText
+  ListItemText,
+  Button,
+  Avatar,
+  Typography,
+  IconButton,
+  CircularProgress,
+  Tooltip,
+  TablePagination
 } from '@mui/material'
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
+import {
+  DataGrid,
+  GridColDef,
+  GridCellParams,
+  GridSortModel
+} from '@mui/x-data-grid'
 import TeamManagementContentWrapper from '../components/TeamManagementContentWrapper'
 import styles from './teamMembers.module.scss'
 
+// --- options ---
 const ROLE_OPTIONS = [
   'Admin',
   'Manager',
@@ -21,9 +37,9 @@ const ROLE_OPTIONS = [
   'Reception',
   'Finance'
 ]
-
 const STATUS_OPTIONS = ['Active', 'Pending', 'Invited', 'Disabled']
 
+// DataGrid menu props (keeps dropdown reasonably sized)
 const ITEM_HEIGHT = 48
 const ITEM_PADDING_TOP = 8
 const MenuProps = {
@@ -35,10 +51,294 @@ const MenuProps = {
   }
 }
 
-const TeamMembers: React.FC = () => {
-  const [search, setSearch] = useState<string>('')
+// --- types ---
+type MemberRow = {
+  id: string
+  name: string
+  email: string
+  role: string
+  status: string
+}
+
+// --- helpers ---
+const generateDummyData = (count = 50): MemberRow[] => {
+  const names = [
+    'Ali Khan',
+    'Sara Ahmed',
+    'Hassan Raza',
+    'Ayesha Noor',
+    'Bilal Malik',
+    'Fatima Iqbal',
+    'Usman Tariq',
+    'Zara Ali',
+    'Omar Siddiqui',
+    'Maryam Khan'
+  ]
+
+  return Array.from({ length: count }).map((_, i) => {
+    const base = names[i % names.length]
+    const name = `${base} ${i + 1}`
+    return {
+      id: `m-${i + 1}`,
+      name,
+      email: `${base.toLowerCase().replace(/\s+/g, '.')}.${i}@example.com`,
+      role: ROLE_OPTIONS[i % ROLE_OPTIONS.length],
+      status: STATUS_OPTIONS[i % STATUS_OPTIONS.length]
+    }
+  })
+}
+
+// Simple loader used inside the grid locale text
+const CustomLoader: React.FC<{ backgroundColor?: string }> = ({
+  backgroundColor
+}) => (
+  <Box
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      py: 4
+    }}
+  >
+    <CircularProgress />
+  </Box>
+)
+
+// --- component ---
+export default function TeamMembers(): JSX.Element {
+  // filter state
+  const [searchKey, setSearchKey] = useState<string>('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
+
+  // data + selection + sorting + pagination
+  const [allRows] = useState<MemberRow[]>(() => generateDummyData(50))
+  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
+
+  // DataGrid pagination controlled by external TablePagination
+  const [page, setPage] = useState<number>(0)
+  const [pageSize, setPageSize] = useState<number>(10)
+  const [totalRecords, setTotalRecords] = useState<number>(allRows.length)
+
+  // sort model (server mode style in example)
+  const [sortModel, setSortModel] = useState<GridSortModel>([])
+
+  // ------------------
+  // Filtering & sorting (client-side for dummy)
+  // ------------------
+  const filtered = useMemo(() => {
+    const q = searchKey.trim().toLowerCase()
+    return allRows.filter((r) => {
+      if (q) {
+        const match =
+          r.name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q)
+        if (!match) return false
+      }
+      if (selectedRoles.length > 0 && !selectedRoles.includes(r.role))
+        return false
+      if (selectedStatuses.length > 0 && !selectedStatuses.includes(r.status))
+        return false
+      return true
+    })
+  }, [allRows, searchKey, selectedRoles, selectedStatuses])
+
+  // apply sorting (client-side mimic for now)
+  const sorted = useMemo(() => {
+    if (!sortModel || sortModel.length === 0) return filtered
+    const model = sortModel[0]
+    const sortedRows = [...filtered].sort((a: any, b: any) => {
+      const field = model.field as keyof MemberRow
+      const dir = model.sort === 'asc' ? 1 : -1
+      if (a[field] == null) return 1 * dir
+      if (b[field] == null) return -1 * dir
+      return a[field] > b[field] ? 1 * dir : -1 * dir
+    })
+    return sortedRows
+  }, [filtered, sortModel])
+
+  // current page rows for DataGrid
+  const pageCount = Math.ceil(sorted.length / pageSize) || 1
+  const effectivePage = Math.min(page, Math.max(0, pageCount - 1))
+  const visibleRows = sorted.slice(
+    effectivePage * pageSize,
+    effectivePage * pageSize + pageSize
+  )
+
+  useEffect(() => {
+    setTotalRecords(sorted.length)
+  }, [sorted])
+
+  // fake server fetch when sorting changes (shows loader briefly and keeps client-side behavior)
+  const fetchSortedData = (model: GridSortModel) => {
+    setLoading(true)
+    // simulate delay
+    setTimeout(() => {
+      setSortModel(model)
+      setLoading(false)
+    }, 300)
+  }
+
+  // clear filters
+  const handleClearFilters = () => {
+    setSearchKey('')
+    setSelectedRoles([])
+    setSelectedStatuses([])
+    setPage(0)
+  }
+
+  // selection helpers
+  const toggleId = (id: string, checked: boolean) => {
+    setSelectedMemberIds((prev) =>
+      checked ? [...prev, id] : prev.filter((p) => p !== id)
+    )
+  }
+
+  // row class name example (theme-specific styling can be added in SCSS)
+  const getRowClassName = (params: any) => {
+    return params.row.status === 'Disabled' ? styles.rowDisabled : ''
+  }
+
+  // --- DataGrid columns ---
+  const columns: GridColDef[] = [
+    {
+      field: 'select',
+      headerName: '',
+      width: 64,
+      sortable: false,
+      filterable: false,
+      renderHeader: () => null,
+      renderCell: (params) => {
+        const checked = selectedMemberIds.includes(params.row.id)
+        return (
+          <Checkbox
+            size='small'
+            checked={checked}
+            onChange={(e) => toggleId(params.row.id, e.target.checked)}
+            sx={{ padding: 1 }}
+          />
+        )
+      }
+    },
+    {
+      field: 'member',
+      headerName: 'Member',
+      flex: 1.8,
+      minWidth: 240,
+      sortable: false,
+      renderCell: (params: GridCellParams) => (
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <Avatar sx={{ width: 36, height: 36 }}>
+            {String(params.row.name || ' ? ')
+              .split(' ')
+              .map((n: string) => n[0])
+              .slice(0, 2)
+              .join('')}
+          </Avatar>
+          <Box>
+            <Typography variant='body2'>{params.row.name}</Typography>
+            <Typography variant='caption' color='text.secondary'>
+              {params.row.email}
+            </Typography>
+          </Box>
+        </Box>
+      )
+    },
+    {
+      field: 'role',
+      headerName: 'Role',
+      flex: 1,
+      minWidth: 140,
+      sortable: true,
+      renderCell: (params: GridCellParams) => (
+        <Typography variant='body2'>{params.row.role}</Typography>
+      )
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      flex: 1,
+      minWidth: 140,
+      sortable: true,
+      renderCell: (params: GridCellParams) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant='body2'>{params.row.status}</Typography>
+        </Box>
+      )
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      flex: 0.8,
+      minWidth: 120,
+      sortable: false,
+      renderCell: (params: GridCellParams) => (
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 1,
+            justifyContent: 'flex-end',
+            width: '100%'
+          }}
+        >
+          <Tooltip title='Edit'>
+            <IconButton
+              size='small'
+              onClick={() => console.log('edit', params.row.id)}
+            >
+              <EditIcon fontSize='small' />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title='Delete'>
+            <IconButton
+              size='small'
+              onClick={() => console.log('delete', params.row.id)}
+            >
+              <DeleteIcon fontSize='small' />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )
+    }
+  ]
+
+  // rows passed into DataGrid (DataGrid expects flat objects)
+  const practiceList = visibleRows.map((r) => ({ ...r }))
+
+  // DataGrid locale text for no rows
+  const noRowsLabel = loading ? (
+    <Box className='no-result-found'>
+      <CustomLoader />
+    </Box>
+  ) : practiceList.length === 0 && searchKey.length > 0 ? (
+    <Box className='no-result-found'>
+      <Box className='no-result-found-typography'>
+        <Typography variant='body2'>
+          Your search for '{searchKey}' did not match any results.
+        </Typography>
+        <Typography variant='body2'>
+          Please try again with different keywords or adjust the filters.
+        </Typography>
+      </Box>
+      <Button variant='outlined' onClick={handleClearFilters}>
+        Clear All Filter
+      </Button>
+    </Box>
+  ) : (
+    <Box className='no-result-found'>
+      <Box className='no-result-found-typography'>
+        <Typography variant='body2'>
+          Your search did not match any results.
+        </Typography>
+        <Typography variant='body2'>
+          Please try again with different keywords or adjust the filters.
+        </Typography>
+      </Box>
+      <Button variant='outlined' onClick={handleClearFilters}>
+        Clear All Filter
+      </Button>
+    </Box>
+  )
 
   return (
     <TeamManagementContentWrapper
@@ -47,18 +347,23 @@ const TeamMembers: React.FC = () => {
       title='Team members'
       subtitle='Manage your practice team members and their access'
     >
+      {/* Filters */}
       <Box className={styles.filterContainer}>
         <Box className={styles.filterBody}>
           <TextField
             label='Search'
             variant='outlined'
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchKey}
+            onChange={(e) => {
+              setSearchKey(e.target.value)
+              setPage(0)
+            }}
             placeholder='Search by name, email...'
             sx={{ minWidth: 300, flex: '1 1 300px' }}
+            size='small'
           />
 
-          <FormControl sx={{ minWidth: 180, flex: '0 0 180px' }}>
+          <FormControl sx={{ minWidth: 180, flex: '0 0 180px' }} size='small'>
             <InputLabel id='roles-select-label'>Role</InputLabel>
             <Select
               labelId='roles-select-label'
@@ -69,6 +374,7 @@ const TeamMembers: React.FC = () => {
                 setSelectedRoles(
                   typeof value === 'string' ? value.split(',') : value
                 )
+                setPage(0)
               }}
               renderValue={(selected) => (selected as string[]).join(', ')}
               label='Role'
@@ -83,7 +389,7 @@ const TeamMembers: React.FC = () => {
             </Select>
           </FormControl>
 
-          <FormControl sx={{ minWidth: 180, flex: '0 0 180px' }}>
+          <FormControl sx={{ minWidth: 180, flex: '0 0 180px' }} size='small'>
             <InputLabel id='status-select-label'>Status</InputLabel>
             <Select
               labelId='status-select-label'
@@ -94,6 +400,7 @@ const TeamMembers: React.FC = () => {
                 setSelectedStatuses(
                   typeof value === 'string' ? value.split(',') : value
                 )
+                setPage(0)
               }}
               renderValue={(selected) => (selected as string[]).join(', ')}
               label='Status'
@@ -107,10 +414,56 @@ const TeamMembers: React.FC = () => {
               ))}
             </Select>
           </FormControl>
+
+          <Box sx={{ marginLeft: 'auto' }}>
+            <Button onClick={handleClearFilters} variant='outlined'>
+              Clear
+            </Button>
+          </Box>
         </Box>
+      </Box>
+
+      {/* DataGrid */}
+      <Box sx={{ height: 420, width: '100%', mt: 3 }}>
+        <DataGrid
+          rows={practiceList}
+          columns={columns}
+          getRowClassName={getRowClassName}
+          pageSizeOptions={[5, 10, 25, { value: -1, label: 'All' }]}
+          disableColumnMenu
+          rowHeight={76}
+          hideFooter={true}
+          getRowId={(row) => row.id}
+          sortingMode='server'
+          localeText={{
+            noRowsLabel
+          }}
+          onSortModelChange={(model: GridSortModel) => {
+            // trigger a "server" fetch (we simulate it)
+            fetchSortedData(model)
+          }}
+          sortModel={sortModel}
+          sx={{
+            border: 'none',
+            '& .MuiDataGrid-cell': { outline: 'none' }
+          }}
+        />
+
+        {/* External pagination (keeps behaviour like example) */}
+        <TablePagination
+          className='pagination-container'
+          rowsPerPageOptions={[5, 10, 25, 50]}
+          component='div'
+          count={totalRecords}
+          rowsPerPage={pageSize}
+          page={effectivePage}
+          onPageChange={(_, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(event) => {
+            setPageSize(parseInt(event.target.value, 10))
+            setPage(0)
+          }}
+        />
       </Box>
     </TeamManagementContentWrapper>
   )
 }
-
-export default TeamMembers
