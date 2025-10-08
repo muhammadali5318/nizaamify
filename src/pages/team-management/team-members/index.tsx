@@ -9,14 +9,12 @@ import {
   Checkbox,
   ListItemText,
   Button,
-  Avatar,
   Typography,
   IconButton,
   CircularProgress,
   Tooltip,
   TablePagination
 } from '@mui/material'
-import DeleteIcon from '@mui/icons-material/Delete'
 import {
   DataGrid,
   GridColDef,
@@ -111,7 +109,6 @@ export default function TeamMembers(): JSX.Element {
 
   // data + selection + sorting + pagination
   const [allRows] = useState<MemberRow[]>(() => generateDummyData(50))
-  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([])
   const [loading, setLoading] = useState<boolean>(false)
 
   // DataGrid pagination controlled by external TablePagination
@@ -166,9 +163,6 @@ export default function TeamMembers(): JSX.Element {
   useEffect(() => {
     // keep totalRecords in sync AND remove selection for rows that are no longer in the filtered dataset
     setTotalRecords(sorted.length)
-    setSelectedMemberIds((prev) =>
-      prev.filter((id) => sorted.some((r) => r.id === id))
-    )
   }, [sorted])
 
   // fake server fetch when sorting changes (shows loader briefly and keeps client-side behavior)
@@ -189,25 +183,6 @@ export default function TeamMembers(): JSX.Element {
     setPage(0)
   }
 
-  // selection helpers
-  const toggleId = (id: string, checked: boolean) => {
-    setSelectedMemberIds((prev) =>
-      checked
-        ? Array.from(new Set([...prev, id]))
-        : prev.filter((p) => p !== id)
-    )
-  }
-
-  // select / deselect all filtered rows
-  const toggleSelectAll = (checked: boolean) => {
-    if (checked) {
-      // select all filtered (sorted) row ids (so respects filters)
-      setSelectedMemberIds(sorted.map((r) => r.id))
-    } else {
-      setSelectedMemberIds([])
-    }
-  }
-
   // row class name example (theme-specific styling can be added in SCSS)
   const getRowClassName = (params: any) => {
     return params.row.status === 'Disabled' ? styles.rowDisabled : ''
@@ -225,55 +200,12 @@ export default function TeamMembers(): JSX.Element {
   // --- DataGrid columns ---
   const columns: GridColDef[] = [
     {
-      field: 'select',
-      headerName: '',
-      sortable: false,
-      filterable: false,
-      renderHeader: () => {
-        const total = sorted.length
-        const selectedCount = selectedMemberIds.length
-        const checked = total > 0 && selectedCount === total
-        const indeterminate = selectedCount > 0 && selectedCount < total
-
-        return (
-          <Checkbox
-            size='small'
-            checked={checked}
-            indeterminate={indeterminate}
-            onClick={(e) => e.stopPropagation()}
-            onChange={(e) => {
-              const checked = e.target.checked
-              toggleSelectAll(checked)
-            }}
-            sx={{ padding: 1 }}
-            disabled={total === 0}
-            inputProps={{ 'aria-label': 'select all members' }}
-          />
-        )
-      },
-      renderCell: (params) => {
-        const checked = selectedMemberIds.includes(params.row.id)
-        return (
-          <Checkbox
-            size='small'
-            checked={checked}
-            onChange={(e) => toggleId(params.row.id, e.target.checked)}
-            sx={{ padding: 1 }}
-          />
-        )
-      },
-      width: 64
-    },
-    {
       field: 'member',
       headerName: 'Members',
       flex: 1,
       sortable: false,
       renderCell: (params: GridCellParams) => (
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          {/* avatar commented out — re-enable if needed */}
-          {/* <Avatar sx={{ width: 36, height: 36 }}>{String(params.row.name || ' ? ').split(' ').map((n: string) => n[0]).slice(0,2).join('')}</Avatar> */}
-
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <Typography variant='body2'>{params.row.name}</Typography>
             <Typography
@@ -478,12 +410,6 @@ export default function TeamMembers(): JSX.Element {
               ))}
             </Select>
           </FormControl>
-
-          <Box sx={{ marginLeft: 'auto' }}>
-            <Button onClick={handleClearFilters} variant='outlined'>
-              Clear
-            </Button>
-          </Box>
         </Box>
       </Box>
 
