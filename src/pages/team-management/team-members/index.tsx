@@ -11,6 +11,7 @@ import {
   ListItemText
 } from '@mui/material'
 import TeamManagementContentWrapper from '../components/TeamManagementContentWrapper'
+import styles from './teamMembers.module.scss'
 
 const ROLE_OPTIONS = [
   'Admin',
@@ -46,78 +47,67 @@ const TeamMembers: React.FC = () => {
       title='Team members'
       subtitle='Manage your practice team members and their access'
     >
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 2,
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          mt: 2
-        }}
-      >
-        {/* 1. Search box */}
-        <TextField
-          label='Search team members'
-          variant='outlined'
-          size='small'
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder='Search by name, email...'
-          sx={{ minWidth: 260, flex: '1 1 320px' }}
-        />
+      <Box className={styles.filterContainer}>
+        <Box className={styles.filterBody}>
+          <TextField
+            label='Search'
+            variant='outlined'
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder='Search by name, email...'
+            sx={{ minWidth: 300, flex: '1 1 300px' }}
+          />
 
-        {/* 2. Multi-select dropdown (roles) - shows checkboxes in dropdown, plain text when closed */}
-        <FormControl sx={{ minWidth: 220, flex: '0 0 260px' }} size='small'>
-          <InputLabel id='roles-select-label'>Role</InputLabel>
-          <Select
-            labelId='roles-select-label'
-            multiple
-            value={selectedRoles}
-            onChange={(e) => {
-              const value = e.target.value
-              // MUI sometimes returns string when autofill; we ensure string[]
-              setSelectedRoles(
-                typeof value === 'string' ? value.split(',') : value
-              )
-            }}
-            renderValue={(selected) => (selected as string[]).join(', ')}
-            label='Role'
-            MenuProps={MenuProps}
-          >
-            {ROLE_OPTIONS.map((role) => (
-              <MenuItem key={role} value={role}>
-                <Checkbox checked={selectedRoles.indexOf(role) > -1} />
-                <ListItemText primary={role} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+          <FormControl sx={{ minWidth: 180, flex: '0 0 180px' }}>
+            <InputLabel id='roles-select-label'>Role</InputLabel>
+            <Select
+              labelId='roles-select-label'
+              multiple
+              value={selectedRoles}
+              onChange={(e) => {
+                const value = e.target.value
+                setSelectedRoles(
+                  typeof value === 'string' ? value.split(',') : value
+                )
+              }}
+              renderValue={(selected) => (selected as string[]).join(', ')}
+              label='Role'
+              MenuProps={MenuProps}
+            >
+              {ROLE_OPTIONS.map((role) => (
+                <MenuItem key={role} value={role}>
+                  <Checkbox checked={selectedRoles.indexOf(role) > -1} />
+                  <ListItemText primary={role} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-        {/* 3. Multi-select dropdown (status) - shows checkboxes in dropdown, plain text when closed */}
-        <FormControl sx={{ minWidth: 220, flex: '0 0 260px' }} size='small'>
-          <InputLabel id='status-select-label'>Status</InputLabel>
-          <Select
-            labelId='status-select-label'
-            multiple
-            value={selectedStatuses}
-            onChange={(e) => {
-              const value = e.target.value
-              setSelectedStatuses(
-                typeof value === 'string' ? value.split(',') : value
-              )
-            }}
-            renderValue={(selected) => (selected as string[]).join(', ')}
-            label='Status'
-            MenuProps={MenuProps}
-          >
-            {STATUS_OPTIONS.map((status) => (
-              <MenuItem key={status} value={status}>
-                <Checkbox checked={selectedStatuses.indexOf(status) > -1} />
-                <ListItemText primary={status} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+          <FormControl sx={{ minWidth: 180, flex: '0 0 180px' }}>
+            <InputLabel id='status-select-label'>Status</InputLabel>
+            <Select
+              labelId='status-select-label'
+              multiple
+              value={selectedStatuses}
+              onChange={(e) => {
+                const value = e.target.value
+                setSelectedStatuses(
+                  typeof value === 'string' ? value.split(',') : value
+                )
+              }}
+              renderValue={(selected) => (selected as string[]).join(', ')}
+              label='Status'
+              MenuProps={MenuProps}
+            >
+              {STATUS_OPTIONS.map((status) => (
+                <MenuItem key={status} value={status}>
+                  <Checkbox checked={selectedStatuses.indexOf(status) > -1} />
+                  <ListItemText primary={status} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
       </Box>
     </TeamManagementContentWrapper>
   )

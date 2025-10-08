@@ -1,0 +1,14 @@
+.filterContainer {
+  display: flex;
+  padding: 16px;
+  align-items: center;
+  gap: 16px;
+//   align-self: stretch;
+
+  .filterBody {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1 0 0;
+  }
+}
