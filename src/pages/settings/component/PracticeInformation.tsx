@@ -322,11 +322,10 @@ const PracticeInformation = () => {
                 />
               )}
             />
-           
           </Stack>
 
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-             <Controller
+            <Controller
               name='numberOfSurgeries'
               control={control}
               render={({ field }) => (
@@ -370,11 +369,10 @@ const PracticeInformation = () => {
                 />
               )}
             />
-          
           </Stack>
 
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <Controller
+            <Controller
               name='numberOfHygienistsTherapists'
               control={control}
               render={({ field }) => (
