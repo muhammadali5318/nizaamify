@@ -25,3 +25,35 @@ export const tabsData: {
     inactiveIcon: '/assets/notification-icon.svg'
   }
 ]
+
+export const teamMembersSx = {
+  border: 'none',
+  borderBottom: '1px solid var(--divider, rgba(0, 0, 0, 0.12))',
+  '& .MuiDataGrid-columnSeparator': { display: 'none' },
+
+  // vertically center headers & cells
+  '& .MuiDataGrid-columnHeader, & .MuiDataGrid-cell': {
+    display: 'flex',
+    alignItems: 'center'
+  },
+
+  // remove visual header/cell right borders
+  '& .MuiDataGrid-cell': { borderRight: 'none', outline: 'none' },
+
+  // header background
+  '& .MuiDataGrid-columnHeaders': {
+    backgroundColor: 'var(--grey-100, #F5F5F5)',
+    color: 'inherit',
+    minHeight: 56
+  },
+
+  '& .MuiDataGrid-columnHeader': {
+    borderRight: 'none',
+    backgroundColor: 'transparent',
+    borderBottom: '1px solid rgba(0,0,0,0.04)'
+  },
+
+  '& .MuiDataGrid-columnHeader .MuiCheckbox-root': {
+    backgroundColor: 'transparent'
+  }
+}

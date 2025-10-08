@@ -13,7 +13,8 @@ import {
   IconButton,
   CircularProgress,
   Tooltip,
-  TablePagination
+  TablePagination,
+  Chip
 } from '@mui/material'
 import {
   DataGrid,
@@ -23,17 +24,11 @@ import {
 } from '@mui/x-data-grid'
 import TeamManagementContentWrapper from '../components/TeamManagementContentWrapper'
 import styles from './teamMembers.module.scss'
+import { teamMembersSx } from '../team-management-config'
 
 // --- options ---
-const ROLE_OPTIONS = [
-  'Admin',
-  'Manager',
-  'Dentist',
-  'Hygienist',
-  'Reception',
-  'Finance'
-]
-const STATUS_OPTIONS = ['Active', 'Pending', 'Invited', 'Disabled']
+const ROLE_OPTIONS = ['Admin', 'Manager']
+const STATUS_OPTIONS = ['Active', 'Pending', 'Inactive']
 
 // DataGrid menu props (keeps dropdown reasonably sized)
 const ITEM_HEIGHT = 48
@@ -161,14 +156,11 @@ export default function TeamMembers(): JSX.Element {
   )
 
   useEffect(() => {
-    // keep totalRecords in sync AND remove selection for rows that are no longer in the filtered dataset
     setTotalRecords(sorted.length)
   }, [sorted])
 
-  // fake server fetch when sorting changes (shows loader briefly and keeps client-side behavior)
   const fetchSortedData = (model: GridSortModel) => {
     setLoading(true)
-    // simulate delay
     setTimeout(() => {
       setSortModel(model)
       setLoading(false)
@@ -208,11 +200,7 @@ export default function TeamMembers(): JSX.Element {
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <Typography variant='body2'>{params.row.name}</Typography>
-            <Typography
-              variant='caption'
-              color='text.secondary'
-              sx={{ lineHeight: 1 }}
-            >
+            <Typography variant='body2' sx={{ lineHeight: 1 }}>
               {params.row.email}
             </Typography>
           </Box>
@@ -233,11 +221,52 @@ export default function TeamMembers(): JSX.Element {
       headerName: 'Status',
       flex: 1,
       sortable: true,
-      renderCell: (params: GridCellParams) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant='body2'>{params.row.status}</Typography>
-        </Box>
-      )
+      renderCell: (params: GridCellParams) => {
+        const status = params.row.status
+
+        // --- config based on status ---
+        const config: Record<
+          string,
+          { icon: string; bg: string; color: string }
+        > = {
+          Active: {
+            icon: '/assets/green-verify-circle.svg',
+            bg: 'rgba(76, 175, 80, 0.15)',
+            color: 'var(--color-success-main)'
+          },
+          Inactive: {
+            icon: '/assets/error-outlined.svg',
+            bg: 'rgba(239, 83, 80, 0.15)',
+            color: 'var(--color-error-main)'
+          },
+          Pending: {
+            icon: '/assets/pending-circle.svg',
+            bg: 'rgba(255, 152, 0, 0.15)',
+            color: 'var(--color-warning-main)'
+          }
+        }
+
+        const { icon, bg, color } = config[status] || config['Pending']
+
+        return (
+          <Chip
+            icon={<Box component='img' src={icon} alt={status} />}
+            label={status}
+            sx={{
+              backgroundColor: bg,
+              color,
+              textTransform: 'capitalize',
+              fontSize: '13px',
+              borderRadius: '16px',
+              height: 24,
+              '& .MuiChip-icon': {
+                color,
+                ml: 0.5
+              }
+            }}
+          />
+        )
+      }
     },
     {
       field: 'actions',
@@ -248,7 +277,7 @@ export default function TeamMembers(): JSX.Element {
         <Box
           sx={{
             display: 'flex',
-            gap: 1,
+            gap: 0.6,
             justifyContent: 'flex-start',
             width: '100%',
             alignItems: 'center'
@@ -356,10 +385,9 @@ export default function TeamMembers(): JSX.Element {
             }}
             placeholder='Search by name, email...'
             sx={{ minWidth: 300, flex: '1 1 300px' }}
-            size='small'
           />
 
-          <FormControl sx={{ minWidth: 180, flex: '0 0 180px' }} size='small'>
+          <FormControl sx={{ minWidth: 180, flex: '0 0 180px' }}>
             <InputLabel id='roles-select-label'>Role</InputLabel>
             <Select
               labelId='roles-select-label'
@@ -385,7 +413,7 @@ export default function TeamMembers(): JSX.Element {
             </Select>
           </FormControl>
 
-          <FormControl sx={{ minWidth: 180, flex: '0 0 180px' }} size='small'>
+          <FormControl sx={{ minWidth: 180, flex: '0 0 180px' }}>
             <InputLabel id='status-select-label'>Status</InputLabel>
             <Select
               labelId='status-select-label'
@@ -434,41 +462,9 @@ export default function TeamMembers(): JSX.Element {
             fetchSortedData(model)
           }}
           sortModel={sortModel}
-          sx={{
-            border: 'none',
-            '& .MuiDataGrid-columnSeparator': { display: 'none' },
-
-            // vertically center headers & cells
-            '& .MuiDataGrid-columnHeader, & .MuiDataGrid-cell': {
-              display: 'flex',
-              alignItems: 'center'
-            },
-
-            // remove visual header/cell right borders
-            '& .MuiDataGrid-cell': { borderRight: 'none', outline: 'none' },
-
-            // <-- new: header background and optional header cell styling
-            '& .MuiDataGrid-columnHeaders': {
-              backgroundColor: 'var(--grey-100, #F5F5F5)',
-              // keep header text readable and aligned
-              color: 'inherit',
-              // if you want a little more header height:
-              minHeight: 56
-            },
-            '& .MuiDataGrid-columnHeader': {
-              borderRight: 'none',
-              backgroundColor: 'transparent',
-              borderBottom: '1px solid rgba(0,0,0,0.04)'
-            },
-
-            // optional: make header checkbox area match header background
-            '& .MuiDataGrid-columnHeader .MuiCheckbox-root': {
-              backgroundColor: 'transparent'
-            }
-          }}
+          sx={{ ...teamMembersSx }}
         />
 
-        {/* External pagination (keeps behaviour like example) */}
         <TablePagination
           className='pagination-container'
           rowsPerPageOptions={[5, 10, 25, 50]}
