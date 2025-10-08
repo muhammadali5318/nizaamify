@@ -1,4 +1,6 @@
-import React, { useMemo, useState, useEffect, JSX } from 'react'
+/* eslint-disable no-console */
+// src/modules/team-members/TeamMembers.tsx
+import { useMemo, useState, useEffect } from 'react'
 import {
   Box,
   TextField,
@@ -8,94 +10,24 @@ import {
   MenuItem,
   Checkbox,
   ListItemText,
-  Button,
-  Typography,
-  IconButton,
-  CircularProgress,
-  Tooltip,
-  TablePagination,
-  Chip
+  TablePagination
 } from '@mui/material'
-import {
-  DataGrid,
-  GridColDef,
-  GridCellParams,
-  GridSortModel
-} from '@mui/x-data-grid'
+import { DataGrid, GridSortModel } from '@mui/x-data-grid'
 import TeamManagementContentWrapper from '../components/TeamManagementContentWrapper'
 import styles from './teamMembers.module.scss'
 import { teamMembersSx } from '../team-management-config'
+import { JSX } from 'react/jsx-runtime'
+import { useTeamMembersColumns } from '../hooks/useTeamMembersColumns'
+import {
+  MemberRow,
+  generateDummyData,
+  clampPage,
+  MenuProps,
+  ROLE_OPTIONS,
+  STATUS_OPTIONS
+} from '../team-members-config'
+import { NoResultsBox } from './components/TeamMembers'
 
-// --- options ---
-const ROLE_OPTIONS = ['Admin', 'Manager']
-const STATUS_OPTIONS = ['Active', 'Pending', 'Inactive']
-
-// DataGrid menu props (keeps dropdown reasonably sized)
-const ITEM_HEIGHT = 48
-const ITEM_PADDING_TOP = 8
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 260
-    }
-  }
-}
-
-// --- types ---
-type MemberRow = {
-  id: string
-  name: string
-  email: string
-  role: string
-  status: string
-}
-
-// --- helpers ---
-const generateDummyData = (count = 50): MemberRow[] => {
-  const names = [
-    'Ali Khan',
-    'Sara Ahmed',
-    'Hassan Raza',
-    'Ayesha Noor',
-    'Bilal Malik',
-    'Fatima Iqbal',
-    'Usman Tariq',
-    'Zara Ali',
-    'Omar Siddiqui',
-    'Maryam Khan'
-  ]
-
-  return Array.from({ length: count }).map((_, i) => {
-    const base = names[i % names.length]
-    const name = `${base} ${i + 1}`
-    return {
-      id: `m-${i + 1}`,
-      name,
-      email: `${base.toLowerCase().replace(/\s+/g, '.')}.${i}@example.com`,
-      role: ROLE_OPTIONS[i % ROLE_OPTIONS.length],
-      status: STATUS_OPTIONS[i % STATUS_OPTIONS.length]
-    }
-  })
-}
-
-// Simple loader used inside the grid locale text
-const CustomLoader: React.FC<{ backgroundColor?: string }> = ({
-  backgroundColor
-}) => (
-  <Box
-    sx={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      py: 4
-    }}
-  >
-    <CircularProgress />
-  </Box>
-)
-
-// --- component ---
 export default function TeamMembers(): JSX.Element {
   // filter state
   const [searchKey, setSearchKey] = useState<string>('')
@@ -106,17 +38,15 @@ export default function TeamMembers(): JSX.Element {
   const [allRows] = useState<MemberRow[]>(() => generateDummyData(50))
   const [loading, setLoading] = useState<boolean>(false)
 
-  // DataGrid pagination controlled by external TablePagination
+  // pagination
   const [page, setPage] = useState<number>(0)
   const [pageSize, setPageSize] = useState<number>(10)
   const [totalRecords, setTotalRecords] = useState<number>(allRows.length)
 
-  // sort model (server mode style in example)
+  // sort model
   const [sortModel, setSortModel] = useState<GridSortModel>([])
 
-  // ------------------
-  // Filtering & sorting (client-side for dummy)
-  // ------------------
+  // filtering
   const filtered = useMemo(() => {
     const q = searchKey.trim().toLowerCase()
     return allRows.filter((r) => {
@@ -133,7 +63,7 @@ export default function TeamMembers(): JSX.Element {
     })
   }, [allRows, searchKey, selectedRoles, selectedStatuses])
 
-  // apply sorting (client-side mimic for now)
+  // sorting (client-side mimic)
   const sorted = useMemo(() => {
     if (!sortModel || sortModel.length === 0) return filtered
     const model = sortModel[0]
@@ -147,9 +77,9 @@ export default function TeamMembers(): JSX.Element {
     return sortedRows
   }, [filtered, sortModel])
 
-  // current page rows for DataGrid
+  // page calculations
   const pageCount = Math.ceil(sorted.length / pageSize) || 1
-  const effectivePage = Math.min(page, Math.max(0, pageCount - 1))
+  const effectivePage = clampPage(page, pageCount)
   const visibleRows = sorted.slice(
     effectivePage * pageSize,
     effectivePage * pageSize + pageSize
@@ -167,7 +97,6 @@ export default function TeamMembers(): JSX.Element {
     }, 300)
   }
 
-  // clear filters
   const handleClearFilters = () => {
     setSearchKey('')
     setSelectedRoles([])
@@ -175,194 +104,29 @@ export default function TeamMembers(): JSX.Element {
     setPage(0)
   }
 
-  // row class name example (theme-specific styling can be added in SCSS)
   const getRowClassName = (params: any) => {
     return params.row.status === 'Disabled' ? styles.rowDisabled : ''
   }
 
-  const ImgIcon = ({ src, alt }: { src: string; alt?: string }) => (
-    <Box
-      component='img'
-      src={src}
-      alt={alt || ''}
-      sx={{ width: 18, height: 18, display: 'block' }}
-    />
-  )
+  // handlers for actions (pass into hook)
+  const handlers = {
+    onView: (id: string) => console.log('view', id),
+    onInvite: (id: string) => console.log('invite', id),
+    onSwap: (id: string) => console.log('swap', id),
+    onDelete: (id: string) => console.log('delete', id)
+  }
 
-  // --- DataGrid columns ---
-  const columns: GridColDef[] = [
-    {
-      field: 'member',
-      headerName: 'Members',
-      flex: 1,
-      sortable: false,
-      renderCell: (params: GridCellParams) => (
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <Typography variant='body2'>{params.row.name}</Typography>
-            <Typography variant='body2' sx={{ lineHeight: 1 }}>
-              {params.row.email}
-            </Typography>
-          </Box>
-        </Box>
-      )
-    },
-    {
-      field: 'role',
-      headerName: 'Role',
-      flex: 1,
-      sortable: true,
-      renderCell: (params: GridCellParams) => (
-        <Typography variant='body2'>{params.row.role}</Typography>
-      )
-    },
-    {
-      field: 'status',
-      headerName: 'Status',
-      flex: 1,
-      sortable: true,
-      renderCell: (params: GridCellParams) => {
-        const status = params.row.status
+  const columns = useTeamMembersColumns(handlers)
 
-        // --- config based on status ---
-        const config: Record<
-          string,
-          { icon: string; bg: string; color: string }
-        > = {
-          Active: {
-            icon: '/assets/green-verify-circle.svg',
-            bg: 'rgba(76, 175, 80, 0.15)',
-            color: 'var(--color-success-main)'
-          },
-          Inactive: {
-            icon: '/assets/error-outlined.svg',
-            bg: 'rgba(239, 83, 80, 0.15)',
-            color: 'var(--color-error-main)'
-          },
-          Pending: {
-            icon: '/assets/pending-circle.svg',
-            bg: 'rgba(255, 152, 0, 0.15)',
-            color: 'var(--color-warning-main)'
-          }
-        }
-
-        const { icon, bg, color } = config[status] || config['Pending']
-
-        return (
-          <Chip
-            icon={<Box component='img' src={icon} alt={status} />}
-            label={status}
-            sx={{
-              backgroundColor: bg,
-              color,
-              textTransform: 'capitalize',
-              fontSize: '13px',
-              borderRadius: '16px',
-              height: 24,
-              '& .MuiChip-icon': {
-                color,
-                ml: 0.5
-              }
-            }}
-          />
-        )
-      }
-    },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      flex: 1,
-      sortable: false,
-      renderCell: (params: GridCellParams) => (
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 0.6,
-            justifyContent: 'flex-start',
-            width: '100%',
-            alignItems: 'center'
-          }}
-        >
-          <Tooltip title='View'>
-            <IconButton
-              size='small'
-              onClick={() => console.log('view', params.row.id)}
-              aria-label='view member'
-            >
-              <ImgIcon src='/assets/transparent-eye.svg' alt='view' />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title='Invite / Add'>
-            <IconButton
-              size='small'
-              onClick={() => console.log('invite', params.row.id)}
-              aria-label='invite member'
-            >
-              <ImgIcon src='/assets/person-add.svg' alt='invite' />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title='Swap'>
-            <IconButton
-              size='small'
-              onClick={() => console.log('swap', params.row.id)}
-              aria-label='swap member'
-            >
-              <ImgIcon src='/assets/swap-icon.svg' alt='swap' />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title='Delete'>
-            <IconButton
-              size='small'
-              onClick={() => console.log('swap', params.row.id)}
-              aria-label='flag icon'
-            >
-              <ImgIcon src='/assets/green-flag.svg' alt='flag icon' />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      )
-    }
-  ]
-
-  // rows passed into DataGrid (DataGrid expects flat objects)
+  // rows passed into DataGrid (flat)
   const practiceList = visibleRows.map((r) => ({ ...r }))
 
-  // DataGrid locale text for no rows
-  const noRowsLabel = loading ? (
-    <Box className='no-result-found'>
-      <CustomLoader />
-    </Box>
-  ) : practiceList.length === 0 && searchKey.length > 0 ? (
-    <Box className='no-result-found'>
-      <Box className='no-result-found-typography'>
-        <Typography variant='body2'>
-          Your search for '{searchKey}' did not match any results.
-        </Typography>
-        <Typography variant='body2'>
-          Please try again with different keywords or adjust the filters.
-        </Typography>
-      </Box>
-      <Button variant='outlined' onClick={handleClearFilters}>
-        Clear All Filter
-      </Button>
-    </Box>
-  ) : (
-    <Box className='no-result-found'>
-      <Box className='no-result-found-typography'>
-        <Typography variant='body2'>
-          Your search did not match any results.
-        </Typography>
-        <Typography variant='body2'>
-          Please try again with different keywords or adjust the filters.
-        </Typography>
-      </Box>
-      <Button variant='outlined' onClick={handleClearFilters}>
-        Clear All Filter
-      </Button>
-    </Box>
+  const noRowsLabel = (
+    <NoResultsBox
+      loading={loading}
+      searchKey={searchKey}
+      onClear={handleClearFilters}
+    />
   )
 
   return (
