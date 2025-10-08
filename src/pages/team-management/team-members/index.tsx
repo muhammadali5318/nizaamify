@@ -424,13 +424,14 @@ export default function TeamMembers(): JSX.Element {
       </Box>
 
       {/* DataGrid */}
-      <Box sx={{ height: 420, width: '100%', mt: 3 }}>
+      <Box sx={{ width: '100%', mt: 3 }}>
         <DataGrid
           rows={practiceList}
           columns={columns}
           getRowClassName={getRowClassName}
           pageSizeOptions={[5, 10, 25, { value: -1, label: 'All' }]}
           disableColumnMenu
+          disableColumnResize
           rowHeight={76}
           hideFooter={true}
           getRowId={(row) => row.id}
@@ -445,7 +446,19 @@ export default function TeamMembers(): JSX.Element {
           sortModel={sortModel}
           sx={{
             border: 'none',
-            '& .MuiDataGrid-cell': { outline: 'none' }
+            // <-- hide the vertical column separator / resize handle
+            '& .MuiDataGrid-columnSeparator': {
+              display: 'none'
+            },
+
+            // optional: remove any visual header borders/right-lines
+            '& .MuiDataGrid-columnHeader': {
+              borderRight: 'none'
+            },
+            '& .MuiDataGrid-cell': {
+              borderRight: 'none',
+              outline: 'none'
+            }
           }}
         />
 
