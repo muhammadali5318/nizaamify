@@ -1,4 +1,4 @@
-import { Box, Divider, Stack, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import styles from './TeamManagementContentWrapper.module.scss'
 
 interface TeamManagementContentWrapperProps {
@@ -31,14 +31,14 @@ const TeamManagementContentWrapper: React.FC<
           </Typography>
         </Stack>
       </Box>
-      <Box width='100%' px={2}>
+      {/* <Box width='100%' px={2}>
         <Divider
           sx={{
             borderColor: 'var(--grey-200)',
             borderBottomWidth: '2px'
           }}
         />
-      </Box>
+      </Box> */}
 
       {children}
     </Box>
