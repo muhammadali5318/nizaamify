@@ -213,7 +213,6 @@ export default function TeamMembers(): JSX.Element {
     return params.row.status === 'Disabled' ? styles.rowDisabled : ''
   }
 
-  // helper to render an image icon (keeps markup DRY)
   const ImgIcon = ({ src, alt }: { src: string; alt?: string }) => (
     <Box
       component='img'
@@ -511,7 +510,6 @@ export default function TeamMembers(): JSX.Element {
           sortModel={sortModel}
           sx={{
             border: 'none',
-            // hide the vertical column separator / resize handle
             '& .MuiDataGrid-columnSeparator': { display: 'none' },
 
             // vertically center headers & cells
@@ -521,8 +519,26 @@ export default function TeamMembers(): JSX.Element {
             },
 
             // remove visual header/cell right borders
-            '& .MuiDataGrid-columnHeader': { borderRight: 'none' },
-            '& .MuiDataGrid-cell': { borderRight: 'none', outline: 'none' }
+            '& .MuiDataGrid-cell': { borderRight: 'none', outline: 'none' },
+
+            // <-- new: header background and optional header cell styling
+            '& .MuiDataGrid-columnHeaders': {
+              backgroundColor: 'var(--grey-100, #F5F5F5)',
+              // keep header text readable and aligned
+              color: 'inherit',
+              // if you want a little more header height:
+              minHeight: 56
+            },
+            '& .MuiDataGrid-columnHeader': {
+              borderRight: 'none',
+              backgroundColor: 'transparent',
+              borderBottom: '1px solid rgba(0,0,0,0.04)'
+            },
+
+            // optional: make header checkbox area match header background
+            '& .MuiDataGrid-columnHeader .MuiCheckbox-root': {
+              backgroundColor: 'transparent'
+            }
           }}
         />
 
