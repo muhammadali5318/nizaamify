@@ -9,8 +9,7 @@ const CenteredTab = styled(Tab)(() => ({
   minHeight: 42,
 
   '& .MuiTab-iconWrapper': {
-    minWidth: 20,
-    height: 20,
+    margin: '0px',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
