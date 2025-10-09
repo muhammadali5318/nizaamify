@@ -1,7 +1,8 @@
 export const USER_ROLES = [
-  { value: 'practice_admin', label: 'Practice Admin' },
-  { value: 'practice_manager', label: 'Practice Manager' },
-  { value: 'financier', label: 'Financier' }
+  { value: 'PRACTICE OWNER', label: 'Practice Owner' },
+  { value: 'PRACTICE MANAGER', label: 'Practice Manager' },
+  { value: 'COMPANY DIRECTOR', label: 'Company Director' },
+  { value: 'PRACTICE USER', label: 'Practice User' }
 ] as const
 
 export type UserRole = (typeof USER_ROLES)[number]['value']

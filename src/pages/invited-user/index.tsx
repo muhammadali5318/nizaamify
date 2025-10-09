@@ -48,7 +48,7 @@ const InvitedUserOnboarding = () => {
         }
       } catch (err: any) {
         if (err?.error[0].includes('invitation is no longer active')) {
-          setStep(6)
+          setStep(5)
         }
       } finally {
         if (!ignore) setLoading(false)
@@ -161,25 +161,6 @@ const InvitedUserOnboarding = () => {
           </EmailVerificationStatus>
         )
 
-      case 6:
-        return (
-          <EmailVerificationStatus
-            iconSrc='/assets/danger.svg'
-            iconAlt='Invalid link'
-            buttonText='Back to Login'
-            onButtonClick={() => navigate(paths.auth.login)}
-          >
-            <>
-              <Typography variant='h4' className='font-weight--700'>
-                Invalid invitation link
-              </Typography>
-              <Typography variant='subtitle1' color='textSecondary'>
-                Invitation link is not valid. It may be broken or has already
-                been used.
-              </Typography>
-            </>
-          </EmailVerificationStatus>
-        )
       default:
         return (
           <EmailVerificationStatus

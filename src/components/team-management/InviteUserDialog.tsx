@@ -12,7 +12,6 @@ import {
   MenuItem,
   Box,
   Typography,
-  Alert,
   CircularProgress
 } from '@mui/material'
 import { useForm, Controller, SubmitHandler } from 'react-hook-form'
@@ -29,9 +28,12 @@ const inviteUserSchema = z.object({
     .string()
     .nonempty('Email is required')
     .pipe(z.email('Please enter a valid email')),
-  role: z.enum(['practice_admin', 'practice_manager', 'financier'], {
-    message: 'Please select a role'
-  })
+  role: z.enum(
+    ['PRACTICE OWNER', 'PRACTICE MANAGER', 'COMPANY DIRECTOR', 'PRACTICE USER'],
+    {
+      message: 'Please select a role'
+    }
+  )
 })
 
 interface InviteUserDialogProps {
@@ -43,7 +45,7 @@ interface InviteUserDialogProps {
 }
 
 const InviteUserDialog: React.FC<InviteUserDialogProps> = React.memo(
-  ({ open, onClose, onInvite, loading = false, error }) => {
+  ({ open, onClose, onInvite, loading = false }) => {
     const {
       control,
       handleSubmit,
@@ -54,7 +56,7 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = React.memo(
       resolver: zodResolver(inviteUserSchema),
       defaultValues: {
         email: '',
-        role: 'practice_admin' as UserRole
+        role: 'PRACTICE USER' as UserRole
       },
       mode: 'onChange'
     })
@@ -118,12 +120,6 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = React.memo(
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogContent sx={{ p: 0, pt: 1, gap: 2 }}>
-            {error && (
-              <Alert severity='error' sx={{ mb: 3 }}>
-                {error}
-              </Alert>
-            )}
-
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Controller
                 name='email'

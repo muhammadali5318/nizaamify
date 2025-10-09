@@ -8,14 +8,24 @@ import {
 } from 'src/components/team-management/common/team-management'
 import InvitationSuccessDialog from 'src/components/team-management/InvitationSuccessDialog'
 import InviteUserDialog from 'src/components/team-management/InviteUserDialog'
+import apiClient from 'src/services/api-client'
+import { endpoints } from 'src/services/backendUrl'
+import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
+import { useAuth0 } from '@auth0/auth0-react'
+import { notify } from 'src/components/notistack/NotificationProvider'
+import { useAuth } from 'src/context/AuthProvider'
+import { useInitialData } from 'src/hooks/useFetchInitialData'
 
 const InviteTeamMember: React.FC = () => {
+  const { user } = useAuth0()
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
   const [invitedUserData, setInvitedUserData] =
     useState<InvitedUserData | null>(null)
   const [inviteLoading, setInviteLoading] = useState(false)
   const [inviteError, setInviteError] = useState<string | null>(null)
+  const { accessToken } = useAuth()
+  const { data: practiceData } = useInitialData(!!accessToken)
 
   const handleInviteUser = useCallback(
     async (data: InviteUserFormData): Promise<void> => {
@@ -23,15 +33,25 @@ const InviteTeamMember: React.FC = () => {
         setInviteLoading(true)
         setInviteError(null)
 
-        // TODO: Replace this with real API call
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        const response = await apiClient.post(
+          endpoints.userInvitation(getUserOrgUuid(user)),
+          {
+            invited_user_email: data.email,
+            invited_user_role: data.role,
+            is_nominated: false
+          }
+        )
 
-        setInvitedUserData({ email: data.email, role: data.role })
-        setSuccessDialogOpen(true)
+        if (response.status === 200) {
+          notify.success('Invitation sent successfully!')
+          setInvitedUserData({ email: data.email, role: data.role })
+          setSuccessDialogOpen(true)
+        }
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Failed to send invitation'
-        setInviteError(errorMessage)
+        const errorMessage = error?.message
+          ? error.message
+          : 'Failed to send invitation'
+        notify.error(errorMessage)
         throw error
       } finally {
         setInviteLoading(false)
@@ -81,9 +101,9 @@ const InviteTeamMember: React.FC = () => {
         <InvitationSuccessDialog
           open={successDialogOpen}
           onClose={handleCloseSuccessDialog}
-          invitedEmail={invitedUserData.email}
-          role={invitedUserData.role}
-          practiceName='Greyford Dental Practice'
+          invitedEmail={invitedUserData?.email}
+          role={invitedUserData?.role}
+          practiceName={practiceData?.practice_name}
         />
       )}
     </>
