@@ -1,5 +1,5 @@
 // FILE: src/pages/TeamManagement.tsx
-import React from 'react'
+import React, { useCallback, useState } from 'react'
 import { Box } from '@mui/material'
 import styles from './teamManagement.module.scss'
 import ModuleHeader from 'src/components/moduleHeader'
@@ -9,8 +9,20 @@ import { ReusableTabs } from 'src/components/tabs'
 import { tabsData } from './team-management-config'
 
 const TeamManagement: React.FC = () => {
-  const tabs = useTeamManagementTabs()
+  const [teamCounts, setTeamCounts] = useState({
+    total_users: 0,
+    active_users: 0,
+    pending_invited_users: 0
+  })
 
+  const handleCountsUpdate = useCallback(
+    (counts: typeof teamCounts) => {
+      setTeamCounts(counts)
+    },
+    [setTeamCounts]
+  )
+
+  const tabs = useTeamManagementTabs(handleCountsUpdate)
   return (
     <Box className={styles.teamManagementRoot}>
       <ModuleHeader
@@ -20,16 +32,20 @@ const TeamManagement: React.FC = () => {
       />
 
       <Box className={styles.statsCardRoot}>
-        <StatsCard iconSrc='team-member.svg' label='Team Members' value='03' />
+        <StatsCard
+          iconSrc='team-member.svg'
+          label='Team Members'
+          value={teamCounts?.total_users}
+        />
         <StatsCard
           iconSrc='active-member.svg'
           label='Active members'
-          value='03'
+          value={teamCounts?.active_users}
         />
         <StatsCard
           iconSrc='pending-member.svg'
           label='Pending invites'
-          value='03'
+          value={teamCounts?.pending_invited_users}
         />
       </Box>
 

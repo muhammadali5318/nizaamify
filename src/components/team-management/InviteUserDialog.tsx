@@ -18,10 +18,10 @@ import { useForm, Controller, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
-  USER_ROLES,
   type InviteUserFormData,
   type UserRole
 } from './common/team-management'
+import { USER_ROLES } from 'src/const'
 
 const inviteUserSchema = z.object({
   email: z

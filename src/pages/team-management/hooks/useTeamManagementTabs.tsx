@@ -6,14 +6,20 @@ import RolesPermissions from '../role-and-permissin'
 import { tabsData } from '../team-management-config'
 import TeamMembers from '../team-members'
 
-export default function useTeamManagementTabs(): ReusableTabItem[] {
+export default function useTeamManagementTabs(
+  onCountsUpdate?: (counts: {
+    total_users: number
+    active_users: number
+    pending_invited_users: number
+  }) => void
+): ReusableTabItem[] {
   return React.useMemo(() => {
     return tabsData.map((t) => {
       let content: React.ReactNode = null
 
       switch (t.key) {
         case 0:
-          content = <TeamMembers />
+          content = <TeamMembers onCountsUpdate={onCountsUpdate} />
           break
         case 1:
           content = <SentInvitations />
@@ -33,5 +39,5 @@ export default function useTeamManagementTabs(): ReusableTabItem[] {
         content
       }
     })
-  }, [])
+  }, [onCountsUpdate])
 }

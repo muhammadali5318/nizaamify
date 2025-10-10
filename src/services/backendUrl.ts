@@ -14,15 +14,15 @@ export const endpoints = {
     stepFour: (practiceId: string) =>
       `${API_BASE}/practices/${practiceId}/onboarding/steps/4/`
   },
-  userInvitation: (id: string) => `${API_BASE}/practices/${id}/invite/`,
-  currentPractice: (id: string) => `${API_BASE}/practices/${id}/`,
-  practiceProfile: (id: string) => `${API_BASE}/practices/${id}/profile/`,
-  userInfo: apiVersion,
-  inviteUser: (id: string) => `${API_BASE}/invited-users/${id}/`,
-  userWithActivePractices: (id: string) => `${API_BASE}/users/${id}/`,
-  userProfile: (id: string) => `${API_BASE}/users/${id}/profile/`,
   signup: {
     createUser: `user-workstation/${apiVersion}/users/signup/`,
     verifyEmail: `user-workstation/${apiVersion}/users/verify-email/`
-  }
+  },
+  userInvitation: (id: string) => `${API_BASE}/practices/${id}/invite/`,
+  currentPractice: (id: string) => `${API_BASE}/practices/${id}/`,
+  practiceProfile: (id: string) => `${API_BASE}/practices/${id}/profile/`,
+  inviteUser: (id: string) => `${API_BASE}/invited-users/${id}/`,
+  userWithActivePractices: (id: string) => `${API_BASE}/users/${id}/`,
+  userProfile: (id: string) => `${API_BASE}/users/${id}/profile/`,
+  teamMembersList: (id: string) => `${API_BASE}/practices/${id}/users/`
 }

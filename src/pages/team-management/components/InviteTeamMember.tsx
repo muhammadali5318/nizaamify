@@ -15,6 +15,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { notify } from 'src/components/notistack/NotificationProvider'
 import { useAuth } from 'src/context/AuthProvider'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
+import { queryClient } from 'src/utils/queryClient'
 
 const InviteTeamMember: React.FC = () => {
   const { user } = useAuth0()
@@ -46,11 +47,23 @@ const InviteTeamMember: React.FC = () => {
           notify.success('Invitation sent successfully!')
           setInvitedUserData({ email: data.email, role: data.role })
           setSuccessDialogOpen(true)
+          await queryClient.invalidateQueries({
+            queryKey: ['teamMembersListApi']
+          })
         }
-      } catch (error) {
-        const errorMessage = error?.message
-          ? error.message
-          : 'Failed to send invitation'
+      } catch (error: unknown) {
+        let errorMessage = 'Failed to send invitation'
+
+        if (error instanceof Error) {
+          errorMessage = error.message
+        } else if (
+          typeof error === 'object' &&
+          error !== null &&
+          'message' in error
+        ) {
+          errorMessage = (error as { message: string }).message
+        }
+
         notify.error(errorMessage)
         throw error
       } finally {

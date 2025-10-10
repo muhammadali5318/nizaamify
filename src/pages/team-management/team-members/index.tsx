@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
-// src/modules/team-members/TeamMembers.tsx
-import { useMemo, useState, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Box,
   TextField,
@@ -16,86 +15,71 @@ import { DataGrid, GridSortModel } from '@mui/x-data-grid'
 import TeamManagementContentWrapper from '../components/TeamManagementContentWrapper'
 import styles from './teamMembers.module.scss'
 import { teamMembersSx } from '../team-management-config'
-import { JSX } from 'react/jsx-runtime'
 import { useTeamMembersColumns } from '../hooks/useTeamMembersColumns'
-import {
-  MemberRow,
-  generateDummyData,
-  clampPage,
-  MenuProps,
-  ROLE_OPTIONS,
-  STATUS_OPTIONS
-} from '../team-members-config'
+import { useFetchTeamMembers } from '../hooks/useFetchTeamMembers'
+import { MenuProps, STATUS_OPTIONS } from '../team-members-config'
 import { NoResultsBox } from './components/TeamMembers'
+import { USER_ROLES } from 'src/const'
+import { convertArrayToUpperCase } from 'src/utils/arrayUtils.'
 
-export default function TeamMembers(): JSX.Element {
+interface TeamMembersProps {
+  onCountsUpdate?: (counts: {
+    total_users: number
+    active_users: number
+    pending_invited_users: number
+  }) => void
+}
+
+const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
   // filter state
   const [searchKey, setSearchKey] = useState<string>('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
 
-  // data + selection + sorting + pagination
-  const [allRows] = useState<MemberRow[]>(() => generateDummyData(50))
-  const [loading, setLoading] = useState<boolean>(false)
+  const [localLoading, setLocalLoading] = useState<boolean>(false)
 
   // pagination
   const [page, setPage] = useState<number>(0)
   const [pageSize, setPageSize] = useState<number>(10)
-  const [totalRecords, setTotalRecords] = useState<number>(allRows.length)
 
   // sort model
   const [sortModel, setSortModel] = useState<GridSortModel>([])
 
-  // filtering
-  const filtered = useMemo(() => {
-    const q = searchKey.trim().toLowerCase()
-    return allRows.filter((r) => {
-      if (q) {
-        const match =
-          r.name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q)
-        if (!match) return false
-      }
-      if (selectedRoles.length > 0 && !selectedRoles.includes(r.role))
-        return false
-      if (selectedStatuses.length > 0 && !selectedStatuses.includes(r.status))
-        return false
-      return true
-    })
-  }, [allRows, searchKey, selectedRoles, selectedStatuses])
-
-  // sorting (client-side mimic)
-  const sorted = useMemo(() => {
-    if (!sortModel || sortModel.length === 0) return filtered
-    const model = sortModel[0]
-    const sortedRows = [...filtered].sort((a: any, b: any) => {
-      const field = model.field as keyof MemberRow
-      const dir = model.sort === 'asc' ? 1 : -1
-      if (a[field] == null) return 1 * dir
-      if (b[field] == null) return -1 * dir
-      return a[field] > b[field] ? 1 * dir : -1 * dir
-    })
-    return sortedRows
-  }, [filtered, sortModel])
-
-  // page calculations
-  const pageCount = Math.ceil(sorted.length / pageSize) || 1
-  const effectivePage = clampPage(page, pageCount)
-  const visibleRows = sorted.slice(
-    effectivePage * pageSize,
-    effectivePage * pageSize + pageSize
-  )
+  const { items, teamUsersCounts, total, isLoading } = useFetchTeamMembers({
+    page,
+    pageSize,
+    search: searchKey,
+    user_role: selectedRoles,
+    user_practice_status: convertArrayToUpperCase(selectedStatuses),
+    ordering: sortModel[0]?.field,
+    sortOrder: sortModel[0]?.sort
+  })
 
   useEffect(() => {
-    setTotalRecords(sorted.length)
-  }, [sorted])
+    if (teamUsersCounts && onCountsUpdate) {
+      const normalizedCounts = {
+        total_users: teamUsersCounts.total_users ?? 0,
+        active_users: teamUsersCounts.active_users ?? 0,
+        pending_invited_users: teamUsersCounts.pending_invited_users ?? 0
+      }
 
-  const fetchSortedData = (model: GridSortModel) => {
-    setLoading(true)
-    setTimeout(() => {
-      setSortModel(model)
-      setLoading(false)
-    }, 300)
-  }
+      onCountsUpdate(normalizedCounts)
+    }
+  }, [teamUsersCounts, onCountsUpdate])
+
+  const fetchSortedData = useCallback(
+    (model: GridSortModel) => {
+      if (JSON.stringify(model) === JSON.stringify(sortModel)) return
+
+      setLocalLoading(true)
+      setPage(0)
+      setTimeout(() => {
+        setSortModel(model)
+        setLocalLoading(false)
+      }, 300)
+    },
+    [sortModel]
+  )
 
   const handleClearFilters = () => {
     setSearchKey('')
@@ -118,17 +102,6 @@ export default function TeamMembers(): JSX.Element {
 
   const columns = useTeamMembersColumns(handlers)
 
-  // rows passed into DataGrid (flat)
-  const practiceList = visibleRows.map((r) => ({ ...r }))
-
-  const noRowsLabel = (
-    <NoResultsBox
-      loading={loading}
-      searchKey={searchKey}
-      onClear={handleClearFilters}
-    />
-  )
-
   return (
     <TeamManagementContentWrapper
       imageSrc='/assets/team-members-list.svg'
@@ -147,7 +120,7 @@ export default function TeamMembers(): JSX.Element {
               setSearchKey(e.target.value)
               setPage(0)
             }}
-            placeholder='Search by name, email...'
+            placeholder='Search by name'
             sx={{ minWidth: 300, flex: '1 1 300px' }}
           />
 
@@ -168,10 +141,10 @@ export default function TeamMembers(): JSX.Element {
               label='Role'
               MenuProps={MenuProps}
             >
-              {ROLE_OPTIONS.map((role) => (
-                <MenuItem key={role} value={role}>
-                  <Checkbox checked={selectedRoles.indexOf(role) > -1} />
-                  <ListItemText primary={role} />
+              {USER_ROLES.map((role) => (
+                <MenuItem key={role.value} value={role.value}>
+                  <Checkbox checked={selectedRoles.indexOf(role.value) > -1} />
+                  <ListItemText primary={role.label} />
                 </MenuItem>
               ))}
             </Select>
@@ -208,41 +181,52 @@ export default function TeamMembers(): JSX.Element {
       {/* DataGrid */}
       <Box sx={{ width: '100%' }}>
         <DataGrid
-          rows={practiceList}
+          rows={items}
           columns={columns}
           getRowClassName={getRowClassName}
+          getRowId={(row) => row.id}
           pageSizeOptions={[5, 10, 25, { value: -1, label: 'All' }]}
           disableColumnMenu
           disableColumnResize
           rowHeight={56}
-          hideFooter={true}
-          getRowId={(row) => row.id}
+          hideFooter
           sortingMode='server'
-          localeText={{
-            noRowsLabel
-          }}
-          onSortModelChange={(model: GridSortModel) => {
-            // trigger a "server" fetch (we simulate it)
-            fetchSortedData(model)
-          }}
           sortModel={sortModel}
-          sx={{ ...teamMembersSx }}
+          loading={localLoading || isLoading}
+          slots={{
+            noRowsOverlay: () => (
+              <NoResultsBox
+                loading={localLoading || isLoading}
+                searchKey={searchKey}
+                onClear={handleClearFilters}
+              />
+            )
+          }}
+          onSortModelChange={(model: GridSortModel) => fetchSortedData(model)}
+          sx={teamMembersSx}
         />
 
         <TablePagination
           className='pagination-container'
           rowsPerPageOptions={[5, 10, 25, 50]}
           component='div'
-          count={totalRecords}
+          count={total ?? 0}
           rowsPerPage={pageSize}
-          page={effectivePage}
-          onPageChange={(_, newPage) => setPage(newPage)}
+          page={page}
+          onPageChange={(_, newPage) => {
+            setPage(newPage)
+          }}
           onRowsPerPageChange={(event) => {
-            setPageSize(parseInt(event.target.value, 10))
+            const newSize = parseInt(event.target.value, 10)
+            setPageSize(newSize)
             setPage(0)
           }}
+          showFirstButton
+          showLastButton
         />
       </Box>
     </TeamManagementContentWrapper>
   )
 }
+
+export default TeamMembers

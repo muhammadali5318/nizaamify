@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import { GridColDef, GridCellParams } from '@mui/x-data-grid'
 import { Box, Typography, IconButton, Tooltip } from '@mui/material'
 import { StatusChip, ImgIcon } from '../team-members/components/TeamMembers'
+import { toTitleCase } from 'src/utils/stringUtils'
 
 type Handlers = {
   onView?: (id: string) => void
@@ -24,30 +25,32 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
         renderCell: (params: GridCellParams) => (
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <Typography variant='body2'>{params.row.name}</Typography>
+              <Typography variant='body2'>{params?.row?.user_name}</Typography>
               <Typography variant='body2' sx={{ lineHeight: 1 }}>
-                {params.row.email}
+                {params?.row?.email}
               </Typography>
             </Box>
           </Box>
         )
       },
       {
-        field: 'role',
+        field: 'user_role',
         headerName: 'Role',
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => (
-          <Typography variant='body2'>{params.row.role}</Typography>
+          <Typography variant='body2'>
+            {toTitleCase(params?.row?.user_role)}
+          </Typography>
         )
       },
       {
-        field: 'status',
+        field: 'user_practice_status',
         headerName: 'Status',
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => {
-          return <StatusChip status={params.row.status} />
+          return <StatusChip status={params?.row?.user_practice_status} />
         }
       },
       {
@@ -65,7 +68,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
               alignItems: 'center'
             }}
           >
-            <Tooltip title='View'>
+            <Tooltip placement='top' title='View'>
               <IconButton
                 size='small'
                 onClick={() =>
@@ -79,7 +82,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
               </IconButton>
             </Tooltip>
 
-            <Tooltip title='Invite / Add'>
+            <Tooltip placement='top' title='Invite / Add'>
               <IconButton
                 size='small'
                 onClick={() =>
@@ -93,7 +96,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
               </IconButton>
             </Tooltip>
 
-            <Tooltip title='Swap'>
+            <Tooltip placement='top' title='Swap'>
               <IconButton
                 size='small'
                 onClick={() =>
@@ -107,19 +110,27 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
               </IconButton>
             </Tooltip>
 
-            <Tooltip title='Delete'>
-              <IconButton
-                size='small'
-                onClick={() =>
-                  onDelete
-                    ? onDelete(String(params.row.id))
-                    : console.log('delete', params.row.id)
+            {params.row.user_role === 'PRACTICE MANAGER' && (
+              <Tooltip
+                placement='top'
+                title={
+                  params?.row?.is_nominated
+                    ? 'Already nominated'
+                    : 'Nominate now'
                 }
-                aria-label='delete member'
               >
-                <ImgIcon src='/assets/green-flag.svg' alt='flag icon' />
-              </IconButton>
-            </Tooltip>
+                <IconButton size='small' aria-label='Nomination flag'>
+                  <ImgIcon
+                    src={
+                      params?.row?.is_nominated
+                        ? '/assets/green-flag.svg'
+                        : '/assets/blue-flag.svg'
+                    }
+                    alt='flag icon'
+                  />
+                </IconButton>
+              </Tooltip>
+            )}
           </Box>
         )
       }
