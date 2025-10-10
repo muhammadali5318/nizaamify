@@ -63,12 +63,12 @@ definitions:
               export VITE_AUTH0_DOMAIN=$DEV_VITE_AUTH0_DOMAIN
               export VITE_AUTH0_CLIENT_ID=$DEV_VITE_AUTH0_CLIENT_ID
               export VITE_AUTH0_AUDIENCE=$DEV_VITE_AUTH0_AUDIENCE
-              export VITE_BASE_URL=$DEV_VITE_BASE_URL
+              export VITE_BASE_URL=$DEV_VITE_API_URL
             elif [[ "${ENV}" == "qa" ]]; then
               export VITE_AUTH0_DOMAIN=$QA_VITE_AUTH0_DOMAIN
               export VITE_AUTH0_CLIENT_ID=$QA_VITE_AUTH0_CLIENT_ID
               export VITE_AUTH0_AUDIENCE=$QA_VITE_AUTH0_AUDIENCE
-              export VITE_BASE_URL=$QA_VITE_BASE_URL
+              export VITE_BASE_URL=$QA_VITE_API_URL
             fi
           - npm run build
         artifacts:
