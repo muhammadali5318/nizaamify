@@ -64,17 +64,17 @@ definitions:
               export VITE_API_URL=
               export VITE_CALLBACK_URL=
             elif [[ "${ENV}" == "dev" ]]; then
-              export VITE_AUTH0_DOMAIN=$DEV_VITE_AUTH0_DOMAIN
-              export VITE_AUTH0_CLIENT_ID=$DEV_VITE_AUTH0_CLIENT_ID
-              export VITE_AUTH0_AUDIENCE=$DEV_VITE_AUTH0_AUDIENCE
-              export VITE_API_URL=$DEV_VITE_API_URL
-              export VITE_CALLBACK_URL=$DEV_VITE_CALLBACK_URL
+              export VITE_APP_AUTH0_DOMAIN=$DEV_VITE_AUTH0_DOMAIN
+              export VITE_APP_AUTH0_CLIENT_ID=$DEV_VITE_AUTH0_CLIENT_ID
+              export VITE_APP_AUTH0_AUDIENCE=$DEV_VITE_AUTH0_AUDIENCE
+              export VITE_APP_API_URL=$DEV_VITE_API_URL
+              export VITE_APP_CALLBACK_URL=$DEV_VITE_CALLBACK_URL
             elif [[ "${ENV}" == "qa" ]]; then
-              export VITE_AUTH0_DOMAIN=$QA_VITE_AUTH0_DOMAIN
-              export VITE_AUTH0_CLIENT_ID=$QA_VITE_AUTH0_CLIENT_ID
-              export VITE_AUTH0_AUDIENCE=$QA_VITE_AUTH0_AUDIENCE
-              export VITE_API_URL=$QA_VITE_API_URL
-              export VITE_CALLBACK_URL=$QA_VITE_CALLBACK_URL
+              export VITE_APP_AUTH0_DOMAIN=$QA_VITE_AUTH0_DOMAIN
+              export VITE_APP_AUTH0_CLIENT_ID=$QA_VITE_AUTH0_CLIENT_ID
+              export VITE_APP_AUTH0_AUDIENCE=$QA_VITE_AUTH0_AUDIENCE
+              export VITE_APP_API_URL=$QA_VITE_API_URL
+              export VITE_APP_CALLBACK_URL=$QA_VITE_CALLBACK_URL
             fi
           - npm run build
         artifacts:
