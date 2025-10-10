@@ -4,7 +4,7 @@ import { paths } from 'src/paths'
 
 const LoginButton: React.FC = () => {
   const { loginWithRedirect, isLoading, isAuthenticated } = useAuth0()
-  const audience = import.meta.env.VITE_APP_AUTH0_AUDIENCE
+  const audience = import.meta.env.VITE_AUTH0_AUDIENCE
 
   useEffect(() => {
     if (isLoading) return
