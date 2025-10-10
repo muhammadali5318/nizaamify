@@ -2,18 +2,18 @@
 import { useMemo } from 'react'
 import { GridColDef, GridCellParams } from '@mui/x-data-grid'
 import { Box, Typography, IconButton, Tooltip } from '@mui/material'
-import { StatusChip, ImgIcon } from '../team-members/components/TeamMembers'
+import { StatusChip, ImgIcon } from '../components/TeamMembers'
 import { toTitleCase } from 'src/utils/stringUtils'
 
 type Handlers = {
   onView?: (id: string) => void
   onInvite?: (id: string) => void
   onSwap?: (id: string) => void
-  onDelete?: (id: string) => void
+  onNominate?: (id: string) => void
 }
 
 export const useTeamMembersColumns = (handlers: Handlers = {}) => {
-  const { onView, onInvite, onSwap, onDelete } = handlers
+  const { onView, onInvite, onSwap, onNominate } = handlers
 
   const columns: GridColDef[] = useMemo(
     () => [
@@ -110,32 +110,41 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
               </IconButton>
             </Tooltip>
 
-            {params.row.user_role === 'PRACTICE MANAGER' && (
-              <Tooltip
-                placement='top'
-                title={
-                  params?.row?.is_nominated
-                    ? 'Already nominated'
-                    : 'Nominate now'
-                }
-              >
-                <IconButton size='small' aria-label='Nomination flag'>
-                  <ImgIcon
-                    src={
-                      params?.row?.is_nominated
-                        ? '/assets/green-flag.svg'
-                        : '/assets/blue-flag.svg'
+            {params.row.user_role === 'PRACTICE MANAGER' &&
+              params.row.user_practice_status === 'ACTIVE' && (
+                <Tooltip
+                  placement='top'
+                  title={
+                    params?.row?.is_nominated
+                      ? 'Already nominated'
+                      : 'Nominate now'
+                  }
+                >
+                  <IconButton
+                    size='small'
+                    aria-label='Nomination flag'
+                    onClick={() =>
+                      onNominate
+                        ? onNominate(String(params.row.id))
+                        : console.log('nominate', params.row.id)
                     }
-                    alt='flag icon'
-                  />
-                </IconButton>
-              </Tooltip>
-            )}
+                  >
+                    <ImgIcon
+                      src={
+                        params?.row?.is_nominated
+                          ? '/assets/green-flag.svg'
+                          : '/assets/blue-flag.svg'
+                      }
+                      alt='flag icon'
+                    />
+                  </IconButton>
+                </Tooltip>
+              )}
           </Box>
         )
       }
     ],
-    [onView, onInvite, onSwap, onDelete]
+    [onView, onInvite, onSwap, onNominate]
   )
 
   return columns

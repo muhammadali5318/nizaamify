@@ -6,21 +6,18 @@ import {
   DialogActions,
   Button,
   Box,
-  Typography,
-  Stack
+  Typography
 } from '@mui/material'
-import { getRoleLabel, type UserRole } from './common/team-management'
 
-interface InvitationSuccessDialogProps {
+interface ConfirmationSuccessDialogProps {
   open: boolean
   onClose: () => void
-  invitedEmail: string
-  role: UserRole
-  practiceName?: string
+  title: string
+  children: React.ReactNode
 }
 
-const InvitationSuccessDialog: React.FC<InvitationSuccessDialogProps> =
-  React.memo(({ open, onClose, invitedEmail, role, practiceName }) => {
+const ConfirmationSuccessDialog: React.FC<ConfirmationSuccessDialogProps> =
+  React.memo(({ open, onClose, title, children }) => {
     const handleClose = useCallback(() => {
       onClose()
     }, [onClose])
@@ -45,56 +42,21 @@ const InvitationSuccessDialog: React.FC<InvitationSuccessDialogProps> =
             sx={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 1
+              gap: 0
             }}
           >
             <img
               src='/assets/success-check.svg'
-              alt='invitation successfully sent'
+              alt='success'
               style={{ width: 88, height: 88 }}
             />
+            <Typography variant='h4' fontWeight={700}>
+              {title}
+            </Typography>
           </Box>
         </DialogTitle>
 
-        <DialogContent sx={{ p: 0, pt: 1 }}>
-          <Stack spacing={1}>
-            <Typography variant='h4' fontWeight={700}>
-              Invitation sent!
-            </Typography>
-            <Typography variant='body2' color='text.secondary'>
-              An invitation has been sent to{' '}
-              <Typography
-                component='span'
-                color='text.primary'
-                fontWeight={700}
-              >
-                {invitedEmail}
-              </Typography>{' '}
-              to join{' '}
-              <Typography
-                component='span'
-                color='text.primary'
-                fontWeight={700}
-              >
-                {practiceName}
-              </Typography>{' '}
-              as a{' '}
-              <Typography
-                component='span'
-                color='text.primary'
-                fontWeight={700}
-              >
-                {getRoleLabel(role)}
-              </Typography>
-              .
-            </Typography>
-
-            <Typography variant='body2' color='text.secondary'>
-              They&apos;ll receive an email with instructions to set up their
-              account.
-            </Typography>
-          </Stack>
-        </DialogContent>
+        <DialogContent sx={{ p: 0, pt: 1 }}>{children}</DialogContent>
 
         <DialogActions sx={{ p: 0, mt: 2.5 }}>
           <Button
@@ -116,6 +78,6 @@ const InvitationSuccessDialog: React.FC<InvitationSuccessDialogProps> =
     )
   })
 
-InvitationSuccessDialog.displayName = 'InvitationSuccessDialog'
+ConfirmationSuccessDialog.displayName = 'ConfirmationSuccessDialog'
 
-export default InvitationSuccessDialog
+export default ConfirmationSuccessDialog

@@ -1,12 +1,11 @@
-// src/components/team-management/InviteTeamMember.tsx
 import { useState, useCallback } from 'react'
-import { Button } from '@mui/material'
+import { Button, Typography } from '@mui/material'
 import { PersonAdd as PersonAddIcon } from '@mui/icons-material'
 import {
   InvitedUserData,
-  InviteUserFormData
+  InviteUserFormData,
+  getRoleLabel
 } from 'src/components/team-management/common/team-management'
-import InvitationSuccessDialog from 'src/components/team-management/InvitationSuccessDialog'
 import InviteUserDialog from 'src/components/team-management/InviteUserDialog'
 import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
@@ -16,6 +15,7 @@ import { notify } from 'src/components/notistack/NotificationProvider'
 import { useAuth } from 'src/context/AuthProvider'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
 import { queryClient } from 'src/utils/queryClient'
+import ConfirmationSuccessDialog from 'src/components/team-management/InvitationSuccessDialog'
 
 const InviteTeamMember: React.FC = () => {
   const { user } = useAuth0()
@@ -111,13 +111,31 @@ const InviteTeamMember: React.FC = () => {
 
       {/* Success dialog */}
       {invitedUserData && (
-        <InvitationSuccessDialog
+        <ConfirmationSuccessDialog
           open={successDialogOpen}
           onClose={handleCloseSuccessDialog}
-          invitedEmail={invitedUserData?.email}
-          role={invitedUserData?.role}
-          practiceName={practiceData?.practice_name}
-        />
+          title='Invitation sent!'
+        >
+          <Typography variant='body2' color='text.secondary'>
+            An invitation has been sent to{' '}
+            <Typography component='span' color='text.primary' fontWeight={700}>
+              {invitedUserData.email}
+            </Typography>{' '}
+            to join{' '}
+            <Typography component='span' color='text.primary' fontWeight={700}>
+              {practiceData?.practice_name}
+            </Typography>{' '}
+            as a{' '}
+            <Typography component='span' color='text.primary' fontWeight={700}>
+              {getRoleLabel(invitedUserData.role)}
+            </Typography>
+            .
+          </Typography>
+
+          <Typography variant='body2' color='text.secondary' mt={1}>
+            They’ll receive an email with instructions to set up their account.
+          </Typography>
+        </ConfirmationSuccessDialog>
       )}
     </>
   )

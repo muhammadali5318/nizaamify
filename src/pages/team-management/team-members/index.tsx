@@ -9,18 +9,21 @@ import {
   MenuItem,
   Checkbox,
   ListItemText,
-  TablePagination
+  TablePagination,
+  Typography
 } from '@mui/material'
 import { DataGrid, GridSortModel } from '@mui/x-data-grid'
 import TeamManagementContentWrapper from '../components/TeamManagementContentWrapper'
 import styles from './teamMembers.module.scss'
 import { teamMembersSx } from '../team-management-config'
-import { useTeamMembersColumns } from '../hooks/useTeamMembersColumns'
+import { useTeamMembersColumns } from './hooks/useTeamMembersColumns'
 import { useFetchTeamMembers } from '../hooks/useFetchTeamMembers'
 import { MenuProps, STATUS_OPTIONS } from '../team-members-config'
 import { NoResultsBox } from './components/TeamMembers'
 import { USER_ROLES } from 'src/const'
 import { convertArrayToUpperCase } from 'src/utils/arrayUtils.'
+import NominatePracticeManagerTeamList from '../components/NominatePracticeManagerTeamList'
+import ConfirmationSuccessDialog from 'src/components/team-management/InvitationSuccessDialog'
 
 interface TeamMembersProps {
   onCountsUpdate?: (counts: {
@@ -31,6 +34,16 @@ interface TeamMembersProps {
 }
 
 const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
+  const [isNominateOpen, setIsNominateOpen] = useState(false)
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false)
+
+  const handleCloseNominate = () => setIsNominateOpen(false)
+  const handleOpenSuccessDialog = () => setSuccessDialogOpen(true)
+  const handleCloseSuccessDialog = () => setSuccessDialogOpen(false)
+  const [selectedUser, setSelectedUser] = useState<{
+    name: string
+    userId: string
+  } | null>(null)
   // filter state
   const [searchKey, setSearchKey] = useState<string>('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
@@ -92,12 +105,27 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
     return params.row.status === 'Disabled' ? styles.rowDisabled : ''
   }
 
-  // handlers for actions (pass into hook)
+  const handleNominate = useCallback(
+    (id: string) => {
+      const user = items.find((item) => String(item.id) === id)
+      if (user) {
+        setSelectedUser({
+          name: user?.user_name ?? '',
+          userId: user.user_id ?? ''
+        })
+        setIsNominateOpen(true)
+      } else {
+        console.warn('No user found for nomination:', id)
+      }
+    },
+    [items]
+  )
+
   const handlers = {
     onView: (id: string) => console.log('view', id),
     onInvite: (id: string) => console.log('invite', id),
     onSwap: (id: string) => console.log('swap', id),
-    onDelete: (id: string) => console.log('delete', id)
+    onNominate: handleNominate
   }
 
   const columns = useTeamMembersColumns(handlers)
@@ -225,6 +253,33 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
           showLastButton
         />
       </Box>
+      <NominatePracticeManagerTeamList
+        open={isNominateOpen}
+        onClose={handleCloseNominate}
+        onSuccess={handleOpenSuccessDialog}
+        name={selectedUser?.name ?? ''}
+        userId={selectedUser?.userId ?? ''}
+      />
+
+      <ConfirmationSuccessDialog
+        open={successDialogOpen}
+        onClose={handleCloseSuccessDialog}
+        title='Nomination successful!'
+      >
+        <Typography variant='body2' color='text.secondary'>
+          You’ve successfully nominated{' '}
+          <Typography component='span' color='text.primary' fontWeight={700}>
+            {selectedUser?.name}
+          </Typography>{' '}
+          to complete the practice onboarding process.to complete the practice
+          onboarding process.{' '}
+        </Typography>
+
+        <Typography variant='body2' color='text.secondary' mt={1}>
+          They’ll receive an email notification and now have access to the
+          onboarding form.{' '}
+        </Typography>
+      </ConfirmationSuccessDialog>
     </TeamManagementContentWrapper>
   )
 }
