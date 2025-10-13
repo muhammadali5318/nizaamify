@@ -8,7 +8,7 @@ const UploadDocuments = () => {
   return (
     <div>
       {' '}
-      <ManualEntryCard onStart={() => console.log('Manual entry started')} />
+      <ManualEntryCard onStart={() => console.warn('Manual entry started')} />
       <Box className={styles.uploadSection}>
         <UploadDocumentCard />
 

@@ -18,8 +18,8 @@ const DocumentsPage: React.FC = () => {
       <Box className={styles.headerBanner}>
         <Typography variant='body2'>
           <strong>Greyford</strong> practice’s current <b>accounting basis</b>{' '}
-          is set to <b>Accrual mode</b>. You can change this mode anytime in{' '}
-          <a href='#'>Settings</a>.
+          is set to <b>Accrual mode</b>. You can change this mode anytime
+          in{' '}
         </Typography>
       </Box>
 
