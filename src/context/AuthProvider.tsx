@@ -181,7 +181,7 @@ function AuthProviderContainer({ children }: Props) {
   )
 
   if (status === 'loading') {
-    return <PageLoader />
+    return <PageLoader>Loading...</PageLoader>
   }
 
   return (
