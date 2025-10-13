@@ -97,7 +97,7 @@ const InviteTeamMember: React.FC = () => {
         startIcon={<PersonAddIcon />}
         onClick={handleOpenInviteDialog}
       >
-        Invite team members
+        Invite team member
       </Button>
 
       {/* Invite dialog */}

@@ -25,6 +25,7 @@ export const endpoints = {
   userWithActivePractices: (id: string) => `${API_BASE}/users/${id}/`,
   userProfile: (id: string) => `${API_BASE}/users/${id}/profile/`,
   teamMembersList: (id: string) => `${API_BASE}/practices/${id}/users/`,
+  resendInvite: (id: string) => `${API_BASE}/practices/${id}/resend-invite/`,
   nominateExistingManager: (orgId: string, userId: string) =>
     `${API_BASE}/practices/${orgId}/users/${userId}/nominate/`
 }

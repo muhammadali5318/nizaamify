@@ -9,7 +9,7 @@ type Handlers = {
   onView?: (id: string) => void
   onInvite?: (id: string) => void
   onSwap?: (id: string) => void
-  onNominate?: (id: string) => void
+  onNominate?: (id: any) => void
 }
 
 export const useTeamMembersColumns = (handlers: Handlers = {}) => {
@@ -125,7 +125,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
                     aria-label='Nomination flag'
                     onClick={() =>
                       onNominate
-                        ? onNominate(String(params.row.id))
+                        ? onNominate(params.row)
                         : console.log('nominate', params.row.id)
                     }
                   >

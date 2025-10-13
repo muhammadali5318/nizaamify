@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useCallback, useEffect, useState } from 'react'
 import {
   Box,
@@ -12,7 +11,7 @@ import {
   TablePagination,
   Typography
 } from '@mui/material'
-import { DataGrid, GridSortModel } from '@mui/x-data-grid'
+import { DataGrid } from '@mui/x-data-grid'
 import TeamManagementContentWrapper from '../components/TeamManagementContentWrapper'
 import styles from './teamMembers.module.scss'
 import { teamMembersSx } from '../team-management-config'
@@ -21,9 +20,10 @@ import { useFetchTeamMembers } from '../hooks/useFetchTeamMembers'
 import { MenuProps, STATUS_OPTIONS } from '../team-members-config'
 import { NoResultsBox } from './components/TeamMembers'
 import { USER_ROLES } from 'src/const'
-import { convertArrayToUpperCase } from 'src/utils/arrayUtils.'
+import { convertArrayToUpperCase } from 'src/utils/arrayUtils'
 import NominatePracticeManagerTeamList from '../components/NominatePracticeManagerTeamList'
 import ConfirmationSuccessDialog from 'src/components/team-management/InvitationSuccessDialog'
+import { useFetchSortedPaginatedData } from 'src/hooks/useFetchSortedData.'
 
 interface TeamMembersProps {
   onCountsUpdate?: (counts: {
@@ -33,41 +33,51 @@ interface TeamMembersProps {
   }) => void
 }
 
+type TeamMemberRow = {
+  id?: string | number
+  user_name?: string
+  user_id?: string
+  // allow other fields
+  [k: string]: any
+}
+
 const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
   const [isNominateOpen, setIsNominateOpen] = useState(false)
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
-
-  const handleCloseNominate = () => setIsNominateOpen(false)
-  const handleOpenSuccessDialog = () => setSuccessDialogOpen(true)
-  const handleCloseSuccessDialog = () => setSuccessDialogOpen(false)
   const [selectedUser, setSelectedUser] = useState<{
     name: string
     userId: string
   } | null>(null)
-  // filter state
+
+  // 🔹 Filters
   const [searchKey, setSearchKey] = useState<string>('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
 
-  const [localLoading, setLocalLoading] = useState<boolean>(false)
+  // 🔹 Sorting + Pagination (using reusable hook)
+  const {
+    sortModel,
+    page,
+    pageSize,
+    setPage,
+    setPageSize,
+    handleSortChange,
+    ordering,
+    sortOrder
+  } = useFetchSortedPaginatedData()
 
-  // pagination
-  const [page, setPage] = useState<number>(0)
-  const [pageSize, setPageSize] = useState<number>(10)
-
-  // sort model
-  const [sortModel, setSortModel] = useState<GridSortModel>([])
-
+  // 🔹 API call with synced sorting + pagination
   const { items, teamUsersCounts, total, isLoading } = useFetchTeamMembers({
     page,
     pageSize,
     search: searchKey,
     user_role: selectedRoles,
     user_practice_status: convertArrayToUpperCase(selectedStatuses),
-    ordering: sortModel[0]?.field,
-    sortOrder: sortModel[0]?.sort
+    ordering,
+    sortOrder
   })
 
+  // 🔹 Update parent with counts
   useEffect(() => {
     if (teamUsersCounts && onCountsUpdate) {
       const normalizedCounts = {
@@ -75,24 +85,9 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
         active_users: teamUsersCounts.active_users ?? 0,
         pending_invited_users: teamUsersCounts.pending_invited_users ?? 0
       }
-
       onCountsUpdate(normalizedCounts)
     }
   }, [teamUsersCounts, onCountsUpdate])
-
-  const fetchSortedData = useCallback(
-    (model: GridSortModel) => {
-      if (JSON.stringify(model) === JSON.stringify(sortModel)) return
-
-      setLocalLoading(true)
-      setPage(0)
-      setTimeout(() => {
-        setSortModel(model)
-        setLocalLoading(false)
-      }, 300)
-    },
-    [sortModel]
-  )
 
   const handleClearFilters = () => {
     setSearchKey('')
@@ -101,30 +96,23 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
     setPage(0)
   }
 
-  const getRowClassName = (params: any) => {
-    return params.row.status === 'Disabled' ? styles.rowDisabled : ''
-  }
+  const getRowClassName = (params: any) =>
+    params.row.status === 'Disabled' ? styles.rowDisabled : ''
 
-  const handleNominate = useCallback(
-    (id: string) => {
-      const user = items.find((item) => String(item.id) === id)
-      if (user) {
-        setSelectedUser({
-          name: user?.user_name ?? '',
-          userId: user.user_id ?? ''
-        })
-        setIsNominateOpen(true)
-      } else {
-        console.warn('No user found for nomination:', id)
-      }
-    },
-    [items]
-  )
+  const handleNominate = useCallback((row?: TeamMemberRow) => {
+    if (!row) {
+      console.warn('No user row provided for nomination')
+      return
+    }
+
+    setSelectedUser({
+      name: row.user_name ?? '',
+      userId: row.user_id ?? String(row.id ?? '')
+    })
+    setIsNominateOpen(true)
+  }, [])
 
   const handlers = {
-    onView: (id: string) => console.log('view', id),
-    onInvite: (id: string) => console.log('invite', id),
-    onSwap: (id: string) => console.log('swap', id),
     onNominate: handleNominate
   }
 
@@ -220,18 +208,18 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
           hideFooter
           sortingMode='server'
           sortModel={sortModel}
-          loading={localLoading || isLoading}
+          loading={isLoading}
+          onSortModelChange={handleSortChange}
+          sx={teamMembersSx}
           slots={{
             noRowsOverlay: () => (
               <NoResultsBox
-                loading={localLoading || isLoading}
+                loading={isLoading}
                 searchKey={searchKey}
                 onClear={handleClearFilters}
               />
             )
           }}
-          onSortModelChange={(model: GridSortModel) => fetchSortedData(model)}
-          sx={teamMembersSx}
         />
 
         <TablePagination
@@ -241,29 +229,29 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
           count={total ?? 0}
           rowsPerPage={pageSize}
           page={page}
-          onPageChange={(_, newPage) => {
-            setPage(newPage)
-          }}
+          onPageChange={(_, newPage) => setPage(newPage)}
           onRowsPerPageChange={(event) => {
-            const newSize = parseInt(event.target.value, 10)
-            setPageSize(newSize)
+            setPageSize(parseInt(event.target.value, 10))
             setPage(0)
           }}
           showFirstButton
           showLastButton
         />
       </Box>
+
+      {/* Nominate Dialog */}
       <NominatePracticeManagerTeamList
         open={isNominateOpen}
-        onClose={handleCloseNominate}
-        onSuccess={handleOpenSuccessDialog}
+        onClose={() => setIsNominateOpen(false)}
+        onSuccess={() => setSuccessDialogOpen(true)}
         name={selectedUser?.name ?? ''}
         userId={selectedUser?.userId ?? ''}
       />
 
+      {/* Success Dialog */}
       <ConfirmationSuccessDialog
         open={successDialogOpen}
-        onClose={handleCloseSuccessDialog}
+        onClose={() => setSuccessDialogOpen(false)}
         title='Nomination successful!'
       >
         <Typography variant='body2' color='text.secondary'>
@@ -271,13 +259,12 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
           <Typography component='span' color='text.primary' fontWeight={700}>
             {selectedUser?.name}
           </Typography>{' '}
-          to complete the practice onboarding process.to complete the practice
-          onboarding process.{' '}
+          to complete the practice onboarding process.
         </Typography>
 
         <Typography variant='body2' color='text.secondary' mt={1}>
           They’ll receive an email notification and now have access to the
-          onboarding form.{' '}
+          onboarding form.
         </Typography>
       </ConfirmationSuccessDialog>
     </TeamManagementContentWrapper>

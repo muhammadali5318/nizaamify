@@ -46,6 +46,11 @@ export const StatusChip: React.FC<StatusChipProps> = ({ status }) => {
       icon: '/assets/pending-circle.svg',
       bg: 'rgba(255, 152, 0, 0.15)',
       color: 'var(--color-warning-main)'
+    },
+    'RESEND INVITE': {
+      icon: '/assets/re-sync-error.svg',
+      bg: 'rgba(239, 83, 80, 0.15)',
+      color: 'var(--color-error-main)'
     }
   }
 
