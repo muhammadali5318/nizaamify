@@ -64,6 +64,8 @@ const Security = () => {
   const { mutateAsync, isPending } = useUpdateUserProfile()
 
   const newPassword = watch('newPassword')
+  const currentPassword = watch('currentPassword')
+
   useEffect(() => {
     const confirm = getValues('confirmPassword')
     if (!confirm) return
@@ -73,7 +75,12 @@ const Security = () => {
     } else {
       void trigger('confirmPassword')
     }
-  }, [newPassword, getValues, trigger, clearErrors])
+  }, [newPassword, trigger, clearErrors, getValues])
+
+  useEffect(() => {
+    if (!newPassword) return
+    void trigger('newPassword')
+  }, [currentPassword, newPassword, trigger])
 
   const defaultSubmit = async (data: ChangePasswordFormValues) => {
     const payload = {
