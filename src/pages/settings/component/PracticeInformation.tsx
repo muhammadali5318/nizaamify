@@ -31,6 +31,7 @@ import {
   LEFT_REASONS,
   RIGHT_REASONS
 } from '../setting-config'
+import { notify } from 'src/components/notistack/NotificationProvider'
 
 const PracticeInformation = () => {
   const phoneWrapperRef = useRef<HTMLDivElement | null>(null)
@@ -87,7 +88,7 @@ const PracticeInformation = () => {
     try {
       await updatePractice.mutateAsync(values)
     } catch (err) {
-      console.error('Failed to update practice', err)
+      notify.error('Failed to update practice information')
       throw err
     }
   }

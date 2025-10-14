@@ -36,7 +36,7 @@ export const PracticeSchema = z.object({
   email: z
     .string()
     .min(1, 'Email is required')
-    .refine((v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), {
+    .refine((v) => /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(v), {
       message: 'Enter a valid email'
     }),
 
