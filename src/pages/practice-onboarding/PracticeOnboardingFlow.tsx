@@ -22,6 +22,7 @@ import {
 import { StepOne, StepTwo, StepThree, StepFour } from './components'
 import { useAuth0 } from '@auth0/auth0-react'
 import { isPracticeOwner } from 'src/utils/helper'
+import Footer from 'src/components/registration-wrapper/Footer'
 
 // initial values for each step — keep in sync with your schemas
 const initialStepOne: StepOneFormValues = {
@@ -215,70 +216,78 @@ const PracticeOnboardingFlow: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'flex-start',
-          width: '100%',
-          height: '100%',
-          px: 2
+          justifyContent: 'space-between',
+          height: '100vh'
         }}
       >
-        {practice?.onboarding_status === 'COMPLETED' ? (
-          <RegistrationHeader />
-        ) : (
-          <RegistrationHeader
-            heading={
-              <>
-                Welcome to Monai Tech{' '}
-                <span className='font-weight--700'>{user?.family_name}!</span>
-              </>
-            }
-            subHeading='Let’s set up your practice profile to personalise your experience'
-          />
-        )}
+        <Box
+          sx={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            flexDirection: 'column'
+          }}
+        >
+          {practice?.onboarding_status === 'COMPLETED' ? (
+            <RegistrationHeader />
+          ) : (
+            <RegistrationHeader
+              heading={
+                <>
+                  Welcome to Monai Tech{' '}
+                  <span className='font-weight--700'>{user?.family_name}!</span>
+                </>
+              }
+              subHeading='Let’s set up your practice profile to personalise your experience'
+            />
+          )}
 
-        {isLoading ? (
-          <Box
-            sx={{
-              py: 6
-            }}
-          >
-            <CircularProgress />
-          </Box>
-        ) : activeStep === 4 ? (
-          <Box className={styles.completedContainer}>
-            <Congratulations message='You have completed onboarding now access the full system ' />
-          </Box>
-        ) : (
-          <>
-            <Box className={styles.container}>
-              <Box className={styles.left}>
-                <AdaptiveStepper
-                  activeStep={activeStep}
-                  steps={steps}
-                  connectorHeight={30}
-                />
-                <Box>
-                  {isPracticeOwner(user) && (
-                    <NominateNowContainer
-                      onSelectNominee={() => setOpenNominate(true)}
-                    />
-                  )}
-                </Box>
-              </Box>
-
-              <Divider
-                orientation='vertical'
-                flexItem
-                className={styles.divider}
-              />
-
-              <Box className={styles.right}>
-                <Box className={styles.placeholderBox}>
-                  {renderStepContent(activeStep)}
-                </Box>
-              </Box>
+          {isLoading ? (
+            <Box
+              sx={{
+                py: 6
+              }}
+            >
+              <CircularProgress />
             </Box>
-          </>
-        )}
+          ) : activeStep === 4 ? (
+            <Box className={styles.completedContainer}>
+              <Congratulations message='You have completed onboarding now access the full system ' />
+            </Box>
+          ) : (
+            <>
+              <Box className={styles.container}>
+                <Box className={styles.left}>
+                  <AdaptiveStepper
+                    activeStep={activeStep}
+                    steps={steps}
+                    connectorHeight={30}
+                  />
+                  <Box>
+                    {isPracticeOwner(user) && (
+                      <NominateNowContainer
+                        onSelectNominee={() => setOpenNominate(true)}
+                      />
+                    )}
+                  </Box>
+                </Box>
+
+                <Divider
+                  orientation='vertical'
+                  flexItem
+                  className={styles.divider}
+                />
+
+                <Box className={styles.right}>
+                  <Box className={styles.placeholderBox}>
+                    {renderStepContent(activeStep)}
+                  </Box>
+                </Box>
+              </Box>
+            </>
+          )}
+        </Box>
+        <Footer />
       </Box>
       <NominatePracticeManagerDialog
         open={openNominate}

@@ -1,13 +1,12 @@
-// src/pages/SignUp/components/SendVerificationEmail.tsx
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Box, Typography } from '@mui/material'
-import LoadingButton from '@mui/lab/LoadingButton'
+import { Box, Button, Typography } from '@mui/material'
 import dayjs, { Dayjs } from 'dayjs'
 import styles from './EmailVerification.module.scss'
 import RegistrationWrapper from 'src/components/registration-wrapper/RegistrationWrapper'
 import RegistrationHeader from 'src/components/registration-wrapper/RegistrationHeader'
-import { notify } from 'src/components/notistack/NotificationProvider' // optional
+import { notify } from 'src/components/notistack/NotificationProvider'
 import { sendVerificationEmail } from 'src/services/auth/emailVerification'
+import Footer from 'src/components/registration-wrapper/Footer'
 
 type Props = {
   email: string
@@ -29,12 +28,10 @@ const SendVerificationEmail: React.FC<Props> = ({ email }) => {
   const [remaining, setRemaining] = useState<number>(COOLDOWN_SECONDS)
   const [loading, setLoading] = useState<boolean>(false)
 
-  // expiry stored as dayjs object (or null)
   const expiryRef = useRef<Dayjs | null>(null)
   const intervalRef = useRef<number | null>(null)
   const mountedRef = useRef(true)
 
-  // compute remaining seconds using dayjs
   const computeRemainingSeconds = useCallback(() => {
     if (!expiryRef.current) return 0
     const diff = expiryRef.current.diff(dayjs(), 'second')
@@ -57,7 +54,6 @@ const SendVerificationEmail: React.FC<Props> = ({ email }) => {
   const startTimer = useCallback(
     (seconds = COOLDOWN_SECONDS) => {
       expiryRef.current = dayjs().add(seconds, 'second')
-      // clear any existing interval
       if (intervalRef.current !== null) {
         window.clearInterval(intervalRef.current)
         intervalRef.current = null
@@ -107,31 +103,40 @@ const SendVerificationEmail: React.FC<Props> = ({ email }) => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'flex-start',
-          width: '100%',
-          height: '100%',
-          px: 2
+          justifyContent: 'space-between',
+          height: '100vh'
         }}
       >
         <RegistrationHeader
           heading='Welcome to Monai Tech!'
           subHeading='Let’s get you onboarded!'
         />
-        <Box className={styles.emailVerificationRoot}>
+
+        {/* responsive card: width 100% on small, fixed 636px on larger screens */}
+        <Box
+          className={styles.emailVerificationRoot}
+          sx={{
+            width: { xs: '100%', sm: '100%', md: '636px' },
+            mx: 'auto',
+            px: { xs: 2, sm: 3, md: 6 },
+            py: { xs: 3, md: 4 }
+          }}
+        >
           <Box className={styles.emailVerificationInfoContainer}>
             <Typography variant='h4' className='font-weight--700'>
               Verify your email address
             </Typography>
             <Typography variant='subtitle1' color='var(--color-text-secondary)'>
               Please verify your email address before signing in. We have sent a
-              verification link to :
+              verification link to:
             </Typography>
           </Box>
 
           <Box className={styles.emailVerificationInfoContainer}>
             <Typography
-              className='font-style--italic font-weight--700'
               variant='h6'
+              className={`${styles.emailText} font-weight--700 font-style--italic`}
+              sx={{ wordBreak: 'break-word' }}
             >
               {email}
             </Typography>
@@ -145,18 +150,18 @@ const SendVerificationEmail: React.FC<Props> = ({ email }) => {
               Didn&apos;t receive an email?
             </Typography>
 
-            <LoadingButton
-              className={styles.resendButton}
+            <Button
               size='large'
               variant='contained'
               onClick={handleResend}
               loading={loading}
+              fullWidth
               disabled={disabled}
             >
               {remaining > 0
                 ? `Resend verification email (${formatSecondsAsMMSS(remaining)})`
                 : 'Resend verification email'}
-            </LoadingButton>
+            </Button>
           </Box>
 
           <Box>
@@ -168,6 +173,7 @@ const SendVerificationEmail: React.FC<Props> = ({ email }) => {
             </Typography>
           </Box>
         </Box>
+        <Footer />
       </Box>
     </RegistrationWrapper>
   )

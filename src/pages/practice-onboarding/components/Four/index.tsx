@@ -354,7 +354,21 @@ const StepFour: React.FC<StepFourProps> = ({
             </FormHelperText>
           </FormControl>
 
-          <Stack direction='row' justifyContent='space-between'>
+          <Stack
+            direction='row'
+            justifyContent='space-between'
+            alignItems='center'
+            sx={{
+              mt: 1,
+              flexWrap: { xs: 'wrap', sm: 'nowrap' },
+              gap: { xs: 1.5, sm: 0 },
+              '@media (max-width: 380px)': {
+                flexDirection: 'column',
+                alignItems: 'stretch',
+                gap: 1.5
+              }
+            }}
+          >
             <Button
               size='large'
               variant='outlined'
@@ -364,7 +378,15 @@ const StepFour: React.FC<StepFourProps> = ({
               Save & exit
             </Button>
 
-            <Box>
+            <Box
+              sx={{
+                '@media (max-width: 380px)': {
+                  display: 'flex',
+                  justifyContent: 'space-between'
+                }
+              }}
+            >
+              {' '}
               <Button
                 size='large'
                 variant='outlined'
@@ -377,7 +399,6 @@ const StepFour: React.FC<StepFourProps> = ({
               >
                 Back
               </Button>
-
               <LoadingButton
                 type='submit'
                 size='large'

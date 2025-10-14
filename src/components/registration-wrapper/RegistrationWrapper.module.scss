@@ -7,7 +7,6 @@
 /* subtract footer height so background stops above footer */
 .wrapper {
   flex: 1;
-  min-height: calc(100vh - 70px); /* 70px matches your footer height */
   background: url('/assets/registration-backgroud.png') no-repeat center center/cover;
   display: flex;
   align-items: flex-start;

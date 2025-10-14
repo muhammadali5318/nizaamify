@@ -1,32 +1,79 @@
 .verificationStatusRoot {
-    display: flex;
-    flex-direction: column;
-    width: 636px;
-    padding: 36px 48px;
-    gap: 20px;
-    border-radius: 24px;
-    border: 1px solid #f7f7f7;
-    background: #fff;
-    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.1);
-  }
-  
-  .verificationStatusFooter {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    align-self: stretch;
-  }
-  
-  .verificationStatusContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-self: stretch;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 636px;
+  max-width: 100%;
+  padding: 36px 48px;
+  gap: 20px;
+  border-radius: 24px;
+  border: 1px solid #f7f7f7;
+  background: #fff;
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.verificationStatusContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-self: stretch;
+}
+
+.verificationStatusFooter {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  align-self: stretch;
+}
+
+.iconDimension {
+  width: 88px;
+  height: 88px;
+  object-fit: contain;
+}
+
+.verificationStatusRoot .width--100 {
+  width: auto;
+}
+
+
+@media (max-width: 768px) {
+  .verificationStatusRoot {
+    gap: 16px;
+    border-radius: 20px;
   }
 
   .iconDimension {
-    width: 88px;
-    height: 88px;
+    width: 72px;
+    height: 72px;
   }
-  
+
+  .verificationStatusContainer {
+    gap: 6px;
+  }
+
+}
+
+/* Small phones */
+@media (max-width: 600px) {
+  .verificationStatusRoot {
+    width: 100%;
+    padding: 16px;
+    gap: 12px;
+    border-radius: 16px;
+  }
+
+  .iconDimension {
+    width: 56px;
+    height: 56px;
+  }
+
+  .verificationStatusContainer {
+    gap: 6px;
+  }
+
+  .verificationStatusRoot .width--100 {
+    width: 100%;
+  }
+}

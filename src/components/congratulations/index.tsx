@@ -14,31 +14,57 @@ const Congratulations: React.FC<CongratulationsProps> = ({ message }) => {
   }
 
   return (
-    <Box className={styles.congratulationsContainer}>
+    <Box
+      className={styles.congratulationsContainer}
+      sx={{
+        width: { xs: '100%', md: '636px' },
+        mx: 'auto',
+        px: { xs: 3, md: '48px' },
+        py: { xs: 3, md: '36px' }
+      }}
+    >
       <Box className='center-align-width--100'>
-        <img src='/assets/congrats.svg' alt='congrat icon' />
-      </Box>
-      <Box className={styles.congratsInfoContainer}>
-        <Typography variant='h4' className='font-weight--700'>
-          Congratulations!{' '}
-        </Typography>
-        <Typography
+        <Box
+          component='img'
+          src='/assets/congrats.svg'
+          alt='congrat icon'
           sx={{
-            width: '364px',
-            textAlign: 'center'
+            width: { xs: '120px', sm: '150px', md: 'auto' },
+            maxWidth: '100%',
+            height: 'auto',
+            display: 'block'
           }}
+        />
+      </Box>
+
+      <Box className={styles.congratsInfoContainer}>
+        <Typography variant='h4' className='font-weight--700' align='center'>
+          Congratulations!
+        </Typography>
+
+        <Typography
           variant='subtitle1'
           color='var(--color-text-secondary)'
+          sx={{
+            width: { xs: '100%', md: '364px' },
+            maxWidth: '100%',
+            textAlign: 'center',
+            wordBreak: 'break-word'
+          }}
         >
           {message}
         </Typography>
       </Box>
+
       <Box className='center-align-width--100'>
         <Button
           size='large'
           variant='contained'
           className={styles.continueBtn}
           onClick={handleContinue}
+          sx={{
+            width: { xs: '100%', md: '210px' }
+          }}
         >
           Continue
         </Button>

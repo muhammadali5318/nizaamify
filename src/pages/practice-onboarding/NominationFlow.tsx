@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
-import styles from './NominationFlow.module.scss'
 import { Box, CircularProgress } from '@mui/material'
 import RegistrationHeader from 'src/components/registration-wrapper/RegistrationHeader'
 import RegistrationWrapper from 'src/components/registration-wrapper/RegistrationWrapper'
@@ -10,6 +9,7 @@ import InvitationSent from 'src/components/invitation-sent'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
 import { paths } from 'src/paths'
 import { useAuth } from 'src/context/AuthProvider'
+import Footer from 'src/components/registration-wrapper/Footer'
 
 enum FlowStep {
   WELCOME = 'WELCOME',
@@ -59,17 +59,13 @@ const NominationFlow = () => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'flex-start',
-          height: '100%',
-          px: 2
+          justifyContent: 'space-between',
+          height: '100vh'
         }}
       >
         <RegistrationHeader />
-        {isLoading ? (
-          <CircularProgress />
-        ) : (
-          <Box className={styles.nominationFlowRoot}>{renderStep()}</Box>
-        )}
+        {isLoading ? <CircularProgress /> : <Box>{renderStep()}</Box>}
+        <Footer />
       </Box>
     </RegistrationWrapper>
   )

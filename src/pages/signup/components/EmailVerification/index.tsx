@@ -9,7 +9,7 @@ import { endpoints } from 'src/services/backendUrl'
 import { Link, useLocation, useNavigate } from 'react-router'
 import EmailVerificationStatus from './EmailVerificationStatus'
 import { sendVerificationEmail } from 'src/services/auth/emailVerification'
-import styles from './EmailVerification.module.scss'
+import Footer from 'src/components/registration-wrapper/Footer'
 
 type VerificationStatus =
   | 'expired'
@@ -175,14 +175,13 @@ const EmailVerification: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'flex-start',
-          height: '100%',
-          px: 2
+          justifyContent: 'space-between',
+          height: '100vh'
         }}
       >
         <RegistrationHeader />
 
-        <Box className={styles.congratulationsRoot}>
+        <Box>
           {status === 'loading' ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
               <CircularProgress />
@@ -353,6 +352,7 @@ const EmailVerification: React.FC = () => {
             <Congratulations message='Your email has been verified and your account has been created successfully.' />
           ) : null}
         </Box>
+        <Footer />
       </Box>
     </RegistrationWrapper>
   )

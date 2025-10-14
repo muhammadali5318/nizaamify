@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { Box, CircularProgress, Typography } from '@mui/material'
 import RegistrationHeader from 'src/components/registration-wrapper/RegistrationHeader'
 import RegistrationWrapper from 'src/components/registration-wrapper/RegistrationWrapper'
-import styles from './index.module.scss'
 import CreatePassword from './components/CreatePassword'
 import Congratulations from 'src/components/congratulations'
 import Welcome from './components/Welcome'
@@ -12,6 +11,7 @@ import apiClient from 'src/services/api-client'
 import EmailVerificationStatus from '../signup/components/EmailVerification/EmailVerificationStatus'
 import { paths } from 'src/paths'
 import { endpoints } from 'src/services/backendUrl'
+import Footer from 'src/components/registration-wrapper/Footer'
 
 const InvitedUserOnboarding = () => {
   const [step, setStep] = useState<number | null>(null)
@@ -190,13 +190,13 @@ const InvitedUserOnboarding = () => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'flex-start',
-          height: '100%',
-          px: 2
+          justifyContent: 'space-between',
+          height: '100vh'
         }}
       >
         <RegistrationHeader />
-        <Box className={styles.invitedUserOnboardingRoot}>{renderStep()}</Box>
+        <Box>{renderStep()}</Box>
+        <Footer />
       </Box>
     </RegistrationWrapper>
   )

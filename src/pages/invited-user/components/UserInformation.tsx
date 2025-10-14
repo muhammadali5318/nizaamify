@@ -113,7 +113,7 @@ const UserInformation: React.FC<UserInformationProps> = ({
       </Box>
 
       {/* Grid fields */}
-      <Box display='grid' gridTemplateColumns='1fr 1fr' gap={2}>
+      <Box className={styles.formGrid}>
         {/* First Name */}
         <Controller
           name='firstName'

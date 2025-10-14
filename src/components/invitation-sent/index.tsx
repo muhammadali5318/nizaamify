@@ -56,7 +56,7 @@ const InvitationSent = ({ practiceName }: InvitationSentProps) => {
 
         <Divider />
       </Stack>
-      <Stack direction={'row'} spacing={2.5} width={'100%'}>
+      <Box className={styles.actions}>
         <Button
           fullWidth
           variant='outlined'
@@ -74,7 +74,7 @@ const InvitationSent = ({ practiceName }: InvitationSentProps) => {
         >
           Continue onboarding myself
         </Button>
-      </Stack>
+      </Box>
     </Stack>
   )
 }

@@ -14,6 +14,7 @@ import { SignupFormDataSet, SetFormDataSet } from './types'
 import { apiClientOpen } from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
 import { sendVerificationEmail } from 'src/services/auth/emailVerification'
+import Footer from 'src/components/registration-wrapper/Footer'
 
 const initialFormData: SignupFormDataSet = {
   firstName: '',
@@ -204,37 +205,45 @@ const SignUp: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'flex-start',
-          width: '100%',
-          height: '100%',
-          px: 2
+          justifyContent: 'space-between',
+          height: '100vh'
         }}
       >
-        <RegistrationHeader
-          heading='Welcome to Monai Tech!'
-          subHeading='Let’s get you onboarded!'
-        />
-
-        <Box className={styles.container}>
-          {/* LEFT: Adaptive Stepper */}
-          <Box className={styles.left}>
-            <AdaptiveStepper activeStep={activeStep} steps={steps} />
-          </Box>
-
-          {/* CENTER: Divider */}
-          <Divider
-            orientation={isMobile ? 'horizontal' : 'horizontal'}
-            flexItem
-            className={styles.divider}
+        <Box
+          sx={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            flexDirection: 'column'
+          }}
+        >
+          <RegistrationHeader
+            heading='Welcome to Monai Tech!'
+            subHeading='Let’s get you onboarded!'
           />
 
-          {/* RIGHT: Render different component per step */}
-          <Box className={styles.right}>
-            <Box className={styles.placeholderBox}>
-              {renderStepContent(activeStep)}
+          <Box className={styles.container}>
+            {/* LEFT: Adaptive Stepper */}
+            <Box className={styles.left}>
+              <AdaptiveStepper activeStep={activeStep} steps={steps} />
+            </Box>
+
+            {/* CENTER: Divider */}
+            <Divider
+              orientation={isMobile ? 'horizontal' : 'horizontal'}
+              flexItem
+              className={styles.divider}
+            />
+
+            {/* RIGHT: Render different component per step */}
+            <Box className={styles.right}>
+              <Box className={styles.placeholderBox}>
+                {renderStepContent(activeStep)}
+              </Box>
             </Box>
           </Box>
         </Box>
+        <Footer />
       </Box>
     </RegistrationWrapper>
   )
