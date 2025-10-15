@@ -1,4 +1,3 @@
-// FILE: components/ReusableTabs/ReusableTabs.tsx
 import React from 'react'
 import { Box, Tabs } from '@mui/material'
 import CenteredTab from './CenteredTab'
@@ -44,7 +43,7 @@ const ReusableTabs: React.FC<ReusableTabsProps> = ({
   }
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '100%', boxSizing: 'border-box', maxWidth: '100%' }}>
       <Tabs
         value={value}
         onChange={handleTabChange as any}
@@ -53,6 +52,24 @@ const ReusableTabs: React.FC<ReusableTabsProps> = ({
         scrollButtons='auto'
         textColor='primary'
         indicatorColor='primary'
+        // make tabs container scrollable & hide native scrollbar visually
+        sx={{
+          width: '100%',
+          boxSizing: 'border-box',
+          overflowX: 'auto',
+          // keep the flex container tight so tabs wrap/scroll correctly
+          '& .MuiTabs-flexContainer': {
+            gap: 1,
+            alignItems: 'center'
+          },
+          // hide scrollbar (still scrollable)
+          msOverflowStyle: 'none',
+          scrollbarWidth: 'none',
+          '&::-webkit-scrollbar': {
+            height: 0,
+            display: 'none'
+          }
+        }}
         slotProps={{
           indicator: {
             style: { display: 'none' }
@@ -64,6 +81,8 @@ const ReusableTabs: React.FC<ReusableTabsProps> = ({
             key={String(t.key)}
             value={t.key}
             label={t.label}
+            // responsive padding & minWidth to avoid forcing layout overflow
+            sx={{ minWidth: 'auto', px: { xs: 0.75, sm: 1.5 } }}
             icon={
               t.activeIcon || t.inactiveIcon ? (
                 <img

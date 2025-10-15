@@ -1,13 +1,21 @@
 // src/components/common/Panel.tsx
-import React from 'react'
+import React, { ReactNode } from 'react'
 import { Box, Stack, Avatar, Typography, Divider } from '@mui/material'
-import { SettingsWrapperProps } from '../type'
 
-const SettingsWrapper: React.FC<SettingsWrapperProps> = ({
+interface SidebarContentWrapperProps {
+  title: string
+  description: string
+  logo: string
+  children: ReactNode
+  isDividerVisible?: boolean
+}
+
+const SidebarContentWrapper: React.FC<SidebarContentWrapperProps> = ({
   title,
   description,
   logo,
-  children
+  children,
+  isDividerVisible = true
 }) => {
   return (
     <Stack spacing={2.5}>
@@ -28,12 +36,11 @@ const SettingsWrapper: React.FC<SettingsWrapperProps> = ({
           </Typography>
         </Box>
       </Stack>
-
-      <Divider />
+      {isDividerVisible && <Divider />}
 
       <>{children}</>
     </Stack>
   )
 }
 
-export default SettingsWrapper
+export default SidebarContentWrapper

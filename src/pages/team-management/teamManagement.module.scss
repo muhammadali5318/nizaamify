@@ -1,19 +1,49 @@
-.TeamManagementRoot {
+.teamManagementRoot {
   box-sizing: border-box;
   display: flex;
-  padding: 24px 158px;
+  padding: 24px 158px; // keep for desktop
   flex-direction: column;
   align-items: flex-start;
   gap: 20px;
   flex-shrink: 0;
   border-radius: 24px 0 0 0;
   background: #fff;
+
+  // ✅ For medium screens (tablets)
+  @media (max-width: 1024px) {
+    padding: 24px 80px;
+  }
+
+  // ✅ For small screens (mobile)
+  @media (max-width: 768px) {
+    padding: 20px 32px;
+    gap: 16px;
+  }
+
+  // ✅ For extra small devices (<480px)
+  @media (max-width: 480px) {
+    padding: 16px 16px;
+    gap: 12px;
+    border-radius: 0; // remove rounding if it causes overflow
+  }
 }
 
-
 .statsCardRoot {
-    display: flex;
-align-items: flex-start;
-gap: 20px;
-align-self: stretch;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  align-self: stretch;
+
+  // ✅ Stack cards vertically on small screens
+  @media (max-width: 768px) {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
 }

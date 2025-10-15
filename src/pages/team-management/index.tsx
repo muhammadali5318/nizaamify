@@ -31,7 +31,12 @@ const TeamManagement: React.FC = () => {
         subheading='Manage your practice team members, roles, and permissions'
       />
 
-      <Box className={styles.statsCardRoot}>
+      <Box
+        className={styles.statsCardRoot}
+        sx={{
+          justifyContent: { xs: 'center', sm: 'center', md: 'flex-start' }
+        }}
+      >
         <StatsCard
           iconSrc='team-member.svg'
           label='Team Members'
