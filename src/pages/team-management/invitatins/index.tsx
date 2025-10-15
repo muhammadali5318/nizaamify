@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+// SentInvitations.tsx (updated to prevent full-page scroll)
+import React, { useState, useMemo } from 'react'
 import { Box, TablePagination, Typography } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { useAuth0 } from '@auth0/auth0-react'
@@ -86,6 +87,14 @@ const SentInvitations: React.FC = () => {
   const handlers = { onInvite: handleInvite }
   const columns = useTeamMembersColumns(handlers)
 
+  // Sum minWidth to prevent column shrinking
+  const totalMinWidth = useMemo(() => {
+    return columns.reduce((sum, col) => {
+      const colMin = (col as any).minWidth ?? (col as any).width ?? 120
+      return sum + Number(colMin)
+    }, 0)
+  }, [columns])
+
   const getRowClassName = (params: any) =>
     params.row.status === 'Disabled' ? styles.rowDisabled : ''
 
@@ -96,7 +105,13 @@ const SentInvitations: React.FC = () => {
       title='Sent Invitations'
       subtitle='Manage invitations that have been sent to users'
     >
-      <Box sx={{ width: '100%' }}>
+      <Box
+        sx={{
+          width: '100%',
+          maxWidth: '100vw',
+          boxSizing: 'border-box'
+        }}
+      >
         {items?.length === 0 && !isLoading ? (
           <Box
             height={336}
@@ -116,22 +131,51 @@ const SentInvitations: React.FC = () => {
           </Box>
         ) : (
           <>
-            <DataGrid
-              rows={items}
-              columns={columns}
-              getRowClassName={getRowClassName}
-              getRowId={(row) => row.id}
-              pageSizeOptions={[5, 10, 25, { value: -1, label: 'All' }]}
-              disableColumnMenu
-              disableColumnResize
-              rowHeight={56}
-              hideFooter
-              sortingMode='server'
-              sortModel={sortModel}
-              onSortModelChange={handleSortChange}
-              loading={localLoading || isLoading}
-              sx={teamMembersSx}
-            />
+            <Box
+              sx={{
+                width: '100%',
+                maxWidth: '90vw',
+                overflowX: 'auto',
+                WebkitOverflowScrolling: 'touch',
+                boxSizing: 'border-box'
+              }}
+            >
+              <Box
+                sx={{
+                  minWidth: `${totalMinWidth}px`,
+                  width: '100%',
+                  boxSizing: 'border-box'
+                }}
+              >
+                <DataGrid
+                  rows={items}
+                  columns={columns}
+                  getRowClassName={getRowClassName}
+                  getRowId={(row) => row.id}
+                  pageSizeOptions={[5, 10, 25, { value: -1, label: 'All' }]}
+                  disableColumnMenu
+                  disableColumnResize
+                  rowHeight={56}
+                  hideFooter
+                  sortingMode='server'
+                  sortModel={sortModel}
+                  onSortModelChange={handleSortChange}
+                  loading={localLoading || isLoading}
+                  sx={{
+                    ...teamMembersSx,
+                    width: '100%',
+                    minWidth: `${totalMinWidth}px`,
+                    boxSizing: 'border-box',
+                    '& .MuiDataGrid-virtualScroller': {
+                      overflowX: 'hidden'
+                    },
+                    '& .MuiDataGrid-cell': {
+                      py: 1
+                    }
+                  }}
+                />
+              </Box>
+            </Box>
 
             <TablePagination
               className='pagination-container'
@@ -153,7 +197,6 @@ const SentInvitations: React.FC = () => {
         )}
       </Box>
 
-      {/* ✅ Success Dialog */}
       <ConfirmationSuccessDialog
         open={successDialogOpen}
         onClose={handleCloseSuccessDialog}

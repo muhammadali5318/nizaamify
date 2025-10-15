@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
+// TeamMembers.tsx
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Box,
   TextField,
@@ -37,7 +38,6 @@ type TeamMemberRow = {
   id?: string | number
   user_name?: string
   user_id?: string
-  // allow other fields
   [k: string]: any
 }
 
@@ -49,12 +49,12 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
     userId: string
   } | null>(null)
 
-  // 🔹 Filters
+  // Filters
   const [searchKey, setSearchKey] = useState<string>('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
 
-  // 🔹 Sorting + Pagination (using reusable hook)
+  // Sorting + Pagination
   const {
     sortModel,
     page,
@@ -66,7 +66,7 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
     sortOrder
   } = useFetchSortedPaginatedData()
 
-  // 🔹 API call with synced sorting + pagination
+  // API call
   const { items, teamUsersCounts, total, isLoading } = useFetchTeamMembers({
     page,
     pageSize,
@@ -77,7 +77,7 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
     sortOrder
   })
 
-  // 🔹 Update parent with counts
+  // Update parent counts
   useEffect(() => {
     if (teamUsersCounts && onCountsUpdate) {
       const normalizedCounts = {
@@ -112,11 +112,16 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
     setIsNominateOpen(true)
   }, [])
 
-  const handlers = {
-    onNominate: handleNominate
-  }
-
+  const handlers = { onNominate: handleNominate }
   const columns = useTeamMembersColumns(handlers)
+
+  // Compute total minWidth for columns to prevent shrinking
+  const totalMinWidth = useMemo(() => {
+    return columns.reduce((sum, col) => {
+      const colMin = (col as any).minWidth ?? (col as any).width ?? 120
+      return sum + Number(colMin)
+    }, 0)
+  }, [columns])
 
   return (
     <TeamManagementContentWrapper
@@ -129,6 +134,7 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
       <Box className={styles.filterContainer}>
         <Box className={styles.filterBody}>
           <TextField
+            className={styles.searchField}
             label='Search'
             variant='outlined'
             value={searchKey}
@@ -137,10 +143,9 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
               setPage(0)
             }}
             placeholder='Search by name'
-            sx={{ minWidth: 300, flex: '1 1 300px' }}
           />
 
-          <FormControl sx={{ minWidth: 180, flex: '0 0 180px' }}>
+          <FormControl className={styles.filterDropdown}>
             <InputLabel id='roles-select-label'>Role</InputLabel>
             <Select
               labelId='roles-select-label'
@@ -166,7 +171,7 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
             </Select>
           </FormControl>
 
-          <FormControl sx={{ minWidth: 180, flex: '0 0 180px' }}>
+          <FormControl className={styles.filterDropdown}>
             <InputLabel id='status-select-label'>Status</InputLabel>
             <Select
               labelId='status-select-label'
@@ -194,33 +199,70 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
         </Box>
       </Box>
 
-      {/* DataGrid */}
-      <Box sx={{ width: '100%' }}>
-        <DataGrid
-          rows={items}
-          columns={columns}
-          getRowClassName={getRowClassName}
-          getRowId={(row) => row.id}
-          pageSizeOptions={[5, 10, 25, { value: -1, label: 'All' }]}
-          disableColumnMenu
-          disableColumnResize
-          rowHeight={56}
-          hideFooter
-          sortingMode='server'
-          sortModel={sortModel}
-          loading={isLoading}
-          onSortModelChange={handleSortChange}
-          sx={teamMembersSx}
-          slots={{
-            noRowsOverlay: () => (
-              <NoResultsBox
-                loading={isLoading}
-                searchKey={searchKey}
-                onClear={handleClearFilters}
-              />
-            )
+      {/* DataGrid - outer defensive wrapper prevents page overflow */}
+      <Box
+        sx={{
+          width: '100%',
+          maxWidth: '100vw',
+          boxSizing: 'border-box'
+        }}
+      >
+        {/* Outer scroll wrapper: ONLY this box handles horizontal scrolling */}
+        <Box
+          sx={{
+            width: '100%',
+            maxWidth: '90vw',
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            boxSizing: 'border-box'
           }}
-        />
+        >
+          {/* Inner sizing box: ensures columns don't shrink below their minWidths */}
+          <Box
+            sx={{
+              minWidth: `${totalMinWidth}px`,
+              width: '100%',
+              boxSizing: 'border-box'
+            }}
+          >
+            <DataGrid
+              rows={items}
+              columns={columns}
+              getRowClassName={getRowClassName}
+              getRowId={(row) => row.id}
+              pageSizeOptions={[5, 10, 25, { value: -1, label: 'All' }]}
+              disableColumnMenu
+              disableColumnResize
+              rowHeight={56}
+              hideFooter
+              sortingMode='server'
+              sortModel={sortModel}
+              loading={isLoading}
+              onSortModelChange={handleSortChange}
+              sx={{
+                ...teamMembersSx,
+                width: '100%',
+                minWidth: `${totalMinWidth}px`,
+                boxSizing: 'border-box',
+                '& .MuiDataGrid-virtualScroller': {
+                  overflowX: 'hidden' // let outer wrapper manage horizontal scroll
+                },
+                '& .MuiDataGrid-cell': {
+                  py: 1
+                }
+              }}
+              slots={{
+                noRowsOverlay: () => (
+                  <NoResultsBox
+                    loading={isLoading}
+                    searchKey={searchKey}
+                    onClear={handleClearFilters}
+                  />
+                )
+              }}
+            />
+          </Box>
+        </Box>
 
         <TablePagination
           className='pagination-container'

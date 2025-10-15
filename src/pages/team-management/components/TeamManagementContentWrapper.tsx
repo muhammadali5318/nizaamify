@@ -8,6 +8,7 @@ interface TeamManagementContentWrapperProps {
   title: string
   subtitle: string
   children?: React.ReactNode
+  showInviteTeamMember?: boolean
 }
 
 const TeamManagementContentWrapper: React.FC<
@@ -17,7 +18,8 @@ const TeamManagementContentWrapper: React.FC<
   imageAlt = 'content-header-image',
   title,
   subtitle,
-  children
+  children,
+  showInviteTeamMember = true
 }) => {
   return (
     <Box className={styles.teamManagementContentWrapper}>
@@ -37,7 +39,7 @@ const TeamManagementContentWrapper: React.FC<
             </Typography>
           </Stack>
         </Box>
-        <InviteTeamMember />
+        {showInviteTeamMember && <InviteTeamMember />}
       </Box>
 
       {children}

@@ -1,20 +1,16 @@
-/* styles/roles-permissions.scss */
 .roles-permissions__sidebar {
-  /* horizontal scrolling on touch devices */
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  white-space: nowrap; /* prevents children from wrapping where possible */
+  white-space: nowrap;
 }
 
-/* prevent flex children from expanding and forcing a horizontal scrollbar */
 .roles-permissions__content {
   min-width: 0;
 }
 
-/* optional: small visual padding for tab items on xs screens (tweak if needed) */
 @media (max-width: 600px) {
   .roles-permissions__sidebar .MuiList-root {
-    display: inline-flex; /* makes list items sit in a row when possible */
+    display: inline-flex;
     flex-wrap: nowrap;
   }
   .roles-permissions__sidebar .MuiListItemButton-root {

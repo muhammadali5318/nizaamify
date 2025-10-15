@@ -20,7 +20,8 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
       {
         field: 'member',
         headerName: 'Members',
-        flex: 1.5,
+        minWidth: 250,
+        flex: 1,
         sortable: false,
         renderCell: (params: GridCellParams) => (
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
@@ -35,6 +36,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
       {
         field: 'user_role',
         headerName: 'Role',
+        minWidth: 140,
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => (
@@ -46,6 +48,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
       {
         field: 'user_practice_status',
         headerName: 'Status',
+        minWidth: 130,
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => {
@@ -55,6 +58,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
       {
         field: 'invitation_created_at',
         headerName: 'Sent Date',
+        minWidth: 140,
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => (
@@ -68,6 +72,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
       {
         field: 'invitation_expired_at',
         headerName: 'Expire',
+        minWidth: 140,
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => (
@@ -81,7 +86,8 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
       {
         field: 'actions',
         headerName: 'Actions',
-        flex: 0.7,
+        minWidth: 90,
+        flex: 1,
         sortable: false,
         renderCell: (params: GridCellParams) => {
           const isResendInvite =

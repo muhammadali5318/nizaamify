@@ -16,33 +16,32 @@ const RolesPermissions: React.FC = () => {
   return (
     <Box>
       <TeamManagementContentWrapper
-        imageSrc={activeItem?.imageSrc ?? '/assets/bg-black-clock-icon.svg'}
-        imageAlt={activeItem?.imageAlt ?? 'role icon'}
-        title={activeItem?.title ?? 'Roles & permissions'}
-        subtitle={
-          activeItem?.description ??
-          'Manage role-based access control for your practice'
-        }
+        showInviteTeamMember={false}
+        imageSrc='/assets/permission-icon.svg'
+        imageAlt='permission icon'
+        title={activeItem?.title}
+        subtitle={activeItem?.description}
       >
         <Box
           sx={{
             width: '100%',
             display: 'flex',
-            gap: { xs: 1.5, md: 3 },
-            flexDirection: { xs: 'column', md: 'row' },
-            padding: { xs: '12px', md: '21px 16px 16px 16px' },
+            gap: { xs: 1.5, sm: 3 },
+            flexDirection: { xs: 'column', sm: 'row' },
+            padding: { xs: '12px', sm: '21px 16px 16px 16px' },
             alignItems: 'flex-start'
           }}
         >
           <Box
             className='roles-permissions__sidebar'
             sx={{
-              width: { xs: '100%', md: 240 },
-              minWidth: { md: 240 },
+              width: { xs: '100%', sm: 'auto' },
+              flex: { xs: '0 0 100%', sm: '0 0 auto' },
               flexShrink: 0,
-              overflowX: { xs: 'auto', md: 'visible' },
+              overflowX: { xs: 'auto', sm: 'visible' },
               WebkitOverflowScrolling: 'touch',
-              pb: { xs: 1, md: 0 }
+              pb: { xs: 1, sm: 0 },
+              alignSelf: 'flex-start'
             }}
           >
             <SidebarTabs
@@ -59,14 +58,14 @@ const RolesPermissions: React.FC = () => {
               flex: 1,
               width: '100%',
               minWidth: 0,
-              pt: { xs: 0.5, md: 0 }
+              pt: { xs: 0.5, sm: 0 }
             }}
             className='roles-permissions__content'
           >
             <SidebarContentWrapper
               title={activeItem?.title}
               description={activeItem?.description}
-              logo={activeItem?.logo}
+              logo='/assets/profile.svg'
               isDividerVisible={false}
             >
               {ActiveComponent ? (

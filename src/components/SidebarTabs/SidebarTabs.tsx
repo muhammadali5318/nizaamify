@@ -37,7 +37,8 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
   scrollAmount = 200
 }) => {
   const theme = useTheme()
-  const isMdUp = useMediaQuery(theme.breakpoints.up('md'))
+  // use 'sm' breakpoint so 600px+ keeps sidebar; <600px becomes top row
+  const isSmUp = useMediaQuery(theme.breakpoints.up('sm'))
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const [showLeft, setShowLeft] = useState(false)
   const [showRight, setShowRight] = useState(false)
@@ -49,7 +50,8 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
       setShowRight(false)
       return
     }
-    if (isMdUp) {
+    // hide arrows for >= 600px (sidebar mode)
+    if (isSmUp) {
       setShowLeft(false)
       setShowRight(false)
       return
@@ -65,14 +67,12 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
     const el = scrollRef.current
     if (!el) return
 
-    // update on scroll
     const onScroll = () => updateArrows()
     el.addEventListener('scroll', onScroll, { passive: true })
 
-    // update on resize
     const ro = new ResizeObserver(() => updateArrows())
     ro.observe(el)
-    // also observe window in case layout changes
+
     window.addEventListener('resize', updateArrows)
 
     return () => {
@@ -80,9 +80,8 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
       ro.disconnect()
       window.removeEventListener('resize', updateArrows)
     }
-  }, [isMdUp, menu.length])
+  }, [isSmUp, menu.length])
 
-  // Programmatic scroll
   const scrollBy = (amount: number) => {
     const el = scrollRef.current
     if (!el) return
@@ -104,7 +103,7 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
         </Typography>
       ) : null}
 
-      {showLeft && !isMdUp ? (
+      {showLeft && !isSmUp ? (
         <IconButton
           aria-label='scroll left'
           onClick={() => scrollBy(-scrollAmount)}
@@ -112,7 +111,7 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
           sx={{
             position: 'absolute',
             left: 6,
-            top: header ? 36 : 6,
+            top: header ? 42 : 6,
             zIndex: 5,
             bgcolor: 'background.paper',
             boxShadow: 1,
@@ -123,7 +122,7 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
         </IconButton>
       ) : null}
 
-      {showRight && !isMdUp ? (
+      {showRight && !isSmUp ? (
         <IconButton
           aria-label='scroll right'
           onClick={() => scrollBy(scrollAmount)}
@@ -131,7 +130,7 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
           sx={{
             position: 'absolute',
             right: 6,
-            top: header ? 36 : 6,
+            top: header ? 42 : 6,
             zIndex: 5,
             bgcolor: 'background.paper',
             boxShadow: 1,
@@ -142,23 +141,20 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
         </IconButton>
       ) : null}
 
-      {/* Scroll container (native scroll + swipe on touch) */}
+      {/* Scroll container: row on xs (top), column on sm+ (sidebar) */}
       <Box
         ref={scrollRef}
         sx={{
-          // On xs: horizontal row with native scroll
           display: 'flex',
-          flexDirection: { xs: 'row', md: 'column' },
+          flexDirection: { xs: 'row', sm: 'column' },
           flexWrap: 'nowrap',
-          overflowX: { xs: 'auto', md: 'visible' },
-          overflowY: { xs: 'hidden', md: 'visible' }, // avoid vertical scroll inside tabs on mobile
+          overflowX: { xs: 'auto', sm: 'visible' },
+          overflowY: { xs: 'hidden', sm: 'visible' },
           WebkitOverflowScrolling: 'touch',
-          // hide native scrollbar visually (optional). Browsers vary — this keeps page static.
           '&::-webkit-scrollbar': {
-            height: { xs: '8px', md: '0px' }
+            height: { xs: '8px', sm: '0px' }
           },
-          // spacing for scroll arrows so they don't overlap content
-          px: { xs: showLeft || showRight ? '36px' : 0, md: 0 }
+          px: { xs: showLeft || showRight ? 0 : 0, sm: 0 }
         }}
         aria-label='Sidebar tabs scroll area'
       >
@@ -167,11 +163,11 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
           aria-label='Settings menu'
           sx={{
             display: 'flex',
-            flexDirection: { xs: 'row', md: 'column' },
+            flexDirection: { xs: 'row', sm: 'column' },
             flexWrap: 'nowrap',
             padding: 0,
-            // ensure list takes full width on mobile so horizontal scroll works as expected
-            width: { xs: 'auto', md: '100%' }
+            // ensure horizontal list can overflow naturally on xs
+            width: { xs: 0, sm: '100%' }
           }}
         >
           {menu.map((m) => {
@@ -202,13 +198,11 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
                   border: 'none',
                   borderRadius: '12px',
                   padding: '8px 12px',
-                  // IMPORTANT: prevent shrinking so items keep their width and cause overflow
                   flexShrink: 0,
-                  // Inline layout on xs to prevent wrap; column on md for original behavior
                   display: { xs: 'inline-flex', sm: 'flex' },
                   minWidth: { xs: 96, sm: 'auto' },
                   mr: { xs: 1, sm: 0 },
-                  mb: { md: 1 }
+                  mb: { sm: 1 }
                 }}
               >
                 <Typography

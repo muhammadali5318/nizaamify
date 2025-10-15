@@ -26,7 +26,11 @@ const StatsCard: React.FC<StatsCardProps> = ({ iconSrc, label, value }) => {
           {label}
         </Typography>
       </Stack>
-      <Typography variant='h3' fontWeight={700}>
+      <Typography
+        variant='h3'
+        fontWeight={700}
+        color='var(--color-primary-light)'
+      >
         {value}
       </Typography>
     </Box>

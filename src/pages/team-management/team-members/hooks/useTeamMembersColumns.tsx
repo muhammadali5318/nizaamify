@@ -20,6 +20,8 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
       {
         field: 'member',
         headerName: 'Members',
+        // removed flex; rely on minWidth so column never shrinks below usable size
+        minWidth: 250,
         flex: 1,
         sortable: false,
         renderCell: (params: GridCellParams) => (
@@ -36,6 +38,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
       {
         field: 'user_role',
         headerName: 'Role',
+        minWidth: 140,
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => (
@@ -47,6 +50,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
       {
         field: 'user_practice_status',
         headerName: 'Status',
+        minWidth: 130,
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => {
@@ -56,6 +60,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
       {
         field: 'actions',
         headerName: 'Actions',
+        minWidth: 170,
         flex: 1,
         sortable: false,
         renderCell: (params: GridCellParams) => (

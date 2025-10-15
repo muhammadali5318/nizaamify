@@ -10,21 +10,21 @@
   background: #fff;
 
   // ✅ For medium screens (tablets)
-  @media (max-width: 1024px) {
-    padding: 24px 80px;
+  @media (max-width: 1200px) {
+    padding: 24px;
   }
 
   // ✅ For small screens (mobile)
   @media (max-width: 768px) {
-    padding: 20px 32px;
+    padding: 24px;
     gap: 16px;
   }
 
   // ✅ For extra small devices (<480px)
   @media (max-width: 480px) {
-    padding: 16px 16px;
+    padding: 24px 18px;
     gap: 12px;
-    border-radius: 0; // remove rounding if it causes overflow
+    border-radius: 0;
   }
 }
 

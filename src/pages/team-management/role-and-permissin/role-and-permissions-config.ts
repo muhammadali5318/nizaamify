@@ -10,9 +10,6 @@ export const TEAM_ROLES_MENU: any[] = [
     label: 'Super Admin (Monai)',
     title: 'Super Admin (Monai)',
     description: 'Super admin access and permissions',
-    logo: '/assets/profile.svg',
-    imageSrc: '/assets/bg-black-clock-icon.svg',
-    imageAlt: 'super admin icon',
     component: SuperAdmin
   },
   {
@@ -20,9 +17,6 @@ export const TEAM_ROLES_MENU: any[] = [
     label: 'Owner / Principal',
     title: 'Owner / Principal',
     description: 'Practice Owner / Principal access and permissions',
-    logo: '/assets/profile.svg',
-    imageSrc: '/assets/bg-black-clock-icon.svg',
-    imageAlt: 'owner icon',
     component: OwnerPrincipal
   },
   {
@@ -30,9 +24,6 @@ export const TEAM_ROLES_MENU: any[] = [
     label: 'Company Director',
     title: 'Company Director',
     description: 'Company Director access and permissions',
-    logo: '/assets/profile.svg',
-    imageSrc: '/assets/bg-black-clock-icon.svg',
-    imageAlt: 'director icon',
     component: CompanyDirector
   },
   {
@@ -40,9 +31,6 @@ export const TEAM_ROLES_MENU: any[] = [
     label: 'Practice Manager',
     title: 'Practice Manager',
     description: 'Practice Manager access and permissions',
-    logo: '/assets/profile.svg',
-    imageSrc: '/assets/bg-black-clock-icon.svg',
-    imageAlt: 'manager icon',
     component: PracticeManager
   },
   {
@@ -50,9 +38,6 @@ export const TEAM_ROLES_MENU: any[] = [
     label: 'Practice Viewer',
     title: 'Practice Viewer',
     description: 'Practice Viewer access and permissions',
-    logo: '/assets/profile.svg',
-    imageSrc: '/assets/bg-black-clock-icon.svg',
-    imageAlt: 'viewer icon',
     component: PracticeViewer
   }
 ]
