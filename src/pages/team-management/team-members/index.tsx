@@ -75,7 +75,9 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
     pageSize,
     search: searchKey,
     user_role: selectedRoles,
-    user_practice_status: convertArrayToUpperCase(selectedStatuses),
+    user_practice_status: convertArrayToUpperCase(
+      selectedStatuses.length > 0 ? selectedStatuses : [...STATUS_OPTIONS]
+    ),
     ordering,
     sortOrder
   })
