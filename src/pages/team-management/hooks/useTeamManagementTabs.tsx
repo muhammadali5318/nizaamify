@@ -1,8 +1,8 @@
 // FILE: src/hooks/useTeamManagementTabs.tsx
 import React from 'react'
 import { ReusableTabItem } from 'src/components/tabs/ReusableTabs'
-import SentInvitations from '../invitatins'
-import RolesPermissions from '../role-and-permissin'
+import SentInvitations from '../invitations'
+import RolesPermissions from '../roles-and-permissions'
 import { tabsData } from '../team-management-config'
 import TeamMembers from '../team-members'
 

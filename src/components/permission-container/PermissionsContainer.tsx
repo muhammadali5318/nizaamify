@@ -1,5 +1,14 @@
+// PermissionsContainer.tsx
 import { Box, Divider, Typography } from '@mui/material'
 import styles from './PermissionsContainer.module.scss'
+import { formatTitle, getTextAfterDelimiter } from 'src/utils/stringUtils'
+
+type PermissionObject = {
+  id: string
+  name: string
+  description?: string
+  is_active: boolean
+}
 
 type PermissionItem = {
   path: string
@@ -8,26 +17,14 @@ type PermissionItem = {
 
 type PermissionsContainerProps = {
   item: PermissionItem
+  permissions: PermissionObject[]
 }
 
-const PermissionsContainer = ({ item }: PermissionsContainerProps) => {
-  const permissionRows = [
-    {
-      label: 'View revenue dashboard',
-      icon: '/assets/close-circle.svg',
-      note: '(Per practice only if support required)'
-    },
-    {
-      label: 'View revenue dashboard',
-      icon: '/assets/tick-circle.svg',
-      note: '(Per practice only if support required)'
-    },
-    {
-      label: 'View revenue dashboard',
-      icon: '/assets/tick-circle.svg',
-      note: '(Per practice only if support required)'
-    }
-  ]
+const PermissionsContainer = ({
+  item,
+  permissions
+}: PermissionsContainerProps) => {
+  const permissionCount = permissions.filter((p) => p.is_active).length
 
   return (
     <Box className={styles.permissionsContainerRoot}>
@@ -37,19 +34,19 @@ const PermissionsContainer = ({ item }: PermissionsContainerProps) => {
           <img src={item.path} alt={`${item.title} icon`} />
           <Box>
             <Typography color='#0A0A0A' variant='subtitle1'>
-              {item.title}
+              {formatTitle(item.title)}
             </Typography>
             <Typography
               className={`${styles.permissionCount} ${styles.hidePermissionCountTop}`}
             >
-              {permissionRows.length} Permissions
+              {permissionCount} Permissions
             </Typography>
           </Box>
         </Box>
         <Typography
           className={`${styles.permissionCount} ${styles.hidePermissionCount}`}
         >
-          {permissionRows.length} Permissions
+          {permissionCount} Permissions
         </Typography>
       </Box>
 
@@ -57,31 +54,47 @@ const PermissionsContainer = ({ item }: PermissionsContainerProps) => {
 
       {/* Permission Rows */}
       <Box sx={{ width: '100%' }}>
-        {permissionRows.map((row, index) => (
-          <Box key={index}>
+        {permissions.map((perm, index) => (
+          <Box key={perm.id ?? index}>
             <Box className={styles.permissionRow}>
               <Typography variant='body1' color='primary.main'>
-                {row.label}
+                {getTextAfterDelimiter(perm.name)}
               </Typography>
+
               <Box className={styles.permissionIconContainer}>
-                <img src={row.icon} alt='permission icon' />
+                {/* Keep the same icons as before: active -> tick, inactive -> close */}
+                <img
+                  src={
+                    perm.is_active
+                      ? '/assets/tick-circle.svg'
+                      : '/assets/close-circle.svg'
+                  }
+                  alt={perm.is_active ? 'active' : 'inactive'}
+                />
                 <Typography
                   variant='caption'
-                  sx={{
-                    display: { xs: 'none', lg: 'inline' }
-                  }}
+                  sx={{ display: { xs: 'none', lg: 'inline' } }}
                 >
-                  {row.note}
+                  {perm.description}
                 </Typography>
               </Box>
             </Box>
 
             {/* Divider between rows except last */}
-            {index !== permissionRows.length - 1 && (
+            {index !== permissions.length - 1 && (
               <Divider sx={{ width: '100%', borderColor: 'var(--grey-200)' }} />
             )}
           </Box>
         ))}
+
+        {/* If there are no permissions for this section, show a small placeholder */}
+        {permissions.length === 0 && (
+          <Box className={styles.permissionRow} sx={{ py: 2 }}>
+            <Typography variant='body2' color='text.secondary'>
+              No permissions available
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Box>
   )

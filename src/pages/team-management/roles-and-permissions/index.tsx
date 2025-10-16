@@ -1,12 +1,13 @@
-// pages/RolesPermissions.tsx
 import React, { useState } from 'react'
-import { Box } from '@mui/material'
+import { Box, CircularProgress } from '@mui/material'
 import TeamManagementContentWrapper from '../components/TeamManagementContentWrapper'
 import { TEAM_ROLES_MENU } from './role-and-permissions-config'
 import SidebarTabs from 'src/components/SidebarTabs/SidebarTabs'
 import SidebarContentWrapper from 'src/components/SidebarTabs/SidebarContentWrapper'
+import { usePracticeRolesAndPermissions } from './hooks/usePracticeRolesAndPermissions'
 
 const RolesPermissions: React.FC = () => {
+  const { isPending } = usePracticeRolesAndPermissions(true)
   const [active, setActive] = useState<string>(TEAM_ROLES_MENU[0].id)
   const activeItem: any | undefined = TEAM_ROLES_MENU.find(
     (m) => m.id === active
@@ -32,6 +33,7 @@ const RolesPermissions: React.FC = () => {
             alignItems: 'flex-start'
           }}
         >
+          {/* Sidebar - always visible */}
           <Box
             className='roles-permissions__sidebar'
             sx={{
@@ -52,26 +54,35 @@ const RolesPermissions: React.FC = () => {
             />
           </Box>
 
+          {/* Main content */}
           <Box
             component='main'
             sx={{
               flex: 1,
               width: '100%',
               minWidth: 0,
-              pt: { xs: 0.5, sm: 0 }
+              pt: { xs: 0.5, sm: 0 },
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              minHeight: '300px'
             }}
             className='roles-permissions__content'
           >
-            <SidebarContentWrapper
-              title={activeItem?.title}
-              description={activeItem?.description}
-              logo='/assets/profile.svg'
-              isDividerVisible={false}
-            >
-              {ActiveComponent ? (
-                <ActiveComponent {...(activeItem?.componentProps ?? {})} />
-              ) : null}
-            </SidebarContentWrapper>
+            {isPending ? (
+              <CircularProgress />
+            ) : (
+              <SidebarContentWrapper
+                title={activeItem?.title}
+                description={activeItem?.description}
+                logo='/assets/profile.svg'
+                isDividerVisible={false}
+              >
+                {ActiveComponent ? (
+                  <ActiveComponent {...(activeItem?.componentProps ?? {})} />
+                ) : null}
+              </SidebarContentWrapper>
+            )}
           </Box>
         </Box>
       </TeamManagementContentWrapper>

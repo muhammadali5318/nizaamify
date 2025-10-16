@@ -1,6 +1,7 @@
 // Use this axios instance to call apis with configurations like baseURL
 
 import axios from 'axios'
+import { notify } from 'src/components/notistack/NotificationProvider'
 import { CONFIG } from 'src/config-global'
 
 // ----------------------------------------------------------------------
@@ -22,9 +23,11 @@ const errorCallback = (error: {
         break
       case 403:
         console.error('Forbidden. You do not have access.')
+        notify.error('Forbidden. You do not have access.')
         break
       case 404:
         console.error('Resource not found.')
+        notify.error('Resource not found.')
         break
       case 500:
         console.error('Internal Server error')

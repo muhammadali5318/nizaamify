@@ -1,6 +1,3 @@
-const apiVersion = 'v1'
-
-// Base API
 export const API_BASE = 'user-workstation/v1'
 
 export const endpoints = {
@@ -15,8 +12,8 @@ export const endpoints = {
       `${API_BASE}/practices/${practiceId}/onboarding/steps/4/`
   },
   signup: {
-    createUser: `user-workstation/${apiVersion}/users/signup/`,
-    verifyEmail: `user-workstation/${apiVersion}/users/verify-email/`
+    createUser: `${API_BASE}/users/signup/`,
+    verifyEmail: `${API_BASE}/users/verify-email/`
   },
   userInvitation: (id: string) => `${API_BASE}/practices/${id}/invite/`,
   currentPractice: (id: string) => `${API_BASE}/practices/${id}/`,
@@ -26,6 +23,8 @@ export const endpoints = {
   userProfile: (id: string) => `${API_BASE}/users/${id}/profile/`,
   teamMembersList: (id: string) => `${API_BASE}/practices/${id}/users/`,
   resendInvite: (id: string) => `${API_BASE}/practices/${id}/resend-invite/`,
+  practiceRolesAndPermission: (id: string) =>
+    `${API_BASE}/practices/${id}/roles/permissions/`,
   nominateExistingManager: (orgId: string, userId: string) =>
     `${API_BASE}/practices/${orgId}/users/${userId}/nominate/`
 }

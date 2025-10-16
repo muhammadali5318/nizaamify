@@ -1,17 +1,13 @@
-import CompanyDirector from './components/CompanyDirector'
-import OwnerPrincipal from './components/OwnerPrincipal'
-import PracticeManager from './components/PracticeManager'
-import PracticeViewer from './components/PracticeViewer'
-import { SuperAdmin } from './components/SuperAdmin'
+// pages/role-and-permissions-config.ts
+
+import {
+  OwnerPrincipal,
+  CompanyDirector,
+  PracticeManager,
+  PracticeViewer
+} from './components/RoleWrappers'
 
 export const TEAM_ROLES_MENU: any[] = [
-  {
-    id: 'super-admin',
-    label: 'Super Admin (Monai)',
-    title: 'Super Admin (Monai)',
-    description: 'Super admin access and permissions',
-    component: SuperAdmin
-  },
   {
     id: 'owner-principal',
     label: 'Owner / Principal',
