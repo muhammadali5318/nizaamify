@@ -4,6 +4,8 @@ import { GridColDef, GridCellParams } from '@mui/x-data-grid'
 import { Box, Typography, IconButton, Tooltip } from '@mui/material'
 import { StatusChip, ImgIcon } from '../components/TeamMembers'
 import { toTitleCase } from 'src/utils/stringUtils'
+import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
+import { useFeatureRule } from 'src/hooks/useFeatureRule'
 
 type Handlers = {
   onView?: (id: string) => void
@@ -14,6 +16,9 @@ type Handlers = {
 
 export const useTeamMembersColumns = (handlers: Handlers = {}) => {
   const { onView, onInvite, onSwap, onNominate } = handlers
+  const { isEnabled: onboardingCompleted } = useFeatureRule(
+    FEATURE_RULE_IDS.ONBOARDING_COMPLETED
+  )
 
   const columns: GridColDef[] = useMemo(
     () => [
@@ -114,7 +119,8 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
               </IconButton>
             </Tooltip>
 
-            {params.row.user_role === 'PRACTICE MANAGER' &&
+            {!onboardingCompleted &&
+              params.row.user_role === 'PRACTICE MANAGER' &&
               params.row.user_practice_status === 'ACTIVE' && (
                 <Tooltip
                   placement='top'

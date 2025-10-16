@@ -107,72 +107,86 @@ const SendVerificationEmail: React.FC<Props> = ({ email }) => {
           height: '100vh'
         }}
       >
-        <RegistrationHeader
-          heading='Welcome to Monai Tech!'
-          subHeading='Let’s get you onboarded!'
-        />
+        <Box>
+          <RegistrationHeader
+            heading='Welcome to Monai Tech!'
+            subHeading='Let’s get you onboarded!'
+          />
 
-        {/* responsive card: width 100% on small, fixed 636px on larger screens */}
-        <Box
-          className={styles.emailVerificationRoot}
-          sx={{
-            width: { xs: '100%', sm: '100%', md: '636px' },
-            mx: 'auto',
-            px: { xs: 2, sm: 3, md: 6 },
-            py: { xs: 3, md: 4 }
-          }}
-        >
-          <Box className={styles.emailVerificationInfoContainer}>
-            <Typography variant='h4' className='font-weight--700'>
-              Verify your email address
-            </Typography>
-            <Typography variant='subtitle1' color='var(--color-text-secondary)'>
-              Please verify your email address before signing in. We have sent a
-              verification link to:
-            </Typography>
-          </Box>
+          <Box
+            className={styles.emailVerificationRoot}
+            sx={{
+              width: { xs: '100%', sm: '100%', md: '636px' },
+              mx: 'auto',
+              px: { xs: 2, sm: 3, md: 6 },
+              py: { xs: 3, md: 4 }
+            }}
+          >
+            <Box className={styles.emailVerificationInfoContainer}>
+              <Typography variant='h4' className='font-weight--700'>
+                Verify your email address
+              </Typography>
+              <Typography
+                variant='subtitle1'
+                color='var(--color-text-secondary)'
+              >
+                Please verify your email address before signing in. We have sent
+                a verification link to:
+              </Typography>
+            </Box>
 
-          <Box className={styles.emailVerificationInfoContainer}>
-            <Typography
-              variant='h6'
-              className={`${styles.emailText} font-weight--700 font-style--italic`}
-              sx={{ wordBreak: 'break-word' }}
-            >
-              {email}
-            </Typography>
-            <Typography variant='subtitle1' color='var(--color-text-secondary)'>
-              The verification link expires in 60 minutes.
-            </Typography>
-          </Box>
+            <Box className={styles.emailVerificationInfoContainer}>
+              <Typography
+                variant='h6'
+                className={`${styles.emailText} font-weight--700 font-style--italic`}
+                sx={{ wordBreak: 'break-word' }}
+              >
+                {email}
+              </Typography>
+              <Typography
+                variant='subtitle1'
+                color='var(--color-text-secondary)'
+              >
+                The verification link expires in 60 minutes.
+              </Typography>
+            </Box>
 
-          <Box className={styles.emailVerificationActionContainer}>
-            <Typography variant='subtitle1' color='var(--color-text-secondary)'>
-              Didn&apos;t receive an email?
-            </Typography>
+            <Box className={styles.emailVerificationActionContainer}>
+              <Typography
+                variant='subtitle1'
+                color='var(--color-text-secondary)'
+              >
+                Didn&apos;t receive an email?
+              </Typography>
 
-            <Button
-              size='large'
-              variant='contained'
-              onClick={handleResend}
-              loading={loading}
-              fullWidth
-              disabled={disabled}
-            >
-              {remaining > 0
-                ? `Resend verification email (${formatSecondsAsMMSS(remaining)})`
-                : 'Resend verification email'}
-            </Button>
-          </Box>
+              <Button
+                size='large'
+                variant='contained'
+                onClick={handleResend}
+                loading={loading}
+                fullWidth
+                disabled={disabled}
+              >
+                {remaining > 0
+                  ? `Resend verification email (${formatSecondsAsMMSS(remaining)})`
+                  : 'Resend verification email'}
+              </Button>
+            </Box>
 
-          <Box>
-            <Typography variant='subtitle1' color='var(--color-text-secondary)'>
-              If you still haven’t received the email, please{' '}
-              <span className='info-main font-weight--700'>
-                Contact support.
-              </span>
-            </Typography>
+            <Box>
+              <Typography
+                variant='subtitle1'
+                color='var(--color-text-secondary)'
+              >
+                If you still haven’t received the email, please{' '}
+                <span className='info-main font-weight--700'>
+                  Contact support.
+                </span>
+              </Typography>
+            </Box>
           </Box>
         </Box>
+
         <Footer />
       </Box>
     </RegistrationWrapper>

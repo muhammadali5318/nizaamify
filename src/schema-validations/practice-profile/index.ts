@@ -19,7 +19,10 @@ const InsightsEnum = z.enum([
 ])
 
 export const PracticeSchema = z.object({
-  practiceName: z.string().min(1, 'Practice name is required'),
+  practiceName: z
+    .string()
+    .nonempty('Practice name is required')
+    .max(40, 'Practice name must not exceed 40 characters'),
   principalName: z.string().min(1, 'Principal name is required'),
   practiceManagerName: z.string().min(1, 'Practice manager name is required'),
   practiceAddress: z

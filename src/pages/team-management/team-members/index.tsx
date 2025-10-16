@@ -153,32 +153,6 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
           />
 
           <FormControl className={styles.filterDropdown}>
-            <InputLabel id='roles-select-label'>Role</InputLabel>
-            <Select
-              labelId='roles-select-label'
-              multiple
-              value={selectedRoles}
-              onChange={(e) => {
-                const value = e.target.value
-                setSelectedRoles(
-                  typeof value === 'string' ? value.split(',') : value
-                )
-                setPage(0)
-              }}
-              renderValue={(selected) => (selected as string[]).join(', ')}
-              label='Role'
-              MenuProps={MenuProps}
-            >
-              {USER_ROLES.map((role) => (
-                <MenuItem key={role.value} value={role.value}>
-                  <Checkbox checked={selectedRoles.indexOf(role.value) > -1} />
-                  <ListItemText primary={role.label} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControl className={styles.filterDropdown}>
             <InputLabel id='status-select-label'>Status</InputLabel>
             <Select
               labelId='status-select-label'
@@ -199,6 +173,32 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
                 <MenuItem key={status} value={status}>
                   <Checkbox checked={selectedStatuses.indexOf(status) > -1} />
                   <ListItemText primary={status} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl className={styles.filterDropdown}>
+            <InputLabel id='roles-select-label'>Role</InputLabel>
+            <Select
+              labelId='roles-select-label'
+              multiple
+              value={selectedRoles}
+              onChange={(e) => {
+                const value = e.target.value
+                setSelectedRoles(
+                  typeof value === 'string' ? value.split(',') : value
+                )
+                setPage(0)
+              }}
+              renderValue={(selected) => (selected as string[]).join(', ')}
+              label='Role'
+              MenuProps={MenuProps}
+            >
+              {USER_ROLES.map((role) => (
+                <MenuItem key={role.value} value={role.value}>
+                  <Checkbox checked={selectedRoles.indexOf(role.value) > -1} />
+                  <ListItemText primary={role.label} />
                 </MenuItem>
               ))}
             </Select>
