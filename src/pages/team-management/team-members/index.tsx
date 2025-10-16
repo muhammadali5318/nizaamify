@@ -25,6 +25,8 @@ import { convertArrayToUpperCase } from 'src/utils/arrayUtils'
 import NominatePracticeManagerTeamList from '../components/NominatePracticeManagerTeamList'
 import ConfirmationSuccessDialog from 'src/components/team-management/InvitationSuccessDialog'
 import { useFetchSortedPaginatedData } from 'src/hooks/useFetchSortedData.'
+import { useNavigate } from 'react-router'
+import { paths } from 'src/paths'
 
 interface TeamMembersProps {
   onCountsUpdate?: (counts: {
@@ -42,6 +44,7 @@ type TeamMemberRow = {
 }
 
 const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
+  const navigate = useNavigate()
   const [isNominateOpen, setIsNominateOpen] = useState(false)
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<{
@@ -112,7 +115,11 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
     setIsNominateOpen(true)
   }, [])
 
-  const handlers = { onNominate: handleNominate }
+  const handleOnView = (id: string) => {
+    navigate(paths.teamManagement.gotoSpecificTeamMember(id))
+  }
+
+  const handlers = { onNominate: handleNominate, onView: handleOnView }
   const columns = useTeamMembersColumns(handlers)
 
   // Compute total minWidth for columns to prevent shrinking

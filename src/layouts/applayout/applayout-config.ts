@@ -51,7 +51,7 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
     items: [
       {
         text: 'Team management',
-        to: paths.teamManagement,
+        to: paths.teamManagement.root,
         activeIcon: 'active-team-management.svg',
         inactiveIcon: 'inactive-team-management.svg',
         moduleId: 'team-management'

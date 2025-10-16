@@ -20,7 +20,6 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
       {
         field: 'member',
         headerName: 'Members',
-        // removed flex; rely on minWidth so column never shrinks below usable size
         minWidth: 250,
         flex: 1,
         sortable: false,
@@ -128,11 +127,13 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
                   <IconButton
                     size='small'
                     aria-label='Nomination flag'
-                    onClick={() =>
-                      onNominate
-                        ? onNominate(params.row)
-                        : console.log('nominate', params.row.id)
-                    }
+                    onClick={() => {
+                      if (!params?.row?.is_nominated) {
+                        onNominate?.(params.row)
+                      } else {
+                        console.log('nominate', params.row.id)
+                      }
+                    }}
                   >
                     <ImgIcon
                       src={

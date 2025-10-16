@@ -7,7 +7,11 @@ export const paths = {
   documents: '/documents',
   reports: '/reports',
   benchmarks: '/benchmarks',
-  teamManagement: '/team-management',
+  teamManagement: {
+    root: '/team-management',
+    specificTeamMember: '/team-management/members/:id',
+    gotoSpecificTeamMember: (id: string) => `/team-management/members/${id}`
+  },
   practiceSettings: '/practice-settings',
   billing: '/billing',
   settings: '/settings',

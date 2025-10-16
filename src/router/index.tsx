@@ -17,6 +17,9 @@ const Documents = lazy(() => import('src/pages/documents'))
 const Reports = lazy(() => import('src/pages/reports'))
 const Benchmarks = lazy(() => import('src/pages/benchmarks'))
 const TeamManagement = lazy(() => import('src/pages/team-management'))
+const MemberRolesAndPermission = lazy(
+  () => import('src/pages/team-management/specific-team-member')
+)
 const PracticeSettings = lazy(() => import('src/pages/practice-settings'))
 const Billing = lazy(() => import('src/pages/billing'))
 const Settings = lazy(() => import('src/pages/settings'))
@@ -106,7 +109,15 @@ export function Router() {
             )
           },
           {
-            path: paths.teamManagement,
+            path: paths.teamManagement.specificTeamMember,
+            element: (
+              <FeatureProtectedRoute moduleId='team-management'>
+                <MemberRolesAndPermission />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.teamManagement.root,
             element: (
               <FeatureProtectedRoute moduleId='team-management'>
                 <TeamManagement />
