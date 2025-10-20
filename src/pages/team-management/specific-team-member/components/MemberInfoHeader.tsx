@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 // src/components/your-path/MemberInfoHeader.tsx
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
   Avatar,
   Box,
@@ -21,8 +21,10 @@ import { useFeatureRule } from 'src/hooks/useFeatureRule'
 import NominatePracticeManagerTeamList from '../../components/NominatePracticeManagerTeamList'
 import ConfirmationSuccessDialog from 'src/components/team-management/InvitationSuccessDialog'
 import { paths } from 'src/paths'
+import { useAuth0 } from '@auth0/auth0-react'
 
 const MemberInfoHeader = () => {
+  const { user } = useAuth0()
   const navigate = useNavigate()
   const location = useLocation()
   const { id = '' } = useParams<{ id: string }>()
@@ -37,14 +39,6 @@ const MemberInfoHeader = () => {
   )
 
   const isMobile = useMediaQuery('(max-width:600px)')
-
-  useEffect(() => {
-    if (successDialogOpen) {
-      navigate(paths.teamManagement.gotoSpecificTeamMember(id), {
-        state: { name, email, role, isNominated: true }
-      })
-    }
-  }, [successDialogOpen, isNominated, id])
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setMenuAnchorEl(event.currentTarget)
@@ -103,116 +97,120 @@ const MemberInfoHeader = () => {
       </Box>
 
       {/* Right Section */}
-      {isMobile ? (
+      {!(email === user?.email) && (
         <>
-          <IconButton onClick={handleMenuOpen} aria-label='more'>
-            <MoreVertIcon />
-          </IconButton>
-
-          <Menu
-            anchorEl={menuAnchorEl}
-            open={Boolean(menuAnchorEl)}
-            onClose={handleMenuClose}
-          >
-            <MenuItem onClick={handleMenuClose}>
-              <Button
-                fullWidth
-                variant='contained'
-                color='error'
-                startIcon={
-                  <img
-                    src='/assets/person-add-white.svg'
-                    alt='person icon'
-                    width={18}
-                    height={18}
-                  />
-                }
-              >
-                Deactivate user
-              </Button>
-            </MenuItem>
-
-            <MenuItem onClick={handleMenuClose}>
-              <Box display='flex' alignItems='center' gap={1}>
-                <ImgIcon src='/assets/swap-icon.svg' alt='swap' />
-                <Typography noWrap>Update member role</Typography>
-              </Box>
-            </MenuItem>
-
-            {!onboardingCompleted && role === 'PRACTICE MANAGER' && (
-              <MenuItem onClick={handleNominate}>
-                <Box display='flex' alignItems='center' gap={1}>
-                  <ImgIcon
-                    src={
-                      isNominated
-                        ? '/assets/green-flag.svg'
-                        : '/assets/blue-flag.svg'
-                    }
-                    alt='flag icon'
-                  />
-                  <Typography noWrap>
-                    {isNominated ? 'Already nominated' : 'Nominate Now'}
-                  </Typography>
-                </Box>
-              </MenuItem>
-            )}
-          </Menu>
-        </>
-      ) : (
-        <>
-          <Box className={styles.memberActionsContainer}>
-            <Button
-              size='medium'
-              variant='contained'
-              color='error'
-              startIcon={
-                <img
-                  src='/assets/person-add-white.svg'
-                  alt='person icon'
-                  width={18}
-                  height={18}
-                />
-              }
-            >
-              Deactivate user
-            </Button>
-
-            <Tooltip placement='top' title='Update member role'>
-              <IconButton
-                size='small'
-                onClick={() => console.log('swap')}
-                aria-label='swap member'
-              >
-                <ImgIcon src='/assets/swap-icon.svg' alt='swap' />
+          {isMobile ? (
+            <>
+              <IconButton onClick={handleMenuOpen} aria-label='more'>
+                <MoreVertIcon />
               </IconButton>
-            </Tooltip>
 
-            {!onboardingCompleted && role === 'PRACTICE MANAGER' && (
-              <Tooltip
-                placement='top'
-                title={
-                  isNominated
-                    ? 'Already nominated'
-                    : 'Nominate to complete onboarding'
-                }
+              <Menu
+                anchorEl={menuAnchorEl}
+                open={Boolean(menuAnchorEl)}
+                onClose={handleMenuClose}
               >
-                <IconButton
-                  size='small'
-                  aria-label='Nomination flag'
-                  onClick={handleNominate}
-                >
-                  <ImgIcon
-                    src={
-                      isNominated
-                        ? '/assets/green-flag.svg'
-                        : '/assets/blue-flag.svg'
+                <MenuItem onClick={handleMenuClose}>
+                  <Button
+                    fullWidth
+                    variant='contained'
+                    color='error'
+                    startIcon={
+                      <img
+                        src='/assets/person-add-white.svg'
+                        alt='person icon'
+                        width={18}
+                        height={18}
+                      />
                     }
-                    alt='flag icon'
-                  />
-                </IconButton>
-              </Tooltip>
-            )}
-          </Box>
+                  >
+                    Deactivate user
+                  </Button>
+                </MenuItem>
+
+                <MenuItem onClick={handleMenuClose}>
+                  <Box display='flex' alignItems='center' gap={1}>
+                    <ImgIcon src='/assets/swap-icon.svg' alt='swap' />
+                    <Typography noWrap>Update member role</Typography>
+                  </Box>
+                </MenuItem>
+
+                {!onboardingCompleted && role === 'PRACTICE MANAGER' && (
+                  <MenuItem onClick={handleNominate}>
+                    <Box display='flex' alignItems='center' gap={1}>
+                      <ImgIcon
+                        src={
+                          isNominated
+                            ? '/assets/green-flag.svg'
+                            : '/assets/blue-flag.svg'
+                        }
+                        alt='flag icon'
+                      />
+                      <Typography noWrap>
+                        {isNominated ? 'Already nominated' : 'Nominate Now'}
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                )}
+              </Menu>
+            </>
+          ) : (
+            <>
+              <Box className={styles.memberActionsContainer}>
+                <Button
+                  size='medium'
+                  variant='contained'
+                  color='error'
+                  startIcon={
+                    <img
+                      src='/assets/person-add-white.svg'
+                      alt='person icon'
+                      width={18}
+                      height={18}
+                    />
+                  }
+                >
+                  Deactivate user
+                </Button>
+
+                <Tooltip placement='top' title='Update member role'>
+                  <IconButton
+                    size='small'
+                    onClick={() => console.log('swap')}
+                    aria-label='swap member'
+                  >
+                    <ImgIcon src='/assets/swap-icon.svg' alt='swap' />
+                  </IconButton>
+                </Tooltip>
+
+                {!onboardingCompleted && role === 'PRACTICE MANAGER' && (
+                  <Tooltip
+                    placement='top'
+                    title={
+                      isNominated
+                        ? 'Already nominated'
+                        : 'Nominate to complete onboarding'
+                    }
+                  >
+                    <IconButton
+                      size='small'
+                      aria-label='Nomination flag'
+                      onClick={handleNominate}
+                    >
+                      <ImgIcon
+                        src={
+                          isNominated
+                            ? '/assets/green-flag.svg'
+                            : '/assets/blue-flag.svg'
+                        }
+                        alt='flag icon'
+                      />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </Box>
+            </>
+          )}
         </>
       )}
 
@@ -227,7 +225,12 @@ const MemberInfoHeader = () => {
 
       <ConfirmationSuccessDialog
         open={successDialogOpen}
-        onClose={() => setSuccessDialogOpen(false)}
+        onClose={() => {
+          setSuccessDialogOpen(false)
+          navigate(paths.teamManagement.gotoSpecificTeamMember(id), {
+            state: { name, email, role, isNominated: true }
+          })
+        }}
         title='Nomination successful!'
       >
         <Typography variant='body2' color='text.secondary'>

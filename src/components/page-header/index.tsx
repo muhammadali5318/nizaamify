@@ -1,15 +1,14 @@
-// src/components/common/Panel.tsx
 import React from 'react'
 import { Box, Stack, Avatar, Typography, Divider } from '@mui/material'
 
-interface SidebarContentWrapperProps {
+interface PageProps {
   title: string
   description: string
   logo: string
   isDividerVisible?: boolean
 }
 
-const SidebarContentWrapper: React.FC<SidebarContentWrapperProps> = ({
+const PageHeader: React.FC<PageProps> = ({
   title,
   description,
   logo,
@@ -34,9 +33,13 @@ const SidebarContentWrapper: React.FC<SidebarContentWrapperProps> = ({
           </Typography>
         </Box>
       </Stack>
-      {isDividerVisible && <Divider />}
+      {isDividerVisible && (
+        <Box>
+          <Divider sx={{ mb: 2.5 }} />
+        </Box>
+      )}{' '}
     </Stack>
   )
 }
 
-export default SidebarContentWrapper
+export default PageHeader

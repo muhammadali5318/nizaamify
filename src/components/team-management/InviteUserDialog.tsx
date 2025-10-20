@@ -91,7 +91,7 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = React.memo(
           paper: {
             sx: {
               py: '36px',
-              px: 6
+              px: { xs: 2, sm: 6 }
             }
           }
         }}
@@ -109,7 +109,12 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = React.memo(
               alt='user invitation icon'
               style={{ width: 48, height: 48 }}
             />
-            <Typography variant='h5' fontWeight={700}>
+            <Typography
+              className='font-weight--700'
+              sx={{
+                typography: { xs: 'h6', sm: 'h5' }
+              }}
+            >
               Invite new team member
             </Typography>
             <Typography variant='subtitle1' color='text.secondary'>

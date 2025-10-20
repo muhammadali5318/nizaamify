@@ -36,6 +36,12 @@ const PermissionsContainer: React.FC<PermissionsContainerProps> = ({
     setLocalPermissions(permissions || [])
   }, [permissions])
 
+  useEffect(() => {
+    if (!isEditing) {
+      setLocalPermissions(permissions || [])
+    }
+  }, [isEditing, permissions])
+
   const permissionCount = localPermissions.filter((p) => p.is_active).length
 
   const togglePermission = (id: string) => {
@@ -43,7 +49,7 @@ const PermissionsContainer: React.FC<PermissionsContainerProps> = ({
       p.id === id ? { ...p, is_active: !p.is_active } : p
     )
     setLocalPermissions(updated)
-    if (onChange) onChange(updated) // notify parent immediately
+    if (onChange) onChange(updated)
   }
 
   return (

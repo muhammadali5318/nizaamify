@@ -3,8 +3,8 @@ import { Box, CircularProgress, Stack } from '@mui/material'
 import TeamManagementContentWrapper from '../components/TeamManagementContentWrapper'
 import { TEAM_ROLES_MENU } from './role-and-permissions-config'
 import SidebarTabs from 'src/components/SidebarTabs/SidebarTabs'
-import SidebarContentWrapper from 'src/components/SidebarTabs/SidebarContentWrapper'
 import { usePracticeRolesAndPermissions } from './hooks/usePracticeRolesAndPermissions'
+import PageHeader from 'src/components/page-header'
 
 const RolesPermissions: React.FC = () => {
   const { isPending } = usePracticeRolesAndPermissions(true)
@@ -73,7 +73,7 @@ const RolesPermissions: React.FC = () => {
               <CircularProgress />
             ) : (
               <Stack spacing={2.5} width={'100%'}>
-                <SidebarContentWrapper
+                <PageHeader
                   title={activeItem?.title}
                   description={activeItem?.description}
                   logo='/assets/profile.svg'

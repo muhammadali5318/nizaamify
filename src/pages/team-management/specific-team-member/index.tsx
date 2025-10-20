@@ -6,10 +6,9 @@ import {
   Stack,
   useMediaQuery
 } from '@mui/material'
-import { useParams } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { useAuth0 } from '@auth0/auth0-react'
 
-import SidebarContentWrapper from 'src/components/SidebarTabs/SidebarContentWrapper'
 import TeamManagementContentWrapper from '../components/TeamManagementContentWrapper'
 import MemberRoleAndPermissionsList from './components/MemberRoleAndPermissionsList'
 import PermissionsEditActions from './components/PermissionsEditActions'
@@ -30,10 +29,13 @@ import {
   specificMembersBreadCrumbs
 } from './permissionsUtils'
 import MemberInfoHeader from './components/MemberInfoHeader'
+import PageHeader from 'src/components/page-header'
 
 const MemberRolesAndPermission: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth0()
+  const location = useLocation()
+  const { email } = location.state || {}
   const orgUuid = user ? getUserOrgUuid(user) : null
 
   // Detect mobile screen
@@ -133,20 +135,22 @@ const MemberRolesAndPermission: React.FC = () => {
                   ...(isEditing && isMobile && { flexWrap: 'wrap' })
                 }}
               >
-                <SidebarContentWrapper
+                <PageHeader
                   title={role?.name ?? '—'}
                   description={role?.description ?? ''}
                   logo='/assets/profile.svg'
                   isDividerVisible={false}
                 />
 
-                <PermissionsEditActions
-                  isEditing={isEditing}
-                  onEdit={handleEdit}
-                  onSave={handleSave}
-                  onCancel={handleCancel}
-                  canSave={canSave}
-                />
+                {!(email === user?.email) && (
+                  <PermissionsEditActions
+                    isEditing={isEditing}
+                    onEdit={handleEdit}
+                    onSave={handleSave}
+                    onCancel={handleCancel}
+                    canSave={canSave}
+                  />
+                )}
               </Box>
 
               <Stack spacing={2.5}>

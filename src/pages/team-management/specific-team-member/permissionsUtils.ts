@@ -87,7 +87,16 @@ export const updateUserPermission = async (
 
     notify.success('Roles & permissions updated successfully')
     await refetch()
-  } catch (err) {
+  } catch (err: unknown) {
+    if (typeof err === 'object' && err !== null && 'error' in err) {
+      const apiError = err as { error?: string[] }
+      const errMsg = apiError.error?.[0]
+      if (errMsg) {
+        notify.error(errMsg)
+        return
+      }
+    }
+
     notify.error('Something went wrong. Please try again later.')
     console.error(err)
   }

@@ -32,7 +32,7 @@ const ConfirmationSuccessDialog: React.FC<ConfirmationSuccessDialogProps> =
           paper: {
             sx: {
               py: '36px',
-              px: 6
+              px: { xs: 2, sm: 6 }
             }
           }
         }}
@@ -45,12 +45,21 @@ const ConfirmationSuccessDialog: React.FC<ConfirmationSuccessDialogProps> =
               gap: 0
             }}
           >
-            <img
+            <Box
+              component='img'
               src='/assets/success-check.svg'
               alt='success'
-              style={{ width: 88, height: 88 }}
+              sx={{
+                width: { xs: 64, sm: 88 },
+                height: { xs: 64, sm: 88 }
+              }}
             />
-            <Typography variant='h4' fontWeight={700}>
+            <Typography
+              className='font-weight--700'
+              sx={{
+                typography: { xs: 'h6', sm: 'h4' }
+              }}
+            >
               {title}
             </Typography>
           </Box>

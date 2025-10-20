@@ -18,7 +18,7 @@ import RenderUlList from 'src/components/render-ul-list'
 interface NominateExistingPracticeManagerProps {
   open: boolean
   onClose: () => void
-  onSuccess?: () => void
+  onSuccess: () => void
   name: string
   userId: string
 }
@@ -32,8 +32,8 @@ const NominateExistingPracticeManager: React.FC<NominateExistingPracticeManagerP
       orgUuid,
       userId,
       onSuccess: () => {
+        onSuccess()
         onClose()
-        if (onSuccess) onSuccess()
       }
     })
 
@@ -50,8 +50,9 @@ const NominateExistingPracticeManager: React.FC<NominateExistingPracticeManagerP
         slotProps={{
           paper: {
             sx: {
+              margin: '0px',
               py: '36px',
-              px: 6
+              px: { xs: 2, sm: 6 }
             }
           }
         }}
@@ -72,7 +73,12 @@ const NominateExistingPracticeManager: React.FC<NominateExistingPracticeManagerP
         <DialogContent sx={{ p: 0 }}>
           <Stack spacing={2.5}>
             <Box>
-              <Typography variant='h5' fontWeight={700}>
+              <Typography
+                className='font-weight--700'
+                sx={{
+                  typography: { xs: 'h6', sm: 'h5' }
+                }}
+              >
                 Nominate for practice onboarding
               </Typography>
               <Typography variant='subtitle1'>
@@ -105,13 +111,21 @@ const NominateExistingPracticeManager: React.FC<NominateExistingPracticeManagerP
           </Stack>
         </DialogContent>
 
-        <DialogActions sx={{ p: 0, mt: 2.5, display: 'flex', gap: 2.5 }}>
+        <DialogActions
+          sx={{
+            p: 0,
+            mt: 2.5,
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 2.5
+          }}
+        >
           <Button
             onClick={onClose}
             variant='outlined'
-            fullWidth
             size='large'
             disabled={isPending}
+            sx={{ flex: 1 }}
           >
             Cancel
           </Button>
@@ -119,12 +133,12 @@ const NominateExistingPracticeManager: React.FC<NominateExistingPracticeManagerP
           <Button
             onClick={handleConfirm}
             variant='contained'
-            fullWidth
             size='large'
             disabled={isPending}
             sx={{
-              margin: '0px !important',
+              flex: 1,
               bgcolor: 'black',
+              whiteSpace: 'nowrap',
               '&:hover': {
                 bgcolor: 'rgba(0, 0, 0, 0.9)'
               }

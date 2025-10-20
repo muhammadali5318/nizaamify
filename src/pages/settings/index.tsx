@@ -9,7 +9,7 @@ import { useFeatureRule } from 'src/hooks/useFeatureRule'
 import { useAuth } from 'src/context/AuthProvider'
 import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
 import SidebarTabs from 'src/components/SidebarTabs/SidebarTabs'
-import SidebarContentWrapper from 'src/components/SidebarTabs/SidebarContentWrapper'
+import PageHeader from 'src/components/page-header'
 
 const Settings = () => {
   const { accessToken } = useAuth()
@@ -44,13 +44,14 @@ const Settings = () => {
         {/* Content area */}
         <Box className={styles.settingsContent}>
           {activeItem && ActiveComponent ? (
-            <SidebarContentWrapper
-              title={activeItem.title}
-              description={activeItem.description}
-              logo={activeItem.logo}
-            >
+            <>
+              <PageHeader
+                title={activeItem.title}
+                description={activeItem.description}
+                logo={activeItem.logo}
+              />
               <ActiveComponent {...(activeItem.componentProps ?? {})} />
-            </SidebarContentWrapper>
+            </>
           ) : null}
         </Box>
       </Stack>
