@@ -151,7 +151,7 @@ const MemberInfoHeader = () => {
                     alt='flag icon'
                   />
                   <Typography noWrap>
-                    {isNominated ? 'Already nominated' : 'Nominate to complete'}
+                    {isNominated ? 'Already nominated' : 'Nominate Now'}
                   </Typography>
                 </Box>
               </MenuItem>
