@@ -31,13 +31,15 @@ export const CustomLoader: React.FC<{ backgroundColor?: string }> = () => (
 
 type StatusChipProps = { status: string }
 export const StatusChip: React.FC<StatusChipProps> = ({ status }) => {
+  const normalizedStatus = status?.toUpperCase?.() || ''
+
   const config: Record<string, { icon: string; bg: string; color: string }> = {
     ACTIVE: {
       icon: '/assets/green-verify-circle.svg',
       bg: 'rgba(76, 175, 80, 0.15)',
       color: 'var(--color-success-main)'
     },
-    Inactive: {
+    INACTIVE: {
       icon: '/assets/error-outlined.svg',
       bg: 'rgba(239, 83, 80, 0.15)',
       color: 'var(--color-error-main)'
@@ -54,7 +56,13 @@ export const StatusChip: React.FC<StatusChipProps> = ({ status }) => {
     }
   }
 
-  const { icon, bg, color } = config[status] || config['Pending']
+  const fallback = {
+    icon: '/assets/pending-circle.svg',
+    bg: 'rgba(255, 152, 0, 0.15)',
+    color: 'var(--color-warning-main)'
+  }
+
+  const { icon, bg, color } = config[normalizedStatus] ?? fallback
 
   return (
     <Chip
