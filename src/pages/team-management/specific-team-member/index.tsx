@@ -1,5 +1,11 @@
 import React, { useState } from 'react'
-import { Box, CircularProgress, Divider, Stack } from '@mui/material'
+import {
+  Box,
+  CircularProgress,
+  Divider,
+  Stack,
+  useMediaQuery
+} from '@mui/material'
 import { useParams } from 'react-router'
 import { useAuth0 } from '@auth0/auth0-react'
 
@@ -26,17 +32,16 @@ import {
 import MemberInfoHeader from './components/MemberInfoHeader'
 
 const MemberRolesAndPermission: React.FC = () => {
-  const { id } = useParams<{
-    id: string
-  }>()
-
+  const { id } = useParams<{ id: string }>()
   const { user } = useAuth0()
   const orgUuid = user ? getUserOrgUuid(user) : null
+
+  // Detect mobile screen
+  const isMobile = useMediaQuery('(max-width:600px)')
 
   // Query data for selected member
   const { data, refetch, isPending } = useMemberRolesAndPermissions(true, id)
 
-  // Local UI state
   const [isEditing, setIsEditing] = useState(false)
   const [updatedPermissions, setUpdatedPermissions] = useState<
     Record<string, PermissionObject[]>
@@ -123,7 +128,9 @@ const MemberRolesAndPermission: React.FC = () => {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  marginBottom: 2.5
+                  marginBottom: 2.5,
+                  gap: 1,
+                  ...(isEditing && isMobile && { flexWrap: 'wrap' })
                 }}
               >
                 <SidebarContentWrapper

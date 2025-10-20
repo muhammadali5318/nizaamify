@@ -1,6 +1,5 @@
-// src/components/permission-container/PermissionsEditActions.tsx
 import React from 'react'
-import { Button, Box } from '@mui/material'
+import { Button, Box, useMediaQuery } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
 
 type PermissionsEditActionsProps = {
@@ -18,6 +17,8 @@ const PermissionsEditActions: React.FC<PermissionsEditActionsProps> = ({
   onCancel,
   canSave
 }) => {
+  const isMobile = useMediaQuery('(max-width:600px)')
+
   return (
     <>
       {!isEditing ? (
@@ -27,9 +28,22 @@ const PermissionsEditActions: React.FC<PermissionsEditActionsProps> = ({
           size='medium'
           color='primary'
           variant='contained'
-          startIcon={<EditIcon fontSize='small' />}
+          sx={{
+            minWidth: isMobile ? 40 : 'auto',
+            px: isMobile ? 1 : 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
         >
-          Edit
+          {isMobile ? (
+            <EditIcon fontSize='small' sx={{ color: '#fff' }} />
+          ) : (
+            <>
+              <EditIcon fontSize='small' sx={{ color: '#fff', mr: 1 }} />
+              Edit
+            </>
+          )}
         </Button>
       ) : (
         <Box
@@ -38,11 +52,13 @@ const PermissionsEditActions: React.FC<PermissionsEditActionsProps> = ({
             alignItems: 'center',
             justifyContent: 'flex-start',
             flexDirection: 'row',
+            alignSelf: 'stretch',
             gap: 2.5,
-            width: 'auto'
+            width: isMobile && isEditing ? '100%' : 'auto'
           }}
         >
           <Button
+            fullWidth={isMobile && isEditing}
             size='medium'
             variant='outlined'
             onClick={onCancel}
@@ -54,6 +70,7 @@ const PermissionsEditActions: React.FC<PermissionsEditActionsProps> = ({
           </Button>
 
           <Button
+            fullWidth={isMobile && isEditing}
             size='medium'
             variant='contained'
             onClick={onSave}
