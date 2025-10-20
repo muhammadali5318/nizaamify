@@ -1,12 +1,11 @@
 // src/components/common/Panel.tsx
-import React, { ReactNode } from 'react'
+import React from 'react'
 import { Box, Stack, Avatar, Typography, Divider } from '@mui/material'
 
 interface SidebarContentWrapperProps {
   title: string
   description: string
   logo: string
-  children: ReactNode
   isDividerVisible?: boolean
 }
 
@@ -14,11 +13,10 @@ const SidebarContentWrapper: React.FC<SidebarContentWrapperProps> = ({
   title,
   description,
   logo,
-  children,
   isDividerVisible = true
 }) => {
   return (
-    <Stack spacing={2.5}>
+    <Stack spacing={2.5} width={'100%'}>
       <Stack direction={'row'} spacing={'10px'} alignItems='center'>
         <Avatar
           src={logo}
@@ -37,8 +35,6 @@ const SidebarContentWrapper: React.FC<SidebarContentWrapperProps> = ({
         </Box>
       </Stack>
       {isDividerVisible && <Divider />}
-
-      <>{children}</>
     </Stack>
   )
 }

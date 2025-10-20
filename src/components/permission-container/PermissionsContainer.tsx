@@ -1,5 +1,5 @@
-// PermissionsContainer.tsx
-import { Box, Divider, Typography } from '@mui/material'
+import React, { useEffect, useState } from 'react'
+import { Box, Divider, Typography, Checkbox } from '@mui/material'
 import styles from './PermissionsContainer.module.scss'
 import { formatTitle, getTextAfterDelimiter } from 'src/utils/stringUtils'
 
@@ -18,17 +18,36 @@ type PermissionItem = {
 type PermissionsContainerProps = {
   item: PermissionItem
   permissions: PermissionObject[]
+  isEditing: boolean
+  onChange?: (updatedPermissions: PermissionObject[]) => void
 }
 
-const PermissionsContainer = ({
+const PermissionsContainer: React.FC<PermissionsContainerProps> = ({
   item,
-  permissions
-}: PermissionsContainerProps) => {
-  const permissionCount = permissions.filter((p) => p.is_active).length
+  permissions,
+  isEditing,
+  onChange
+}) => {
+  const [localPermissions, setLocalPermissions] = useState<PermissionObject[]>(
+    permissions || []
+  )
+
+  useEffect(() => {
+    setLocalPermissions(permissions || [])
+  }, [permissions])
+
+  const permissionCount = localPermissions.filter((p) => p.is_active).length
+
+  const togglePermission = (id: string) => {
+    const updated = localPermissions.map((p) =>
+      p.id === id ? { ...p, is_active: !p.is_active } : p
+    )
+    setLocalPermissions(updated)
+    if (onChange) onChange(updated) // notify parent immediately
+  }
 
   return (
     <Box className={styles.permissionsContainerRoot}>
-      {/* Header */}
       <Box className={styles.HeaderContainer}>
         <Box className={styles.IconContainer}>
           <img src={item.path} alt={`${item.title} icon`} />
@@ -43,6 +62,7 @@ const PermissionsContainer = ({
             </Typography>
           </Box>
         </Box>
+
         <Typography
           className={`${styles.permissionCount} ${styles.hidePermissionCount}`}
         >
@@ -54,15 +74,27 @@ const PermissionsContainer = ({
 
       {/* Permission Rows */}
       <Box sx={{ width: '100%' }}>
-        {permissions.map((perm, index) => (
+        {(localPermissions || []).map((perm, index) => (
           <Box key={perm.id ?? index}>
             <Box className={styles.permissionRow}>
-              <Typography variant='body1' color='primary.main'>
-                {getTextAfterDelimiter(perm.name)}
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {isEditing && (
+                  <Checkbox
+                    size='small'
+                    checked={!!perm.is_active}
+                    onChange={() => togglePermission(perm.id)}
+                    inputProps={{
+                      'aria-label': `${getTextAfterDelimiter(perm.name)} permission`
+                    }}
+                  />
+                )}
+
+                <Typography variant='body1' color='primary.main'>
+                  {getTextAfterDelimiter(perm.name)}
+                </Typography>
+              </Box>
 
               <Box className={styles.permissionIconContainer}>
-                {/* Keep the same icons as before: active -> tick, inactive -> close */}
                 <img
                   src={
                     perm.is_active
@@ -71,24 +103,16 @@ const PermissionsContainer = ({
                   }
                   alt={perm.is_active ? 'active' : 'inactive'}
                 />
-                <Typography
-                  variant='caption'
-                  sx={{ display: { xs: 'none', lg: 'inline' } }}
-                >
-                  {perm.description}
-                </Typography>
               </Box>
             </Box>
 
-            {/* Divider between rows except last */}
-            {index !== permissions.length - 1 && (
+            {index !== localPermissions.length - 1 && (
               <Divider sx={{ width: '100%', borderColor: 'var(--grey-200)' }} />
             )}
           </Box>
         ))}
 
-        {/* If there are no permissions for this section, show a small placeholder */}
-        {permissions.length === 0 && (
+        {localPermissions.length === 0 && (
           <Box className={styles.permissionRow} sx={{ py: 2 }}>
             <Typography variant='body2' color='text.secondary'>
               No permissions available

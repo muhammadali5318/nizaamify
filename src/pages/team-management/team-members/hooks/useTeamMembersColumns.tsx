@@ -6,9 +6,16 @@ import { StatusChip, ImgIcon } from '../components/TeamMembers'
 import { toTitleCase } from 'src/utils/stringUtils'
 import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
 import { useFeatureRule } from 'src/hooks/useFeatureRule'
+import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined'
 
 type Handlers = {
-  onView?: (id: string) => void
+  onView?: (
+    id: string,
+    name: string,
+    email: string,
+    role: string,
+    isNominated: boolean
+  ) => void
   onInvite?: (id: string) => void
   onSwap?: (id: string) => void
   onNominate?: (id: any) => void
@@ -77,21 +84,36 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
               alignItems: 'center'
             }}
           >
-            <Tooltip placement='top' title='View'>
-              <IconButton
-                size='small'
-                onClick={() =>
-                  onView
-                    ? onView(String(params.row.id))
-                    : console.log('view', params.row.id)
-                }
-                aria-label='view member'
+            <Tooltip placement='top' title='Manage member permissions'>
+              <Box
+                component='span'
+                sx={{
+                  display: 'inline-flex',
+                  verticalAlign: 'middle'
+                }}
               >
-                <ImgIcon src='/assets/transparent-eye.svg' alt='view' />
-              </IconButton>
+                <IconButton
+                  size='small'
+                  aria-label='view member'
+                  disabled={params?.row?.user_practice_status === 'INVITED'}
+                  onClick={() =>
+                    onView
+                      ? onView(
+                          params?.row?.user_id,
+                          params?.row?.user_name,
+                          params?.row?.email,
+                          params?.row?.user_role,
+                          params?.row?.is_nominated
+                        )
+                      : console.log('view', params.row.id)
+                  }
+                >
+                  <RemoveRedEyeOutlinedIcon fontSize='small' />
+                </IconButton>
+              </Box>
             </Tooltip>
 
-            <Tooltip placement='top' title='Invite / Add'>
+            <Tooltip placement='top' title='Deactivate user'>
               <IconButton
                 size='small'
                 onClick={() =>
@@ -105,7 +127,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
               </IconButton>
             </Tooltip>
 
-            <Tooltip placement='top' title='Swap'>
+            <Tooltip placement='top' title='Update member role'>
               <IconButton
                 size='small'
                 onClick={() =>
@@ -127,7 +149,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
                   title={
                     params?.row?.is_nominated
                       ? 'Already nominated'
-                      : 'Nominate now'
+                      : 'Nominate to complete onboarding'
                   }
                 >
                   <IconButton

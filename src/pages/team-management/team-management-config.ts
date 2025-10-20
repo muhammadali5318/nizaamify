@@ -57,3 +57,19 @@ export const teamMembersSx = {
     backgroundColor: 'transparent'
   }
 }
+
+export const PERMISSION_ICON_MAP: Record<string, string> = {
+  'Dashboards & Insights': '/assets/roles-dashboard.svg',
+  Benchmarking: '/assets/roles-bench-marking.svg',
+  'Subscriptions & Billing': '/assets/roles-subscription.svg',
+  Payments: '/assets/roles-payments.svg',
+  'Data Access & Management': '/assets/roles-audiance.svg',
+  'User & Account Management': '/assets/roles-settings.svg',
+  'Legal & Compliance': '/assets/roles-audiance.svg',
+  'Feedback & Support': '/assets/roles-question-mark.svg',
+  'AI Assistant': '/assets/spark.svg',
+  'Audit Logs': '/assets/roles-audiance.svg',
+  'Integrations & Finance': '/assets/roles-payments.svg'
+}
+
+export const DEFAULT_PERMISSION_ICON = '/assets/roles-audiance.svg'

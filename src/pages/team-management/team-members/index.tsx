@@ -117,8 +117,16 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
     setIsNominateOpen(true)
   }, [])
 
-  const handleOnView = (id: string) => {
-    navigate(paths.teamManagement.gotoSpecificTeamMember(id))
+  const handleOnView = (
+    id: string,
+    name: string,
+    email: string,
+    role: string,
+    isNominated: boolean
+  ) => {
+    navigate(paths.teamManagement.gotoSpecificTeamMember(id), {
+      state: { name, email, role, isNominated }
+    })
   }
 
   const handlers = { onNominate: handleNominate, onView: handleOnView }

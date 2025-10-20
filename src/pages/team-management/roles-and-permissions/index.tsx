@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Box, CircularProgress } from '@mui/material'
+import { Box, CircularProgress, Stack } from '@mui/material'
 import TeamManagementContentWrapper from '../components/TeamManagementContentWrapper'
 import { TEAM_ROLES_MENU } from './role-and-permissions-config'
 import SidebarTabs from 'src/components/SidebarTabs/SidebarTabs'
@@ -72,16 +72,17 @@ const RolesPermissions: React.FC = () => {
             {isPending ? (
               <CircularProgress />
             ) : (
-              <SidebarContentWrapper
-                title={activeItem?.title}
-                description={activeItem?.description}
-                logo='/assets/profile.svg'
-                isDividerVisible={false}
-              >
+              <Stack spacing={2.5} width={'100%'}>
+                <SidebarContentWrapper
+                  title={activeItem?.title}
+                  description={activeItem?.description}
+                  logo='/assets/profile.svg'
+                  isDividerVisible={false}
+                />
                 {ActiveComponent ? (
                   <ActiveComponent {...(activeItem?.componentProps ?? {})} />
                 ) : null}
-              </SidebarContentWrapper>
+              </Stack>
             )}
           </Box>
         </Box>

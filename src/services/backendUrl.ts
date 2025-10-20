@@ -25,6 +25,8 @@ export const endpoints = {
   resendInvite: (id: string) => `${API_BASE}/practices/${id}/resend-invite/`,
   practiceRolesAndPermission: (id: string) =>
     `${API_BASE}/practices/${id}/roles/permissions/`,
+  getUserRolesAndPermission: (orgId: string, userId: string | undefined) =>
+    `${API_BASE}/practices/${orgId}/users/${userId}/permissions/`,
   nominateExistingManager: (orgId: string, userId: string) =>
     `${API_BASE}/practices/${orgId}/users/${userId}/nominate/`
 }
