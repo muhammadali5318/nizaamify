@@ -1,4 +1,3 @@
-// src/App.tsx
 import { JSX } from 'react'
 import { Router } from './router'
 import { ThemeProvider } from '@mui/material'
@@ -12,6 +11,8 @@ import NotificationProvider from './components/notistack/NotificationProvider'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './utils/queryClient'
 import { FeatureFlagProvider } from './context/FeatureFlagProvider'
+import { Provider as ReduxProvider } from 'react-redux'
+import { store } from './store/store' // ✅ import your Redux store
 
 function App(): JSX.Element {
   return (
@@ -21,10 +22,14 @@ function App(): JSX.Element {
           <AuthProvider>
             <ErrorBoundary>
               <ThemeProvider theme={theme}>
-                <NotificationProvider>
-                  <Router />
-                  <IdleSessionHandler />
-                </NotificationProvider>
+                <ReduxProvider store={store}>
+                  {' '}
+                  {/* ✅ Redux provider added */}
+                  <NotificationProvider>
+                    <Router />
+                    <IdleSessionHandler />
+                  </NotificationProvider>
+                </ReduxProvider>
               </ThemeProvider>
             </ErrorBoundary>
           </AuthProvider>
