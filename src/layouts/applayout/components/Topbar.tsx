@@ -186,11 +186,10 @@ const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
     setOpen((prev) => !prev)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleClose = (_event?: Event | React.SyntheticEvent) => {
     setOpen(false)
   }
-
+  console.warn('user info', user)
   const handleLogout = () => {
     logout({ logoutParams: { returnTo: window.location.origin } })
   }
