@@ -22,7 +22,7 @@ export const triggerProcessAPI = async (
       payload
     )
     notify.success(`${name} processed successfully!`)
-    console.log('Process API response:', response.data)
+    console.warn('Process API response:', response.data)
   } catch (error: any) {
     console.error('Error processing document:', error)
     notify.error(`Failed to process ${name}`)
