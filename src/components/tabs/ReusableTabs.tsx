@@ -11,6 +11,7 @@ export type ReusableTabItem = {
   activeIcon?: string
   inactiveIcon?: string
   content: React.ReactNode
+  count?: number
 }
 
 interface ReusableTabsProps {
@@ -52,53 +53,88 @@ const ReusableTabs: React.FC<ReusableTabsProps> = ({
         scrollButtons='auto'
         textColor='primary'
         indicatorColor='primary'
-        // make tabs container scrollable & hide native scrollbar visually
         sx={{
           width: '100%',
           boxSizing: 'border-box',
           overflowX: 'auto',
-          // keep the flex container tight so tabs wrap/scroll correctly
           '& .MuiTabs-flexContainer': {
             gap: 1,
             alignItems: 'center'
           },
-          // hide scrollbar (still scrollable)
           msOverflowStyle: 'none',
           scrollbarWidth: 'none',
-          '&::-webkit-scrollbar': {
-            height: 0,
-            display: 'none'
-          }
+          '&::-webkit-scrollbar': { height: 0, display: 'none' }
         }}
-        slotProps={{
-          indicator: {
-            style: { display: 'none' }
-          }
-        }}
+        slotProps={{ indicator: { style: { display: 'none' } } }}
       >
-        {tabs.map((t) => (
-          <CenteredTab
-            key={String(t.key)}
-            value={t.key}
-            label={t.label}
-            // responsive padding & minWidth to avoid forcing layout overflow
-            sx={{ minWidth: 'auto', px: { xs: 0.75, sm: 1.5 } }}
-            icon={
-              t.activeIcon || t.inactiveIcon ? (
-                <img
-                  src={
-                    value === t.key
-                      ? (t.activeIcon ?? t.inactiveIcon)
-                      : (t.inactiveIcon ?? t.activeIcon)
-                  }
-                  alt={`${t.label} icon`}
-                />
-              ) : undefined
-            }
-            iconPosition='start'
-            {...a11yProps(t.key)}
-          />
-        ))}
+        {tabs.map((t) => {
+          const showBadge = typeof t.count === 'number' && t.count > 0
+          const badgeText =
+            typeof t.count === 'number' && t.count > 99 ? '99+' : t.count
+
+          const labelNode = (
+            <Box
+              component='span'
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 1,
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <Box component='span' sx={{ lineHeight: 1 }}>
+                {t.label}
+              </Box>
+
+              {showBadge && (
+                <Box
+                  component='span'
+                  sx={{
+                    bgcolor: 'warning.main',
+                    color: '#fff',
+                    borderRadius: '999px',
+                    minWidth: 20,
+                    height: 22,
+                    px: 0.6,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    boxShadow: '0 0 0 2px rgba(0,0,0,0.05)'
+                  }}
+                  aria-hidden
+                >
+                  {badgeText}
+                </Box>
+              )}
+            </Box>
+          )
+
+          return (
+            <CenteredTab
+              key={String(t.key)}
+              value={t.key}
+              // pass the composed label node
+              label={labelNode}
+              sx={{ minWidth: 'auto', px: { xs: 0.75, sm: 1.5 } }}
+              icon={
+                t.activeIcon || t.inactiveIcon ? (
+                  <img
+                    src={
+                      value === t.key
+                        ? (t.activeIcon ?? t.inactiveIcon)
+                        : (t.inactiveIcon ?? t.activeIcon)
+                    }
+                    alt={`${t.label} icon`}
+                  />
+                ) : undefined
+              }
+              iconPosition='start'
+              {...a11yProps(t.key)}
+            />
+          )
+        })}
       </Tabs>
 
       {tabs.map((t) => (

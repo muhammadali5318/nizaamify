@@ -28,6 +28,7 @@ export default function useDocumentsTabs(): ReusableTabItem[] {
         label: t.label,
         activeIcon: t.activeIcon,
         inactiveIcon: t.inactiveIcon,
+        count: t.count,
         content
       }
     })
