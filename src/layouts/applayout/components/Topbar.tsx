@@ -186,7 +186,7 @@ const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
     setOpen((prev) => !prev)
   }
 
-  const handleClose = (_event?: Event | React.SyntheticEvent) => {
+  const handleClose = () => {
     setOpen(false)
   }
   console.warn('user info', user)
