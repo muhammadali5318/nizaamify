@@ -70,14 +70,15 @@ export const documentsTabsData = [
   },
   {
     key: 1,
-    label: 'Uploaded by You',
-    activeIcon: '/assets/in-active-union.svg',
-    inactiveIcon: '/assets/in-active-union.svg'
+    label: 'Pending documents',
+    activeIcon: '/assets/active-union.svg',
+    inactiveIcon: '/assets/in-active-union.svg',
+    count: 44
   },
   {
     key: 2,
-    label: 'Requires Review',
-    activeIcon: '/assets/history-icon.svg',
+    label: 'Upload history',
+    activeIcon: '/assets/history.svg',
     inactiveIcon: '/assets/history-icon.svg'
   }
 ]
