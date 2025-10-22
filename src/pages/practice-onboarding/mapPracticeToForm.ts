@@ -1,3 +1,4 @@
+import { StepFiveFormValues } from 'src/schema-validations/practice-onboarding/stepFive'
 import { StepFourFormValues } from 'src/schema-validations/practice-onboarding/stepFour'
 import { StepOneFormValues } from 'src/schema-validations/practice-onboarding/stepOne'
 import { StepThreeFormValues } from 'src/schema-validations/practice-onboarding/stepThree'
@@ -27,6 +28,7 @@ type ApiPractice = {
   confidence_reading_reports?: string | null
   insights_format?: string | null
   onboarding_step: number
+  accounting_basis: string | ''
 }
 
 const normalizeString = (v?: string | null, fallback = '') =>
@@ -160,6 +162,15 @@ export function mapPracticeApiToForm(api: ApiPractice) {
     preferredInsightsFormat: mapInsightsFormat(api.insights_format)
   }
 
+  const stepFive: StepFiveFormValues = {
+    accountingBasis:
+      api.accounting_basis?.toLowerCase() === 'accrual'
+        ? 'accrual'
+        : api.accounting_basis?.toLowerCase() === 'cash'
+          ? 'cash'
+          : ''
+  }
+
   const activeStep = api.onboarding_step
 
   return {
@@ -168,6 +179,7 @@ export function mapPracticeApiToForm(api: ApiPractice) {
     stepTwo,
     stepThree,
     stepFour,
+    stepFive,
     activeStep
   }
 }
