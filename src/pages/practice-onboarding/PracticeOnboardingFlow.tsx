@@ -287,7 +287,12 @@ const PracticeOnboardingFlow: React.FC = () => {
             </Box>
           ) : (
             <>
-              <Box className={styles.container}>
+              <Box
+                className={styles.container}
+                sx={{
+                  maxWidth: activeStep === 4 ? '1300px' : '1000px'
+                }}
+              >
                 <Box className={styles.left}>
                   <AdaptiveStepper
                     activeStep={activeStep}

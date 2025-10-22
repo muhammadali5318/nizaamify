@@ -1,3 +1,4 @@
+// src/pages/SignUp/components/stepFive.tsx
 import React, { useEffect } from 'react'
 import { useForm, Controller, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -8,10 +9,7 @@ import {
   FormHelperText,
   Button,
   Typography,
-  Alert,
-  Radio,
-  RadioGroup,
-  FormControlLabel
+  Alert
 } from '@mui/material'
 import { ChevronLeft, ChevronRight } from '@mui/icons-material'
 import { useAuth0 } from '@auth0/auth0-react'
@@ -26,6 +24,7 @@ import {
   StepFiveFormValues,
   stepFiveSchema
 } from 'src/schema-validations/practice-onboarding/stepFive'
+import RadioCard from 'src/components/radio-card'
 
 type StepFiveProps = {
   formData: Partial<StepFiveFormValues>
@@ -38,6 +37,10 @@ type StepFiveProps = {
   serverErrors?: Record<string, string>
   onOpenNominate: () => void
 }
+
+/**
+ * Reusable radio-card component
+ */
 
 const StepFive: React.FC<StepFiveProps> = ({
   formData,
@@ -146,7 +149,6 @@ const StepFive: React.FC<StepFiveProps> = ({
         sx={{ mt: 2 }}
       >
         <Stack spacing={2.5}>
-          {/* Radio buttons for accounting basis */}
           <FormControl
             component='fieldset'
             error={Boolean(errors.accountingBasis)}
@@ -155,27 +157,63 @@ const StepFive: React.FC<StepFiveProps> = ({
               Select your accounting basis
             </Typography>
 
+            {/* Controller wraps the custom cards */}
             <Controller
               name='accountingBasis'
               control={control}
-              render={({ field }) => (
-                <RadioGroup {...field} row>
-                  <FormControlLabel
-                    value='accrual'
-                    control={<Radio />}
-                    label='Accrual based'
-                  />
-                  <FormControlLabel
-                    value='cash'
-                    control={<Radio />}
-                    label='Cash based'
-                  />
-                </RadioGroup>
-              )}
+              render={({ field }) => {
+                const selectedValue =
+                  field.value as StepFiveFormValues['accountingBasis']
+
+                return (
+                  <>
+                    <Stack
+                      direction={{ xs: 'column', sm: 'row' }}
+                      spacing={2}
+                      sx={{ mt: 1 }}
+                    >
+                      <RadioCard
+                        value='cash'
+                        selectedValue={selectedValue}
+                        onSelect={(v) => field.onChange(v)}
+                        header='Cash basis'
+                        description='Income and expenses are recorded when cash actually moves, that is, when you receive or make payments. Ideal for smaller or newer practices that want to track real-time cash flow and keep things simple.'
+                        bullets={[
+                          'A real-time view of your actual cash position',
+                          'Easier reconciliation with bank statements',
+                          'Simpler tax reporting and bookkeeping',
+                          'AI processing based on paid invoices only'
+                        ]}
+                        alertText='Your practice records revenue only when payment is received and expenses only when bills are paid.'
+                        data-testid='radio-card-cash'
+                      />
+
+                      <RadioCard
+                        value='accrual'
+                        selectedValue={selectedValue}
+                        onSelect={(v) => field.onChange(v)}
+                        header='Accrual basis'
+                        description='Income and expenses are recorded when they’re earned or incurred, even if the payment hasn’t been made yet. Ideal for established practices that want deeper financial insights and long-term performance tracking.'
+                        bullets={[
+                          'A full picture of expected income and liabilities',
+                          'Advanced trend analysis and AI forecasting',
+                          'Benchmarking accuracy aligned with NHS and Monai averages',
+                          'AI processing for both paid and unpaid invoices'
+                        ]}
+                        alertText='Your practice tracks invoices and bills at the time they’re issued, not when cash is received or paid.'
+                        data-testid='radio-card-accrual'
+                      />
+                    </Stack>
+
+                    {errors.accountingBasis && (
+                      <FormHelperText sx={{ mt: 1 }}>
+                        {errors.accountingBasis.message}
+                      </FormHelperText>
+                    )}
+                  </>
+                )
+              }}
             />
-            {errors.accountingBasis && (
-              <FormHelperText>{errors.accountingBasis.message}</FormHelperText>
-            )}
           </FormControl>
 
           <Alert severity='info'>
