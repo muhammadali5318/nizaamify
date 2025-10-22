@@ -59,7 +59,7 @@ const DocumentsPage: React.FC = () => {
         />
       </Stack>
 
-      <Box sx={{ mt: { xs: 2, md: 4 }, px: { xs: 1, md: 3 } }}>
+      <Box sx={{ mt: { xs: 2, md: 4 }, px: { xs: 1, md: 3 }, width: '100%' }}>
         <ReusableTabs tabs={tabs} initialTab={documentsTabsData[0].key} />
       </Box>
     </Box>

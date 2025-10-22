@@ -1,0 +1,30 @@
+.moduleRoot {
+  width: 100%;
+  border-radius: 24px;
+border: 1px solid #F1F1F1;
+background: var(--background-paper-elevation-1, #FFF);
+}
+
+.filterContainer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 16px;
+
+  // Each child gets equal width
+  > * {
+    flex: 1 1 200px; // grow/shrink equally, min width = 200px
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: stretch;
+
+    > * {
+      flex: 1 1 100%;
+      width: 100%;
+    }
+  }
+}

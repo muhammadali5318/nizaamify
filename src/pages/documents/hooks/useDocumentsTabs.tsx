@@ -3,7 +3,6 @@ import { ReusableTabItem } from 'src/components/tabs/ReusableTabs'
 import { documentsTabsData } from '../config/documentsConfig'
 import UploadedDocuments from '../tabs/UploadDocuments'
 import PendingDocuments from '../tabs/PendingDocuments'
-import { UploadHistory } from '../tabs/UploadHistory'
 export default function useDocumentsTabs(): ReusableTabItem[] {
   return React.useMemo(() => {
     return documentsTabsData.map((t) => {
@@ -14,10 +13,24 @@ export default function useDocumentsTabs(): ReusableTabItem[] {
           content = <UploadedDocuments />
           break
         case 1:
-          content = <PendingDocuments />
+          content = (
+            <PendingDocuments
+              title='Pending documents'
+              description='Search, filter, and manage your uploaded documents'
+              icon='/assets/document-upload-card-icon.svg'
+              isPendingDocments={true}
+            />
+          )
           break
         case 2:
-          content = <UploadHistory />
+          content = (
+            <PendingDocuments
+              title='Upload history'
+              description='Search, filter, and manage your uploaded documents'
+              icon='/assets/history-Icon-blue.svg'
+              isPendingDocments={false}
+            />
+          )
           break
         default:
           content = null
