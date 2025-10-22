@@ -4,15 +4,14 @@
   min-height: 100vh;
 }
 
-/* subtract footer height so background stops above footer */
 .wrapper {
   flex: 1;
-  background: url('/assets/registration-backgroud.png') no-repeat center center/cover;
+  background: url('/assets/registration-backgroud.png') repeat-y center top;
+  background-size: 100% auto;
   display: flex;
   align-items: flex-start;
   justify-content: center;
 }
-
 
 .overlay {
   width: 100%;

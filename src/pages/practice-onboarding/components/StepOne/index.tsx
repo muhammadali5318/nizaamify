@@ -1,7 +1,6 @@
 import React from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { LoadingButton } from '@mui/lab'
 import { ArrowDropDown, ChevronRight } from '@mui/icons-material'
 import { MuiTelInput } from 'mui-tel-input'
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
@@ -16,7 +15,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
-import SaveAndExitDialogue from '../SaveAndExitDialogue/SaveAndExitDialogue' // adjust path if needed
+import SaveAndExitDialogue from '../SaveAndExitDialogue/SaveAndExitDialogue'
 import {
   Box,
   Stack,
@@ -192,7 +191,6 @@ const StepOne: React.FC<StepOneProps> = ({
         sx={{ mt: 2 }}
       >
         <Stack spacing={2.5}>
-          {/* ...form fields unchanged... */}
           {/* Practice name */}
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <Controller
@@ -365,7 +363,7 @@ const StepOne: React.FC<StepOneProps> = ({
             >
               Save & exit
             </Button>
-            <LoadingButton
+            <Button
               type='submit'
               size='large'
               variant='contained'
@@ -375,7 +373,7 @@ const StepOne: React.FC<StepOneProps> = ({
               endIcon={<ChevronRight />}
             >
               Next
-            </LoadingButton>
+            </Button>
           </Stack>
         </Stack>
       </Box>

@@ -1,4 +1,3 @@
-// FILE: src/pages/SignUp/components/stepFive.tsx
 import React, { useEffect } from 'react'
 import { useForm, Controller, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -15,8 +14,6 @@ import {
   FormControlLabel
 } from '@mui/material'
 import { ChevronLeft, ChevronRight } from '@mui/icons-material'
-import { LoadingButton } from '@mui/lab'
-import { isEqual } from 'lodash'
 import { useAuth0 } from '@auth0/auth0-react'
 import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { useNavigate } from 'react-router'
@@ -57,7 +54,6 @@ const StepFive: React.FC<StepFiveProps> = ({
   const isSaving = updateStep.status === 'pending'
   const navigate = useNavigate()
 
-  // Ensure default values never include null — use ''
   const defaultAccountingBasis = (formData?.accountingBasis ??
     '') as StepFiveFormValues['accountingBasis']
 
@@ -81,33 +77,24 @@ const StepFive: React.FC<StepFiveProps> = ({
     })
   }, [formData, reset])
 
-  // handle server errors
   useEffect(() => {
     if (serverErrors?.email) notify.error(serverErrors.email)
     if (serverErrors?.practice) notify.error(serverErrors.practice)
     if (serverErrors?.general) notify.error(serverErrors.general)
   }, [serverErrors])
 
-  // typed submit
   const submit: SubmitHandler<StepFiveFormValues> = (data) => {
     const patchForParent: Partial<StepFiveFormValues> = {
       accountingBasis: data.accountingBasis
     }
 
-    if (isEqual(patchForParent, formData)) {
-      onNext?.()
-      return
-    }
-
     setFormData(patchForParent)
 
     const payload = {
-      // if empty string, API will get '' — change to null if you prefer
       accounting_basis: data.accountingBasis
         ? data.accountingBasis.toUpperCase()
         : ''
     }
-
     updateStep.mutate(payload, {
       onSuccess: () => onNext?.(patchForParent)
     })
@@ -121,11 +108,6 @@ const StepFive: React.FC<StepFiveProps> = ({
     const onValid: SubmitHandler<StepFiveFormValues> = (data) => {
       const patchForParent: Partial<StepFiveFormValues> = {
         accountingBasis: data.accountingBasis
-      }
-
-      if (isEqual(patchForParent, formData)) {
-        navigate(paths.dashboard)
-        return
       }
 
       setFormData(patchForParent)
@@ -259,7 +241,7 @@ const StepFive: React.FC<StepFiveProps> = ({
                 Back
               </Button>
 
-              <LoadingButton
+              <Button
                 type='submit'
                 size='large'
                 variant='contained'
@@ -269,7 +251,7 @@ const StepFive: React.FC<StepFiveProps> = ({
                 endIcon={<ChevronRight />}
               >
                 Done
-              </LoadingButton>
+              </Button>
             </Box>
           </Stack>
         </Stack>

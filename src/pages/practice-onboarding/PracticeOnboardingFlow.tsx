@@ -228,6 +228,7 @@ const PracticeOnboardingFlow: React.FC = () => {
             onSubmit={(patch?: Partial<StepFiveFormValues>) =>
               handleSubmitAll(patch)
             }
+            onNext={(patch?: Partial<StepFiveFormValues>) => handleNext(patch)}
             activeStep={activeStep}
             isSubmitting={isSubmitting}
             serverErrors={serverErrors}
