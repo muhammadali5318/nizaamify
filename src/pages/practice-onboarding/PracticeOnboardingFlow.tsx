@@ -290,7 +290,7 @@ const PracticeOnboardingFlow: React.FC = () => {
               <Box
                 className={styles.container}
                 sx={{
-                  maxWidth: activeStep === 4 ? '1300px' : '1000px'
+                  maxWidth: activeStep === 4 ? '1300px' : '1000px '
                 }}
               >
                 <Box className={styles.left}>

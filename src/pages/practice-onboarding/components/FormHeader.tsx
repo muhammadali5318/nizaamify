@@ -26,7 +26,7 @@ const FormHeader: React.FC<FormHeaderProps> = ({ activeStep }) => {
           {steps[activeStep].heading}
         </Typography>
         <Typography color='var(--color-text-secondary)' variant='subtitle1'>
-          {steps[activeStep].subHeading}
+          {steps[activeStep].description || steps[activeStep].subHeading}
         </Typography>
       </Box>
 

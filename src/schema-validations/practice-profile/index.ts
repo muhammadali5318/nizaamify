@@ -18,6 +18,9 @@ const InsightsEnum = z.enum([
   'DETAILED REPORTS'
 ])
 
+const AccountingBasisEnumUpper = z.enum(['CASH', 'ACCRUAL'])
+const AccountingBasisEnumLower = z.enum(['cash', 'accrual'])
+
 export const PracticeSchema = z.object({
   practiceName: z
     .string()
@@ -97,6 +100,11 @@ export const PracticeSchema = z.object({
     .union([InsightsEnum, z.literal('')])
     .refine((v) => v !== '', {
       message: 'Please select a preferred insights format'
+    }),
+  accountingBasis: z
+    .union([AccountingBasisEnumUpper, AccountingBasisEnumLower, z.literal('')])
+    .refine((v) => v !== '', {
+      message: 'Accounting basis is required'
     })
 })
 

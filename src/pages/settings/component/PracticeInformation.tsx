@@ -16,7 +16,7 @@ import {
   Button
 } from '@mui/material'
 import { ArrowDropDown } from '@mui/icons-material'
-import { useForm, Controller, Resolver } from 'react-hook-form'
+import { useForm, Controller, Resolver, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { MuiTelInput } from 'mui-tel-input'
 import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
@@ -32,6 +32,8 @@ import {
   RIGHT_REASONS
 } from '../setting-config'
 import { notify } from 'src/components/notistack/NotificationProvider'
+import AccountingBasisCard from './AccountingBasisInfo'
+import { ACCRUAL_BASIS_INFO, CASH_BASIS_INFO } from 'src/const'
 
 const PracticeInformation = () => {
   const phoneWrapperRef = useRef<HTMLDivElement | null>(null)
@@ -72,7 +74,8 @@ const PracticeInformation = () => {
       frequencyOfFinancialReview: '',
       primaryReasons: [],
       confidenceReadingReports: '',
-      preferredInsightsFormat: ''
+      preferredInsightsFormat: '',
+      accountingBasis: ''
     } as unknown as PracticeFormValues,
     mode: 'onChange'
   })
@@ -102,6 +105,11 @@ const PracticeInformation = () => {
       openCountryDropdown()
     }
   }
+
+  const accountingBasis = useWatch({
+    control,
+    name: 'accountingBasis'
+  })
 
   return (
     <Box
@@ -670,6 +678,48 @@ const PracticeInformation = () => {
               {errors.preferredInsightsFormat?.message as React.ReactNode}
             </FormHelperText>
           </FormControl>
+        </Stack>
+
+        <Divider />
+
+        <Stack spacing={2}>
+          <Typography variant='h6' className='font-weight--700'>
+            Accounting settings
+          </Typography>
+
+          <FormControl fullWidth error={!!errors.accountingBasis}>
+            <InputLabel id='accounting-basis-label'>
+              Accounting basis
+            </InputLabel>
+            <Controller
+              name='accountingBasis'
+              control={control}
+              render={({ field }) => (
+                <Select
+                  required
+                  {...field}
+                  labelId='accounting-basis-label'
+                  label='Accounting basis *'
+                  value={field.value ?? ''}
+                  onChange={(e) => field.onChange(e.target.value)}
+                >
+                  <MenuItem value='CASH'>Cash basis</MenuItem>
+                  <MenuItem value='ACCRUAL'>Accrual basis</MenuItem>
+                </Select>
+              )}
+            />
+            <FormHelperText>
+              {errors.accountingBasis?.message as React.ReactNode}
+            </FormHelperText>
+          </FormControl>
+
+          {accountingBasis === 'CASH' && (
+            <AccountingBasisCard data={CASH_BASIS_INFO} />
+          )}
+
+          {accountingBasis === 'ACCRUAL' && (
+            <AccountingBasisCard data={ACCRUAL_BASIS_INFO} />
+          )}
         </Stack>
 
         <Box>

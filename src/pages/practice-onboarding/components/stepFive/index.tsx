@@ -25,6 +25,7 @@ import {
   stepFiveSchema
 } from 'src/schema-validations/practice-onboarding/stepFive'
 import RadioCard from 'src/components/radio-card'
+import { CASH_BASIS_INFO, ACCRUAL_BASIS_INFO } from 'src/const'
 
 type StepFiveProps = {
   formData: Partial<StepFiveFormValues>
@@ -173,37 +174,17 @@ const StepFive: React.FC<StepFiveProps> = ({
                       sx={{ mt: 1 }}
                     >
                       <RadioCard
-                        value='cash'
-                        iconPath='coin-pound.svg'
+                        {...CASH_BASIS_INFO}
                         selectedValue={selectedValue}
                         onSelect={(v) => field.onChange(v)}
-                        header='Cash basis'
-                        description='Income and expenses are recorded when cash actually moves, that is, when you receive or make payments. Ideal for smaller or newer practices that want to track real-time cash flow and keep things simple.'
-                        bullets={[
-                          'A real-time view of your actual cash position',
-                          'Easier reconciliation with bank statements',
-                          'Simpler tax reporting and bookkeeping',
-                          'AI processing based on paid invoices only'
-                        ]}
-                        alertText='Your practice records revenue only when payment is received and expenses only when bills are paid.'
-                        data-testid='radio-card-cash'
+                        data-testid={CASH_BASIS_INFO.testId}
                       />
 
                       <RadioCard
-                        iconPath='accrual-icon.svg'
-                        value='accrual'
+                        {...ACCRUAL_BASIS_INFO}
                         selectedValue={selectedValue}
                         onSelect={(v) => field.onChange(v)}
-                        header='Accrual basis'
-                        description='Income and expenses are recorded when they’re earned or incurred, even if the payment hasn’t been made yet. Ideal for established practices that want deeper financial insights and long-term performance tracking.'
-                        bullets={[
-                          'A full picture of expected income and liabilities',
-                          'Advanced trend analysis and AI forecasting',
-                          'Benchmarking accuracy aligned with NHS and Monai averages',
-                          'AI processing for both paid and unpaid invoices'
-                        ]}
-                        alertText='Your practice tracks invoices and bills at the time they’re issued, not when cash is received or paid.'
-                        data-testid='radio-card-accrual'
+                        data-testid={ACCRUAL_BASIS_INFO.testId}
                       />
                     </Stack>
 

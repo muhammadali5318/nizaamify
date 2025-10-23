@@ -88,6 +88,7 @@ export type PracticeApi = {
   onboarding_status?: string | null
   onboarding_step?: number | null
   onboarding_completed_at?: string | null
+  accounting_basis: string
 }
 
 export type PracticeFormValues = {
@@ -111,6 +112,7 @@ export type PracticeFormValues = {
   primaryReasons: string[]
   confidenceReadingReports: string
   preferredInsightsFormat: string
+  accountingBasis: string
 }
 
 const UI_TO_API_REASON_MAP: Record<string, string> = {
@@ -160,7 +162,8 @@ export const mapFormToApiPayload = (
       Array.isArray((v as any).primaryReasons) ? (v as any).primaryReasons : []
     ),
     confidence_reading_reports: v.confidenceReadingReports ?? '',
-    insights_format: v.preferredInsightsFormat ?? ''
+    insights_format: v.preferredInsightsFormat ?? '',
+    accounting_basis: v.accountingBasis ?? ''
   }
 }
 
@@ -274,6 +277,7 @@ export const mapPracticeApiToForm = (api: PracticeApi): PracticeFormValues => {
       api.confidence_reading_reports,
       CONFIDENCE_OPTIONS
     ),
-    preferredInsightsFormat: pickOrEmpty(api.insights_format, INSIGHTS_OPTIONS)
+    preferredInsightsFormat: pickOrEmpty(api.insights_format, INSIGHTS_OPTIONS),
+    accountingBasis: api?.accounting_basis
   }
 }
