@@ -56,7 +56,13 @@ const AccountingBasisCard: React.FC<Props> = ({ data }) => {
             {bullets.map((b, i) => (
               <ListItem
                 key={i}
-                sx={{ display: 'flex', alignItems: 'center', py: 0.5 }}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  py: 0.5,
+                  px: 0,
+                  gap: '14px'
+                }}
               >
                 <ListItemIcon sx={{ minWidth: 28, pt: '2px' }}>
                   <img
