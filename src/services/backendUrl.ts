@@ -9,7 +9,9 @@ export const endpoints = {
     stepThree: (practiceId: string) =>
       `${API_BASE}/practices/${practiceId}/onboarding/steps/3/`,
     stepFour: (practiceId: string) =>
-      `${API_BASE}/practices/${practiceId}/onboarding/steps/4/`
+      `${API_BASE}/practices/${practiceId}/onboarding/steps/4/`,
+    stepFive: (practiceId: string) =>
+      `${API_BASE}/practices/${practiceId}/onboarding/steps/5/`
   },
   signup: {
     createUser: `${API_BASE}/users/signup/`,

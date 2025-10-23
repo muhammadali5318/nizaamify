@@ -1,7 +1,5 @@
-// FILE: src/pages/SignUp/components/SignupStepTwo.tsx
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeft, ChevronRight } from '@mui/icons-material'
-import { LoadingButton } from '@mui/lab'
 import {
   Box,
   Stack,
@@ -368,11 +366,14 @@ const StepTwo: React.FC<StepTwoProps> = ({
                 variant='outlined'
                 color='primary'
                 onClick={onBack}
+                sx={{
+                  mr: '8px'
+                }}
                 startIcon={<ChevronLeft />}
               >
                 Back
               </Button>
-              <LoadingButton
+              <Button
                 type='submit'
                 size='large'
                 variant='contained'
@@ -382,7 +383,7 @@ const StepTwo: React.FC<StepTwoProps> = ({
                 endIcon={<ChevronRight />}
               >
                 Next
-              </LoadingButton>
+              </Button>
             </Box>
           </Stack>
         </Stack>

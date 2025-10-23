@@ -1,4 +1,3 @@
-// FILE: src/pages/SignUp/SignUp.tsx
 import React, { useCallback, useEffect, useState } from 'react'
 import { Box, Divider, CircularProgress } from '@mui/material'
 import RegistrationWrapper from 'src/components/registration-wrapper/RegistrationWrapper'
@@ -7,7 +6,6 @@ import AdaptiveStepper from 'src/components/common/AdaptiveStepper'
 import { steps } from './practice-onboarding-config'
 import RegistrationHeader from 'src/components/registration-wrapper/RegistrationHeader'
 import NominateNowContainer from 'src/components/nominate-now'
-
 import NominatePracticeManagerDialog from 'src/components/nomiate-practice-manage'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
 import { mapPracticeApiToForm } from './mapPracticeToForm'
@@ -23,8 +21,12 @@ import { StepOne, StepTwo, StepThree, StepFour } from './components'
 import { useAuth0 } from '@auth0/auth0-react'
 import { isPracticeOwner } from 'src/utils/helper'
 import Footer from 'src/components/registration-wrapper/Footer'
+import StepFive from './components/stepFive'
+import { StepFiveFormValues } from 'src/schema-validations/practice-onboarding/stepFive'
 
-// initial values for each step — keep in sync with your schemas
+// -------------------------------
+// INITIAL VALUES
+// -------------------------------
 const initialStepOne: StepOneFormValues = {
   practiceName: '',
   principalName: '',
@@ -57,6 +59,10 @@ const initialStepFour: StepFourFormValues = {
   preferredInsightsFormat: ''
 }
 
+const initialStepFive: StepFiveFormValues = {
+  accountingBasis: ''
+}
+
 const PracticeOnboardingFlow: React.FC = () => {
   const { user } = useAuth0()
   const { accessToken } = useAuth()
@@ -64,7 +70,9 @@ const PracticeOnboardingFlow: React.FC = () => {
 
   const [activeStep, setActiveStep] = useState<number>(0)
 
-  // separate state for each step
+  // -------------------------------
+  // STATE MANAGEMENT
+  // -------------------------------
   const [stepOneData, setStepOneData] =
     useState<StepOneFormValues>(initialStepOne)
   const [stepTwoData, setStepTwoData] =
@@ -73,9 +81,16 @@ const PracticeOnboardingFlow: React.FC = () => {
     useState<StepThreeFormValues>(initialStepThree)
   const [stepFourData, setStepFourData] =
     useState<StepFourFormValues>(initialStepFour)
+  const [stepFiveData, setStepFiveData] =
+    useState<StepFiveFormValues>(initialStepFive)
 
   const [openNominate, setOpenNominate] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const [serverErrors, setServerErrors] = useState<Record<string, string>>({})
 
+  // -------------------------------
+  // EFFECT: MAP PRACTICE API TO FORM
+  // -------------------------------
   useEffect(() => {
     if (!practice) return
     const mapped = mapPracticeApiToForm(practice)
@@ -84,13 +99,10 @@ const PracticeOnboardingFlow: React.FC = () => {
     setStepTwo(mapped.stepTwo)
     setStepThree(mapped.stepThree)
     setStepFour(mapped.stepFour)
+    setStepFive(mapped.stepFive)
     setActiveStep((prev) => (prev ? prev : mapped.activeStep))
   }, [practice])
 
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
-  const [serverErrors, setServerErrors] = useState<Record<string, string>>({})
-
-  // typed setters that accept partial patches for convenience
   const setStepOne = useCallback(
     (patch: Partial<StepOneFormValues>) =>
       setStepOneData((prev) => ({ ...prev, ...patch })),
@@ -111,11 +123,14 @@ const PracticeOnboardingFlow: React.FC = () => {
       setStepFourData((prev) => ({ ...prev, ...patch })),
     []
   )
+  const setStepFive = useCallback(
+    (patch: Partial<StepFiveFormValues>) =>
+      setStepFiveData((prev) => ({ ...prev, ...patch })),
+    []
+  )
 
-  // navigation helpers
   const handleNext = useCallback(
     (patch?: any) => {
-      // optionally accept a patch (component may pass current step patch)
       if (patch) {
         switch (activeStep) {
           case 0:
@@ -130,13 +145,16 @@ const PracticeOnboardingFlow: React.FC = () => {
           case 3:
             setStepFour(patch)
             break
+          case 4:
+            setStepFive(patch)
+            break
           default:
             break
         }
       }
       setActiveStep((s) => s + 1)
     },
-    [activeStep, setStepOne, setStepTwo, setStepThree, setStepFour]
+    [activeStep, setStepOne, setStepTwo, setStepThree, setStepFour, setStepFive]
   )
 
   const handleBack = useCallback(() => {
@@ -145,7 +163,7 @@ const PracticeOnboardingFlow: React.FC = () => {
 
   const handleSubmitAll = async (patch?: any) => {
     if (patch) {
-      setStepFour(patch as Partial<StepFourFormValues>)
+      setStepFive(patch as Partial<StepFiveFormValues>)
     }
 
     setIsSubmitting(true)
@@ -194,10 +212,23 @@ const PracticeOnboardingFlow: React.FC = () => {
             formData={stepFourData}
             setFormData={setStepFour}
             onBack={handleBack}
-            onSubmit={(patch?: Partial<StepFourFormValues>) =>
+            onNext={(patch?: Partial<StepFourFormValues>) => handleNext(patch)}
+            activeStep={activeStep}
+            isSubmitting={isSubmitting}
+            serverErrors={serverErrors}
+            onOpenNominate={() => setOpenNominate(true)}
+          />
+        )
+      case 4:
+        return (
+          <StepFive
+            formData={stepFiveData}
+            setFormData={setStepFive}
+            onBack={handleBack}
+            onSubmit={(patch?: Partial<StepFiveFormValues>) =>
               handleSubmitAll(patch)
             }
-            onNext={(patch?: Partial<StepFourFormValues>) => handleNext(patch)}
+            onNext={(patch?: Partial<StepFiveFormValues>) => handleNext(patch)}
             activeStep={activeStep}
             isSubmitting={isSubmitting}
             serverErrors={serverErrors}
@@ -250,13 +281,18 @@ const PracticeOnboardingFlow: React.FC = () => {
             >
               <CircularProgress />
             </Box>
-          ) : activeStep === 4 ? (
+          ) : activeStep === 5 ? (
             <Box className={styles.completedContainer}>
-              <Congratulations message='You have completed onboarding now access the full system ' />
+              <Congratulations message='You have completed onboarding now access the full system' />
             </Box>
           ) : (
             <>
-              <Box className={styles.container}>
+              <Box
+                className={styles.container}
+                sx={{
+                  maxWidth: activeStep === 4 ? '1300px' : '1000px'
+                }}
+              >
                 <Box className={styles.left}>
                   <AdaptiveStepper
                     activeStep={activeStep}

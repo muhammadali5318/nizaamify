@@ -5,5 +5,6 @@ export const steps = [
     subHeading: 'Practice structure & operations'
   },
   { heading: 'Practice systems', subHeading: 'Software & support systems' },
-  { heading: 'Financial habits', subHeading: 'Preferences & goals' }
+  { heading: 'Financial habits', subHeading: 'Preferences & goals' },
+  { heading: 'Accounting basis', subHeading: 'Accounting basis details' }
 ]

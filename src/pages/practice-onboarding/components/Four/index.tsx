@@ -22,7 +22,6 @@ import {
   StepFourFormValues as FormValues
 } from 'src/schema-validations/practice-onboarding/stepFour'
 import { notify } from 'src/components/notistack/NotificationProvider'
-import { LoadingButton } from '@mui/lab'
 import { useUpdateStepFour } from '../../hooks/useUpdateStepFour'
 import { isEqual } from 'lodash'
 import { useAuth0 } from '@auth0/auth0-react'
@@ -386,7 +385,6 @@ const StepFour: React.FC<StepFourProps> = ({
                 }
               }}
             >
-              {' '}
               <Button
                 size='large'
                 variant='outlined'
@@ -399,7 +397,7 @@ const StepFour: React.FC<StepFourProps> = ({
               >
                 Back
               </Button>
-              <LoadingButton
+              <Button
                 type='submit'
                 size='large'
                 variant='contained'
@@ -409,7 +407,7 @@ const StepFour: React.FC<StepFourProps> = ({
                 endIcon={<ChevronRight />}
               >
                 Next
-              </LoadingButton>
+              </Button>
             </Box>
           </Stack>
         </Stack>
