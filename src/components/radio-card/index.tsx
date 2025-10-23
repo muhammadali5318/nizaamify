@@ -72,6 +72,11 @@ const RadioCard: React.FC<{
             <Radio
               checked={selected}
               onChange={() => onSelect(value)}
+              sx={{
+                '&.Mui-checked': {
+                  color: '#1976D2'
+                }
+              }}
               slotProps={{
                 input: {
                   'aria-label': header

@@ -216,7 +216,7 @@ const StepFive: React.FC<StepFiveProps> = ({
             />
           </FormControl>
 
-          <Alert severity='info'>
+          <Alert severity='info' className='alert-info-container'>
             <Typography
               className='alert-info-text font-weight--500'
               component='div'
