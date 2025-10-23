@@ -174,6 +174,7 @@ const StepFive: React.FC<StepFiveProps> = ({
                     >
                       <RadioCard
                         value='cash'
+                        iconPath='coin-pound.svg'
                         selectedValue={selectedValue}
                         onSelect={(v) => field.onChange(v)}
                         header='Cash basis'
@@ -189,6 +190,7 @@ const StepFive: React.FC<StepFiveProps> = ({
                       />
 
                       <RadioCard
+                        iconPath='accrual-icon.svg'
                         value='accrual'
                         selectedValue={selectedValue}
                         onSelect={(v) => field.onChange(v)}

@@ -21,6 +21,7 @@ const RadioCard: React.FC<{
   description: string
   bullets: string[]
   alertText: string
+  iconPath: string
   'data-testid'?: string
 }> = ({
   value,
@@ -30,6 +31,7 @@ const RadioCard: React.FC<{
   description,
   bullets,
   alertText,
+  iconPath,
   'data-testid': testId
 }) => {
   const selected = selectedValue === value
@@ -67,7 +69,7 @@ const RadioCard: React.FC<{
         {/* top-right radio */}
         <Stack spacing={2.5}>
           <Box display={'flex'} justifyContent={'space-between'}>
-            <img src='/assets/coin-pound.svg' alt='coin' />
+            <img src={`/assets/${iconPath}`} alt='accounting basis icon' />
 
             <Radio
               checked={selected}
