@@ -172,7 +172,7 @@ export default function ProcessingCompletedList() {
                   borderRadius: '12px'
                 }}
               >
-                <img src={aiIcon}></img> <p>AI summary</p>
+                <img src={aiIcon} alt='ai icon'></img> <p>AI summary</p>
               </Typography>
 
               <Box

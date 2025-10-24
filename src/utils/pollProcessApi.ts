@@ -56,8 +56,6 @@ export const pollProcessApiUntilReady = async (
         })
       )
 
-      console.log(`Process attempt ${attempt}: ${filename} = ${status}`)
-
       if (status !== 'PENDING') {
         if (secureBatchStatusUrl) {
           try {
@@ -92,8 +90,6 @@ export const pollProcessApiUntilReady = async (
                     })) || []
                 })
               )
-
-              console.log(`✅ Processed batch stored: ${batchData.batch_id}`)
             }
           } catch (batchErr) {
             console.error('Error fetching batch status:', batchErr)
@@ -109,7 +105,7 @@ export const pollProcessApiUntilReady = async (
         return res
       }
 
-      await new Promise((r) => setTimeout(r, intervalMs))
+      await new Promise((resolve) => setTimeout(resolve, intervalMs))
     } catch (err) {
       console.error(`Error polling process API for ${filename}:`, err)
       throw err
