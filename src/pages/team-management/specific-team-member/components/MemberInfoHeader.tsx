@@ -22,6 +22,8 @@ import NominatePracticeManagerTeamList from '../../components/NominatePracticeMa
 import ConfirmationSuccessDialog from 'src/components/team-management/InvitationSuccessDialog'
 import { paths } from 'src/paths'
 import { useAuth0 } from '@auth0/auth0-react'
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
+import UpdateMemberRoleModal from '../../components/UpdateMemberRoleModal'
 
 const MemberInfoHeader = () => {
   const { user } = useAuth0()
@@ -30,6 +32,10 @@ const MemberInfoHeader = () => {
   const { id = '' } = useParams<{ id: string }>()
   const [isNominateOpen, setIsNominateOpen] = useState(false)
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
+
+  // State for Update Member Role Modal
+  const [isUpdateMemberOpen, setIsUpdateMemberOpen] = useState(false)
+
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
 
   const { name, email, role, isNominated } = location.state || {}
@@ -129,7 +135,12 @@ const MemberInfoHeader = () => {
                 </MenuItem>
 
                 <MenuItem onClick={handleMenuClose}>
-                  <Box display='flex' alignItems='center' gap={1}>
+                  <Box
+                    display='flex'
+                    alignItems='center'
+                    gap={1}
+                    onClick={() => setIsUpdateMemberOpen(true)}
+                  >
                     <ImgIcon src='/assets/swap-icon.svg' alt='swap' />
                     <Typography noWrap>Update member role</Typography>
                   </Box>
@@ -174,13 +185,21 @@ const MemberInfoHeader = () => {
                 </Button>
 
                 <Tooltip placement='top' title='Update member role'>
-                  <IconButton
-                    size='small'
-                    onClick={() => console.log('swap')}
-                    aria-label='swap member'
+                  <Box
+                    component='span'
+                    sx={{
+                      display: 'inline-flex',
+                      verticalAlign: 'middle'
+                    }}
                   >
-                    <ImgIcon src='/assets/swap-icon.svg' alt='swap' />
-                  </IconButton>
+                    <IconButton
+                      size='small'
+                      onClick={() => setIsUpdateMemberOpen(true)}
+                      aria-label='swap member'
+                    >
+                      <SwapHorizIcon fontSize='small' />
+                    </IconButton>
+                  </Box>
                 </Tooltip>
 
                 {!onboardingCompleted && role === 'PRACTICE MANAGER' && (
@@ -246,6 +265,17 @@ const MemberInfoHeader = () => {
           onboarding form.
         </Typography>
       </ConfirmationSuccessDialog>
+
+      {/* swap member role Dialogue */}
+      <UpdateMemberRoleModal
+        open={isUpdateMemberOpen}
+        onClose={() => setIsUpdateMemberOpen(false)}
+        member={{
+          user_id: id,
+          user_name: name,
+          user_role: role
+        }}
+      />
     </Box>
   )
 }

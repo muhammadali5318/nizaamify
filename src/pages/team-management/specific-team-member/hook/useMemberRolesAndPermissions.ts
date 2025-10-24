@@ -45,7 +45,7 @@ export const useMemberRolesAndPermissions = (
       }
 
       const response = await apiClient.get(
-        endpoints.getUserRolesAndPermission(orgUuid, userId)
+        endpoints.userRolesAndPermission(orgUuid, userId)
       )
       return response?.data?.data as MemberRolesResponse
     },

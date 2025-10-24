@@ -27,6 +27,7 @@ import ConfirmationSuccessDialog from 'src/components/team-management/Invitation
 import { useFetchSortedPaginatedData } from 'src/hooks/useFetchSortedData.'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
+import UpdateMemberRoleModal from '../components/UpdateMemberRoleModal'
 
 interface TeamMembersProps {
   onCountsUpdate?: (counts: {
@@ -36,10 +37,11 @@ interface TeamMembersProps {
   }) => void
 }
 
-type TeamMemberRow = {
+export type TeamMemberRow = {
   id?: string | number
   user_name?: string
   user_id?: string
+  user_role: string
   [k: string]: any
 }
 
@@ -51,6 +53,12 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
     name: string
     userId: string
   } | null>(null)
+
+  // State for Update Member Role Modal
+  const [isUpdateMemberOpen, setIsUpdateMemberOpen] = useState(false)
+  const [selectedMember, setSelectedMember] = useState<TeamMemberRow | null>(
+    null
+  )
 
   // Filters
   const [searchKey, setSearchKey] = useState<string>('')
@@ -129,7 +137,23 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
     })
   }
 
-  const handlers = { onNominate: handleNominate, onView: handleOnView }
+  // 🔹 Opens the Update Member Role modal
+  const openUpdateMember = (member: TeamMemberRow) => {
+    setSelectedMember(member)
+    setIsUpdateMemberOpen(true)
+  }
+
+  // 🔹 Closes the Update Member Role modal
+  const closeUpdateMember = () => {
+    setIsUpdateMemberOpen(false)
+    setSelectedMember(null)
+  }
+
+  const handlers = {
+    onNominate: handleNominate,
+    onView: handleOnView,
+    onUpdateMember: openUpdateMember
+  }
   const columns = useTeamMembersColumns(handlers)
 
   // Compute total minWidth for columns to prevent shrinking
@@ -326,6 +350,13 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
           onboarding form.
         </Typography>
       </ConfirmationSuccessDialog>
+
+      {/* swap member role Dialogue */}
+      <UpdateMemberRoleModal
+        open={isUpdateMemberOpen}
+        onClose={closeUpdateMember}
+        member={selectedMember}
+      />
     </TeamManagementContentWrapper>
   )
 }

@@ -7,6 +7,9 @@ import { toTitleCase } from 'src/utils/stringUtils'
 import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
 import { useFeatureRule } from 'src/hooks/useFeatureRule'
 import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined'
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
+import { TeamMemberRow } from '..'
+import { useAuth0 } from '@auth0/auth0-react'
 
 type Handlers = {
   onView?: (
@@ -17,15 +20,16 @@ type Handlers = {
     isNominated: boolean
   ) => void
   onInvite?: (id: string) => void
-  onSwap?: (id: string) => void
+  onUpdateMember?: (member: TeamMemberRow) => void
   onNominate?: (id: any) => void
 }
 
 export const useTeamMembersColumns = (handlers: Handlers = {}) => {
-  const { onView, onInvite, onSwap, onNominate } = handlers
+  const { onView, onInvite, onUpdateMember, onNominate } = handlers
   const { isEnabled: onboardingCompleted } = useFeatureRule(
     FEATURE_RULE_IDS.ONBOARDING_COMPLETED
   )
+  const { user } = useAuth0()
 
   const columns: GridColDef[] = useMemo(
     () => [
@@ -128,17 +132,29 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
             </Tooltip>
 
             <Tooltip placement='top' title='Update member role'>
-              <IconButton
-                size='small'
-                onClick={() =>
-                  onSwap
-                    ? onSwap(String(params.row.id))
-                    : console.log('swap', params.row.id)
-                }
-                aria-label='swap member'
+              <Box
+                component='span'
+                sx={{
+                  display: 'inline-flex',
+                  verticalAlign: 'middle'
+                }}
               >
-                <ImgIcon src='/assets/swap-icon.svg' alt='swap' />
-              </IconButton>
+                <IconButton
+                  size='small'
+                  disabled={
+                    params?.row?.user_practice_status !== 'ACTIVE' ||
+                    params?.row?.email === user?.email
+                  }
+                  onClick={() =>
+                    onUpdateMember
+                      ? onUpdateMember(params.row)
+                      : console.log('swap', params.row.id)
+                  }
+                  aria-label='Update member role'
+                >
+                  <SwapHorizIcon fontSize='small' />
+                </IconButton>
+              </Box>
             </Tooltip>
 
             {!onboardingCompleted &&
@@ -178,7 +194,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
         )
       }
     ],
-    [onView, onInvite, onSwap, onNominate]
+    [onView, onInvite, onUpdateMember, onNominate]
   )
 
   return columns

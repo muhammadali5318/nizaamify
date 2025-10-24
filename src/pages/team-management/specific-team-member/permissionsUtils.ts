@@ -80,7 +80,7 @@ export const updateUserPermission = async (
   }
 
   try {
-    await apiClient.put(endpoints.getUserRolesAndPermission(orgUuid, userId), {
+    await apiClient.put(endpoints.userRolesAndPermission(orgUuid, userId), {
       functional_role_id: roleId,
       user_functional_role_permissions: changed
     })

@@ -91,7 +91,8 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = React.memo(
           paper: {
             sx: {
               py: '36px',
-              px: { xs: 2, sm: 6 }
+              px: { xs: 2, sm: 6 },
+              borderRadius: '24px'
             }
           }
         }}
