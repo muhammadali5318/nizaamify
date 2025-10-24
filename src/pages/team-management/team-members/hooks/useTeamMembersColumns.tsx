@@ -19,13 +19,14 @@ type Handlers = {
     role: string,
     isNominated: boolean
   ) => void
-  onInvite?: (id: string) => void
+  onUnlink?: (id: string) => void
+  onDelete?: (id: string) => void
   onUpdateMember?: (member: TeamMemberRow) => void
   onNominate?: (id: any) => void
 }
 
 export const useTeamMembersColumns = (handlers: Handlers = {}) => {
-  const { onView, onInvite, onUpdateMember, onNominate } = handlers
+  const { onView, onUnlink, onUpdateMember, onNominate, onDelete } = handlers
   const { isEnabled: onboardingCompleted } = useFeatureRule(
     FEATURE_RULE_IDS.ONBOARDING_COMPLETED
   )
@@ -78,123 +79,143 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
         minWidth: 170,
         flex: 1,
         sortable: false,
-        renderCell: (params: GridCellParams) => (
-          <Box
-            sx={{
-              display: 'flex',
-              gap: 0.6,
-              justifyContent: 'flex-start',
-              width: '100%',
-              alignItems: 'center'
-            }}
-          >
-            <Tooltip placement='top' title='Manage member permissions'>
-              <Box
-                component='span'
-                sx={{
-                  display: 'inline-flex',
-                  verticalAlign: 'middle'
-                }}
-              >
-                <IconButton
-                  size='small'
-                  aria-label='view member'
-                  disabled={params?.row?.user_practice_status === 'INVITED'}
-                  onClick={() =>
-                    onView
-                      ? onView(
-                          params?.row?.user_id,
-                          params?.row?.user_name,
-                          params?.row?.email,
-                          params?.row?.user_role,
-                          params?.row?.is_nominated
-                        )
-                      : console.log('view', params.row.id)
-                  }
-                >
-                  <RemoveRedEyeOutlinedIcon fontSize='small' />
-                </IconButton>
-              </Box>
-            </Tooltip>
-
-            <Tooltip placement='top' title='Deactivate user'>
-              <IconButton
-                size='small'
-                onClick={() =>
-                  onInvite
-                    ? onInvite(String(params.row.id))
-                    : console.log('invite', params.row.id)
-                }
-                aria-label='invite member'
-              >
-                <ImgIcon src='/assets/person-add.svg' alt='invite' />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip placement='top' title='Update member role'>
-              <Box
-                component='span'
-                sx={{
-                  display: 'inline-flex',
-                  verticalAlign: 'middle'
-                }}
-              >
-                <IconButton
-                  size='small'
-                  disabled={
-                    params?.row?.user_practice_status !== 'ACTIVE' ||
-                    params?.row?.email === user?.email
-                  }
-                  onClick={() =>
-                    onUpdateMember
-                      ? onUpdateMember(params.row)
-                      : console.log('swap', params.row.id)
-                  }
-                  aria-label='Update member role'
-                >
-                  <SwapHorizIcon fontSize='small' />
-                </IconButton>
-              </Box>
-            </Tooltip>
-
-            {!onboardingCompleted &&
-              params.row.user_role === 'PRACTICE MANAGER' &&
-              params.row.user_practice_status === 'ACTIVE' && (
-                <Tooltip
-                  placement='top'
-                  title={
-                    params?.row?.is_nominated
-                      ? 'Already nominated'
-                      : 'Nominate to complete onboarding'
-                  }
+        renderCell: (params: GridCellParams) => {
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 0.6,
+                justifyContent: 'flex-start',
+                width: '100%',
+                alignItems: 'center'
+              }}
+            >
+              <Tooltip placement='top' title='Manage member permissions'>
+                <Box
+                  component='span'
+                  sx={{
+                    display: 'inline-flex',
+                    verticalAlign: 'middle'
+                  }}
                 >
                   <IconButton
                     size='small'
-                    aria-label='Nomination flag'
-                    onClick={() => {
-                      if (!params?.row?.is_nominated) {
-                        onNominate?.(params.row)
-                      } else {
-                        console.log('nominate', params.row.id)
-                      }
-                    }}
+                    aria-label='view member'
+                    disabled={params?.row?.user_practice_status === 'INVITED'}
+                    onClick={() =>
+                      onView
+                        ? onView(
+                            params?.row?.user_id,
+                            params?.row?.user_name,
+                            params?.row?.email,
+                            params?.row?.user_role,
+                            params?.row?.is_nominated
+                          )
+                        : console.log('view', params.row.id)
+                    }
                   >
-                    <ImgIcon
-                      src={
-                        params?.row?.is_nominated
-                          ? '/assets/green-flag.svg'
-                          : '/assets/blue-flag.svg'
-                      }
-                      alt='flag icon'
-                    />
+                    <RemoveRedEyeOutlinedIcon fontSize='small' />
                   </IconButton>
-                </Tooltip>
-              )}
-          </Box>
-        )
+                </Box>
+              </Tooltip>
+
+              <Tooltip
+                placement='top'
+                title={
+                  params?.row?.has_other_active_practices
+                    ? 'Unlink user from practice'
+                    : 'Delete user from Monai'
+                }
+              >
+                <IconButton
+                  size='small'
+                  onClick={() =>
+                    params?.row?.has_other_active_practices
+                      ? onUnlink?.(String(params.row.id))
+                      : onDelete?.(String(params.row.id))
+                  }
+                  aria-label='invite member'
+                >
+                  <ImgIcon
+                    src={
+                      params?.row?.has_other_active_practices
+                        ? params.row.user_practice_status === 'ACTIVE'
+                          ? '/assets/active-unlink.svg'
+                          : '/assets/inactive-unlink.svg'
+                        : params.row.user_practice_status === 'ACTIVE'
+                          ? '/assets/active-trash.svg'
+                          : '/assets/inactive-trash.svg'
+                    }
+                    alt='invite'
+                  />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip placement='top' title='Update member role'>
+                <Box
+                  component='span'
+                  sx={{
+                    display: 'inline-flex',
+                    verticalAlign: 'middle'
+                  }}
+                >
+                  <IconButton
+                    size='small'
+                    disabled={
+                      params?.row?.user_practice_status !== 'ACTIVE' ||
+                      params?.row?.email === user?.email
+                    }
+                    onClick={() =>
+                      onUpdateMember
+                        ? onUpdateMember(params.row)
+                        : console.log('swap', params.row.id)
+                    }
+                    aria-label='Update member role'
+                  >
+                    <SwapHorizIcon fontSize='small' />
+                  </IconButton>
+                </Box>
+              </Tooltip>
+
+              {!onboardingCompleted &&
+                params.row.user_role === 'PRACTICE MANAGER' &&
+                params.row.user_practice_status === 'ACTIVE' && (
+                  <Tooltip
+                    placement='top'
+                    title={
+                      params?.row?.is_nominated
+                        ? 'Already nominated'
+                        : 'Nominate to complete onboarding'
+                    }
+                  >
+                    <IconButton
+                      size='small'
+                      aria-label='Nomination flag'
+                      onClick={() => {
+                        if (!params?.row?.is_nominated) {
+                          onNominate?.(params.row)
+                        } else {
+                          console.log('nominate', params.row.id)
+                        }
+                      }}
+                    >
+                      <ImgIcon
+                        src={
+                          params?.row?.is_nominated
+                            ? '/assets/green-flag.svg'
+                            : '/assets/blue-flag.svg'
+                        }
+                        alt='flag icon'
+                      />
+                    </IconButton>
+                  </Tooltip>
+                )}
+            </Box>
+          )
+        }
       }
     ],
-    [onView, onInvite, onUpdateMember, onNominate]
+    [onView, onUnlink, onDelete, onUpdateMember, onNominate]
   )
 
   return columns

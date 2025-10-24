@@ -28,6 +28,8 @@ import { useFetchSortedPaginatedData } from 'src/hooks/useFetchSortedData.'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
 import UpdateMemberRoleModal from '../components/UpdateMemberRoleModal'
+import UnlinkUserModal from '../components/UnlinkUserModal'
+import DeleteUserModal from '../components/DeleteUserModal'
 
 interface TeamMembersProps {
   onCountsUpdate?: (counts: {
@@ -59,6 +61,9 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
   const [selectedMember, setSelectedMember] = useState<TeamMemberRow | null>(
     null
   )
+
+  const [openUnlinkUser, setOpenUnlinkUser] = useState(false)
+  const [openDeleteUser, setOpenDeleteUser] = useState(false)
 
   // Filters
   const [searchKey, setSearchKey] = useState<string>('')
@@ -137,22 +142,38 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
     })
   }
 
-  // 🔹 Opens the Update Member Role modal
   const openUpdateMember = (member: TeamMemberRow) => {
     setSelectedMember(member)
     setIsUpdateMemberOpen(true)
   }
 
-  // 🔹 Closes the Update Member Role modal
   const closeUpdateMember = () => {
     setIsUpdateMemberOpen(false)
     setSelectedMember(null)
   }
 
+  const handleOpenUnlinkUser = useCallback(() => {
+    setOpenUnlinkUser(true)
+  }, [])
+
+  const handleCloseUnlinkUser = useCallback(() => {
+    setOpenUnlinkUser(false)
+  }, [])
+
+  const handleOpenDeleteUser = useCallback(() => {
+    setOpenDeleteUser(true)
+  }, [])
+
+  const handleCloseDeleteUser = useCallback(() => {
+    setOpenDeleteUser(false)
+  }, [])
+
   const handlers = {
     onNominate: handleNominate,
     onView: handleOnView,
-    onUpdateMember: openUpdateMember
+    onUpdateMember: openUpdateMember,
+    onUnlink: handleOpenUnlinkUser,
+    onDelete: handleOpenDeleteUser
   }
   const columns = useTeamMembersColumns(handlers)
 
@@ -248,7 +269,6 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
           boxSizing: 'border-box'
         }}
       >
-        {/* Outer scroll wrapper: ONLY this box handles horizontal scrolling */}
         <Box
           sx={{
             width: '100%',
@@ -258,7 +278,6 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
             boxSizing: 'border-box'
           }}
         >
-          {/* Inner sizing box: ensures columns don't shrink below their minWidths */}
           <Box
             sx={{
               minWidth: `${totalMinWidth}px`,
@@ -286,7 +305,7 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
                 minWidth: `${totalMinWidth}px`,
                 boxSizing: 'border-box',
                 '& .MuiDataGrid-virtualScroller': {
-                  overflowX: 'hidden' // let outer wrapper manage horizontal scroll
+                  overflowX: 'hidden'
                 },
                 '& .MuiDataGrid-cell': {
                   py: 1
@@ -357,6 +376,9 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
         onClose={closeUpdateMember}
         member={selectedMember}
       />
+
+      <UnlinkUserModal open={openUnlinkUser} onClose={handleCloseUnlinkUser} />
+      <DeleteUserModal open={openDeleteUser} onClose={handleCloseDeleteUser} />
     </TeamManagementContentWrapper>
   )
 }
