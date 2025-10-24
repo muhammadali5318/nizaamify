@@ -15,7 +15,6 @@ const UploadDocuments = () => {
         <UploadDocumentCard />
         <DocumentUploadBox />
       </Box>
-
       <UploadQueue />
 
       <UploadCategories />

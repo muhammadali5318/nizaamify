@@ -12,7 +12,8 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './utils/queryClient'
 import { FeatureFlagProvider } from './context/FeatureFlagProvider'
 import { Provider as ReduxProvider } from 'react-redux'
-import { store } from './store/store' // ✅ import your Redux store
+import { persistor, store } from './store/store'
+import { PersistGate } from 'redux-persist/integration/react'
 
 function App(): JSX.Element {
   return (
@@ -23,12 +24,12 @@ function App(): JSX.Element {
             <ErrorBoundary>
               <ThemeProvider theme={theme}>
                 <ReduxProvider store={store}>
-                  {' '}
-                  {/* ✅ Redux provider added */}
-                  <NotificationProvider>
-                    <Router />
-                    <IdleSessionHandler />
-                  </NotificationProvider>
+                  <PersistGate loading={null} persistor={persistor}>
+                    <NotificationProvider>
+                      <Router />
+                      <IdleSessionHandler />
+                    </NotificationProvider>
+                  </PersistGate>
                 </ReduxProvider>
               </ThemeProvider>
             </ErrorBoundary>

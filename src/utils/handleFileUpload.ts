@@ -17,8 +17,7 @@ export const handleFileUpload = (
     'jpeg',
     'xls',
     'xlsx',
-    'xlsm',
-    'docx'
+    'xlsm'
   ]
 
   const maxSize = 10 * 1024 * 1024 // 10MB

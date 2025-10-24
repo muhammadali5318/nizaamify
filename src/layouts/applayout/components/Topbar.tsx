@@ -189,7 +189,6 @@ const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
   const handleClose = () => {
     setOpen(false)
   }
-  console.warn('user info', user)
   const handleLogout = () => {
     logout({ logoutParams: { returnTo: window.location.origin } })
   }
