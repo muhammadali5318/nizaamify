@@ -10,6 +10,7 @@ import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined'
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
 import { TeamMemberRow } from '..'
 import { useAuth0 } from '@auth0/auth0-react'
+import { Mode } from '../../components/DeactivateUserModal'
 
 type Handlers = {
   onView?: (
@@ -19,14 +20,13 @@ type Handlers = {
     role: string,
     isNominated: boolean
   ) => void
-  onUnlink?: (id: string) => void
-  onDelete?: (id: string) => void
+  onUnlink?: (member: TeamMemberRow, mode: Mode) => void
   onUpdateMember?: (member: TeamMemberRow) => void
   onNominate?: (id: any) => void
 }
 
 export const useTeamMembersColumns = (handlers: Handlers = {}) => {
-  const { onView, onUnlink, onUpdateMember, onNominate, onDelete } = handlers
+  const { onView, onUnlink, onUpdateMember, onNominate } = handlers
   const { isEnabled: onboardingCompleted } = useFeatureRule(
     FEATURE_RULE_IDS.ONBOARDING_COMPLETED
   )
@@ -101,7 +101,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
                   <IconButton
                     size='small'
                     aria-label='view member'
-                    disabled={params?.row?.user_practice_status === 'INVITED'}
+                    disabled={params?.row?.user_practice_status !== 'ACTIVE'}
                     onClick={() =>
                       onView
                         ? onView(
@@ -127,28 +127,37 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
                     : 'Delete user from Monai'
                 }
               >
-                <IconButton
-                  size='small'
-                  onClick={() =>
-                    params?.row?.has_other_active_practices
-                      ? onUnlink?.(String(params.row.id))
-                      : onDelete?.(String(params.row.id))
-                  }
-                  aria-label='invite member'
+                <Box
+                  component='span'
+                  sx={{
+                    display: 'inline-flex',
+                    verticalAlign: 'middle'
+                  }}
                 >
-                  <ImgIcon
-                    src={
+                  <IconButton
+                    size='small'
+                    disabled={params.row.user_practice_status !== 'ACTIVE'}
+                    onClick={() =>
                       params?.row?.has_other_active_practices
-                        ? params.row.user_practice_status === 'ACTIVE'
-                          ? '/assets/active-unlink.svg'
-                          : '/assets/inactive-unlink.svg'
-                        : params.row.user_practice_status === 'ACTIVE'
-                          ? '/assets/active-trash.svg'
-                          : '/assets/inactive-trash.svg'
+                        ? onUnlink?.(params?.row, 'unlink')
+                        : onUnlink?.(params?.row, 'delete')
                     }
-                    alt='invite'
-                  />
-                </IconButton>
+                    aria-label='invite member'
+                  >
+                    <ImgIcon
+                      src={
+                        params?.row?.has_other_active_practices
+                          ? params.row.user_practice_status === 'ACTIVE'
+                            ? '/assets/active-unlink.svg'
+                            : '/assets/inactive-unlink.svg'
+                          : params.row.user_practice_status === 'ACTIVE'
+                            ? '/assets/active-trash.svg'
+                            : '/assets/inactive-trash.svg'
+                      }
+                      alt='invite'
+                    />
+                  </IconButton>
+                </Box>
               </Tooltip>
 
               <Tooltip placement='top' title='Update member role'>
@@ -215,7 +224,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
         }
       }
     ],
-    [onView, onUnlink, onDelete, onUpdateMember, onNominate]
+    [onView, onUnlink, onUpdateMember, onNominate]
   )
 
   return columns

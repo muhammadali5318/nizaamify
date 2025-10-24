@@ -28,8 +28,7 @@ import { useFetchSortedPaginatedData } from 'src/hooks/useFetchSortedData.'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
 import UpdateMemberRoleModal from '../components/UpdateMemberRoleModal'
-import UnlinkUserModal from '../components/UnlinkUserModal'
-import DeleteUserModal from '../components/DeleteUserModal'
+import DeactivateUserModal, { Mode } from '../components/DeactivateUserModal'
 
 interface TeamMembersProps {
   onCountsUpdate?: (counts: {
@@ -58,12 +57,12 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
 
   // State for Update Member Role Modal
   const [isUpdateMemberOpen, setIsUpdateMemberOpen] = useState(false)
+  const [mode, setMode] = useState<Mode>('')
   const [selectedMember, setSelectedMember] = useState<TeamMemberRow | null>(
     null
   )
 
   const [openUnlinkUser, setOpenUnlinkUser] = useState(false)
-  const [openDeleteUser, setOpenDeleteUser] = useState(false)
 
   // Filters
   const [searchKey, setSearchKey] = useState<string>('')
@@ -152,28 +151,25 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
     setSelectedMember(null)
   }
 
-  const handleOpenUnlinkUser = useCallback(() => {
-    setOpenUnlinkUser(true)
-  }, [])
+  const handleOpenUnlinkUser = useCallback(
+    (member: TeamMemberRow, mode: Mode) => {
+      setSelectedMember(member)
+      setOpenUnlinkUser(true)
+      setMode(mode)
+    },
+    []
+  )
 
   const handleCloseUnlinkUser = useCallback(() => {
     setOpenUnlinkUser(false)
-  }, [])
-
-  const handleOpenDeleteUser = useCallback(() => {
-    setOpenDeleteUser(true)
-  }, [])
-
-  const handleCloseDeleteUser = useCallback(() => {
-    setOpenDeleteUser(false)
+    setSelectedMember(null)
   }, [])
 
   const handlers = {
     onNominate: handleNominate,
     onView: handleOnView,
     onUpdateMember: openUpdateMember,
-    onUnlink: handleOpenUnlinkUser,
-    onDelete: handleOpenDeleteUser
+    onUnlink: handleOpenUnlinkUser
   }
   const columns = useTeamMembersColumns(handlers)
 
@@ -377,8 +373,12 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
         member={selectedMember}
       />
 
-      <UnlinkUserModal open={openUnlinkUser} onClose={handleCloseUnlinkUser} />
-      <DeleteUserModal open={openDeleteUser} onClose={handleCloseDeleteUser} />
+      <DeactivateUserModal
+        open={openUnlinkUser}
+        onClose={handleCloseUnlinkUser}
+        member={selectedMember}
+        mode={mode}
+      />
     </TeamManagementContentWrapper>
   )
 }

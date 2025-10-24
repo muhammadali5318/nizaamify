@@ -32,5 +32,7 @@ export const endpoints = {
   nominateExistingManager: (orgId: string, userId: string) =>
     `${API_BASE}/practices/${orgId}/users/${userId}/nominate/`,
   updateMemberRole: (orgId: string, userId: string | undefined) =>
-    `${API_BASE}/practices/${orgId}/users/${userId}/role/`
+    `${API_BASE}/practices/${orgId}/users/${userId}/role/`,
+  deactivateTeamMember: (orgId: string, userId: string | undefined) =>
+    `${API_BASE}/practices/${orgId}/users/${userId}/deactivate/`
 }
