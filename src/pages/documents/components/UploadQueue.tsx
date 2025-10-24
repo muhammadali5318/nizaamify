@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { uploadFilesToS3 } from 'src/services/apis/handleStartProcessing'
 import { setPresignData } from 'src/store/slices/presignedSlice'
+import { getFileIcon } from 'src/utils/getFileIcon'
 
 export default function UploadQueue() {
   const dispatch = useDispatch()
@@ -42,8 +43,6 @@ export default function UploadQueue() {
       console.warn('Presign API response:', response)
       const presignData = response.data
       dispatch(setPresignData(presignData))
-
-      notify.success('Pre-signed URLs generated successfully!')
 
       await uploadFilesToS3(
         presignData.items,
@@ -101,27 +100,75 @@ export default function UploadQueue() {
           key={file.id}
           sx={{
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '8px 12px',
+            flexDirection: 'column',
+            gap: '4px',
+            p: 1.5,
+            mb: 1,
             backgroundColor: '#f8f9fa',
-            borderRadius: '8px',
-            mb: 1
+            borderRadius: '8px'
           }}
         >
-          <Box>
-            <Typography variant='body2'>{file.name}</Typography>
+          <Box
+            display='flex'
+            justifyContent='space-between'
+            alignItems='center'
+          >
+            <Box display='flex' alignItems='center' gap={1.2}>
+              <img
+                src={getFileIcon(file.name)}
+                alt='file-icon'
+                width={28}
+                height={28}
+              />
+
+              <Box>
+                <Typography variant='body2'>{file.name}</Typography>
+                <Typography variant='caption' color='textSecondary'>
+                  {(file.size / 1024).toFixed(2)} KB — {file.type || 'Unknown'}
+                </Typography>
+              </Box>
+            </Box>
+            {file.status !== 'completed' && (
+              <IconButton
+                onClick={() => dispatch(removeFile(file.id))}
+                size='small'
+                color='primary'
+              >
+                <CancelOutlinedIcon />
+              </IconButton>
+            )}
+          </Box>
+
+          <Box sx={{ width: '100%', mt: 0.5 }}>
+            <Box
+              sx={{
+                height: 8,
+                borderRadius: 5,
+                backgroundColor: '#e0e0e0',
+                overflow: 'hidden'
+              }}
+            >
+              <Box
+                sx={{
+                  width: `${file.progress}%`,
+                  height: '100%',
+                  backgroundColor:
+                    file.status === 'completed' ? '#2E7D32' : '#1976d2',
+                  transition: 'width 0.2s ease-in-out'
+                }}
+              />
+            </Box>
+
             <Typography variant='caption' color='textSecondary'>
-              {(file.size / 1024).toFixed(2)} KB — {file.type || 'Unknown'}
+              {file.status === 'uploading'
+                ? `Uploading... ${file.progress}%`
+                : file.status === 'processing'
+                  ? 'Processing... ⏳'
+                  : file.status === 'completed'
+                    ? 'Completed ✅'
+                    : 'Queued'}
             </Typography>
           </Box>
-          <IconButton
-            onClick={() => dispatch(removeFile(file.id))}
-            size='small'
-            color='primary'
-          >
-            <CancelOutlinedIcon />
-          </IconButton>
         </Box>
       ))}
     </Box>

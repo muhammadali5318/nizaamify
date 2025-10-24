@@ -21,8 +21,9 @@ export const triggerProcessAPI = async (
       `/docs/v1/practices/${practiceId}/process/`,
       payload
     )
-    notify.success(`${name} processed successfully!`)
+    notify.info(`${name} processing...`)
     console.warn('Process API response:', response.data)
+    return response.data
   } catch (error: any) {
     console.error('Error processing document:', error)
     notify.error(`Failed to process ${name}`)

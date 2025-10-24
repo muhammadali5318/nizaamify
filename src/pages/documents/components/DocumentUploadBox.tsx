@@ -6,6 +6,7 @@ import uploadIcon from '../../../assets/upload-box-icon.svg'
 import fileimage from '../../../assets/upload-file-combined-icon.svg'
 import styles from '../documents.module.scss'
 import { useState, DragEvent } from 'react'
+import ProcessingCompletedList from './ProcessingCompletedList'
 
 export default function DocumentUploadBox() {
   const dispatch = useDispatch()
@@ -38,59 +39,76 @@ export default function DocumentUploadBox() {
       handleFileUpload(event, dispatch)
     }
   }
+  const { completedFiles } = useSelector((state: RootState) => state.uploads)
+  const batches = useSelector((state: RootState) => state.processed.batches)
+  console.warn(batches)
+  const hasBatches = Object.keys(batches || {}).length > 0
 
   return (
-    <Box
-      className={`${styles.uploadBox} ${isDragging ? styles.dragActive : ''}`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      sx={{
-        border: isDragging ? '2px dashed #1976d2' : '2px dashed #ccc',
-        borderRadius: '12px',
-        padding: '24px',
-        transition: 'border 0.2s ease-in-out',
-        backgroundColor: isDragging ? '#f0f8ff' : '#fff'
-      }}
-    >
-      <img src={uploadIcon} alt='Upload' width={200} height={100} />
-      <Typography variant='h6' mt={1}>
-        Upload or drag and drop your financial documents
-      </Typography>
-      <Typography variant='body2' color='textSecondary' mb={1}>
-        You can upload unlimited files but only 5 in one go.
-      </Typography>
-      <Typography variant='body2' color='textPrimary'>
-        Maximum 10MB each — Supported: <strong>.CSV, .PDF, .PNG, .JPG</strong>
-      </Typography>
-
-      <img
-        style={{ marginTop: '20px' }}
-        src={fileimage}
-        alt='File types'
-        width={200}
-        height={30}
-      />
-
-      <Box
-        sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-      >
-        <Button
-          variant='contained'
-          component='label'
-          disabled={files.length >= 5}
-          className={styles.uploadButton}
-          sx={{ mt: 2 }}
+    <>
+      {completedFiles.length > 0 || hasBatches ? (
+        <Box sx={{ mt: '20px', width: '100%' }}>
+          <ProcessingCompletedList />
+        </Box>
+      ) : (
+        <Box
+          className={`${styles.uploadBox} ${isDragging ? styles.dragActive : ''}`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          sx={{
+            border: isDragging ? '2px dashed #1976d2' : '2px dashed #ccc',
+            borderRadius: '12px',
+            padding: '24px',
+            transition: 'border 0.2s ease-in-out',
+            backgroundColor: isDragging ? '#f0f8ff' : '#fff'
+          }}
         >
-          {files.length >= 5 ? 'Limit Reached (5/5)' : 'Browse Files'}
-          <input
-            hidden
-            type='file'
-            multiple
-            onChange={(e) => handleFileUpload(e, dispatch)}
+          <img src={uploadIcon} alt='Upload' width={200} height={100} />
+          <Typography variant='h6' mt={1}>
+            Upload or drag and drop your financial documents
+          </Typography>
+          <Typography variant='body2' color='textSecondary' mb={1}>
+            You can upload unlimited files but only 5 in one go.
+          </Typography>
+          <Typography variant='body2' color='textPrimary'>
+            Maximum 10MB each — Supported:{' '}
+            <strong>.CSV, .PDF, .PNG, .JPG</strong>
+          </Typography>
+
+          <img
+            style={{ marginTop: '20px' }}
+            src={fileimage}
+            alt='File types'
+            width={200}
+            height={30}
           />
-        </Button>
-      </Box>
-    </Box>
+
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}
+          >
+            <Button
+              variant='contained'
+              component='label'
+              disabled={files.length >= 5}
+              className={styles.uploadButton}
+              sx={{ mt: 2 }}
+            >
+              {files.length >= 5 ? 'Limit Reached (5/5)' : 'Browse Files'}
+              <input
+                hidden
+                type='file'
+                multiple
+                onChange={(e) => handleFileUpload(e, dispatch)}
+              />
+            </Button>
+          </Box>
+        </Box>
+      )}
+    </>
   )
 }
