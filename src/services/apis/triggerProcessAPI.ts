@@ -21,7 +21,6 @@ export const triggerProcessAPI = async (
       `/docs/v1/practices/${practiceId}/process/`,
       payload
     )
-    notify.info(`${name} processing...`)
     console.warn('Process API response:', response.data)
     return response.data
   } catch (error: any) {

@@ -1,18 +1,40 @@
-import React, { useState } from 'react'
-import { Box, Typography, Stack } from '@mui/material'
+import React, { useState, useEffect } from 'react'
+import { Box, Typography, Stack, Link } from '@mui/material'
 import styles from './documents.module.scss'
 import StatsCard from 'src/components/team-management/StatsCard'
 import { ReusableTabs } from 'src/components/tabs'
 import useDocumentsTabs from './hooks/useDocumentsTabs'
 import { documentsTabsData } from './config/documentsConfig'
-
+import { useInitialData } from '../../hooks/useFetchInitialData'
+import { useNavigate } from 'react-router'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 const DocumentsPage: React.FC = () => {
   const [stats] = useState({
     all: 3,
     uploaded: 3,
     review: 3
   })
+
   const tabs = useDocumentsTabs()
+  const navigate = useNavigate()
+
+  const { data, isLoading, isError } = useInitialData(true)
+
+  const practiceName = data?.practice_name || 'Your'
+
+  useEffect(() => {
+    if (data) console.warn('Initial Data:', data)
+  }, [data])
+
+  const handleNavigateToSettings = () => {
+    navigate('/settings')
+  }
+  const toTitleCase = (text: string) => {
+    return text
+      ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()
+      : ''
+  }
+  const accountingBasis = toTitleCase(data?.accounting_basis || 'N/A')
 
   return (
     <Box className={styles.documentsRoot}>
@@ -20,15 +42,63 @@ const DocumentsPage: React.FC = () => {
         className={styles.headerBanner}
         sx={{
           textAlign: { xs: 'center', md: 'left' },
-          px: { xs: 2, md: 4 },
-          py: { xs: 1.5, md: 2 }
+
+          color: '#01579B',
+          backgroundColor: '#F2F9FC',
+          width: '100%',
+          border: '1px solid #0288D1',
+          borderRadius: '16px'
         }}
       >
-        <Typography variant='body2' fontSize={{ xs: 13, md: 15 }}>
-          <strong>Greyford</strong> practice’s current <b>accounting basis</b>{' '}
-          is set to <b>Accrual mode</b>. You can change this mode anytime
-          in{' '}
-        </Typography>
+        {isLoading ? (
+          <Typography variant='body2'>Loading practice details...</Typography>
+        ) : isError ? (
+          <Typography color='error' variant='body2'>
+            Failed to load practice details
+          </Typography>
+        ) : (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              gap: '6px'
+            }}
+          >
+            <Box paddingTop='4px' color='#0288D1'>
+              <ErrorOutlineIcon />
+            </Box>
+            <Typography variant='body2' fontSize={{ xs: 13, md: 15 }}>
+              <strong>{practiceName}</strong> practice’s current{' '}
+              <b>accounting basis</b> is set to{' '}
+              <span
+                style={{
+                  color: 'primary.main',
+                  fontWeight: 'bold'
+                }}
+              >
+                {' '}
+                {accountingBasis} mode.
+              </span>
+              You can change this mode anytime in
+              <Link
+                component='button'
+                onClick={handleNavigateToSettings}
+                sx={{
+                  color: '#01579B',
+                  fontWeight: 'bold',
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                  marginLeft: '4px',
+                  marginBottom: '3px'
+                }}
+              >
+                Settings
+              </Link>
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       <Stack
