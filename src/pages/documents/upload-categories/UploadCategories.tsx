@@ -8,6 +8,8 @@ import labIcon from '../../../../public/assets/dental-icon.svg'
 import operationsIcon from '../../../../public/assets/business-ops-icon.svg'
 import premisesIcon from '../../../../public/assets/premises-icon.svg'
 import taxIcon from '../../../../public/assets/tax-icon.svg'
+import { useSelector } from 'react-redux'
+import { RootState } from 'src/store/store'
 
 const categories = [
   {
@@ -80,25 +82,36 @@ const categories = [
 ]
 
 const UploadCategories: React.FC = () => {
-  return (
-    <Box className={styles.documentsPage}>
-      <Typography variant='h6' mb={2} mt={2}>
-        Document Categories & Examples
-      </Typography>
+  const { completedFiles } = useSelector((state: RootState) => state.uploads)
+  const batches = useSelector((state: RootState) => state.processed.batches)
+  console.warn(batches)
+  const hasBatches = Object.keys(batches || {}).length > 0
 
-      <Box className={styles.categoriesGrid}>
-        {categories.map((cat, idx) => (
-          <DocumentCategoryCard
-            key={idx}
-            iconColor={cat.color}
-            iconSrc={cat.icon}
-            title={cat.title}
-            examples={cat.examples}
-            onUploadClick={() => alert(`Uploading for ${cat.title}`)}
-          />
-        ))}
-      </Box>
-    </Box>
+  return (
+    <>
+      {completedFiles.length > 0 || hasBatches ? (
+        <Box sx={{ mt: '20px', width: '100%' }}></Box>
+      ) : (
+        <Box className={styles.documentsPage}>
+          <Typography variant='h6' mb={2} mt={2}>
+            Document Categories & Examples
+          </Typography>
+
+          <Box className={styles.categoriesGrid}>
+            {categories.map((cat, idx) => (
+              <DocumentCategoryCard
+                key={idx}
+                iconColor={cat.color}
+                iconSrc={cat.icon}
+                title={cat.title}
+                examples={cat.examples}
+                // onUploadClick={() => alert(`Uploading for ${cat.title}`)}
+              />
+            ))}
+          </Box>
+        </Box>
+      )}
+    </>
   )
 }
 

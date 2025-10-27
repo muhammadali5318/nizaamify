@@ -206,7 +206,7 @@ export default function ProcessingCompletedList() {
                 </Typography>
                 <Typography variant='body2' sx={{ mt: 0.5, color: '#374151' }}>
                   Extracted amount:{' '}
-                  <strong>${Number(doc.amount || 0).toLocaleString()}</strong>
+                  <strong>£ {Number(doc.amount || 0).toLocaleString()}</strong>
                 </Typography>
               </Box>
             </Box>

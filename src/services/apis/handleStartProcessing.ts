@@ -6,7 +6,7 @@ import {
   moveToCompleted
 } from '../../store/slices/uploadSlice'
 import { addOrUpdateBatchStatus } from 'src/store/slices/processingSlice'
-import { pollProcessApiUntilReady } from 'src/utils/pollProcessApi'
+import { pollBatchStatusUntilComplete } from 'src/utils/pollProcessApi'
 
 export const uploadFilesToS3 = async (
   items: any[],
@@ -50,14 +50,12 @@ export const uploadFilesToS3 = async (
             notify.success(`${filename} uploaded successfully!`)
 
             try {
-              const finalProcessRes = await pollProcessApiUntilReady(
+              const finalProcessRes = await pollBatchStatusUntilComplete(
                 batchId,
                 key,
                 filename,
                 userId,
-                practiceId,
-                3000,
-                0
+                practiceId
               )
 
               const processData = finalProcessRes?.data ?? finalProcessRes

@@ -32,7 +32,6 @@ export default function DocumentUploadBox() {
 
     const droppedFiles = e.dataTransfer.files
     if (droppedFiles && droppedFiles.length > 0) {
-      // mimic input change for reuse
       const event = {
         target: { files: droppedFiles }
       } as unknown as React.ChangeEvent<HTMLInputElement>
