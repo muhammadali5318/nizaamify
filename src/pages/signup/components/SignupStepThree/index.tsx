@@ -102,7 +102,8 @@ const SignupStepThree: React.FC<Props> = ({
   }
 
   const hasBlockingServerErrors =
-    Boolean(serverErrors?.email) || Boolean(serverErrors?.practice)
+    Boolean(serverErrors?.email) ||
+    Boolean(serverErrors?.practice || serverErrors?.practiceAlreadyExist)
 
   useEffect(() => {
     if (serverErrors?.email) {
@@ -115,6 +116,14 @@ const SignupStepThree: React.FC<Props> = ({
 
     if (serverErrors?.password) {
       notify.error(serverErrors?.password)
+    }
+
+    if (serverErrors?.postcode) {
+      notify.error(serverErrors?.postcode)
+    }
+
+    if (serverErrors?.practiceAlreadyExist) {
+      notify.error(serverErrors?.practiceAlreadyExist)
     }
 
     if (serverErrors?.general) {

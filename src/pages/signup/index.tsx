@@ -72,6 +72,8 @@ const SignUp: React.FC = () => {
         'postcode' in patch
       ) {
         delete newErrors.practice
+        delete newErrors.practiceAlreadyExist
+        delete newErrors.postcode
       }
 
       // Clear password error when user edits password or confirmPassword
@@ -118,6 +120,7 @@ const SignUp: React.FC = () => {
       const parsedErrors: Record<string, string> = {}
 
       if (respData) {
+        // ---- Email error ----
         const userEmailErr =
           respData?.user?.email && Array.isArray(respData?.user?.email)
             ? respData?.user?.email.join(' ')
@@ -126,6 +129,7 @@ const SignUp: React.FC = () => {
           parsedErrors.email =
             'It looks like you already have an account. Try logging in or reset your password if needed.'
 
+        // ---- Practice non-field errors ----
         const practiceErr =
           respData?.practice?.non_field_errors &&
           Array.isArray(respData?.practice?.non_field_errors)
@@ -133,6 +137,7 @@ const SignUp: React.FC = () => {
             : respData?.practice?.non_field_errors
         if (practiceErr) parsedErrors.practice = practiceErr
 
+        // ---- Password errors ----
         const userPasswordErr =
           respData?.user?.password && Array.isArray(respData?.user?.password)
             ? respData?.user?.password.join(' ')
@@ -140,8 +145,25 @@ const SignUp: React.FC = () => {
         if (userPasswordErr)
           parsedErrors.password =
             'Password is too common, please choose a stronger password'
+
+        // ---- Postcode validation error ----
+        const postcodeErr =
+          respData?.practice?.postcode &&
+          Array.isArray(respData?.practice?.postcode)
+            ? respData?.practice?.postcode.join(' ')
+            : respData?.practice?.postcode
+        if (postcodeErr) parsedErrors.postcode = postcodeErr
       }
 
+      // ---- Practice detail error ----
+      const practiceDetailErr =
+        respData?.practice?.detail && Array.isArray(respData?.practice?.detail)
+          ? respData?.practice?.detail.join(' ')
+          : respData?.practice?.detail
+      if (practiceDetailErr)
+        parsedErrors.practiceAlreadyExist = practiceDetailErr
+
+      // ---- General fallback ----
       if (!Object.keys(parsedErrors).length) {
         parsedErrors.general =
           respData?.message || 'Something went wrong. Please try again later.'

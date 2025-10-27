@@ -152,12 +152,26 @@ const SendVerificationEmail: React.FC<Props> = ({ email }) => {
             </Box>
 
             <Box className={styles.emailVerificationActionContainer}>
-              <Typography
-                variant='subtitle1'
-                color='var(--color-text-secondary)'
+              <Box
+                sx={{
+                  width: '100%',
+                  textAlign: 'center'
+                }}
               >
-                Didn&apos;t receive an email?
-              </Typography>
+                <Typography
+                  variant='subtitle1'
+                  color='var(--color-text-secondary)'
+                >
+                  Didn&apos;t receive an email?
+                </Typography>
+                <Typography
+                  variant='subtitle1'
+                  color='var(--color-text-secondary)'
+                >
+                  Please also check your spam/junk folder if you haven’t
+                  received the email.
+                </Typography>
+              </Box>
 
               <Button
                 size='large'

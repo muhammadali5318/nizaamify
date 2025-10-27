@@ -1,7 +1,7 @@
 import { z } from 'zod/v3'
 
 const ukPostcodeRegex =
-  /^(GIR 0AA|[A-PR-UWYZ]([0-9][0-9A-HJKPS-UW]?|[A-HK-Y][0-9][0-9ABEHMNPRV-Y]?) [0-9][ABD-HJLNP-UW-Z]{2})$/i
+  /^(GIR ?0AA|[A-PR-UWYZ]([0-9][0-9A-HJKPS-UW]?|[A-HK-Y][0-9][0-9ABEHMNPRV-Y]?) ?[0-9][ABD-HJLNP-UW-Z]{2})$/i
 
 export const SignupStepTwoSchema = z.object({
   practiceName: z
