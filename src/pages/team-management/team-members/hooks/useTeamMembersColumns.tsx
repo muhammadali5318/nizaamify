@@ -136,7 +136,10 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
                 >
                   <IconButton
                     size='small'
-                    disabled={params.row.user_practice_status !== 'ACTIVE'}
+                    disabled={
+                      params.row.user_practice_status !== 'ACTIVE' ||
+                      params?.row?.email === user?.email
+                    }
                     onClick={() =>
                       params?.row?.has_other_active_practices
                         ? onUnlink?.(params?.row, 'unlink')
@@ -147,12 +150,14 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
                     <ImgIcon
                       src={
                         params?.row?.has_other_active_practices
-                          ? params.row.user_practice_status === 'ACTIVE'
-                            ? '/assets/active-unlink.svg'
-                            : '/assets/inactive-unlink.svg'
-                          : params.row.user_practice_status === 'ACTIVE'
-                            ? '/assets/active-trash.svg'
-                            : '/assets/inactive-trash.svg'
+                          ? params.row.user_practice_status !== 'ACTIVE' ||
+                            params?.row?.email === user?.email
+                            ? '/assets/inactive-unlink.svg'
+                            : '/assets/active-unlink.svg'
+                          : params.row.user_practice_status !== 'ACTIVE' ||
+                              params?.row?.email === user?.email
+                            ? '/assets/inactive-trash.svg'
+                            : '/assets/active-trash.svg'
                       }
                       alt='invite'
                     />
