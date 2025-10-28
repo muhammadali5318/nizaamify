@@ -106,7 +106,6 @@ export const pollBatchStatusUntilComplete = async (
         )
 
         if (allProcessed) {
-          notify.success(`All documents processed for ${filename}`)
           return batchData
         }
       } catch (batchErr) {

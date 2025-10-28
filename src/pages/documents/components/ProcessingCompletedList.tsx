@@ -14,6 +14,7 @@ import { useState } from 'react'
 import EditDocumentModal from './EditDocumentModal'
 import { getFileIcon } from 'src/utils/getFileIcon'
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined'
+import verifiedIcon from '../../../../public/assets/verified.svg'
 import { useAuth0 } from '@auth0/auth0-react'
 import { approveDocuments } from 'src/services/apis/approveDocs'
 import { notify } from '../../../components/notistack/NotificationProvider'
@@ -245,17 +246,7 @@ export default function ProcessingCompletedList() {
         open={successOpen}
         onClose={handleUploadMore}
         onConfirm={handleGoToDashboard}
-        icon={
-          <CheckCircleOutlineOutlinedIcon
-            sx={{
-              fontSize: 48,
-              color: '#22C55E',
-              background: '#ECFDF5',
-              borderRadius: '50%',
-              p: 1
-            }}
-          />
-        }
+        icon={<img src={verifiedIcon} alt='Success' />}
         title='Financial data updated successfully'
         description='Your uploaded documents have been processed, and your practice’s financial KPIs have been updated successfully. You can now view the latest insights and benchmarks on your dashboard.'
         confirmText='Go to dashboard'
