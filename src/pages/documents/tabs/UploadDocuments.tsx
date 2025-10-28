@@ -14,8 +14,8 @@ const UploadDocuments = () => {
       <Box className={styles.uploadSection}>
         <UploadDocumentCard />
         <DocumentUploadBox />
+        <UploadQueue />
       </Box>
-      <UploadQueue />
 
       <UploadCategories />
     </div>

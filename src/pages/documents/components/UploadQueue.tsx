@@ -11,7 +11,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { uploadFilesToS3 } from 'src/services/apis/handleStartProcessing'
 import { setPresignData } from 'src/store/slices/presignedSlice'
 import { getFileIcon } from 'src/utils/getFileIcon'
-
+import spinner from '../../../assets/spinnergif.gif'
 export default function UploadQueue() {
   const dispatch = useDispatch()
   const { files } = useSelector((state: RootState) => state.uploads)
@@ -28,7 +28,7 @@ export default function UploadQueue() {
     const org_id = user?.organizations_with_roles[0].metadata.uuid
 
     if (!userId) {
-      notify.error('User UUID not found in Auth0 profile.')
+      notify.error('User ID not found in Auth0 profile.')
       return
     }
 
@@ -73,7 +73,7 @@ export default function UploadQueue() {
         }}
       >
         <Typography variant='subtitle1' mb={1}>
-          Upload Queue ({files.length}/5)
+          Upload queue ({files.length}/5)
         </Typography>
 
         <Button
@@ -121,53 +121,87 @@ export default function UploadQueue() {
                 height={28}
               />
 
-              <Box>
+              <Box textAlign='left'>
                 <Typography variant='body2'>{file.name}</Typography>
                 <Typography variant='caption' color='textSecondary'>
                   {(file.size / 1024).toFixed(2)} KB — {file.type || 'Unknown'}
                 </Typography>
               </Box>
             </Box>
-            {file.status !== 'completed' && (
-              <IconButton
-                onClick={() => dispatch(removeFile(file.id))}
-                size='small'
-                color='primary'
-              >
-                <CancelOutlinedIcon />
-              </IconButton>
-            )}
-          </Box>
-
-          <Box sx={{ width: '100%', mt: 0.5 }}>
             <Box
               sx={{
-                height: 8,
-                borderRadius: 5,
-                backgroundColor: '#e0e0e0',
-                overflow: 'hidden'
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 1
               }}
             >
-              <Box
-                sx={{
-                  width: `${file.progress}%`,
-                  height: '100%',
-                  backgroundColor:
-                    file.status === 'completed' ? '#2E7D32' : '#1976d2',
-                  transition: 'width 0.2s ease-in-out'
-                }}
-              />
-            </Box>
+              <Typography
+                variant='caption'
+                color='textSecondary'
+                display='flex'
+                flexDirection='row'
+                alignItems='center'
+                gap={0.8}
+              >
+                {file.status === 'uploading' && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <img
+                      style={{
+                        borderRadius: '50%',
+                        width: 20,
+                        height: 20,
+                        animation: 'spin 1s linear infinite'
+                      }}
+                      src={spinner}
+                    ></img>
+                    `Uploading... {file.progress}`
+                  </Box>
+                )}
 
-            <Typography variant='caption' color='textSecondary'>
-              {file.status === 'uploading'
-                ? `Uploading... ${file.progress}%`
-                : file.status === 'processing'
-                  ? 'Processing... ⏳'
-                  : file.status === 'completed'
-                    ? 'Completed ✅'
-                    : 'Queued'}
-            </Typography>
+                {file.status === 'processing' && (
+                  <>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <img
+                        style={{
+                          borderRadius: '50%',
+                          width: 20,
+                          height: 20,
+                          animation: 'spin 1s linear infinite'
+                        }}
+                        src={spinner}
+                      ></img>
+                    </Box>
+                    <p> Processing...</p>
+                  </>
+                )}
+
+                {file.status === 'queued' && 'Queued'}
+                {file.status === 'completed' && 'Completed ✅'}
+              </Typography>
+
+              {file.status !== 'completed' && (
+                <IconButton
+                  onClick={() => dispatch(removeFile(file.id))}
+                  size='small'
+                  color='primary'
+                >
+                  <CancelOutlinedIcon />
+                </IconButton>
+              )}
+            </Box>
           </Box>
         </Box>
       ))}

@@ -13,6 +13,10 @@ import {
 import { useDispatch } from 'react-redux'
 import { updateDocumentFields } from '../../../store/slices/processedBatchDataSlice'
 import { notify } from '../../../components/notistack/NotificationProvider'
+import {
+  getDocumentTypes,
+  getDocumentSubtypes
+} from '../../../utils/documentMapping'
 
 interface EditDocumentModalProps {
   open: boolean
@@ -20,10 +24,6 @@ interface EditDocumentModalProps {
   batchId: string
   document: any
 }
-
-const documentCategories = ['Revenue', 'Expense', 'Other']
-const documentTypes = ['Dental labs & materials', 'Supplies', 'Equipment']
-const documentSubtypes = ['Dental lab invoices', 'Material invoices', 'Others']
 
 export default function EditDocumentModal({
   open,
@@ -41,8 +41,9 @@ export default function EditDocumentModal({
     payment_date: ''
   })
 
+  const [availableSubtypes, setAvailableSubtypes] = useState<string[]>([])
+
   useEffect(() => {
-    console.warn('doc', document)
     if (document) {
       setFormData({
         document_category: document.document_category || '',
@@ -55,8 +56,19 @@ export default function EditDocumentModal({
     }
   }, [document])
 
+  useEffect(() => {
+    // Whenever document_type changes, update subtypes list
+    const subtypes = getDocumentSubtypes(formData.document_type)
+    setAvailableSubtypes(subtypes)
+  }, [formData.document_type])
+
   const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+      // reset subtype if type changes
+      ...(field === 'document_type' ? { document_subtype: '' } : {})
+    }))
   }
 
   const handleUpdate = () => {
@@ -72,6 +84,8 @@ export default function EditDocumentModal({
 
   if (!document) return null
 
+  const documentTypes = getDocumentTypes()
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth='sm'>
       <DialogTitle>Change document information</DialogTitle>
@@ -82,51 +96,36 @@ export default function EditDocumentModal({
         </Typography>
 
         <Box display='flex' flexDirection='column' gap={2}>
-          {/* Category */}
+          {/* Document Type */}
           <TextField
             select
             fullWidth
-            label='Document category'
-            value={formData.document_category}
-            onChange={(e) => handleChange('document_category', e.target.value)}
+            label='Document type'
+            value={formData.document_type}
+            onChange={(e) => handleChange('document_type', e.target.value)}
           >
-            {documentCategories.map((cat) => (
-              <MenuItem key={cat} value={cat}>
-                {cat}
+            {documentTypes.map((type) => (
+              <MenuItem key={type} value={type}>
+                {type}
               </MenuItem>
             ))}
           </TextField>
 
-          {/* Type & Subtype */}
-          <Box display='flex' gap={2}>
-            <TextField
-              select
-              fullWidth
-              label='Document type'
-              value={formData.document_type}
-              onChange={(e) => handleChange('document_type', e.target.value)}
-            >
-              {documentTypes.map((type) => (
-                <MenuItem key={type} value={type}>
-                  {type}
-                </MenuItem>
-              ))}
-            </TextField>
-
-            <TextField
-              select
-              fullWidth
-              label='Document subtype'
-              value={formData.document_subtype}
-              onChange={(e) => handleChange('document_subtype', e.target.value)}
-            >
-              {documentSubtypes.map((sub) => (
-                <MenuItem key={sub} value={sub}>
-                  {sub}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Box>
+          {/* Document Subtype */}
+          <TextField
+            select
+            fullWidth
+            label='Document subtype'
+            value={formData.document_subtype}
+            onChange={(e) => handleChange('document_subtype', e.target.value)}
+            disabled={!formData.document_type}
+          >
+            {availableSubtypes.map((sub) => (
+              <MenuItem key={sub} value={sub}>
+                {sub}
+              </MenuItem>
+            ))}
+          </TextField>
 
           {/* Amount */}
           <TextField
