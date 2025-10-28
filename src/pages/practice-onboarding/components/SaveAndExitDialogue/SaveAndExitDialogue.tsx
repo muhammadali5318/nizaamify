@@ -7,11 +7,13 @@ import {
   Button,
   Stack,
   Typography,
-  Alert
+  Alert,
+  Box
 } from '@mui/material'
 import { isPracticeOwner } from 'src/utils/helper'
 import { useAuth0 } from '@auth0/auth0-react'
 import { LoadingButton } from '@mui/lab'
+import HavingTrouble from 'src/components/contact-support/HavingTrouble'
 
 type SaveAndExitDialogueProps = {
   open: boolean
@@ -132,14 +134,9 @@ const SaveAndExitDialogue: React.FC<SaveAndExitDialogueProps> = ({
           </LoadingButton>
         </Stack>
 
-        <Typography
-          mt={2.5}
-          variant='subtitle1'
-          color='var(--color-text-secondary)'
-        >
-          Having trouble? Please{' '}
-          <span className='info-main font-weight--700'>Contact support.</span>
-        </Typography>
+        <Box mt={2.5}>
+          <HavingTrouble />
+        </Box>
       </DialogActions>
     </Dialog>
   )

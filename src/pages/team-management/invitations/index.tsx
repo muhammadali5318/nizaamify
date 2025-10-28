@@ -1,6 +1,6 @@
 // SentInvitations.tsx (updated to prevent full-page scroll)
 import React, { useState, useMemo } from 'react'
-import { Box, TablePagination, Typography } from '@mui/material'
+import { Box, Stack, TablePagination, Typography } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { useAuth0 } from '@auth0/auth0-react'
 
@@ -20,6 +20,7 @@ import { queryClient } from 'src/utils/queryClient'
 
 import styles from './invitations.module.scss'
 import { useFetchSortedPaginatedData } from 'src/hooks/useFetchSortedData.'
+import PendingRequests from './components/PendingRequests'
 
 const SentInvitations: React.FC = () => {
   const { user } = useAuth0()
@@ -99,130 +100,133 @@ const SentInvitations: React.FC = () => {
     params.row.status === 'Disabled' ? styles.rowDisabled : ''
 
   return (
-    <TeamManagementContentWrapper
-      imageSrc='/assets/bg-black-clock-icon.svg'
-      imageAlt='sent invitation icons'
-      title='Sent Invitations'
-      subtitle='Manage invitations that have been sent to users'
-    >
-      <Box
-        sx={{
-          width: '100%',
-          maxWidth: '100vw',
-          boxSizing: 'border-box'
-        }}
+    <Stack spacing={2.5}>
+      <PendingRequests />
+      <TeamManagementContentWrapper
+        imageSrc='/assets/bg-black-clock-icon.svg'
+        imageAlt='sent invitation icons'
+        title='Sent Invitations'
+        subtitle='Manage invitations that have been sent to users'
       >
-        {items?.length === 0 && !isLoading ? (
-          <Box
-            height={336}
-            display='flex'
-            alignItems='center'
-            justifyContent='center'
-            flexDirection='column'
-          >
-            <img
-              src='/assets/no-invite-icon.svg'
-              alt='No invitations found'
-              style={{ maxHeight: 336, objectFit: 'contain' }}
-            />
-            <Typography variant='body1' color='text.primary' fontWeight={700}>
-              No invitations sent
-            </Typography>
-          </Box>
-        ) : (
-          <>
+        <Box
+          sx={{
+            width: '100%',
+            maxWidth: '100vw',
+            boxSizing: 'border-box'
+          }}
+        >
+          {items?.length === 0 && !isLoading ? (
             <Box
-              sx={{
-                width: '100%',
-                maxWidth: '90vw',
-                overflowX: 'auto',
-                WebkitOverflowScrolling: 'touch',
-                boxSizing: 'border-box'
-              }}
+              height={336}
+              display='flex'
+              alignItems='center'
+              justifyContent='center'
+              flexDirection='column'
             >
+              <img
+                src='/assets/no-invite-icon.svg'
+                alt='No invitations found'
+                style={{ maxHeight: 336, objectFit: 'contain' }}
+              />
+              <Typography variant='body1' color='text.primary' fontWeight={700}>
+                No invitations sent
+              </Typography>
+            </Box>
+          ) : (
+            <>
               <Box
                 sx={{
-                  minWidth: `${totalMinWidth}px`,
                   width: '100%',
+                  maxWidth: '90vw',
+                  overflowX: 'auto',
+                  WebkitOverflowScrolling: 'touch',
                   boxSizing: 'border-box'
                 }}
               >
-                <DataGrid
-                  rows={items}
-                  columns={columns}
-                  getRowClassName={getRowClassName}
-                  getRowId={(row) => row.id}
-                  pageSizeOptions={[5, 10, 25, { value: -1, label: 'All' }]}
-                  disableColumnMenu
-                  disableColumnResize
-                  rowHeight={56}
-                  hideFooter
-                  sortingMode='server'
-                  sortModel={sortModel}
-                  onSortModelChange={handleSortChange}
-                  loading={localLoading || isLoading}
+                <Box
                   sx={{
-                    ...teamMembersSx,
-                    width: '100%',
                     minWidth: `${totalMinWidth}px`,
-                    boxSizing: 'border-box',
-                    '& .MuiDataGrid-virtualScroller': {
-                      overflowX: 'hidden'
-                    },
-                    '& .MuiDataGrid-cell': {
-                      py: 1
-                    }
+                    width: '100%',
+                    boxSizing: 'border-box'
                   }}
-                />
+                >
+                  <DataGrid
+                    rows={items}
+                    columns={columns}
+                    getRowClassName={getRowClassName}
+                    getRowId={(row) => row.id}
+                    pageSizeOptions={[5, 10, 25, { value: -1, label: 'All' }]}
+                    disableColumnMenu
+                    disableColumnResize
+                    rowHeight={56}
+                    hideFooter
+                    sortingMode='server'
+                    sortModel={sortModel}
+                    onSortModelChange={handleSortChange}
+                    loading={localLoading || isLoading}
+                    sx={{
+                      ...teamMembersSx,
+                      width: '100%',
+                      minWidth: `${totalMinWidth}px`,
+                      boxSizing: 'border-box',
+                      '& .MuiDataGrid-virtualScroller': {
+                        overflowX: 'hidden'
+                      },
+                      '& .MuiDataGrid-cell': {
+                        py: 1
+                      }
+                    }}
+                  />
+                </Box>
               </Box>
-            </Box>
 
-            <TablePagination
-              className='pagination-container'
-              rowsPerPageOptions={[5, 10, 25, 50]}
-              component='div'
-              count={total ?? 0}
-              rowsPerPage={pageSize}
-              page={page}
-              onPageChange={(_, newPage) => setPage(newPage)}
-              onRowsPerPageChange={(event) => {
-                const newSize = parseInt(event.target.value, 10)
-                setPageSize(newSize)
-                setPage(0)
-              }}
-              showFirstButton
-              showLastButton
-            />
-          </>
-        )}
-      </Box>
+              <TablePagination
+                className='pagination-container'
+                rowsPerPageOptions={[5, 10, 25, 50]}
+                component='div'
+                count={total ?? 0}
+                rowsPerPage={pageSize}
+                page={page}
+                onPageChange={(_, newPage) => setPage(newPage)}
+                onRowsPerPageChange={(event) => {
+                  const newSize = parseInt(event.target.value, 10)
+                  setPageSize(newSize)
+                  setPage(0)
+                }}
+                showFirstButton
+                showLastButton
+              />
+            </>
+          )}
+        </Box>
 
-      <ConfirmationSuccessDialog
-        open={successDialogOpen}
-        onClose={handleCloseSuccessDialog}
-        title='Invitation sent!'
-      >
-        <Typography variant='body2' color='text.secondary'>
-          An invitation has been sent to{' '}
-          <Typography component='span' color='text.primary' fontWeight={700}>
-            {selectedUser?.email}
-          </Typography>{' '}
-          to join{' '}
-          <Typography component='span' color='text.primary' fontWeight={700}>
-            {practiceData?.practice_name}
-          </Typography>{' '}
-          as a{' '}
-          <Typography component='span' color='text.primary' fontWeight={700}>
-            {getRoleLabel(selectedUser?.role)}
+        <ConfirmationSuccessDialog
+          open={successDialogOpen}
+          onClose={handleCloseSuccessDialog}
+          title='Invitation sent!'
+        >
+          <Typography variant='body2' color='text.secondary'>
+            An invitation has been sent to{' '}
+            <Typography component='span' color='text.primary' fontWeight={700}>
+              {selectedUser?.email}
+            </Typography>{' '}
+            to join{' '}
+            <Typography component='span' color='text.primary' fontWeight={700}>
+              {practiceData?.practice_name}
+            </Typography>{' '}
+            as a{' '}
+            <Typography component='span' color='text.primary' fontWeight={700}>
+              {getRoleLabel(selectedUser?.role)}
+            </Typography>
+            .
           </Typography>
-          .
-        </Typography>
 
-        <Typography variant='body2' color='text.secondary' mt={1}>
-          They’ll receive an email with instructions to set up their account.
-        </Typography>
-      </ConfirmationSuccessDialog>
-    </TeamManagementContentWrapper>
+          <Typography variant='body2' color='text.secondary' mt={1}>
+            They’ll receive an email with instructions to set up their account.
+          </Typography>
+        </ConfirmationSuccessDialog>
+      </TeamManagementContentWrapper>
+    </Stack>
   )
 }
 

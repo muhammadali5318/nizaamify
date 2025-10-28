@@ -14,6 +14,7 @@ export const endpoints = {
       `${API_BASE}/practices/${practiceId}/onboarding/steps/5/`
   },
   signup: {
+    requestPracticeAssociation: `${API_BASE}/users/signup/access-requests/`,
     createUser: `${API_BASE}/users/signup/`,
     verifyEmail: `${API_BASE}/users/verify-email/`
   },

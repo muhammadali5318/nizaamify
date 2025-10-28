@@ -6,16 +6,27 @@ interface PageProps {
   description: string
   logo: string
   isDividerVisible?: boolean
+  backgroundColor?: string
+  containerPadding?: string
 }
 
 const PageHeader: React.FC<PageProps> = ({
   title,
   description,
   logo,
-  isDividerVisible = true
+  isDividerVisible = true,
+  backgroundColor = '#FFF',
+  containerPadding = '0px'
 }) => {
   return (
-    <Stack spacing={2.5} width={'100%'}>
+    <Stack
+      spacing={2.5}
+      width={'100%'}
+      sx={{
+        backgroundColor: backgroundColor,
+        padding: containerPadding
+      }}
+    >
       <Stack direction={'row'} spacing={'10px'} alignItems='center'>
         <Avatar
           src={logo}

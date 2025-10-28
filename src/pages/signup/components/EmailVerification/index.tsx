@@ -10,6 +10,8 @@ import { Link, useLocation, useNavigate } from 'react-router'
 import EmailVerificationStatus from './EmailVerificationStatus'
 import { sendVerificationEmail } from 'src/services/auth/emailVerification'
 import Footer from 'src/components/registration-wrapper/Footer'
+import HavingTrouble from 'src/components/contact-support/HavingTrouble'
+import { ContactSupport } from '@mui/icons-material'
 
 type VerificationStatus =
   | 'expired'
@@ -201,9 +203,7 @@ const EmailVerification: React.FC = () => {
                 <>
                   <Typography variant='subtitle1' color='textSecondary'>
                     If you still haven’t received the email, please{' '}
-                    <span className='font-weight--700 info-main cursor-pointer'>
-                      Contact support.
-                    </span>
+                    <ContactSupport />
                   </Typography>
                 </>
               }
@@ -241,9 +241,7 @@ const EmailVerification: React.FC = () => {
                 <>
                   <Typography variant='subtitle1' color='textSecondary'>
                     If you still haven’t received the email, please{' '}
-                    <span className='font-weight--700 info-main cursor-pointer'>
-                      Contact support.
-                    </span>
+                    <ContactSupport />
                   </Typography>
                 </>
               }
@@ -299,12 +297,7 @@ const EmailVerification: React.FC = () => {
                       Sign up
                     </Link>
                   </Typography>
-                  <Typography variant='subtitle1' color='textSecondary'>
-                    Having trouble? Please{' '}
-                    <span className='font-weight--700 info-main cursor-pointer'>
-                      Contact support.
-                    </span>
-                  </Typography>
+                  <HavingTrouble />
                 </>
               }
               onButtonClick={() => navigate('/auth/login')}

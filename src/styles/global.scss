@@ -134,6 +134,10 @@ select {
   height: 32px;
 }
 
+.text-color--primary {
+  color: var(--color-text-primary);
+}
+
 .font-color--warning-dark {
   color: var(--color-warning-dark);
 }

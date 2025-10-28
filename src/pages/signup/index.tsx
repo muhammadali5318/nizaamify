@@ -15,6 +15,7 @@ import { apiClientOpen } from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
 import { sendVerificationEmail } from 'src/services/auth/emailVerification'
 import Footer from 'src/components/registration-wrapper/Footer'
+import RequestPracticeAssociation from './components/RequestPracticeAssociation/RequestPracticeAssociation'
 
 const initialFormData: SignupFormDataSet = {
   firstName: '',
@@ -37,6 +38,18 @@ const initialFormData: SignupFormDataSet = {
   gdpr: false
 }
 
+export type AssociationPayload = {
+  first_name: string
+  last_name: string
+  email: string
+  contact_number: string
+  role: string
+  is_company_director_or_owner: boolean
+  practice_id: string
+  access_request_reason: string
+  practiceName: string
+}
+
 const SignUp: React.FC = () => {
   const [activeStep, setActiveStep] = useState<number>(0)
   const [formData, setFormDataState] =
@@ -44,6 +57,10 @@ const SignUp: React.FC = () => {
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [serverErrors, setServerErrors] = useState<Record<string, string>>({})
+
+  // new state to hold the association payload to pass into RequestPracticeAssociation
+  const [associationPayload, setAssociationPayload] =
+    useState<AssociationPayload | null>(null)
 
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
@@ -112,7 +129,7 @@ const SignUp: React.FC = () => {
     try {
       const response = await apiClientOpen.post(createUser, payload)
       if (response.status === 201) {
-        setActiveStep(3)
+        setActiveStep(4)
         sendVerificationEmail({ email: finalForm?.email })
       }
     } catch (err: any) {
@@ -158,10 +175,37 @@ const SignUp: React.FC = () => {
       // ---- Practice detail error ----
       const practiceDetailErr =
         respData?.practice?.detail && Array.isArray(respData?.practice?.detail)
-          ? respData?.practice?.detail.join(' ')
+          ? respData.practice.detail.join(' ')
           : respData?.practice?.detail
-      if (practiceDetailErr)
+
+      const practiceId =
+        respData?.practice?.practice_id &&
+        Array.isArray(respData.practice.practice_id)
+          ? respData.practice.practice_id[0]
+          : respData?.practice?.practice_id
+
+      if (practiceDetailErr) {
         parsedErrors.practiceAlreadyExist = practiceDetailErr
+      }
+
+      if (practiceId) {
+        // Build the payload exactly as requested
+        const payloadForAssociation: AssociationPayload = {
+          first_name: finalForm.firstName || '',
+          last_name: finalForm.lastName || '',
+          email: finalForm.email || '',
+          contact_number: finalForm.phone || '',
+          role: finalForm.role,
+          is_company_director_or_owner: !!finalForm.isPracticeOwnerOrDirector,
+          practice_id: String(practiceId),
+          access_request_reason: '',
+          practiceName: finalForm?.practiceName
+        }
+
+        // store and navigate to step 3 where RequestPracticeAssociation will receive it
+        setAssociationPayload(payloadForAssociation)
+        setActiveStep(3)
+      }
 
       // ---- General fallback ----
       if (!Object.keys(parsedErrors).length) {
@@ -214,7 +258,17 @@ const SignUp: React.FC = () => {
     }
   }
 
-  if (activeStep === 3) {
+  if (activeStep === 3 || activeStep === 5 || activeStep === 6) {
+    return (
+      <RequestPracticeAssociation
+        setActiveStep={setActiveStep}
+        activeStep={activeStep}
+        payload={associationPayload}
+      />
+    )
+  }
+
+  if (activeStep === 4) {
     return (
       <SendVerificationEmail email={formData.email || 'user@example.com'} />
     )

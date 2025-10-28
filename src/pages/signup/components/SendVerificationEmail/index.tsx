@@ -7,6 +7,7 @@ import RegistrationHeader from 'src/components/registration-wrapper/Registration
 import { notify } from 'src/components/notistack/NotificationProvider'
 import { sendVerificationEmail } from 'src/services/auth/emailVerification'
 import Footer from 'src/components/registration-wrapper/Footer'
+import ContactSupport from 'src/components/contact-support'
 
 type Props = {
   email: string
@@ -193,9 +194,7 @@ const SendVerificationEmail: React.FC<Props> = ({ email }) => {
                 color='var(--color-text-secondary)'
               >
                 If you still haven’t received the email, please{' '}
-                <span className='info-main font-weight--700'>
-                  Contact support.
-                </span>
+                <ContactSupport />
               </Typography>
             </Box>
           </Box>

@@ -12,6 +12,7 @@ import EmailVerificationStatus from '../signup/components/EmailVerification/Emai
 import { paths } from 'src/paths'
 import { endpoints } from 'src/services/backendUrl'
 import Footer from 'src/components/registration-wrapper/Footer'
+import ContactSupport from 'src/components/contact-support'
 
 const InvitedUserOnboarding = () => {
   const [step, setStep] = useState<number | null>(null)
@@ -139,9 +140,7 @@ const InvitedUserOnboarding = () => {
               <>
                 <Typography variant='subtitle1' color='textSecondary'>
                   If you still haven’t received the email, please{' '}
-                  <span className='font-weight--700 info-main cursor-pointer'>
-                    Contact support.
-                  </span>
+                  <ContactSupport />
                 </Typography>
               </>
             }

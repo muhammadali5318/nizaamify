@@ -25,9 +25,9 @@ const EmailVerificationStatus = ({
     <Box className={styles.verificationStatusRoot}>
       <Box>
         <img className={styles.iconDimension} src={iconSrc} alt={iconAlt} />
-      </Box>
 
-      <Box className={styles.verificationStatusContainer}>{children}</Box>
+        <Box className={styles.verificationStatusContainer}>{children}</Box>
+      </Box>
 
       <Box>
         <Button
