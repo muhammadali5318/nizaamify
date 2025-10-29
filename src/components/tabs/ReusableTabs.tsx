@@ -11,6 +11,7 @@ export type ReusableTabItem = {
   activeIcon?: string
   inactiveIcon?: string
   content: React.ReactNode
+  count?: number
 }
 
 interface ReusableTabsProps {
@@ -80,8 +81,35 @@ const ReusableTabs: React.FC<ReusableTabsProps> = ({
           <CenteredTab
             key={String(t.key)}
             value={t.key}
-            label={t.label}
-            // responsive padding & minWidth to avoid forcing layout overflow
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {t.label}
+
+                {t.count ? (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      width: '22px',
+                      height: '22px',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      borderRadius: '33px',
+                      border: '0.917px solid var(--warning-main, #EF6C00)',
+                      background: 'var(--warning-main, #EF6C00)',
+                      color: 'var(--warning-contrast, #FFF)',
+                      fontFamily: 'Roboto',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      lineHeight: '166%', // 18.26px
+                      letterSpacing: '0.367px'
+                    }}
+                  >
+                    {t.count}
+                  </Box>
+                ) : null}
+              </Box>
+            }
             sx={{ minWidth: 'auto', px: { xs: 0.75, sm: 1.5 } }}
             icon={
               t.activeIcon || t.inactiveIcon ? (

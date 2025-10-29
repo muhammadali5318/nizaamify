@@ -2,19 +2,30 @@ import React from 'react'
 import { ReusableTabItem } from 'src/components/tabs/ReusableTabs'
 import { documentsTabsData } from '../config/documentsConfig'
 import UploadedDocuments from '../tabs/UploadDocuments'
-import PendingDocuments from '../tabs/PendingDocuments'
+import FinancialDocumentsList from '../tabs/FinancialDocumentsList'
+import useFetchUploadedDocsList from './useFetchUploadedDocsList'
+
 export default function useDocumentsTabs(): ReusableTabItem[] {
+  // Call hook once here
+  const { total } = useFetchUploadedDocsList({
+    requires_review: true
+  })
+
   return React.useMemo(() => {
     return documentsTabsData.map((t) => {
       let content: React.ReactNode = null
+      let count: number | undefined = t.count
 
       switch (t.key) {
         case 0:
           content = <UploadedDocuments />
           break
+
         case 1:
+          // Pending Documents Tab → Use total from hook
+          count = total
           content = (
-            <PendingDocuments
+            <FinancialDocumentsList
               title='Pending documents'
               description='Search, filter, and manage your uploaded documents'
               icon='/assets/document-upload-card-icon.svg'
@@ -22,9 +33,10 @@ export default function useDocumentsTabs(): ReusableTabItem[] {
             />
           )
           break
+
         case 2:
           content = (
-            <PendingDocuments
+            <FinancialDocumentsList
               title='Upload history'
               description='Search, filter, and manage your uploaded documents'
               icon='/assets/history-Icon-blue.svg'
@@ -32,6 +44,7 @@ export default function useDocumentsTabs(): ReusableTabItem[] {
             />
           )
           break
+
         default:
           content = null
       }
@@ -41,9 +54,9 @@ export default function useDocumentsTabs(): ReusableTabItem[] {
         label: t.label,
         activeIcon: t.activeIcon,
         inactiveIcon: t.inactiveIcon,
-        count: t.count,
+        count, // replace count here
         content
       }
     })
-  }, [])
+  }, [total]) // important: re-run when total changes
 }

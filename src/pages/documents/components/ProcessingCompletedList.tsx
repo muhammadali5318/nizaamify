@@ -24,6 +24,7 @@ import { getModifiedDocuments } from 'src/utils/getModifiedDocs'
 import { clearAll } from 'src/store/slices/processedBatchDataSlice'
 import { clearFiles } from 'src/store/slices/uploadSlice'
 import { useNavigate } from 'react-router'
+import { queryClient } from 'src/utils/queryClient'
 export default function ProcessingCompletedList() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -58,6 +59,10 @@ export default function ProcessingCompletedList() {
 
       await approveDocuments(practiceId, firstBatchId, payloadDocs)
       notify.success('Documents approved successfully!')
+      queryClient.invalidateQueries({
+        queryKey: ['uploadedDocumentListApi'],
+        exact: false
+      })
 
       setSuccessOpen(true)
     } catch (err: any) {

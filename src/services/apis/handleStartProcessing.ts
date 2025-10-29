@@ -7,6 +7,7 @@ import {
 } from '../../store/slices/uploadSlice'
 import { addOrUpdateBatchStatus } from 'src/store/slices/processingSlice'
 import { pollBatchStatusUntilComplete } from 'src/utils/pollProcessApi'
+import { queryClient } from 'src/utils/queryClient'
 
 export const uploadFilesToS3 = async (
   items: any[],
@@ -87,6 +88,10 @@ export const uploadFilesToS3 = async (
               console.error('Processing error:', processError)
               store.dispatch(updateStatus({ id: fileId, status: 'error' }))
               notify.error(`Processing failed for ${filename}`)
+              queryClient.invalidateQueries({
+                queryKey: ['uploadedDocumentListApi'],
+                exact: false
+              })
             }
             resolve()
           } else {

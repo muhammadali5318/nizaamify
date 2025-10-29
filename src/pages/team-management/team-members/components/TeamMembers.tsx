@@ -89,12 +89,13 @@ type NoResultsBoxProps = {
   searchKey: string
   onClear: () => void
   noSearchText?: string
+  isAnyFilterApplied: boolean | undefined
 }
 export const NoResultsBox: React.FC<NoResultsBoxProps> = ({
   loading,
   searchKey,
   onClear,
-  noSearchText
+  isAnyFilterApplied
 }) => {
   if (loading) {
     return (
@@ -104,7 +105,23 @@ export const NoResultsBox: React.FC<NoResultsBoxProps> = ({
     )
   }
 
-  const hasQuery = Boolean(searchKey && searchKey.length > 0)
+  if (!isAnyFilterApplied) {
+    return (
+      <Box
+        sx={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          color: 'text.secondary'
+        }}
+      >
+        <Typography variant='body2'>No data available.</Typography>
+      </Box>
+    )
+  }
+
   return (
     <Box
       sx={{
@@ -120,22 +137,23 @@ export const NoResultsBox: React.FC<NoResultsBoxProps> = ({
     >
       <Box>
         <Typography variant='body2'>
-          {hasQuery ? (
+          {searchKey ? (
             <>
               Your search for <strong>&apos;{searchKey}&apos;</strong> did not
               match any results.
             </>
           ) : (
-            (noSearchText ?? 'Your search did not match any results.')
+            'Your filters did not match any results.'
           )}
         </Typography>
 
         <Typography variant='body2'>
-          Please try again with different keywords or adjust the filters.
+          Try adjusting or clearing your filters.
         </Typography>
       </Box>
+
       <Button variant='outlined' onClick={onClear}>
-        Clear All Filter
+        Clear All Filters
       </Button>
     </Box>
   )

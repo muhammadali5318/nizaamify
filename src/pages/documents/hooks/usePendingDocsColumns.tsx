@@ -1,74 +1,112 @@
 import { useMemo } from 'react'
 import { GridColDef, GridCellParams } from '@mui/x-data-grid'
-import { Box, Typography, IconButton, Tooltip, Button } from '@mui/material'
+import {
+  Box,
+  Typography,
+  IconButton,
+  Tooltip,
+  Button,
+  CircularProgress
+} from '@mui/material'
 import dayjs from 'dayjs'
-import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined'
+import { bytesToReadableSize } from 'src/utils/bytesToMB'
 
 type Handlers = {
   onView: () => void
-  onViewDownload: () => void
+  onViewDownload: (id: string) => void
   onSwap?: (id: string) => void
   onNominate?: (id: string) => void
 }
 
 export const usePendingDocsColumns = (
   handlers: Handlers,
-  isPendingDocments: boolean
+  isPendingDocuments: boolean,
+  downloadingId: string | null
 ) => {
   const { onView, onViewDownload } = handlers
 
   const columns: GridColDef[] = useMemo(
     () => [
       {
-        field: 'Document-name',
+        field: 'file_name',
         headerName: 'Document name',
         minWidth: 250,
         flex: 1,
         sortable: false,
-        renderCell: (params: GridCellParams) => (
-          <Typography variant='body2'>{params.value}</Typography>
-        )
+        renderCell: (params: GridCellParams) => {
+          const fileName = params?.row?.file_name || ''
+          const fileSize = params?.row?.file_size
+
+          return (
+            <Box>
+              <Tooltip placement='top' title={fileName}>
+                <Typography
+                  variant='body2'
+                  noWrap
+                  sx={{
+                    maxWidth: 220,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    display: 'block'
+                  }}
+                >
+                  {fileName}
+                </Typography>
+              </Tooltip>
+              <Typography variant='body2'>
+                {bytesToReadableSize(fileSize)}
+              </Typography>
+            </Box>
+          )
+        }
       },
       {
-        field: 'type',
+        field: 'document_type',
         headerName: 'Type',
         minWidth: 140,
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => (
-          <Typography variant='body2'>{params.value}</Typography>
+          <Typography variant='body2'>
+            {params?.row?.document_type ?? '-'}
+          </Typography>
         )
       },
       {
-        field: 'Subtype',
+        field: 'document_subtype',
         headerName: 'Subtype',
         minWidth: 130,
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => (
-          <Typography variant='body2'>{params.value}</Typography>
+          <Typography variant='body2'>
+            {params?.row?.document_subtype ?? '-'}
+          </Typography>
         )
       },
       {
-        field: 'Document date',
+        field: 'upload_timestamp',
         headerName: 'Document date',
         minWidth: 140,
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => (
           <Typography variant='body2'>
-            {dayjs(params.value as string).format('DD MMM YYYY')}
+            {dayjs(params?.row?.upload_timestamp as string).format(
+              'DD MMM YYYY'
+            )}
           </Typography>
         )
       },
       {
-        field: 'Uploaded-by',
+        field: 'user_name',
         headerName: 'Uploaded by',
         minWidth: 140,
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => (
-          <Typography variant='body2'>{params.value}</Typography>
+          <Typography variant='body2'>{params?.row?.user_name}</Typography>
         )
       },
       {
@@ -77,35 +115,45 @@ export const usePendingDocsColumns = (
         minWidth: 200,
         flex: 1,
         sortable: false,
-        renderCell: () => (
-          <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
-            <Tooltip title='View document'>
-              <IconButton size='small'>
-                <RemoveRedEyeOutlinedIcon
-                  fontSize='small'
-                  onClick={() => onViewDownload()}
-                />
-              </IconButton>
-            </Tooltip>
-            {isPendingDocments ? (
-              <Button size='small' variant='outlined' onClick={() => onView()}>
-                Add Payment Date
-              </Button>
-            ) : (
-              <Tooltip title='View document'>
-                <IconButton size='small'>
-                  <img
-                    src='/assets/document-download.svg'
-                    alt='download icon'
-                  />
-                </IconButton>
+        renderCell: (params: GridCellParams) => {
+          const isRowLoading = downloadingId === params?.row?.id
+
+          return (
+            <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+              <Tooltip title='Download document' placement='top'>
+                <span>
+                  <IconButton
+                    size='small'
+                    onClick={() => onViewDownload(params?.row?.id)}
+                    disabled={!!downloadingId}
+                  >
+                    {isRowLoading ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                      <img
+                        src='/assets/document-download.svg'
+                        alt='download icon'
+                      />
+                    )}
+                  </IconButton>
+                </span>
               </Tooltip>
-            )}
-          </Box>
-        )
+
+              {isPendingDocuments && (
+                <Button
+                  size='small'
+                  variant='outlined'
+                  onClick={() => onView()}
+                >
+                  Add Payment Date
+                </Button>
+              )}
+            </Box>
+          )
+        }
       }
     ],
-    [onView, onViewDownload]
+    [onView, onViewDownload, isPendingDocuments, downloadingId]
   )
 
   return columns
