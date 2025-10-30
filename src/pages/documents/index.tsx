@@ -8,32 +8,66 @@ import { documentsTabsData } from './config/documentsConfig'
 import { useInitialData } from '../../hooks/useFetchInitialData'
 import { useNavigate } from 'react-router'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import apiClient from 'src/services/api-client'
+
+import { notify } from 'src/components/notistack/NotificationProvider'
+import { useAuth0 } from '@auth0/auth0-react'
+
 const DocumentsPage: React.FC = () => {
-  const [stats] = useState({
-    all: 3,
-    uploaded: 3,
-    review: 3
+  const [stats, setStats] = useState({
+    all: 0,
+    uploaded: 0,
+    review: 0
   })
 
   const tabs = useDocumentsTabs()
   const navigate = useNavigate()
-
   const { data, isLoading, isError } = useInitialData(true)
+
+  const { user } = useAuth0()
+
+  const practiceId = user?.organizations_with_roles?.[0]?.metadata?.uuid
 
   const practiceName = data?.practice_name || 'Your'
 
   useEffect(() => {
-    if (data) console.warn('Initial Data:', data)
-  }, [data])
+    const fetchDocumentCounts = async () => {
+      if (!practiceId) return
 
-  const handleNavigateToSettings = () => {
-    navigate('/settings')
-  }
-  const toTitleCase = (text: string) => {
-    return text
-      ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()
-      : ''
-  }
+      try {
+        const response = await apiClient.get(
+          `/docs/v1/practices/${practiceId}/document-counts/`
+        )
+
+        if (response.data?.status && response.data?.data) {
+          const {
+            user_documents_count,
+            practice_documents_count,
+            practice_documents_review_count
+          } = response.data.data
+
+          setStats({
+            all: practice_documents_count,
+            uploaded: user_documents_count,
+            review: practice_documents_review_count
+          })
+        } else {
+          notify.error('Failed to retrieve document counts.')
+        }
+      } catch (error) {
+        console.error('Error fetching document counts:', error)
+        notify.error('Unable to fetch document counts.')
+      }
+    }
+
+    fetchDocumentCounts()
+  }, [practiceId])
+
+  const handleNavigateToSettings = () => navigate('/settings')
+
+  const toTitleCase = (text: string) =>
+    text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : ''
+
   const accountingBasis = toTitleCase(data?.accounting_basis || 'N/A')
 
   return (
@@ -42,7 +76,6 @@ const DocumentsPage: React.FC = () => {
         className={styles.headerBanner}
         sx={{
           textAlign: { xs: 'center', md: 'left' },
-
           color: '#01579B',
           backgroundColor: '#F2F9FC',
           width: '100%',
@@ -74,13 +107,12 @@ const DocumentsPage: React.FC = () => {
               <b>accounting basis</b> is set to{' '}
               <span
                 style={{
-                  color: 'primary.main',
+                  color: '#01579B',
                   fontWeight: 'bold'
                 }}
               >
-                {' '}
                 {accountingBasis} mode.
-              </span>
+              </span>{' '}
               You can change this mode anytime in
               <Link
                 component='button'

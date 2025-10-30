@@ -20,7 +20,7 @@ export const useFetchSortedPaginatedData = (
       if (nextField === currField && nextSort === currSort) return
 
       setSortModel(model)
-      setPage(0) // reset to first page when sorting changes
+      setPage(0)
     },
     [sortModel]
   )

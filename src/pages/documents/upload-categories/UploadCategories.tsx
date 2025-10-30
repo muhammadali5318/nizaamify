@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Typography } from '@mui/material'
+import { Box, Card, CardContent, Typography } from '@mui/material'
 import DocumentCategoryCard from '../components/DocumentCategoryCard'
 import styles from '../documents.module.scss'
 import incomeIcon from '../../../../public/assets/income-icon.svg'
@@ -96,7 +96,76 @@ const UploadCategories: React.FC = () => {
           <Typography variant='h6' mb={2} mt={2}>
             Document Categories & Examples
           </Typography>
+          <Box
+            className={styles.practiceInfoBox}
+            sx={{
+              display: 'flex',
+              gap: 2,
+              mb: 3,
+              flexWrap: 'wrap'
+            }}
+          >
+            <Card
+              sx={{
+                flex: 1,
+                minWidth: '300px',
+                backgroundColor: '#F2F9FD'
+              }}
+            >
+              <CardContent>
+                <Typography
+                  variant='subtitle1'
+                  fontWeight='bold'
+                  gutterBottom
+                  color='#01579B'
+                >
+                  SQUAT and PRIVATE PRACTICE
+                </Typography>
+                <Box component='ul' sx={{ pl: 3, m: 0 }}>
+                  <li>
+                    <Typography variant='body2'>
+                      If they are accrual basis: allocated payments report (or
+                      equivalent report depending on the software they use)
+                    </Typography>
+                  </li>
+                  <li>
+                    <Typography variant='body2'>
+                      Cash basis: Income from bank statement
+                    </Typography>
+                  </li>
+                </Box>
+              </CardContent>
+            </Card>
 
+            <Card
+              sx={{ flex: 1, minWidth: '300px', backgroundColor: '#F2F9FD' }}
+            >
+              <CardContent>
+                <Typography
+                  variant='subtitle1'
+                  fontWeight='bold'
+                  gutterBottom
+                  color='#01579B'
+                >
+                  NHS and MIXED
+                </Typography>
+                <Box component='ul' sx={{ pl: 3, m: 0 }}>
+                  <li>
+                    <Typography variant='body2'>
+                      If they are accrual basis: allocated payments report (or
+                      equivalent report depending on the software they use) +
+                      NHS compass statement
+                    </Typography>
+                  </li>
+                  <li>
+                    <Typography variant='body2'>
+                      Cash basis: Income from bank statement
+                    </Typography>
+                  </li>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
           <Box className={styles.categoriesGrid}>
             {categories.map((cat, idx) => (
               <DocumentCategoryCard

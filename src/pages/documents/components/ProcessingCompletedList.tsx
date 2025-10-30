@@ -25,6 +25,7 @@ import { clearAll } from 'src/store/slices/processedBatchDataSlice'
 import { clearFiles } from 'src/store/slices/uploadSlice'
 import { useNavigate } from 'react-router'
 import { queryClient } from 'src/utils/queryClient'
+import NotificationBanner from 'src/components/common/NotificationBanner'
 export default function ProcessingCompletedList() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -108,6 +109,8 @@ export default function ProcessingCompletedList() {
           Approve and continue
         </Button>
       </Box>
+
+      <NotificationBanner content='Make sure to review the extracted data before approving them. These data will be used in calculating financial records of your practice.' />
 
       {allDocuments.map((doc) => (
         <Card

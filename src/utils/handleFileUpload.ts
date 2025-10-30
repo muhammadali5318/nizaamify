@@ -5,7 +5,8 @@ import { notify } from '../components/notistack/NotificationProvider'
 
 export const handleFileUpload = (
   e: React.ChangeEvent<HTMLInputElement>,
-  dispatch: AppDispatch
+  dispatch: AppDispatch,
+  currentFilesCount: number = 0
 ) => {
   const selectedFiles = Array.from(e.target.files || [])
 
@@ -20,7 +21,16 @@ export const handleFileUpload = (
     'xlsm'
   ]
 
-  const maxSize = 10 * 1024 * 1024 // 10MB
+  const maxSize = 10 * 1024 * 1024
+
+  if (currentFilesCount + selectedFiles.length > 5) {
+    notify.error(
+      `You have exceeded the file upload limit. All selected files have been discarded. (Max 5 files allowed at a time.)`
+    )
+    e.target.value = ''
+    return
+  }
+
   const validFiles = []
 
   for (const file of selectedFiles) {
@@ -30,7 +40,7 @@ export const handleFileUpload = (
 
     if (!isAllowed) {
       notify.error(
-        `One or more files could not be uploaded. Supported formats: PDF, PNG, JPG, CSV. ${file.name}`
+        `Unsupported file format: ${file.name}. Allowed: PDF, PNG, JPG, CSV.`
       )
       continue
     }
@@ -53,7 +63,7 @@ export const handleFileUpload = (
     dispatch(addFiles(validFiles))
     notify.success(`${validFiles.length} file(s) added successfully`)
   } else {
-    notify.info('No valid files were added.')
+    console.warn('No valid files were added.')
   }
 
   e.target.value = ''

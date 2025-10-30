@@ -6,10 +6,11 @@
   flex: 1 0 0;
   border-radius: 24px;
   background: var(--grey-100, #f5f5f5);
+  min-height: 17vh;
 
   @media (max-width: 768px) {
     width: 100%;
-    padding: 12px;
+    padding: 16px;
   }
 }
 
