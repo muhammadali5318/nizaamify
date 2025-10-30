@@ -12,6 +12,7 @@ import { uploadFilesToS3 } from 'src/services/apis/handleStartProcessing'
 import { setPresignData } from 'src/store/slices/presignedSlice'
 import { getFileIcon } from 'src/utils/getFileIcon'
 import spinner from '../../../assets/spinnergif.gif'
+import NotificationBanner from 'src/components/common/NotificationBanner'
 export default function UploadQueue() {
   const dispatch = useDispatch()
   const { files } = useSelector((state: RootState) => state.uploads)
@@ -72,7 +73,7 @@ export default function UploadQueue() {
           alignItems: 'baseline'
         }}
       >
-        <Typography variant='subtitle1' mb={1}>
+        <Typography sx={{ fontWeight: '700' }} mb={1}>
           Upload queue ({files.length}/5)
         </Typography>
 
@@ -94,7 +95,12 @@ export default function UploadQueue() {
           {loading ? 'Processing...' : 'Start documents processing'}
         </Button>
       </Box>
-
+      {files.some((f) => f.status === 'queued') && (
+        <NotificationBanner content='Please review your uploaded documents carefully, these files will be used to process and update your practice’s financial data.' />
+      )}
+      {files.some((f) => f.status === 'processing') && (
+        <NotificationBanner content='Your documents are now being processed. This may take a few moments, please stay patient while our system analyses and extracts the financial data.' />
+      )}
       {files.map((file) => (
         <Box
           key={file.id}

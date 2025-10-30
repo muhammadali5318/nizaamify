@@ -35,9 +35,11 @@ export default function DocumentUploadBox() {
       const event = {
         target: { files: droppedFiles }
       } as unknown as React.ChangeEvent<HTMLInputElement>
-      handleFileUpload(event, dispatch)
+
+      handleFileUpload(event, dispatch, files.length)
     }
   }
+
   const { completedFiles } = useSelector((state: RootState) => state.uploads)
   const batches = useSelector((state: RootState) => state.processed.batches)
   console.warn(batches)
@@ -56,15 +58,45 @@ export default function DocumentUploadBox() {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            sx={{
-              border: isDragging ? '2px dashed #1976d2' : '2px dashed #ccc',
-              borderRadius: '12px',
-              padding: '24px',
-              transition: 'border 0.2s ease-in-out',
-              backgroundColor: isDragging ? '#f0f8ff' : '#fff'
-            }}
           >
-            {files.length > 0 && (
+            {files.length === 0 ? (
+              <Box
+                sx={{
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <p> </p>
+                <Box
+                  mb={1}
+                  sx={{
+                    backgroundColor: '#E5F6FD',
+                    padding: '10px 10px',
+                    borderRadius: '12px',
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'flex-start',
+                    gap: '8px'
+                  }}
+                >
+                  <Box sx={{ color: '#0288D1' }}>
+                    <ErrorOutlineIcon />
+                  </Box>
+                  <Typography
+                    sx={{
+                      color: '#014361',
+                      fontWeight: 500,
+                      fontSize: 'Medium'
+                    }}
+                  >
+                    {files.length}/5 files uploaded
+                  </Typography>
+                </Box>
+              </Box>
+            ) : (
               <Box
                 sx={{
                   height: '20px',
@@ -141,7 +173,7 @@ export default function DocumentUploadBox() {
                   hidden
                   type='file'
                   multiple
-                  onChange={(e) => handleFileUpload(e, dispatch)}
+                  onChange={(e) => handleFileUpload(e, dispatch, files.length)}
                 />
               </Button>
             </Box>

@@ -29,7 +29,7 @@ const DocumentCategoryCard: React.FC<DocumentCategoryCardProps> = ({
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleFileUpload(e, dispatch)
+    handleFileUpload(e, dispatch, files.length)
   }
 
   return (
