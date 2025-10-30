@@ -10,6 +10,8 @@ import { useAuth } from 'src/context/AuthProvider'
 import { paths } from 'src/paths'
 import ErrorBoundary from 'src/components/common/error-boundary'
 import { SplashScreen } from 'src/components/common/SplashScreen'
+import { CONFIG } from 'src/config-global'
+import Placeholder from 'src/components/common/Placeholder'
 
 // lazy pages
 const Dashboard = lazy(() => import('src/pages/dashboard'))
@@ -88,7 +90,11 @@ export function Router() {
             path: paths.documents,
             element: (
               <FeatureProtectedRoute moduleId='documents'>
-                <Documents />
+                {CONFIG.envName === 'dev' ? (
+                  <Documents />
+                ) : (
+                  <Placeholder title='Document' />
+                )}
               </FeatureProtectedRoute>
             )
           },
@@ -120,7 +126,11 @@ export function Router() {
             path: paths.teamManagement.root,
             element: (
               <FeatureProtectedRoute moduleId='team-management'>
-                <TeamManagement />
+                {CONFIG.envName === 'dev' ? (
+                  <TeamManagement />
+                ) : (
+                  <Placeholder title='TeamManagement' />
+                )}
               </FeatureProtectedRoute>
             )
           },
