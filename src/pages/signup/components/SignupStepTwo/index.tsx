@@ -47,7 +47,6 @@ const SignupStepTwo: React.FC<Props> = ({
       practiceName: formData.practiceName,
       street: formData.street,
       city: formData.city,
-      country: formData.country,
       postcode: formData.postcode,
       practiceEmail: formData.practiceEmail
     }
@@ -58,7 +57,6 @@ const SignupStepTwo: React.FC<Props> = ({
       practiceName: formData.practiceName,
       street: formData.street,
       city: formData.city,
-      country: formData.country,
       postcode: formData.postcode,
       practiceEmail: formData.practiceEmail
     })
@@ -69,7 +67,6 @@ const SignupStepTwo: React.FC<Props> = ({
       practiceName: data.practiceName,
       street: data.street,
       city: data.city,
-      country: data.country,
       postcode: data.postcode,
       practiceEmail: data.practiceEmail
     })
@@ -83,7 +80,6 @@ const SignupStepTwo: React.FC<Props> = ({
       practiceName: values.practiceName ?? '',
       street: values.street ?? '',
       city: values.city ?? '',
-      country: values.country ?? '',
       postcode: values.postcode ?? '',
       practiceEmail: values.practiceEmail ?? ''
     }
@@ -138,37 +134,20 @@ const SignupStepTwo: React.FC<Props> = ({
               )}
             />
 
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <Controller
-                name='city'
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    required
-                    fullWidth
-                    label='City'
-                    error={!!errors.city}
-                    helperText={errors.city?.message}
-                  />
-                )}
-              />
-
-              <Controller
-                name='country'
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    required
-                    fullWidth
-                    label='Country'
-                    error={!!errors.country}
-                    helperText={errors.country?.message}
-                  />
-                )}
-              />
-            </Stack>
+            <Controller
+              name='city'
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  required
+                  fullWidth
+                  label='Town/City'
+                  error={!!errors.city}
+                  helperText={errors.city?.message}
+                />
+              )}
+            />
 
             <Controller
               name='postcode'

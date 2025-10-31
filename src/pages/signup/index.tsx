@@ -27,7 +27,6 @@ const initialFormData: SignupFormDataSet = {
   practiceName: '',
   street: '',
   city: '',
-  country: '',
   postcode: '',
   practiceEmail: '',
   password: '',

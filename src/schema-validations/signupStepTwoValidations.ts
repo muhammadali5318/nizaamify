@@ -10,7 +10,6 @@ export const SignupStepTwoSchema = z.object({
     .max(40, 'Practice name must not exceed 40 characters'),
   street: z.string().nonempty('Street is required'),
   city: z.string().nonempty('City is required'),
-  country: z.string().nonempty('Country is required'),
   postcode: z
     .string()
     .nonempty('Postcode is required')

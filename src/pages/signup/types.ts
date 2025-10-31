@@ -35,7 +35,6 @@ export type SignupFormDataSet = {
   practiceName: string
   street: string
   city: string
-  country: string
   postcode: string
   practiceEmail: string
 

@@ -20,10 +20,7 @@ export const generatePayloadForSignUp = (form: SignupFormDataSet) => {
     },
     practice: {
       practice_name: form.practiceName,
-      // join address fields into a single string (adjust as backend expects)
-      address: [form.street, form.city, form.country]
-        .filter(Boolean)
-        .join(', '),
+      address: [form.street, form.city].filter(Boolean).join(', '),
       postcode: form.postcode,
       email: form.practiceEmail
     },
