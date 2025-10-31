@@ -89,7 +89,7 @@ type NoResultsBoxProps = {
   searchKey: string
   onClear: () => void
   noSearchText?: string
-  isAnyFilterApplied: boolean | undefined
+  isAnyFilterApplied?: boolean | undefined
 }
 export const NoResultsBox: React.FC<NoResultsBoxProps> = ({
   loading,

@@ -11,7 +11,7 @@ import EmailVerificationStatus from './EmailVerificationStatus'
 import { sendVerificationEmail } from 'src/services/auth/emailVerification'
 import Footer from 'src/components/registration-wrapper/Footer'
 import HavingTrouble from 'src/components/contact-support/HavingTrouble'
-import { ContactSupport } from '@mui/icons-material'
+import ContactSupport from 'src/components/contact-support'
 
 type VerificationStatus =
   | 'expired'
@@ -229,7 +229,7 @@ const EmailVerification: React.FC = () => {
             // Copied same component/structure as 'expired' case (per request).
             <EmailVerificationStatus
               iconSrc='/assets/warning.svg'
-              iconAlt='Email not verified'
+              iconAlt='Email not verifiedd'
               buttonText={
                 cooldown > 0
                   ? `Send new verification email (${cooldown}s)`

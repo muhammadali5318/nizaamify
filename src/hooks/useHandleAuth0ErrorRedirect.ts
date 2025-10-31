@@ -23,10 +23,13 @@ export default function useAuthErrorRedirect(): string | null {
         ''
       const decoded = decodeURIComponent(rawErrorDesc || '')
       const errorDesc = decoded.toLowerCase()
-
       // Map of substring -> redirect path. Add more handlers here if needed.
       const ERROR_MATCHERS: Array<{ match: string; path: string }> = [
-        { match: 'email_not_verified', path: '/auth/verify-email' }
+        { match: 'email_not_verified', path: '/auth/verify-email' },
+        {
+          match: 'your account has been deactivated',
+          path: 'logout'
+        }
       ]
 
       if (error) {
@@ -58,10 +61,10 @@ export default function useAuthErrorRedirect(): string | null {
             if (auth0Id) {
               // ensure we don't accidentally double-encode
               const encoded = encodeURIComponent(auth0Id)
-              return `${e.path}?auth0Id=${encoded}`
+              return `${window.location.origin}${e.path}?auth0Id=${encoded}`
             }
 
-            return e.path
+            return window.location.origin
           }
         }
       }

@@ -29,6 +29,7 @@ import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
 import UpdateMemberRoleModal from '../components/UpdateMemberRoleModal'
 import DeactivateUserModal, { Mode } from '../components/DeactivateUserModal'
+import { toTitleCase } from 'src/utils/stringUtils'
 
 interface TeamMembersProps {
   onCountsUpdate?: (counts: {
@@ -242,7 +243,9 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
                 )
                 setPage(0)
               }}
-              renderValue={(selected) => (selected as string[]).join(', ')}
+              renderValue={(selected) =>
+                toTitleCase((selected as string[]).join(', '))
+              }
               label='Role'
               MenuProps={MenuProps}
             >

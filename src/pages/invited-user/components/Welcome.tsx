@@ -1,5 +1,6 @@
 import { Box, Typography, Button } from '@mui/material'
 import styles from './Welcome.module.scss'
+import { toTitleCase } from 'src/utils/stringUtils'
 
 // Define props type
 type WelcomeProps = {
@@ -24,7 +25,10 @@ const Welcome: React.FC<WelcomeProps> = ({
         </Typography>
         <Typography variant='subtitle1'>
           You’ve been added as a{' '}
-          <span className='font-weight--700'> {inviteeRole}. </span>
+          <span className='font-weight--700'>
+            {' '}
+            {toTitleCase(inviteeRole ?? '')}.{' '}
+          </span>
         </Typography>
       </Box>
       <Box className='center-align-width--100'>

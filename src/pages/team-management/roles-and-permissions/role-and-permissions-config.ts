@@ -31,9 +31,9 @@ export const TEAM_ROLES_MENU: any[] = [
   },
   {
     id: 'practice-viewer',
-    label: 'Practice Viewer',
-    title: 'Practice Viewer',
-    description: 'Practice Viewer access and permissions',
+    label: 'Practice User',
+    title: 'Practice User',
+    description: 'Practice User access and permissions',
     component: PracticeViewer
   }
 ]

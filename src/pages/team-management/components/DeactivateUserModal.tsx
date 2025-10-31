@@ -16,6 +16,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { queryClient } from 'src/utils/queryClient'
 import { TeamMemberRow } from '../team-members'
+import { toTitleCase } from 'src/utils/stringUtils'
 
 export type Mode = 'unlink' | 'delete' | ''
 
@@ -37,7 +38,7 @@ const DEFAULTS: any = {
         <Typography variant='subtitle1'>
           Are you sure you want to unlink{' '}
           <strong>
-            {member?.user_name} ({member?.user_role})
+            {member?.user_name} ({toTitleCase(member?.user_role)})
           </strong>{' '}
           from <strong>{practiceName}</strong>?
         </Typography>
@@ -58,7 +59,7 @@ const DEFAULTS: any = {
         <Typography variant='subtitle1'>
           Are you sure you want to remove{' '}
           <strong>
-            {member?.user_name} ({member?.user_role})
+            {member?.user_name} ({toTitleCase(member?.user_role)})
           </strong>{' '}
           from <strong>{practiceName}</strong>?
         </Typography>

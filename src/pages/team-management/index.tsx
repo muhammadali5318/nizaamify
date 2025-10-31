@@ -7,8 +7,12 @@ import StatsCard from 'src/components/team-management/StatsCard'
 import useTeamManagementTabs from './hooks/useTeamManagementTabs'
 import { ReusableTabs } from 'src/components/tabs'
 import { tabsData } from './team-management-config'
+import { useAuth } from 'src/context/AuthProvider'
+import { useInitialData } from 'src/hooks/useFetchInitialData'
 
 const TeamManagement: React.FC = () => {
+  const { accessToken } = useAuth()
+  const { data: practiceData } = useInitialData(!!accessToken)
   const [teamCounts, setTeamCounts] = useState({
     total_users: 0,
     active_users: 0,
@@ -27,7 +31,7 @@ const TeamManagement: React.FC = () => {
     <Box className={styles.teamManagementRoot}>
       <ModuleHeader
         avatarSrc='/assets/team-management.svg'
-        heading='Grayford practice management'
+        heading={practiceData?.practice_name}
         subheading='Manage your practice team members, roles, and permissions'
       />
 

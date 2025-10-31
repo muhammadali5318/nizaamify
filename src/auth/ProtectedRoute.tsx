@@ -20,7 +20,7 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = function ProtectedRoute({
   if (redirectTo) {
     logout({
       logoutParams: {
-        returnTo: `${window.location.origin}${redirectTo}`
+        returnTo: redirectTo
       }
     })
     return null
