@@ -1,14 +1,27 @@
-import { Box, TablePagination, Typography } from '@mui/material'
+import { Box, TablePagination } from '@mui/material'
 import PageHeader from 'src/components/page-header'
 import styles from './PendingRequests.module.scss'
 import { DataGrid } from '@mui/x-data-grid'
 import { teamMembersSx } from '../../team-management-config'
 import { useFetchSortedPaginatedData } from 'src/hooks/useFetchSortedData.'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import useFetchTeamMembers from '../../hooks/useFetchTeamMembers'
 import { usePendingRequestsColumns } from '../hooks/usePendingRequestsColumns'
+import ApproveOrRejectRequest, {
+  ApproveOrReject
+} from './ApproveOrRejectRequest'
 
 const PendingRequests = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalMode, setModalMode] = useState<ApproveOrReject>('')
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
+
+  const actionHandler = (userId: string, mode: ApproveOrReject) => {
+    setSelectedUserId(userId)
+    setModalMode(mode)
+    setIsModalOpen(true)
+  }
+
   const {
     sortModel,
     page,
@@ -29,14 +42,9 @@ const PendingRequests = () => {
     sortOrder
   })
 
-  const handleInvite = () => {
-    // eslint-disable-next-line no-console
-    console.log('hello world')
-  }
+  const handlers = { onApprove: actionHandler, onReject: actionHandler }
 
-  const handlers = { onInvite: handleInvite }
   const columns = usePendingRequestsColumns(handlers)
-
   const totalMinWidth = useMemo(() => {
     return columns.reduce((sum, col) => {
       const colMin = (col as any).minWidth ?? (col as any).width ?? 120
@@ -47,6 +55,7 @@ const PendingRequests = () => {
   const getRowClassName = (params: any) =>
     params.row.status === 'Disabled' ? styles.rowDisabled : ''
 
+  if (items?.length === 0) return
   return (
     <Box className={styles.pendingRequestsRoot}>
       <PageHeader
@@ -67,104 +76,88 @@ const PendingRequests = () => {
           boxSizing: 'border-box'
         }}
       >
-        {/* {items?.length === 0 && !isLoading ? ( */}
-        {items?.length === 0 && !isLoading ? (
+        <Box
+          sx={{
+            width: '100%',
+            maxWidth: '90vw',
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            boxSizing: 'border-box'
+          }}
+        >
           <Box
-            height={200}
-            display='flex'
-            alignItems='center'
-            justifyContent='center'
-            flexDirection='column'
+            sx={{
+              minWidth: `${totalMinWidth}px`,
+              width: '100%',
+              boxSizing: 'border-box'
+            }}
           >
-            <img
-              src='/assets/no-invite-icon.svg'
-              alt='No invitations found'
-              style={{ maxHeight: 336, objectFit: 'contain' }}
-            />
-            <Typography variant='body1' color='text.primary' fontWeight={700}>
-              No Pending Request
-            </Typography>
-          </Box>
-        ) : (
-          <>
-            <Box
+            <DataGrid
+              rows={items}
+              columns={columns}
+              getRowClassName={getRowClassName}
+              getRowId={(row) => row.id}
+              pageSizeOptions={[5, 10, 25, { value: -1, label: 'All' }]}
+              disableColumnMenu
+              disableColumnResize
+              rowHeight={56}
+              hideFooter
+              sortingMode='server'
+              sortModel={sortModel}
+              onSortModelChange={handleSortChange}
+              loading={isLoading}
               sx={{
+                ...teamMembersSx,
                 width: '100%',
-                maxWidth: '90vw',
-                overflowX: 'auto',
-                WebkitOverflowScrolling: 'touch',
-                boxSizing: 'border-box'
-              }}
-            >
-              <Box
-                sx={{
-                  minWidth: `${totalMinWidth}px`,
-                  width: '100%',
-                  boxSizing: 'border-box'
-                }}
-              >
-                <DataGrid
-                  rows={items}
-                  columns={columns}
-                  getRowClassName={getRowClassName}
-                  getRowId={(row) => row.id}
-                  pageSizeOptions={[5, 10, 25, { value: -1, label: 'All' }]}
-                  disableColumnMenu
-                  disableColumnResize
-                  rowHeight={56}
-                  hideFooter
-                  sortingMode='server'
-                  sortModel={sortModel}
-                  onSortModelChange={handleSortChange}
-                  loading={isLoading}
-                  sx={{
-                    ...teamMembersSx,
-                    width: '100%',
-                    minWidth: `${totalMinWidth}px`,
-                    boxSizing: 'border-box',
-                    '& .MuiDataGrid-virtualScroller': {
-                      overflowX: 'hidden'
-                    },
-                    '& .MuiDataGrid-cell': {
-                      py: 1
-                    },
-                    '& .MuiDataGrid-row': {
-                      backgroundColor: 'rgba(239, 108, 0, 0.04)'
-                    },
-                    '& .MuiDataGrid-row:hover': {
-                      backgroundColor: 'rgba(239, 108, 0, 0.08)'
-                    },
-                    '& .MuiDataGrid-row.Mui-selected': {
-                      backgroundColor: 'rgba(239, 108, 0, 0.12) !important'
-                    },
+                minWidth: `${totalMinWidth}px`,
+                boxSizing: 'border-box',
+                '& .MuiDataGrid-virtualScroller': {
+                  overflowX: 'hidden'
+                },
+                '& .MuiDataGrid-cell': {
+                  py: 1
+                },
+                '& .MuiDataGrid-row': {
+                  backgroundColor: 'rgba(239, 108, 0, 0.04)'
+                },
+                '& .MuiDataGrid-row:hover': {
+                  backgroundColor: 'rgba(239, 108, 0, 0.08)'
+                },
+                '& .MuiDataGrid-row.Mui-selected': {
+                  backgroundColor: 'rgba(239, 108, 0, 0.12) !important'
+                },
 
-                    '& .MuiDataGrid-columnHeaders': {
-                      backgroundColor: '#ffffff !important'
-                    }
-                  }}
-                />
-              </Box>
-            </Box>
-
-            <TablePagination
-              className='pagination-container'
-              rowsPerPageOptions={[5, 10, 25, 50]}
-              component='div'
-              count={total ?? 0}
-              rowsPerPage={pageSize}
-              page={page}
-              onPageChange={(_, newPage) => setPage(newPage)}
-              onRowsPerPageChange={(event) => {
-                const newSize = parseInt(event.target.value, 10)
-                setPageSize(newSize)
-                setPage(0)
+                '& .MuiDataGrid-columnHeaders': {
+                  backgroundColor: '#ffffff !important'
+                }
               }}
-              showFirstButton
-              showLastButton
             />
-          </>
-        )}
+          </Box>
+        </Box>
+
+        <TablePagination
+          className='pagination-container'
+          rowsPerPageOptions={[5, 10, 25, 50]}
+          component='div'
+          count={total ?? 0}
+          rowsPerPage={pageSize}
+          page={page}
+          onPageChange={(_, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(event) => {
+            const newSize = parseInt(event.target.value, 10)
+            setPageSize(newSize)
+            setPage(0)
+          }}
+          showFirstButton
+          showLastButton
+        />
       </Box>
+      <ApproveOrRejectRequest
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        mode={modalMode}
+        userId={selectedUserId ?? ''}
+      />
     </Box>
   )
 }

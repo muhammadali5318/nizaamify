@@ -50,11 +50,17 @@ type UserInformationProps = {
   setStep?: React.Dispatch<React.SetStateAction<number>>
   onNext: (data: UserInformationSchemaFormValues) => void
   defaultEmail?: string
+  defaultFirstName?: string
+  defaultLastName?: string
+  defaultContact?: string
 }
 
 const UserInformation: React.FC<UserInformationProps> = ({
   onNext,
-  defaultEmail
+  defaultEmail,
+  defaultFirstName,
+  defaultLastName,
+  defaultContact
 }) => {
   const {
     control,
@@ -64,10 +70,10 @@ const UserInformation: React.FC<UserInformationProps> = ({
   } = useForm<UserInformationSchemaFormValues>({
     resolver: zodResolver(UserInformationSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
+      firstName: defaultFirstName || '',
+      lastName: defaultLastName || '',
       email: defaultEmail,
-      phone: '',
+      phone: defaultContact || '',
       terms: false,
       privacy: false,
       disclaimer: false,

@@ -30,18 +30,45 @@ const InvitedUserOnboarding = () => {
   const location = useLocation()
   const query = useMemo(() => new URLSearchParams(location.search), [location])
 
-  const token = query.get('token') ?? ''
-  const invitationId = query.get('invitation_id') ?? ''
+  const token = query.get('token') ?? null
+  const invitationId = query.get('invitation_id') ?? null
+  const userID = query.get('user_id') ?? null
 
   useEffect(() => {
     let ignore = false
 
-    const fetchUserDetails = async () => {
+    const fetchInvitedUserDetails = async () => {
       try {
         setLoading(true)
-        const resp = await apiClient.get(endpoints.inviteUser(invitationId), {
-          params: { token }
-        })
+        const resp = await apiClient.get(
+          endpoints.inviteUser(invitationId ?? ''),
+          {
+            params: { token }
+          }
+        )
+        if (!ignore) {
+          setInvitationInfo(resp?.data?.data ?? null)
+          setStep(1)
+          setError(null)
+        }
+      } catch (err: any) {
+        if (err?.error[0].includes('invitation is no longer active')) {
+          setStep(5)
+        }
+      } finally {
+        if (!ignore) setLoading(false)
+      }
+    }
+
+    const fetchAcceptedUserDetails = async () => {
+      try {
+        setLoading(true)
+        const resp = await apiClient.get(
+          endpoints.accessRequestUserDetails(userID),
+          {
+            params: { token }
+          }
+        )
         if (!ignore) {
           setInvitationInfo(resp?.data?.data ?? null)
           setStep(1)
@@ -57,7 +84,9 @@ const InvitedUserOnboarding = () => {
     }
 
     if (invitationId) {
-      fetchUserDetails()
+      fetchInvitedUserDetails()
+    } else if (userID) {
+      fetchAcceptedUserDetails()
     }
 
     return () => {
@@ -91,7 +120,12 @@ const InvitedUserOnboarding = () => {
     }
 
     try {
-      await apiClient.put(endpoints.inviteUser(invitationId), payload)
+      await apiClient.put(
+        invitationId
+          ? endpoints.inviteUser(invitationId)
+          : endpoints.accessRequestUserDetails(userID),
+        payload
+      )
       setStep(4)
     } catch (err) {
       setStep(5)
@@ -111,13 +145,19 @@ const InvitedUserOnboarding = () => {
             setStep={setStep}
             inviteeRole={invitationInfo?.invitee_role}
             practiceName={invitationInfo?.practice_name}
+            isAccessRequest={!!userID}
           />
         )
       case 2:
         return (
           <UserInformation
             onNext={handleUserInformationNext}
-            defaultEmail={invitationInfo?.invitee_email}
+            defaultEmail={
+              invitationInfo?.invitee_email ?? invitationInfo?.email
+            }
+            defaultFirstName={invitationInfo?.first_name}
+            defaultLastName={invitationInfo?.first_name}
+            defaultContact={invitationInfo?.contact_number}
           />
         )
       case 3:

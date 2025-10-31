@@ -25,6 +25,8 @@ export const endpoints = {
   userWithActivePractices: (id: string) => `${API_BASE}/users/${id}/`,
   userProfile: (id: string) => `${API_BASE}/users/${id}/profile/`,
   teamMembersList: (id: string) => `${API_BASE}/practices/${id}/users/`,
+  accessRequestUserDetails: (id: string | null) =>
+    `${API_BASE}/practices/access-requests/users/${id}/`,
   uploadedDocumentList: (id: string) => `/docs/v1/practices/${id}/documents/`,
   DownloaduploadedDocument: (id: string, documentId: string) =>
     `/docs/v1/practices/${id}/documents/${documentId}/download/`,
@@ -40,5 +42,7 @@ export const endpoints = {
   updateMemberRole: (orgId: string, userId: string | undefined) =>
     `${API_BASE}/practices/${orgId}/users/${userId}/role/`,
   deactivateTeamMember: (orgId: string, userId: string | undefined) =>
-    `${API_BASE}/practices/${orgId}/users/${userId}/deactivate/`
+    `${API_BASE}/practices/${orgId}/users/${userId}/deactivate/`,
+  approveOrRejectTeamMember: (orgId: string, userId: string | undefined) =>
+    `${API_BASE}/practices/${orgId}/users/${userId}/requests/status/`
 }

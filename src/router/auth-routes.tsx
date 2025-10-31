@@ -67,6 +67,14 @@ export const authRoutes = [
             <AuthPages.InvitedUserOnboarding />
           </AuthLayout>
         )
+      },
+      {
+        path: 'access-request',
+        element: (
+          <AuthLayout>
+            <AuthPages.InvitedUserOnboarding />
+          </AuthLayout>
+        )
       }
     ]
   }

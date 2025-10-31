@@ -5,16 +5,15 @@ import { toTitleCase } from 'src/utils/stringUtils'
 import dayjs from 'dayjs'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import HighlightOffIcon from '@mui/icons-material/HighlightOff'
+import { ApproveOrReject } from '../components/ApproveOrRejectRequest'
 
 type Handlers = {
-  onView?: (id: string) => void
-  onInvite?: (data: { email: string; role: string }) => void
-  onSwap?: (id: string) => void
-  onNominate?: (id: string) => void
+  onApprove?: (userId: string, mode: ApproveOrReject) => void
+  onReject?: (userId: string, mode: ApproveOrReject) => void
 }
 
 export const usePendingRequestsColumns = (handlers: Handlers = {}) => {
-  const { onInvite } = handlers
+  const { onApprove, onReject } = handlers
 
   const columns: GridColDef[] = useMemo(
     () => [
@@ -64,18 +63,14 @@ export const usePendingRequestsColumns = (handlers: Handlers = {}) => {
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => {
-          // Prefer normalized "reason" field, fallback to capitalized "Reason"
-          const text =
-            params?.row?.reason ??
-            params?.row?.Reason ??
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed doeiusmod tempor incididunt Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed doeiusmod tempor incididunt Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed doeiusmod tempor incididunt' // fallback if nothing present
+          const text = params?.row?.access_request_reason ?? '-'
 
           return (
             <Tooltip title={text} placement='top'>
               <Typography
                 variant='body2'
                 sx={{
-                  display: 'block', // allow width to be respected
+                  display: 'block',
                   width: '100%',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
@@ -96,9 +91,7 @@ export const usePendingRequestsColumns = (handlers: Handlers = {}) => {
         sortable: true,
         renderCell: (params: GridCellParams) => (
           <Typography variant='body2'>
-            {params?.row?.invitation_expired_at
-              ? dayjs(params.row.invitation_expired_at).format('DD/MM/YYYY')
-              : '-'}
+            {dayjs(params.row.created_at).format('DD/MM/YYYY') ?? '-'}
           </Typography>
         )
       },
@@ -108,7 +101,7 @@ export const usePendingRequestsColumns = (handlers: Handlers = {}) => {
         minWidth: 90,
         flex: 1,
         sortable: false,
-        renderCell: () => {
+        renderCell: (params: GridCellParams) => {
           return (
             <Box
               sx={{
@@ -120,7 +113,11 @@ export const usePendingRequestsColumns = (handlers: Handlers = {}) => {
               }}
             >
               <Tooltip placement='top' title={'Approve request'}>
-                <IconButton size='small' aria-label='invite member'>
+                <IconButton
+                  size='small'
+                  aria-label='Approve member'
+                  onClick={() => onApprove?.(params?.row?.user_id, 'ACTIVE')}
+                >
                   <CheckCircleOutlineIcon
                     sx={{
                       color: '#4CAF50'
@@ -129,7 +126,11 @@ export const usePendingRequestsColumns = (handlers: Handlers = {}) => {
                 </IconButton>
               </Tooltip>
               <Tooltip placement='top' title={'Reject request'}>
-                <IconButton size='small' aria-label='invite member'>
+                <IconButton
+                  size='small'
+                  aria-label='Reject member'
+                  onClick={() => onReject?.(params?.row?.user_id, 'REJECTED')}
+                >
                   <HighlightOffIcon
                     sx={{
                       color: '#D32F2F'
@@ -142,7 +143,7 @@ export const usePendingRequestsColumns = (handlers: Handlers = {}) => {
         }
       }
     ],
-    [onInvite]
+    [onApprove, onReject]
   )
 
   return columns
