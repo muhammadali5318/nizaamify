@@ -1,4 +1,10 @@
-import { Box, Typography, IconButton, Button } from '@mui/material'
+import {
+  Box,
+  Typography,
+  IconButton,
+  Button,
+  LinearProgress
+} from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../../store/store'
 import { removeFile } from '../../../store/slices/uploadSlice'
@@ -13,6 +19,7 @@ import { setPresignData } from 'src/store/slices/presignedSlice'
 import { getFileIcon } from 'src/utils/getFileIcon'
 import spinner from '../../../assets/spinnergif.gif'
 import NotificationBanner from 'src/components/common/NotificationBanner'
+
 export default function UploadQueue() {
   const dispatch = useDispatch()
   const { files } = useSelector((state: RootState) => state.uploads)
@@ -54,7 +61,7 @@ export default function UploadQueue() {
       )
     } catch (error: any) {
       console.error('Error starting processing:', error)
-      notify.error('Failed to start document processing.')
+      notify.error(error?.files?.[0])
     } finally {
       setLoading(false)
     }
@@ -95,19 +102,21 @@ export default function UploadQueue() {
           {loading ? 'Processing...' : 'Start documents processing'}
         </Button>
       </Box>
+
       {files.some((f) => f.status === 'queued') && (
         <NotificationBanner content='Please review your uploaded documents carefully, these files will be used to process and update your practice’s financial data.' />
       )}
       {files.some((f) => f.status === 'processing') && (
         <NotificationBanner content='Your documents are now being processed. This may take a few moments, please stay patient while our system analyses and extracts the financial data.' />
       )}
+
       {files.map((file) => (
         <Box
           key={file.id}
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '4px',
+            gap: '6px',
             p: 1.5,
             mb: 1,
             backgroundColor: '#f8f9fa',
@@ -134,6 +143,7 @@ export default function UploadQueue() {
                 </Typography>
               </Box>
             </Box>
+
             <Box
               sx={{
                 display: 'flex',
@@ -151,46 +161,34 @@ export default function UploadQueue() {
                 gap={0.8}
               >
                 {file.status === 'uploading' && (
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
+                  <>
                     <img
+                      src={spinner}
+                      alt='uploading'
                       style={{
-                        borderRadius: '50%',
                         width: 20,
                         height: 20,
+                        borderRadius: '50%',
                         animation: 'spin 1s linear infinite'
                       }}
-                      src={spinner}
-                    ></img>
-                    `Uploading... {file.progress}`
-                  </Box>
+                    />
+                    Uploading... {file.progress || 0}%
+                  </>
                 )}
 
                 {file.status === 'processing' && (
                   <>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
+                    <img
+                      src={spinner}
+                      alt='processing'
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
                       }}
-                    >
-                      <img
-                        style={{
-                          borderRadius: '50%',
-                          width: 20,
-                          height: 20,
-                          animation: 'spin 1s linear infinite'
-                        }}
-                        src={spinner}
-                      ></img>
-                    </Box>
-                    <p> Processing...</p>
+                    />
+                    Processing...
                   </>
                 )}
 
@@ -202,13 +200,29 @@ export default function UploadQueue() {
                 <IconButton
                   onClick={() => dispatch(removeFile(file.id))}
                   size='small'
-                  color='primary'
+                  color='error'
                 >
                   <CancelOutlinedIcon />
                 </IconButton>
               )}
             </Box>
           </Box>
+
+          {(file.status === 'uploading' || file.status === 'processing') && (
+            <LinearProgress
+              variant='determinate'
+              value={file.progress || (file.status === 'processing' ? 90 : 0)}
+              sx={{
+                height: 6,
+                borderRadius: '4px',
+                backgroundColor: '#e0e0e0',
+                '& .MuiLinearProgress-bar': {
+                  backgroundColor:
+                    file.status === 'processing' ? '#0288d1' : '#2E7D32'
+                }
+              }}
+            />
+          )}
         </Box>
       ))}
     </Box>

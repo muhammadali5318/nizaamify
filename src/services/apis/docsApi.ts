@@ -17,5 +17,6 @@ export const presignDocuments = async (
     `/docs/v1/practices/${org_id}/presign/`,
     payload
   )
+
   return response.data
 }

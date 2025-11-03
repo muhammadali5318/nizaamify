@@ -72,6 +72,7 @@ const DocumentCategoryCard: React.FC<DocumentCategoryCardProps> = ({
           className={styles.uploadBtn}
           onClick={handleButtonClick}
           disabled={files.length >= 5}
+          sx={{ backgroundColor: '#EEEEEE' }}
         >
           {files.length >= 5 ? 'Limit Reached (5/5)' : 'Upload files →'}
         </Button>

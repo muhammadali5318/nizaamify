@@ -7,8 +7,9 @@ import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithAc
 import { isPracticeOwner } from 'src/utils/helper'
 import PendingOnboardingBanner from 'src/components/dashboard/PendingOnboardingBanner'
 import PendingOnboardingForManager from 'src/components/dashboard/PendingOnboardingForManager'
-import WelcomeCard from 'src/components/dashboard/WelcomeCard'
+// import WelcomeCard from 'src/components/dashboard/WelcomeCard'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
+import DashboardStatsSection from './sections/DashboardStatsSection'
 
 const Dashboard = () => {
   const { accessToken } = useAuth()
@@ -47,7 +48,7 @@ const Dashboard = () => {
         <PendingOnboardingBanner />
       )}
       {pendingOnboardinByNominatedManager && <PendingOnboardingForManager />}
-      <WelcomeCard />
+      <DashboardStatsSection />
     </Stack>
   )
 }

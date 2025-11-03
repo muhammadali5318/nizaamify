@@ -47,11 +47,7 @@ export default function DocumentUploadBox() {
 
   return (
     <>
-      {completedFiles.length > 0 || hasBatches ? (
-        <Box sx={{ mt: '20px', width: '100%' }}>
-          <ProcessingCompletedList />
-        </Box>
-      ) : (
+      {completedFiles.length === 0 || !hasBatches ? (
         <>
           <Box
             className={`${styles.uploadBox} ${isDragging ? styles.dragActive : ''}`}
@@ -179,6 +175,10 @@ export default function DocumentUploadBox() {
             </Box>
           </Box>
         </>
+      ) : (
+        <Box sx={{ mt: '20px', width: '100%' }}>
+          <ProcessingCompletedList />
+        </Box>
       )}
     </>
   )
