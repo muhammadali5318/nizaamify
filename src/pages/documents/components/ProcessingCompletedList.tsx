@@ -141,8 +141,8 @@ export default function ProcessingCompletedList() {
                     {doc.file_name}
                   </Typography>
                   <Typography variant='body2' color='text.secondary'>
-                    File Format: {doc.file_name.split('.').pop()?.toUpperCase()}{' '}
-                    | File Size: 10MB
+                    File Format:{' '}
+                    {doc.file_name.split('.').pop()?.toUpperCase()}{' '}
                   </Typography>
                 </Box>
               </Box>

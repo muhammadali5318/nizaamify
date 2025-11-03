@@ -24,7 +24,7 @@ interface EditDocumentModalProps {
   batchId: string
   document: any
 }
-
+import editModalIcon from '../../../assets/edit-modal-icon.svg'
 export default function EditDocumentModal({
   open,
   onClose,
@@ -57,7 +57,6 @@ export default function EditDocumentModal({
   }, [document])
 
   useEffect(() => {
-    // Whenever document_type changes, update subtypes list
     const subtypes = getDocumentSubtypes(formData.document_type)
     setAvailableSubtypes(subtypes)
   }, [formData.document_type])
@@ -66,7 +65,6 @@ export default function EditDocumentModal({
     setFormData((prev) => ({
       ...prev,
       [field]: value,
-      // reset subtype if type changes
       ...(field === 'document_type' ? { document_subtype: '' } : {})
     }))
   }
@@ -88,85 +86,125 @@ export default function EditDocumentModal({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth='sm'>
-      <DialogTitle>Change document information</DialogTitle>
-      <DialogContent dividers>
-        <Typography variant='subtitle1' mb={2}>
-          Select the correct category for <b>{document.file_name}</b> doc from
-          the list below.
-        </Typography>
-
-        <Box display='flex' flexDirection='column' gap={2}>
-          {/* Document Type */}
-          <TextField
-            select
-            fullWidth
-            label='Document type'
-            value={formData.document_type}
-            onChange={(e) => handleChange('document_type', e.target.value)}
-          >
-            {documentTypes.map((type) => (
-              <MenuItem key={type} value={type}>
-                {type}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          {/* Document Subtype */}
-          <TextField
-            select
-            fullWidth
-            label='Document subtype'
-            value={formData.document_subtype}
-            onChange={(e) => handleChange('document_subtype', e.target.value)}
-            disabled={!formData.document_type}
-          >
-            {availableSubtypes.map((sub) => (
-              <MenuItem key={sub} value={sub}>
-                {sub}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          {/* Amount */}
-          <TextField
-            fullWidth
-            label='Extracted amount'
-            type='number'
-            value={formData.amount}
-            onChange={(e) => handleChange('amount', e.target.value)}
-          />
-
-          {/* Dates */}
-          <Box display='flex' gap={2}>
-            <TextField
-              fullWidth
-              label='Date on document'
-              type='date'
-              slotProps={{ inputLabel: { shrink: true } }}
-              value={formData.document_date}
-              onChange={(e) => handleChange('document_date', e.target.value)}
-            />
-
-            <TextField
-              fullWidth
-              label='Payment date'
-              type='date'
-              slotProps={{ inputLabel: { shrink: true } }}
-              value={formData.payment_date}
-              onChange={(e) => handleChange('payment_date', e.target.value)}
-            />
-          </Box>
+      <Box sx={{ padding: '20px' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'flex-start',
+            mt: 2,
+            ml: 2,
+            height: '50px'
+          }}
+        >
+          <img src={editModalIcon} alt='edit' />
         </Box>
-      </DialogContent>
+        <DialogTitle
+          sx={{ fontWeight: 700, fontSize: '24px', marginBottom: '-18px' }}
+        >
+          Change document information
+        </DialogTitle>
+        <DialogContent>
+          <Typography
+            variant='subtitle1'
+            mb={2}
+            sx={{ fontWeight: 400, fontSize: '16px' }}
+          >
+            Select the correct category for <b>{document.file_name}</b> doc from
+            the list below.
+          </Typography>
 
-      <DialogActions>
-        <Button onClick={onClose} variant='outlined' color='inherit'>
-          Cancel
-        </Button>
-        <Button onClick={handleUpdate} variant='contained' color='primary'>
-          Update changes
-        </Button>
-      </DialogActions>
+          <Box display='flex' flexDirection='column' gap={2}>
+            <TextField
+              select
+              fullWidth
+              label='Document type'
+              value={formData.document_type}
+              onChange={(e) => handleChange('document_type', e.target.value)}
+            >
+              {documentTypes.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            <TextField
+              select
+              fullWidth
+              label='Document subtype'
+              value={formData.document_subtype}
+              onChange={(e) => handleChange('document_subtype', e.target.value)}
+              disabled={!formData.document_type}
+            >
+              {availableSubtypes.map((sub) => (
+                <MenuItem key={sub} value={sub}>
+                  {sub}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            <TextField
+              fullWidth
+              label='Extracted amount'
+              type='number'
+              value={formData.amount}
+              onChange={(e) => handleChange('amount', e.target.value)}
+            />
+
+            <Box display='flex' gap={2} flexDirection='column'>
+              <TextField
+                fullWidth
+                label='Date on document'
+                type='date'
+                slotProps={{ inputLabel: { shrink: true } }}
+                value={formData.document_date}
+                onChange={(e) => handleChange('document_date', e.target.value)}
+              />
+
+              <TextField
+                fullWidth
+                label='Payment date'
+                type='date'
+                slotProps={{ inputLabel: { shrink: true } }}
+                value={formData.payment_date}
+                onChange={(e) => handleChange('payment_date', e.target.value)}
+              />
+            </Box>
+          </Box>
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            px: 3,
+            gap: 2,
+            width: '100%'
+          }}
+        >
+          <Button
+            sx={{
+              width: '100%'
+            }}
+            onClick={onClose}
+            variant='outlined'
+            color='inherit'
+          >
+            Cancel
+          </Button>
+          <Button
+            sx={{
+              width: '100%'
+            }}
+            onClick={handleUpdate}
+            variant='contained'
+            color='primary'
+          >
+            Update changes
+          </Button>
+        </DialogActions>
+      </Box>
     </Dialog>
   )
 }

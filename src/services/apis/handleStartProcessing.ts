@@ -16,8 +16,8 @@ export const uploadFilesToS3 = async (
   userId: string,
   practiceId: string
 ) => {
-  for (let i = 0; i < items.length; i++) {
-    const { url, key, headers, filename } = items[i] as {
+  const uploadPromises = items.map((item) => {
+    const { url, key, headers, filename } = item as {
       url: string
       key: string
       headers: Record<string, string>
@@ -25,92 +25,93 @@ export const uploadFilesToS3 = async (
     }
 
     const file = files.find((f) => f.name === filename)
-    if (!file) continue
+    if (!file) return Promise.resolve()
 
     const fileId = file.id
     store.dispatch(updateStatus({ id: fileId, status: 'uploading' }))
 
-    try {
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest()
-        xhr.open('PUT', url)
+    return new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open('PUT', url)
 
-        Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v))
+      Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v))
 
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const progress = Math.round((event.loaded / event.total) * 100)
-            store.dispatch(updateProgress({ id: fileId, progress }))
-          }
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const progress = Math.round((event.loaded / event.total) * 100)
+          store.dispatch(updateProgress({ id: fileId, progress }))
         }
+      }
 
-        xhr.onload = async () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            store.dispatch(updateProgress({ id: fileId, progress: 100 }))
-            store.dispatch(updateStatus({ id: fileId, status: 'processing' }))
-            notify.success(`${filename} uploaded successfully!`)
+      xhr.onload = async () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          store.dispatch(updateProgress({ id: fileId, progress: 100 }))
+          store.dispatch(updateStatus({ id: fileId, status: 'processing' }))
+          notify.success(`${filename} uploaded successfully!`)
 
-            try {
-              const finalProcessRes = await pollBatchStatusUntilComplete(
-                batchId,
-                key,
-                filename,
-                userId,
-                practiceId
+          try {
+            const finalProcessRes = await pollBatchStatusUntilComplete(
+              batchId,
+              key,
+              filename,
+              userId,
+              practiceId
+            )
+
+            const processData = finalProcessRes?.data ?? finalProcessRes
+            const document = processData?.document
+            const batch_status_url = processData?.batch_status_url
+
+            if (document) {
+              store.dispatch(
+                addOrUpdateBatchStatus({
+                  batch_id: processData.batch_id || batchId,
+                  practice_id: document.practice_id || practiceId,
+                  batch_status_url: batch_status_url || null,
+                  documents: [
+                    {
+                      document_id: document.document_id,
+                      file_name: document.file_name,
+                      status: document.status,
+                      status_url: document.status_url ?? null
+                    }
+                  ]
+                })
               )
-
-              const processData = finalProcessRes?.data ?? finalProcessRes
-              const document = processData?.document
-              const batch_status_url = processData?.batch_status_url
-
-              if (document) {
-                store.dispatch(
-                  addOrUpdateBatchStatus({
-                    batch_id: processData.batch_id || batchId,
-                    practice_id: document.practice_id || practiceId,
-                    batch_status_url: batch_status_url || null,
-                    documents: [
-                      {
-                        document_id: document.document_id,
-                        file_name: document.file_name,
-                        status: document.status,
-                        status_url: document.status_url ?? null
-                      }
-                    ]
-                  })
-                )
-              }
-
-              store.dispatch(updateStatus({ id: fileId, status: 'completed' }))
-              store.dispatch(moveToCompleted(fileId))
-              notify.success(`${filename} processed successfully`)
-            } catch (processError) {
-              console.error('Processing error:', processError)
-              store.dispatch(updateStatus({ id: fileId, status: 'error' }))
-              notify.error(`Processing failed for ${filename}`)
-              queryClient.invalidateQueries({
-                queryKey: ['uploadedDocumentListApi'],
-                exact: false
-              })
             }
-            resolve()
-          } else {
+
+            store.dispatch(updateStatus({ id: fileId, status: 'completed' }))
+            store.dispatch(moveToCompleted(fileId))
+            notify.success(`${filename} processed successfully`)
+          } catch (processError) {
+            console.error('Processing error:', processError)
             store.dispatch(updateStatus({ id: fileId, status: 'error' }))
-            notify.error(`Failed to upload ${filename}`)
-            reject(new Error(`Upload failed for ${filename}`))
+            notify.error(`Processing failed for ${filename}`)
+            queryClient.invalidateQueries({
+              queryKey: ['uploadedDocumentListApi'],
+              exact: false
+            })
           }
-        }
-
-        xhr.onerror = () => {
+          resolve()
+        } else {
           store.dispatch(updateStatus({ id: fileId, status: 'error' }))
-          notify.error(`Error uploading ${filename}`)
-          reject(new Error(`Network error for ${filename}`))
+          notify.error(`Failed to upload ${filename}`)
+          reject(new Error(`Upload failed for ${filename}`))
         }
+      }
 
-        xhr.send(file.file)
-      })
-    } catch (error) {
-      console.error('S3 upload error:', error)
-    }
-  }
+      xhr.onerror = () => {
+        store.dispatch(updateStatus({ id: fileId, status: 'error' }))
+        notify.error(`Error uploading ${filename}`)
+        reject(new Error(`Network error for ${filename}`))
+      }
+
+      xhr.send(file.file)
+    })
+  })
+
+  // Run all uploads simultaneously
+  await Promise.allSettled(uploadPromises)
+
+  console.log('All uploads completed (success or fail)')
 }
