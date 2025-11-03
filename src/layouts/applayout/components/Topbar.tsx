@@ -18,6 +18,9 @@ import {
 } from '@mui/material'
 import styles from './Topbar.module.scss'
 import { useAuth0 } from '@auth0/auth0-react'
+import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
+import { useAuth } from 'src/context/AuthProvider'
+import { toTitleCase } from 'src/utils/stringUtils'
 
 type topbarProps = {
   title: string
@@ -79,18 +82,20 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                         variant='body1'
                         color='var(--color-text-primary)'
                       >
-                        {user?.name}
+                        {user?.first_name ?? '-'} {user?.last_name ?? '-'}
                       </Typography>
                       <Typography
                         variant='caption'
                         color='var(--color-primary-light)'
                         className='font-weight--700'
                       >
-                        {user?.email}
+                        {user?.email ?? '-'}
                       </Typography>
                       <Box>
                         <Chip
-                          label={user?.organizations_with_roles[0]?.roles[0]}
+                          label={toTitleCase(
+                            user?.active_practices[0]?.user_role
+                          )}
                           size='small'
                           variant='outlined'
                           sx={{
@@ -177,10 +182,12 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
 }
 
 const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
-  const { user, logout } = useAuth0()
+  const { accessToken } = useAuth()
+  const { logout } = useAuth0()
   const [open, setOpen] = useState(false)
   const anchorRef = useRef<HTMLButtonElement | null>(null)
   const isMobile = useMediaQuery('(max-width:600px)')
+  const { data: userData } = useFetchUserWithActivePracticeData(!!accessToken)
 
   const handleToggle = () => {
     setOpen((prev) => !prev)
@@ -243,14 +250,14 @@ const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
           }}
         >
           <Typography variant='body1' className='font-weight--700'>
-            {user?.name}
+            {userData?.first_name ?? '-'} {userData?.last_name ?? '-'}
           </Typography>
           <Typography
             variant='caption'
             color='var(--color-primary-light)'
             className='font-weight--700'
           >
-            {user?.organizations_with_roles[0]?.roles[0]}
+            {toTitleCase(userData?.active_practices[0]?.user_role ?? '-')}
           </Typography>
         </Box>
 
@@ -263,7 +270,7 @@ const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
           aria-expanded={open ? 'true' : undefined}
           size='small'
         >
-          <Avatar src={user?.picture} alt='profile avatar' />
+          <Avatar src={userData?.picture} alt='profile avatar' />
         </IconButton>
 
         {/* Use the separate ProfilePopper function/component */}
@@ -273,7 +280,7 @@ const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
           onClose={handleClose}
           onLogout={handleLogout}
           onSettings={handleSettings}
-          user={user}
+          user={userData}
         />
       </Box>
     </Box>

@@ -353,6 +353,7 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
       <ConfirmationSuccessDialog
         open={successDialogOpen}
         onClose={() => setSuccessDialogOpen(false)}
+        onSubmit={() => setSuccessDialogOpen(false)}
         title='Nomination successful!'
       >
         <Typography variant='body2' color='text.secondary'>

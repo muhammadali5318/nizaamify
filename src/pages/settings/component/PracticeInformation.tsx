@@ -34,6 +34,7 @@ import {
 import { notify } from 'src/components/notistack/NotificationProvider'
 import AccountingBasisCard from './AccountingBasisInfo'
 import { ACCRUAL_BASIS_INFO, CASH_BASIS_INFO } from 'src/const'
+import { queryClient } from 'src/utils/queryClient'
 
 const PracticeInformation = () => {
   const phoneWrapperRef = useRef<HTMLDivElement | null>(null)
@@ -90,6 +91,7 @@ const PracticeInformation = () => {
   const onSubmit = async (values: PracticeFormValues) => {
     try {
       await updatePractice.mutateAsync(values)
+      await queryClient.invalidateQueries({ queryKey: ['initialData'] })
     } catch (err) {
       notify.error('Failed to update practice information')
       throw err

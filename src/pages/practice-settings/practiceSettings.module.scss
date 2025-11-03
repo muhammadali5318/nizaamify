@@ -1,0 +1,102 @@
+.practiceSettingsRoot {
+  display: flex;
+  padding: 24px 158px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+
+  .practiceSettingsHeader {
+    display: flex;
+    align-items: flex-start;
+    align-self: stretch;
+    justify-content: space-between;
+  overflow-x: hidden;
+    
+  }
+}
+
+/* Full-width grid that always divides each row into 3 equal columns */
+.practiceDetailsWrapper {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+/* IMPORTANT: allow grid children to shrink */
+.practiceDetailsWrapper > * {
+  min-width: 0; /* allow column to shrink even if child has long content */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Card root — make sure card itself doesn't force width/growth */
+.practiceDetailsCardRoot {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0; /* also ensure nested flex children can shrink */
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* prevents child overflows from pushing layout */
+}
+
+/* Text handling: single-line truncation */
+.practiceDetailsCardRoot .title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Text handling: allow long words to break to next line (if you prefer multi-line) */
+.practiceDetailsCardRoot .body,
+.practiceDetailsCardRoot p,
+.practiceDetailsCardRoot .some-long-field {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Images / media: don't overflow */
+.practiceDetailsCardRoot img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Responsive steps (keep yours) */
+@media (max-width: 1300px) {
+  .practiceDetailsWrapper {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .practiceDetailsWrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .practiceSettingsHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 1550px) {
+  .practiceSettingsRoot {
+    padding: 24px 75px;
+  }
+}
+@media (max-width: 1400px) {
+  .practiceSettingsRoot {
+    padding: 24px;
+  }
+}
+@media (max-width: 600px) {
+  .practiceSettingsRoot {
+    padding: 24px 18px;
+  }
+}

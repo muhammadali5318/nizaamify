@@ -147,3 +147,8 @@ export const defaultFinancialDocumentsListFilters: FilterState = {
   docType: null,
   docSubtype: []
 }
+
+export const documentsModuleBreadCrumbs = [
+  { label: 'Documents', to: '/documents' },
+  { label: 'Doc upload' }
+]

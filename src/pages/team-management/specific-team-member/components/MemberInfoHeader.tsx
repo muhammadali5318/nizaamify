@@ -250,6 +250,12 @@ const MemberInfoHeader = () => {
             state: { name, email, role, isNominated: true }
           })
         }}
+        onSubmit={() => {
+          setSuccessDialogOpen(false)
+          navigate(paths.teamManagement.gotoSpecificTeamMember(id), {
+            state: { name, email, role, isNominated: true }
+          })
+        }}
         title='Nomination successful!'
       >
         <Typography variant='body2' color='text.secondary'>

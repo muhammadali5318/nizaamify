@@ -82,7 +82,13 @@ const ReusableTabs: React.FC<ReusableTabsProps> = ({
             key={String(t.key)}
             value={t.key}
             label={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: { xs: 0, sm: 1 }
+                }}
+              >
                 {t.label}
 
                 {t.count ? (
@@ -110,7 +116,7 @@ const ReusableTabs: React.FC<ReusableTabsProps> = ({
                 ) : null}
               </Box>
             }
-            sx={{ minWidth: 'auto', px: { xs: 0.75, sm: 1.5 } }}
+            sx={{ minWidth: 'auto', px: { xs: 0, sm: 1.5 } }}
             icon={
               t.activeIcon || t.inactiveIcon ? (
                 <img

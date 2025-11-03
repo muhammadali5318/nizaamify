@@ -12,6 +12,7 @@ import { mapUserApiToForm, mapUserFormToApi } from '../setting-config'
 import { useUpdateUserProfile, useUserProfile } from '../hooks/useUserProfile'
 import parsePhoneNumberFromString from 'libphonenumber-js'
 import { notify } from 'src/components/notistack/NotificationProvider'
+import { queryClient } from 'src/utils/queryClient'
 
 const profileSchema = z.object({
   firstName: z
@@ -90,6 +91,9 @@ const ProfileInformation = () => {
   const submit = async (values: ProfileForm) => {
     const payload = mapUserFormToApi(values)
     await updateProfile(payload)
+    await queryClient.invalidateQueries({
+      queryKey: ['UserWithActivePracticeData']
+    })
     notify.success('Your profile has been updated successfully.')
     reset(values)
   }

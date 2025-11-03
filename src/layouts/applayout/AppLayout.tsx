@@ -10,9 +10,13 @@ import ListItemText from '@mui/material/ListItemText'
 import ListSubheader from '@mui/material/ListSubheader'
 import styles from './AppLayout.module.scss'
 import Box from '@mui/material/Box'
+import AddPracticeDialog from 'src/pages/practice-settings/components/AddNewPracticeModal.tsx'
 import {
+  Button,
+  Divider,
   FormControl,
   MenuItem,
+  Radio,
   Select,
   Stack,
   Tooltip,
@@ -33,6 +37,9 @@ import { useAuth } from 'src/context/AuthProvider'
 import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
 import { featureFlagConfig } from 'src/config/feature-flag-config'
 import { FeatureFlagService } from 'src/services/FeatureFlagService'
+import { toTitleCase } from 'src/utils/stringUtils'
+import AddIcon from '@mui/icons-material/Add'
+import { useState } from 'react'
 
 type ModuleRenderState = 'hidden' | 'disabled' | 'enabled'
 
@@ -103,14 +110,7 @@ export default function AppLayout() {
   const { userContext } = useFeatureFlagContext()
   const { accessToken } = useAuth()
   const { data: practiceData } = useInitialData(!!accessToken)
-  const [selectedPractice, setSelectedPractice] = React.useState<string>('')
-
-  React.useEffect(() => {
-    if (practiceData?.practice_name) {
-      setSelectedPractice(practiceData.practice_name)
-    }
-  }, [practiceData])
-
+  const [isAddOpen, setIsAddOpen] = useState(false)
   const isMobile = useMediaQuery('(max-width:768px)')
   const isCollapsedBreakpoint = useMediaQuery('(max-width:1024px)')
 
@@ -148,6 +148,9 @@ export default function AppLayout() {
   const handleMobileToggle = () => {
     setMobileOpen((prev) => !prev)
   }
+
+  const handleOpen = () => setIsAddOpen(true)
+  const handleClose = () => setIsAddOpen(false)
 
   // Track active item based on route
   React.useEffect(() => {
@@ -198,30 +201,97 @@ export default function AppLayout() {
         <img src='/assets/practice-selector.svg' alt='practice selector' />
         <FormControl className={styles.muiSelectForm} fullWidth>
           <Select
-            value={selectedPractice}
-            onChange={(e) => setSelectedPractice(e.target.value)}
+            value={practiceData?.practice_name}
+            onChange={(e) => console.warn(e.target.value)}
             displayEmpty
             className={styles.muiSelect}
             sx={{
               borderRadius: '16px',
               pl: 2,
               '& .MuiOutlinedInput-notchedOutline': { borderRadius: '16px' },
-              '& .MuiSelect-icon': { right: 0 }
+              '& .MuiSelect-icon': { right: 0 },
+              '& .MuiSelect-select': {
+                py: 1
+              }
             }}
             renderValue={(selected) => (
-              <Typography
-                variant='subtitle2'
-                sx={{ display: showLabels ? 'inline' : 'none' }}
-              >
-                {selected || 'Select practice'}
-              </Typography>
+              <Stack padding={'0px'}>
+                <Typography
+                  variant='subtitle2'
+                  sx={{ display: showLabels ? 'inline' : 'none' }}
+                >
+                  {selected || 'Select practice'}
+                </Typography>
+                <Typography
+                  variant='subtitle2'
+                  sx={{ display: showLabels ? 'inline' : 'none' }}
+                  color='success.light'
+                  fontWeight={700}
+                  fontStyle={'italic'}
+                >
+                  {toTitleCase(practiceData?.practice_type)}
+                </Typography>
+              </Stack>
             )}
           >
-            {practiceData && (
-              <MenuItem value={practiceData.practice_name}>
-                {practiceData.practice_name}
-              </MenuItem>
-            )}
+            <Box>
+              {practiceData && (
+                <MenuItem
+                  key={practiceData?.practice_name}
+                  value={practiceData?.practice_name}
+                >
+                  <ListItem
+                    disableGutters
+                    sx={{
+                      width: '100%',
+                      padding: 0,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      gap: 1.5
+                    }}
+                  >
+                    <img
+                      src='/assets/practice-selector.svg'
+                      alt='practice selector icon'
+                    />
+
+                    <ListItemText
+                      primary={
+                        <Typography variant='body2' fontWeight={700}>
+                          {practiceData?.practice_name}
+                        </Typography>
+                      }
+                      secondary={
+                        <Typography
+                          variant='caption'
+                          color='var(--color-primary-light)'
+                        >
+                          {practiceData?.email}
+                        </Typography>
+                      }
+                    />
+                    <ListItemIcon sx={{ minWidth: 36 }}>
+                      <Radio checked={true} />
+                    </ListItemIcon>
+                  </ListItem>
+                </MenuItem>
+              )}
+              <Divider />
+              <Box
+                sx={{
+                  padding: '0px 10px'
+                }}
+              >
+                <Button
+                  onClick={handleOpen}
+                  startIcon={<AddIcon />}
+                  fullWidth
+                  variant='outlined'
+                >
+                  Add another practice
+                </Button>
+              </Box>
+            </Box>
           </Select>
         </FormControl>
       </Box>
@@ -474,6 +544,7 @@ export default function AppLayout() {
           <Outlet />
         </Box>
       </Box>
+      <AddPracticeDialog open={isAddOpen} onClose={handleClose} />
     </Box>
   )
 }

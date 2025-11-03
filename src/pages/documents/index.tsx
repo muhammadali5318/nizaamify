@@ -4,7 +4,10 @@ import styles from './documents.module.scss'
 import StatsCard from 'src/components/team-management/StatsCard'
 import { ReusableTabs } from 'src/components/tabs'
 import useDocumentsTabs from './hooks/useDocumentsTabs'
-import { documentsTabsData } from './config/documentsConfig'
+import {
+  documentsModuleBreadCrumbs,
+  documentsTabsData
+} from './config/documentsConfig'
 import { useInitialData } from '../../hooks/useFetchInitialData'
 import { useNavigate } from 'react-router'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
@@ -13,6 +16,7 @@ import apiClient from 'src/services/api-client'
 import { notify } from 'src/components/notistack/NotificationProvider'
 import { useAuth0 } from '@auth0/auth0-react'
 
+import PageBreadcrumbs from 'src/components/bread-crumbs/PageBreadcrumbs'
 const DocumentsPage: React.FC = () => {
   const [stats, setStats] = useState({
     all: 0,
@@ -72,6 +76,8 @@ const DocumentsPage: React.FC = () => {
 
   return (
     <Box className={styles.documentsRoot}>
+      <PageBreadcrumbs items={documentsModuleBreadCrumbs} />
+
       <Box
         className={styles.headerBanner}
         sx={{

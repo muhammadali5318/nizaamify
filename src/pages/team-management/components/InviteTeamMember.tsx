@@ -114,6 +114,7 @@ const InviteTeamMember: React.FC = () => {
         <ConfirmationSuccessDialog
           open={successDialogOpen}
           onClose={handleCloseSuccessDialog}
+          onSubmit={handleCloseSuccessDialog}
           title='Invitation sent!'
         >
           <Typography variant='body2' color='text.secondary'>
