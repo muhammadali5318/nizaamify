@@ -112,6 +112,4 @@ export const uploadFilesToS3 = async (
 
   // Run all uploads simultaneously
   await Promise.allSettled(uploadPromises)
-
-  console.log('All uploads completed (success or fail)')
 }
