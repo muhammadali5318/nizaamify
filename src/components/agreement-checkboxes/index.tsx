@@ -19,7 +19,7 @@ const LABELS: Record<AgreementKeys, React.ReactNode> = {
     <>
       I agree to the{' '}
       <span className='info-main font-weight--700 cursor-pointer'>
-        Terms of service
+        Terms of Service
       </span>
     </>
   ),
@@ -27,7 +27,7 @@ const LABELS: Record<AgreementKeys, React.ReactNode> = {
     <>
       I agree to the{' '}
       <span className='info-main font-weight--700 cursor-pointer'>
-        Privacy policy
+        Privacy Policy
       </span>
     </>
   ),
@@ -35,7 +35,7 @@ const LABELS: Record<AgreementKeys, React.ReactNode> = {
     <>
       I acknowledge the{' '}
       <span className='info-main font-weight--700 cursor-pointer'>
-        Financial disclaimer
+        Financial Disclaimer
       </span>
     </>
   ),

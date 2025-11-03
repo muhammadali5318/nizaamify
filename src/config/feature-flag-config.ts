@@ -45,12 +45,12 @@ const modules: ModuleConfig[] = [
   },
   {
     id: 'team-management',
-    name: 'Team management',
+    name: 'Team Management',
     requiredRules: [FEATURE_RULE_IDS.NOT_MANAGER]
   },
   {
     id: 'practice-settings',
-    name: 'Practice settings',
+    name: 'Practice Settings',
     requiredRules: [
       FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
       FEATURE_RULE_IDS.NOT_MANAGER
@@ -66,7 +66,7 @@ const modules: ModuleConfig[] = [
   },
   {
     id: 'help-support',
-    name: 'Help & support'
+    name: 'Help & Support'
   },
   {
     id: 'nomination-flow',

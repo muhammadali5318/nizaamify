@@ -50,14 +50,14 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
     title: 'Management',
     items: [
       {
-        text: 'Team management',
+        text: 'Team Management',
         to: paths.teamManagement.root,
         activeIcon: 'active-team-management.svg',
         inactiveIcon: 'inactive-team-management.svg',
         moduleId: 'team-management'
       },
       {
-        text: 'Practice settings',
+        text: 'Practice Settings',
         to: paths.practiceSettings,
         activeIcon: 'active-practice-management.svg',
         inactiveIcon: 'inactive-practice-management.svg',
@@ -88,7 +88,7 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
     title: 'Support',
     items: [
       {
-        text: 'Help & support',
+        text: 'Help & Support',
         to: paths.helpAndSupport,
         activeIcon: 'active-help-support.svg',
         inactiveIcon: 'inactive-help-support.svg',

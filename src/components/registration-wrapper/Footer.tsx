@@ -24,7 +24,7 @@ const Footer = () => {
           color='var(--color-text-secondary)'
           sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
         >
-          Privacy policy
+          Privacy Policy
         </Typography>
 
         {/* vertical on sm+, horizontal on xs */}
@@ -44,7 +44,7 @@ const Footer = () => {
           color='var(--color-text-secondary)'
           sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
         >
-          Terms & conditions
+          Terms & Conditions
         </Typography>
       </Stack>
 
