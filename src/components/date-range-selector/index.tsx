@@ -5,7 +5,8 @@ import {
   Popover,
   Stack,
   TextField,
-  InputAdornment
+  InputAdornment,
+  IconButton
 } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -13,6 +14,7 @@ import { DateCalendar } from '@mui/x-date-pickers/DateCalendar'
 import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay'
 import dayjs, { Dayjs } from 'dayjs'
 import InsertInvitationIcon from '@mui/icons-material/InsertInvitation'
+import { ClearIcon } from '@mui/x-date-pickers'
 
 export type RangeISO = { start: string | null; end: string | null }
 
@@ -192,7 +194,21 @@ const DateRangeSelector: React.FC<Props> = ({
               readOnly: true,
               endAdornment: (
                 <InputAdornment position='start'>
-                  <InsertInvitationIcon fontSize='small' color='action' />
+                  {value.start && value.end ? (
+                    <IconButton
+                      size='small'
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onChange({ start: null, end: null })
+                        setTempStart(null)
+                        setTempEnd(null)
+                      }}
+                    >
+                      <ClearIcon fontSize='small' />
+                    </IconButton>
+                  ) : (
+                    <InsertInvitationIcon fontSize='small' color='action' />
+                  )}
                 </InputAdornment>
               )
             }

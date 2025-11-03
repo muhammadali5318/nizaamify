@@ -86,7 +86,7 @@ export const documentsTabsData = [
 ]
 
 export const CATEGORY_OPTIONS = [
-  { value: 'Revenue', label: 'Revenue' },
+  { value: 'Revenue', label: 'Income & revenue' },
   { value: 'Expense', label: 'Expense' },
   { value: 'Unknown', label: 'Unknown' }
 ]
