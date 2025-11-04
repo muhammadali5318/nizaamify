@@ -66,7 +66,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
         borderRadius: '12px',
         boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
         padding: '16px 20px',
-        minWidth: 240,
+        minWidth: 180,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'flex-start',
