@@ -154,16 +154,19 @@ const DocumentsPage: React.FC = () => {
           iconSrc='team-member.svg'
           label='All practice documents'
           value={stats.all}
+          sx={{ minHeight: '17vh' }}
         />
         <StatsCard
           iconSrc='active-member.svg'
           label='Your uploaded documents'
           value={stats.uploaded}
+          sx={{ minHeight: '17vh' }}
         />
         <StatsCard
           iconSrc='pending-member.svg'
           label='Documents requiring review'
           value={stats.review}
+          sx={{ minHeight: '17vh' }}
         />
       </Stack>
 

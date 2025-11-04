@@ -6,11 +6,12 @@ interface StatsCardProps {
   iconSrc: string
   label: string
   value: string | number
+  sx?: object
 }
 
-const StatsCard: React.FC<StatsCardProps> = ({ iconSrc, label, value }) => {
+const StatsCard: React.FC<StatsCardProps> = ({ iconSrc, label, value, sx }) => {
   return (
-    <Box className={styles.statsCardRoot}>
+    <Box className={styles.statsCardRoot} sx={{ ...sx }}>
       <Stack className={styles.statsCardDescription}>
         <Box
           component='img'
