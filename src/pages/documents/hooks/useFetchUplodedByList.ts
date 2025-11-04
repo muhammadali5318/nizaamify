@@ -16,7 +16,9 @@ export function useFetchUploadedByList(
   options?: Omit<UseQueryOptions<string[]>, 'queryKey' | 'queryFn'>
 ) {
   const { user } = useAuth0()
-  const endpoint = endpoints.uploadedByFilterList(getUserOrgUuid(user))
+  const endpoint = endpoints.documents.uploadedByFilterList(
+    getUserOrgUuid(user)
+  )
 
   const queryKey = useMemo(() => ['uploadedByListApi', endpoint], [endpoint])
 

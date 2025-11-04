@@ -6,7 +6,6 @@ import PageHeader from 'src/components/page-header'
 import AddPaymentDateModal from '../components/documents-list/AddPaymentDateModal'
 import { usePendingDocsColumns } from '../hooks/usePendingDocsColumns'
 import { useFetchSortedPaginatedData } from 'src/hooks/useFetchSortedData.'
-import dayjs from 'dayjs'
 import useFetchUploadedDocsList from '../hooks/useFetchUploadedDocsList'
 import useFetchUploadedByList from '../hooks/useFetchUplodedByList'
 import apiClient from 'src/services/api-client'
@@ -37,6 +36,7 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
 }) => {
   const { user } = useAuth0()
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
+  const [documentId, setDocumentId] = useState<string | null>(null)
 
   // external hook: paging & sorting
   const { sortModel, page, pageSize, setPage, setPageSize, handleSortChange } =
@@ -44,7 +44,6 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
 
   // Local UI state
   const [addDateModalOpen, setAddDateModalOpen] = useState(false)
-  const [addDateLoading, setAddDateLoading] = useState(false)
 
   const [filters, setFilters] = useState<FilterState>(
     defaultFinancialDocumentsListFilters
@@ -59,14 +58,17 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
   )
 
   // handlers used by columns
-  const onView = useCallback(() => setAddDateModalOpen(true), [])
+  const onView = useCallback((documentId: string) => {
+    setDocumentId(documentId)
+    setAddDateModalOpen(true)
+  }, [])
 
   const onViewDownload = useCallback(
     async (id: string) => {
       setDownloadingId(id)
       try {
         const resp = await apiClient.get(
-          endpoints.DownloaduploadedDocument(getUserOrgUuid(user), id)
+          endpoints.documents.downloaduploadedDocument(getUserOrgUuid(user), id)
         )
 
         const fileUrl = resp?.data?.data
@@ -145,18 +147,6 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
   const getRowClassName = (params: any) =>
     params.row.status === 'Disabled' ? 'rowDisabled' : ''
 
-  const handleAddDate = useCallback(async (data: { date: dayjs.Dayjs }) => {
-    // eslint-disable-next-line no-console
-    console.log(data)
-    try {
-      setAddDateLoading(true)
-    } catch {
-      setAddDateLoading(true)
-    } finally {
-      setAddDateLoading(false)
-    }
-  }, [])
-
   const clearFilters = useCallback(() => {
     setFilters(defaultFinancialDocumentsListFilters)
     setPage(0)
@@ -214,8 +204,7 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
       <AddPaymentDateModal
         open={addDateModalOpen}
         onClose={() => setAddDateModalOpen(false)}
-        onInvite={handleAddDate}
-        loading={addDateLoading}
+        documentId={documentId ?? ''}
       />
     </Box>
   )

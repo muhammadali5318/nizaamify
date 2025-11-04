@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -12,7 +12,14 @@ import {
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import dayjs from 'dayjs'
 import ReusableDatePicker from 'src/components/date-picker'
+import apiClient from 'src/services/api-client'
+import { endpoints } from 'src/services/backendUrl'
+import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
+import { useAuth0 } from '@auth0/auth0-react'
+import { queryClient } from 'src/utils/queryClient'
+import { notify } from 'src/components/notistack/NotificationProvider'
 
 const addPaymentSchema = z.object({
   date: z.any().refine(
@@ -27,15 +34,17 @@ const addPaymentSchema = z.object({
 
 type AddPaymentFormData = z.infer<typeof addPaymentSchema>
 
-interface InviteUserDialogProps {
+interface AddPaymentProps {
   open: boolean
   onClose: () => void
-  onInvite: (data: AddPaymentFormData) => Promise<void> | void
-  loading?: boolean
+  documentId: string
 }
 
-const AddPaymentDateModal: React.FC<InviteUserDialogProps> = React.memo(
-  ({ open, onClose, onInvite, loading = false }) => {
+const AddPaymentDateModal: React.FC<AddPaymentProps> = React.memo(
+  ({ open, onClose, documentId }) => {
+    const { user } = useAuth0()
+    const [loading, setLoading] = useState(false)
+
     const {
       control,
       handleSubmit,
@@ -57,15 +66,33 @@ const AddPaymentDateModal: React.FC<InviteUserDialogProps> = React.memo(
 
     const onSubmit: SubmitHandler<AddPaymentFormData> = useCallback(
       async (data) => {
+        if (!data?.date) return
+        setLoading(true)
         try {
-          await onInvite(data)
+          const formatted = dayjs(data.date).format('YYYY-MM-DD')
+
+          await apiClient.patch(
+            endpoints.documents.updateDocumentDate(
+              getUserOrgUuid(user),
+              documentId
+            ),
+            { date: formatted }
+          )
+          await queryClient.invalidateQueries({
+            queryKey: ['uploadedDocumentListApi']
+          })
+
           reset()
           onClose()
-        } catch {
-          // parent handles errors
+          notify.success('Payment date has been successfully updated.')
+        } catch (err) {
+          console.error(err)
+          notify.error('Something went wrong. Please try again later.')
+        } finally {
+          setLoading(false)
         }
       },
-      [onInvite, reset, onClose]
+      [reset, onClose, user, documentId]
     )
 
     return (

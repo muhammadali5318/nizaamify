@@ -38,69 +38,70 @@ const ReusableDatePicker: React.FC<ReusableDatePickerProps> = ({
       <Controller
         name={name}
         control={control}
-        render={({ field, fieldState }) => (
-          <DatePicker
-            {...field}
-            // DatePicker accepts `null` as empty value — keep this so clearing works
-            value={field.value ?? null}
-            open={pickerOpen}
-            onOpen={() => setPickerOpen(true)}
-            onClose={() => setPickerOpen(false)}
-            onChange={(val: Dayjs | null) => {
-              field.onChange(val)
-              onChange?.(val)
-            }}
-            disabled={disabled}
-            label={label + (required ? ' *' : '')}
-            // ensure we pass `undefined` (not `null`) when nothing provided
-            minDate={minDate ?? undefined}
-            maxDate={maxDate ?? undefined}
-            slotProps={{
-              textField: {
-                fullWidth: true,
-                variant: 'outlined',
-                ...textFieldProps,
-                error: !!fieldState.error,
-                helperText:
-                  fieldState.error?.message ?? textFieldProps?.helperText,
-                InputLabelProps: { shrink: true },
-                InputProps: {
-                  ...textFieldProps?.InputProps,
-                  endAdornment: (
-                    <InputAdornment position='end'>
-                      <IconButton
-                        onClick={() => setPickerOpen((s) => !s)}
-                        edge='end'
-                        size='small'
-                        aria-label='open calendar'
-                      >
-                        <InsertInvitationIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  )
-                },
-                sx: {
-                  '& .MuiPickersInputBase-root, & .MuiPickersOutlinedInput-root':
-                    {
-                      borderRadius: '12px',
-                      overflow: 'hidden',
-                      '& fieldset': { borderRadius: '12px' }
-                    },
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderRadius: '12px'
+        render={({ field, fieldState }) => {
+          // ensure we don't accidentally pass undefined props to MUI
+          const value = field.value ?? null
+          return (
+            <DatePicker
+              value={value}
+              open={pickerOpen}
+              onOpen={() => setPickerOpen(true)}
+              onClose={() => setPickerOpen(false)}
+              onChange={(val: Dayjs | null) => {
+                field.onChange(val)
+                onChange?.(val)
+              }}
+              disabled={disabled}
+              label={label + (required ? ' *' : '')}
+              minDate={minDate ?? undefined}
+              maxDate={maxDate ?? undefined}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  variant: 'outlined',
+                  ...textFieldProps,
+                  error: !!fieldState.error,
+                  helperText:
+                    fieldState.error?.message ?? textFieldProps?.helperText,
+                  InputLabelProps: { shrink: true },
+                  InputProps: {
+                    ...textFieldProps?.InputProps,
+                    endAdornment: (
+                      <InputAdornment position='end'>
+                        <IconButton
+                          onClick={() => setPickerOpen((s) => !s)}
+                          edge='end'
+                          size='small'
+                          aria-label='open calendar'
+                        >
+                          <InsertInvitationIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    )
                   },
-                  '&& .MuiPickersInputBase-root, && .MuiPickersOutlinedInput-root, && .MuiOutlinedInput-notchedOutline':
-                    { borderRadius: '12px' },
-                  ...(textFieldProps?.sx as object)
+                  sx: {
+                    '& .MuiPickersInputBase-root, & .MuiPickersOutlinedInput-root':
+                      {
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        '& fieldset': { borderRadius: '12px' }
+                      },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderRadius: '12px'
+                    },
+                    '&& .MuiPickersInputBase-root, && .MuiPickersOutlinedInput-root, && .MuiOutlinedInput-notchedOutline':
+                      { borderRadius: '12px' },
+                    ...(textFieldProps?.sx as object)
+                  }
+                },
+                popper: {
+                  disablePortal: true,
+                  sx: { zIndex: (t: any) => t.zIndex.modal + 10 }
                 }
-              },
-              popper: {
-                disablePortal: true,
-                sx: { zIndex: (t: any) => t.zIndex.modal + 10 }
-              }
-            }}
-          />
-        )}
+              }}
+            />
+          )
+        }}
       />
     </LocalizationProvider>
   )

@@ -12,10 +12,8 @@ import dayjs from 'dayjs'
 import { bytesToReadableSize } from 'src/utils/bytesToMB'
 
 type Handlers = {
-  onView: () => void
+  onView: (id: string) => void
   onViewDownload: (id: string) => void
-  onSwap?: (id: string) => void
-  onNominate?: (id: string) => void
 }
 
 export const usePendingDocsColumns = (
@@ -143,7 +141,7 @@ export const usePendingDocsColumns = (
                 <Button
                   size='small'
                   variant='outlined'
-                  onClick={() => onView()}
+                  onClick={() => onView(params?.row?.id)}
                 >
                   Add Payment Date
                 </Button>

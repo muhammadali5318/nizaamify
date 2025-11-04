@@ -1,4 +1,5 @@
 export const API_BASE = 'user-workstation/v1'
+export const API_BASE_DOCUMENTS = 'docs/v1'
 
 export const endpoints = {
   practiceOnboarding: {
@@ -27,11 +28,6 @@ export const endpoints = {
   teamMembersList: (id: string) => `${API_BASE}/practices/${id}/users/`,
   accessRequestUserDetails: (id: string | null) =>
     `${API_BASE}/practices/access-requests/users/${id}/`,
-  uploadedDocumentList: (id: string) => `/docs/v1/practices/${id}/documents/`,
-  DownloaduploadedDocument: (id: string, documentId: string) =>
-    `/docs/v1/practices/${id}/documents/${documentId}/download/`,
-  uploadedByFilterList: (id: string) =>
-    `/docs/v1/practices/${id}/documents/filters/`,
   resendInvite: (id: string) => `${API_BASE}/practices/${id}/resend-invite/`,
   practiceRolesAndPermission: (id: string) =>
     `${API_BASE}/practices/${id}/roles/permissions/`,
@@ -44,5 +40,15 @@ export const endpoints = {
   deactivateTeamMember: (orgId: string, userId: string | undefined) =>
     `${API_BASE}/practices/${orgId}/users/${userId}/deactivate/`,
   approveOrRejectTeamMember: (orgId: string, userId: string | undefined) =>
-    `${API_BASE}/practices/${orgId}/users/${userId}/requests/status/`
+    `${API_BASE}/practices/${orgId}/users/${userId}/requests/status/`,
+  documents: {
+    uploadedDocumentList: (id: string) =>
+      `/${API_BASE_DOCUMENTS}/practices/${id}/documents/`,
+    downloaduploadedDocument: (id: string, documentId: string) =>
+      `/${API_BASE_DOCUMENTS}/practices/${id}/documents/${documentId}/download/`,
+    uploadedByFilterList: (id: string) =>
+      `/${API_BASE_DOCUMENTS}/practices/${id}/documents/filters/`,
+    updateDocumentDate: (id: string, documentId: string) =>
+      `/${API_BASE_DOCUMENTS}/practices/${id}/documents/${documentId}/post-date/`
+  }
 }

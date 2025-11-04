@@ -100,7 +100,8 @@ export function useFetchUploadedDocsList(
 ) {
   const { user } = useAuth0()
   const endpoint =
-    params.endpoint ?? endpoints.uploadedDocumentList(getUserOrgUuid(user))
+    params.endpoint ??
+    endpoints.documents?.uploadedDocumentList(getUserOrgUuid(user))
 
   // update queryKey to include date strings so caching behaves correctly:
   const queryKey = useMemo(() => {
