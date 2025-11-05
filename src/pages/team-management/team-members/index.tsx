@@ -30,6 +30,7 @@ import { paths } from 'src/paths'
 import UpdateMemberRoleModal from '../components/UpdateMemberRoleModal'
 import DeactivateUserModal, { Mode } from '../components/DeactivateUserModal'
 import { toTitleCase } from 'src/utils/stringUtils'
+import { useHasPermission } from 'src/config/module-permissions'
 
 interface TeamMembersProps {
   onCountsUpdate?: (counts: {
@@ -81,19 +82,25 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
     ordering,
     sortOrder
   } = useFetchSortedPaginatedData()
+  const canViewAndEditTeamMembers = useHasPermission('user.manage_users_roles')
 
   // API call
-  const { items, teamUsersCounts, total, isLoading } = useFetchTeamMembers({
-    page,
-    pageSize,
-    search: searchKey,
-    user_role: selectedRoles,
-    user_practice_status: convertArrayToUpperCase(
-      selectedStatuses.length > 0 ? selectedStatuses : [...STATUS_OPTIONS]
-    ),
-    ordering,
-    sortOrder
-  })
+  const { items, teamUsersCounts, total, isLoading } = useFetchTeamMembers(
+    {
+      page,
+      pageSize,
+      search: searchKey,
+      user_role: selectedRoles,
+      user_practice_status: convertArrayToUpperCase(
+        selectedStatuses.length > 0 ? selectedStatuses : [...STATUS_OPTIONS]
+      ),
+      ordering,
+      sortOrder
+    },
+    {
+      enabled: canViewAndEditTeamMembers
+    }
+  )
 
   // Update parent counts
   useEffect(() => {
@@ -188,6 +195,7 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
       imageAlt='team-members-list'
       title='Team members'
       subtitle='Manage your practice team members and their access'
+      showInviteTeamMember={canViewAndEditTeamMembers}
     >
       {/* Filters */}
       <Box className={styles.filterContainer}>

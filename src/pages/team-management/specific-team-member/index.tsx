@@ -30,8 +30,11 @@ import {
 } from './permissionsUtils'
 import MemberInfoHeader from './components/MemberInfoHeader'
 import PageHeader from 'src/components/page-header'
+import { useHasPermission } from 'src/config/module-permissions'
 
 const MemberRolesAndPermission: React.FC = () => {
+  const canUpdateMembersPermission = useHasPermission('user.update_profile')
+  const canViewAndEditTeamMembers = useHasPermission('user.manage_users_roles')
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth0()
   const location = useLocation()
@@ -42,7 +45,10 @@ const MemberRolesAndPermission: React.FC = () => {
   const isMobile = useMediaQuery('(max-width:600px)')
 
   // Query data for selected member
-  const { data, refetch, isPending } = useMemberRolesAndPermissions(true, id)
+  const { data, refetch, isPending } = useMemberRolesAndPermissions(
+    canViewAndEditTeamMembers,
+    id
+  )
 
   const [isEditing, setIsEditing] = useState(false)
   const [updatedPermissions, setUpdatedPermissions] = useState<
@@ -142,7 +148,7 @@ const MemberRolesAndPermission: React.FC = () => {
                   isDividerVisible={false}
                 />
 
-                {!(email === user?.email) && (
+                {!(email === user?.email) && canUpdateMembersPermission && (
                   <PermissionsEditActions
                     isEditing={isEditing}
                     onEdit={handleEdit}

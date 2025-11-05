@@ -1,6 +1,9 @@
+import { PermissionsMap } from 'src/config/module-permissions'
+
 export interface UserContext {
   onboardingCompleted?: boolean
   role?: string
+  permissions?: string[]
   [key: string]: unknown
 }
 
@@ -29,7 +32,7 @@ export type ModuleConfig = {
   name: string
   requiredRules?: FeatureRuleId[]
   disabledMessage?: string
-  isEnabled?: (context: UserContext) => boolean
+  isEnabled?: (permissions: PermissionsMap, moduleId: string) => boolean
 }
 
 export type FeatureFlagConfig = {

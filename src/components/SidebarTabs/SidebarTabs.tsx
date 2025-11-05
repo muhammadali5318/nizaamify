@@ -11,7 +11,7 @@ import {
 } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import { isPracticeManager } from 'src/utils/helper'
+import { useHasPermission } from 'src/config/module-permissions'
 
 type SidebarTabsProps = {
   menu: any[]
@@ -29,7 +29,6 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
   menu,
   activeId,
   onChange,
-  userData,
   onboardingCompleted = true,
   width = { xs: '100%', sm: 180 },
   flex = { xs: '0 0 auto', sm: '0 0 180px' },
@@ -42,6 +41,7 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const [showLeft, setShowLeft] = useState(false)
   const [showRight, setShowRight] = useState(false)
+  const canEditPractice = useHasPermission('user.edit_practice_profile')
 
   const updateArrows = () => {
     const el = scrollRef.current
@@ -173,12 +173,9 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
           {menu.map((m) => {
             const isPracticeTab = m.id === 'practice'
 
-            if (isPracticeTab && isPracticeManager(userData)) {
-              return null
-            }
-
-            const isDisabled = isPracticeTab && !onboardingCompleted
-
+            const isDisabled = isPracticeTab
+              ? !onboardingCompleted || !canEditPractice
+              : false
             return (
               <ListItemButton
                 key={m.id}

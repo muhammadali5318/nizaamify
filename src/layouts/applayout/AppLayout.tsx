@@ -56,50 +56,76 @@ function evaluateModuleStateWithReason(
   let sawDisable = false
   let reason: string | undefined
 
+  // If there are no rules, still honor moduleConfig.isEnabled()
+  if (requiredRules.length === 0) {
+    if (typeof moduleConfig.isEnabled === 'function') {
+      try {
+        const enabled = moduleConfig.isEnabled(userContext, moduleConfig?.id)
+        if (!enabled) {
+          reason =
+            moduleConfig.disabledMessage ||
+            `${moduleConfig.name} is not available`
+          return { state: 'hidden', reason }
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (e) {
+        reason =
+          moduleConfig.disabledMessage ||
+          `${moduleConfig.name} is not available`
+        return { state: 'hidden', reason }
+      }
+    }
+    return { state: 'enabled' }
+  }
+
   for (const ruleId of requiredRules) {
-    const ok = FeatureFlagService.evaluateRule(ruleId, userContext)
-    if (ok) continue
-
     const rule = FeatureFlagService.findRule(ruleId)
-    const visibility = (rule as any)?.visibility as
-      | 'hide'
-      | 'disable'
-      | undefined
 
-    if (visibility === 'hide') {
-      reason =
-        moduleConfig.disabledMessage ||
-        rule?.description ||
-        `${moduleConfig.name} is disabled`
-      return { state: 'hidden', reason }
-    }
-    if (visibility === 'disable') {
-      reason =
-        moduleConfig.disabledMessage ||
-        rule?.description ||
-        `${moduleConfig.name} is disabled`
-      sawDisable = true
+    if (!rule) {
+      // Helpful to surface missing rules while debugging
+      // You can remove this console.warn in production if you want.
+      console.warn(`Feature rule not found: ${ruleId} for module ${moduleId}`)
       continue
     }
 
-    if (ruleId === FEATURE_RULE_IDS.NOT_MANAGER) {
-      reason =
-        moduleConfig.disabledMessage ||
-        rule?.description ||
-        `${moduleConfig.name} is not available for your role`
-      return { state: 'hidden', reason }
-    }
-    if (ruleId === FEATURE_RULE_IDS.ONBOARDING_COMPLETED) {
-      reason = 'Complete onboarding to access this module'
+    const ruleOk = FeatureFlagService.evaluateRule(ruleId, userContext)
+
+    if (ruleOk) {
+      // Rule passed → check module-level isEnabled (if provided).
+      if (typeof moduleConfig.isEnabled === 'function') {
+        try {
+          const enabled = moduleConfig.isEnabled(userContext, moduleConfig?.id)
+          if (!enabled) {
+            reason =
+              moduleConfig.disabledMessage ||
+              rule.description ||
+              `${moduleConfig.name} is not available`
+            return { state: 'hidden', reason }
+          }
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (e) {
+          reason =
+            moduleConfig.disabledMessage ||
+            rule.description ||
+            `${moduleConfig.name} is not available`
+          return { state: 'hidden', reason }
+        }
+      }
+      // rule passed and module enabled (or no isEnabled) → continue to next rule
+      continue
+    } else {
+      // Rule failed → disable the module (don't hide)
+      if (ruleId === FEATURE_RULE_IDS.ONBOARDING_COMPLETED) {
+        reason = 'Complete onboarding to access this module'
+      } else {
+        reason =
+          moduleConfig.disabledMessage ||
+          rule.description ||
+          `${moduleConfig.name} is disabled`
+      }
       sawDisable = true
       continue
     }
-
-    reason =
-      moduleConfig.disabledMessage ||
-      rule?.description ||
-      `${moduleConfig.name} is disabled`
-    sawDisable = true
   }
 
   return { state: sawDisable ? 'disabled' : 'enabled', reason }
@@ -338,6 +364,7 @@ export default function AppLayout() {
                   item.moduleId,
                   userContext || {}
                 )
+                // console.log(item)
                 if (state === 'hidden') return null
 
                 const showTooltip = !showLabels

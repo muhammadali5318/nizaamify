@@ -4,74 +4,71 @@ import {
   ModuleConfig
 } from '../types/feature-flags'
 import { FEATURE_RULE_IDS } from '../constants/feature-rules'
+import { evaluateIsModuleEnabled } from './module-permissions'
 
+// ---------- RULES ----------
 const rules: FeatureRule[] = [
   {
     id: FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
     description: 'Practice onboarding has been completed',
-    evaluate: (context) => {
-      return context.onboardingCompleted === true
-    }
-  },
-  {
-    id: FEATURE_RULE_IDS.NOT_MANAGER,
-    description: 'Managers cannot access restricted modules',
-    evaluate: (context) => context.role !== 'manager' // 👈 expects `role` in UserContext
+    evaluate: (context) => context.onboardingCompleted === true
   }
 ]
 
+// ---------- MODULES CONFIG ----------
 const modules: ModuleConfig[] = [
   {
     id: 'dashboard',
-    name: 'Dashboard'
+    name: 'Dashboard',
+    isEnabled: evaluateIsModuleEnabled
   },
   {
     id: 'documents',
     name: 'Documents',
+    isEnabled: evaluateIsModuleEnabled,
     requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
   },
   {
     id: 'reports',
     name: 'Reports',
-    requiredRules: [
-      FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
-      FEATURE_RULE_IDS.NOT_MANAGER
-    ]
+    isEnabled: evaluateIsModuleEnabled,
+    requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
   },
   {
     id: 'benchmarks',
     name: 'Benchmarks',
+    isEnabled: evaluateIsModuleEnabled,
     requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
   },
   {
     id: 'team-management',
     name: 'Team Management',
-    requiredRules: [FEATURE_RULE_IDS.NOT_MANAGER]
+    isEnabled: evaluateIsModuleEnabled
   },
   {
     id: 'practice-settings',
     name: 'Practice Settings',
-    requiredRules: [
-      FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
-      FEATURE_RULE_IDS.NOT_MANAGER
-    ]
+    isEnabled: evaluateIsModuleEnabled,
+    requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
   },
   {
     id: 'billing',
-    name: 'Billing'
+    name: 'Billing',
+    isEnabled: evaluateIsModuleEnabled
   },
   {
     id: 'settings',
-    name: 'Settings'
+    name: 'Settings',
+    isEnabled: evaluateIsModuleEnabled
   },
   {
     id: 'help-support',
-    name: 'Help & Support'
+    name: 'Help & Support',
+    isEnabled: evaluateIsModuleEnabled
   },
   {
     id: 'nomination-flow',
-    name: 'nomination flow',
-    requiredRules: [FEATURE_RULE_IDS.NOT_MANAGER]
+    name: 'nomination flow'
   }
 ]
 

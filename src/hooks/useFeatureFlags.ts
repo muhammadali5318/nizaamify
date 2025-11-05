@@ -11,8 +11,8 @@ export function useFeatureFlags(userContext: UserContext) {
       let isEnabled = true
       let disabledReason: string | undefined
 
-      if (moduleConfig.isEnabled) {
-        isEnabled = moduleConfig.isEnabled(userContext)
+      if (moduleConfig?.isEnabled) {
+        isEnabled = moduleConfig?.isEnabled?.(userContext, moduleConfig?.id)
         if (!isEnabled) {
           disabledReason =
             moduleConfig.disabledMessage ||

@@ -70,12 +70,15 @@ function buildParams(p: UsePracticeSettingsParams) {
 
 export function useFetchTeamMembers(
   params: UsePracticeSettingsParams,
-  options?: UseQueryOptions<{
-    items: PracticeApiItem[]
-    total: number
-    teamUsersCounts?: TeamUsersCounts
-    teamUserData?: TeamUserData
-  }>
+  options?: Omit<
+    UseQueryOptions<{
+      items: PracticeApiItem[]
+      total: number
+      teamUsersCounts?: TeamUsersCounts
+      teamUserData?: TeamUserData
+    }>,
+    'queryKey' | 'queryFn'
+  >
 ) {
   const { user } = useAuth0()
   const endpoint = endpoints.teamMembersList(getUserOrgUuid(user))

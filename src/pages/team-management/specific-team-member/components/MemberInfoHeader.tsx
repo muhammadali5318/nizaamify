@@ -24,8 +24,10 @@ import { paths } from 'src/paths'
 import { useAuth0 } from '@auth0/auth0-react'
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
 import UpdateMemberRoleModal from '../../components/UpdateMemberRoleModal'
+import { useHasPermission } from 'src/config/module-permissions'
 
 const MemberInfoHeader = () => {
+  const canViewAndEditTeamMembers = useHasPermission('user.manage_users_roles')
   const { user } = useAuth0()
   const navigate = useNavigate()
   const location = useLocation()
@@ -103,7 +105,7 @@ const MemberInfoHeader = () => {
       </Box>
 
       {/* Right Section */}
-      {!(email === user?.email) && (
+      {!(email === user?.email) && canViewAndEditTeamMembers && (
         <>
           {isMobile ? (
             <>
