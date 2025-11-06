@@ -9,7 +9,7 @@ import PendingOnboardingBanner from 'src/components/dashboard/PendingOnboardingB
 import PendingOnboardingForManager from 'src/components/dashboard/PendingOnboardingForManager'
 // import WelcomeCard from 'src/components/dashboard/WelcomeCard'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
-import DashboardStatsSection from './sections/DashboardStatsSection'
+import MainDashboard from './sections/index'
 
 const Dashboard = () => {
   const { accessToken } = useAuth()
@@ -48,7 +48,7 @@ const Dashboard = () => {
         <PendingOnboardingBanner />
       )}
       {pendingOnboardinByNominatedManager && <PendingOnboardingForManager />}
-      <DashboardStatsSection />
+      <MainDashboard />
     </Stack>
   )
 }

@@ -11,6 +11,8 @@ import { paths } from 'src/paths'
 import ErrorBoundary from 'src/components/common/error-boundary'
 import { SplashScreen } from 'src/components/common/SplashScreen'
 
+import ManualEntryPage from 'src/pages/documents/manual-entry/ManualEntryPage'
+
 // lazy pages
 const Dashboard = lazy(() => import('src/pages/dashboard'))
 const Documents = lazy(() => import('src/pages/documents'))
@@ -90,7 +92,17 @@ export function Router() {
               <FeatureProtectedRoute moduleId='documents'>
                 <Documents />
               </FeatureProtectedRoute>
-            )
+            ),
+            children: [
+              {
+                path: 'manual-entry',
+                element: (
+                  <FeatureProtectedRoute moduleId='documents'>
+                    <ManualEntryPage />
+                  </FeatureProtectedRoute>
+                )
+              }
+            ]
           },
           {
             path: paths.reports,

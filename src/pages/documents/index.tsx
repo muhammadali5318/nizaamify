@@ -9,7 +9,7 @@ import {
   documentsTabsData
 } from './config/documentsConfig'
 import { useInitialData } from '../../hooks/useFetchInitialData'
-import { useNavigate } from 'react-router'
+import { Outlet, useLocation, useNavigate } from 'react-router'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import apiClient from 'src/services/api-client'
 
@@ -30,7 +30,8 @@ const DocumentsPage: React.FC = () => {
   const { activePracticeId } = useActivePractice()
 
   const practiceName = data?.practice_name || 'Your'
-
+  const location = useLocation()
+  const isSubRoute = location.pathname === '/documents/manual-entry'
   useEffect(() => {
     const fetchDocumentCounts = async () => {
       if (!activePracticeId) return
@@ -74,102 +75,111 @@ const DocumentsPage: React.FC = () => {
   return (
     <Box className={styles.documentsRoot}>
       <PageBreadcrumbs items={documentsModuleBreadCrumbs} />
-
-      <Box
-        className={styles.headerBanner}
-        sx={{
-          textAlign: { xs: 'center', md: 'left' },
-          color: '#01579B',
-          backgroundColor: '#F2F9FC',
-          width: '100%',
-          border: '1px solid #0288D1',
-          borderRadius: '16px'
-        }}
-      >
-        {isLoading ? (
-          <Typography variant='body2'>Loading practice details...</Typography>
-        ) : isError ? (
-          <Typography color='error' variant='body2'>
-            Failed to load practice details
-          </Typography>
-        ) : (
+      {!isSubRoute ? (
+        <>
           <Box
+            className={styles.headerBanner}
             sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              gap: '6px'
+              textAlign: { xs: 'center', md: 'left' },
+              color: '#01579B',
+              backgroundColor: '#F2F9FC',
+              width: '100%',
+              border: '1px solid #0288D1',
+              borderRadius: '16px'
             }}
           >
-            <Box paddingTop='4px' color='#0288D1'>
-              <ErrorOutlineIcon />
-            </Box>
-            <Typography variant='body2' fontSize={{ xs: 13, md: 15 }}>
-              <strong>{practiceName}</strong> practice’s current{' '}
-              <b>accounting basis</b> is set to{' '}
-              <span
-                style={{
-                  color: '#01579B',
-                  fontWeight: 'bold'
-                }}
-              >
-                {accountingBasis} mode.
-              </span>{' '}
-              You can change this mode anytime in
-              <Link
-                component='button'
-                onClick={handleNavigateToSettings}
+            {isLoading ? (
+              <Typography variant='body2'>
+                Loading practice details...
+              </Typography>
+            ) : isError ? (
+              <Typography color='error' variant='body2'>
+                Failed to load practice details
+              </Typography>
+            ) : (
+              <Box
                 sx={{
-                  color: '#01579B',
-                  fontWeight: 'bold',
-                  textDecoration: 'underline',
-                  cursor: 'pointer',
-                  marginLeft: '4px',
-                  marginBottom: '3px'
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  gap: '6px'
                 }}
               >
-                Settings
-              </Link>
-            </Typography>
+                <Box paddingTop='4px' color='#0288D1'>
+                  <ErrorOutlineIcon />
+                </Box>
+                <Typography variant='body2' fontSize={{ xs: 13, md: 15 }}>
+                  <strong>{practiceName}</strong> practice’s current{' '}
+                  <b>accounting basis</b> is set to{' '}
+                  <span
+                    style={{
+                      color: '#01579B',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    {accountingBasis} mode.
+                  </span>{' '}
+                  You can change this mode anytime in
+                  <Link
+                    component='button'
+                    onClick={handleNavigateToSettings}
+                    sx={{
+                      color: '#01579B',
+                      fontWeight: 'bold',
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                      marginLeft: '4px',
+                      marginBottom: '3px'
+                    }}
+                  >
+                    Settings
+                  </Link>
+                </Typography>
+              </Box>
+            )}
           </Box>
-        )}
-      </Box>
 
-      <Stack
-        direction={{ xs: 'column', md: 'row' }}
-        spacing={{ xs: 2, md: 3 }}
-        justifyContent='center'
-        alignItems='center'
-        className={styles.statsWrapper}
-        sx={{
-          px: { xs: 2, md: 4 },
-          mt: { xs: 2, md: 3 }
-        }}
-      >
-        <StatsCard
-          iconSrc='team-member.svg'
-          label='All practice documents'
-          value={stats.all}
-          sx={{ minHeight: '17vh' }}
-        />
-        <StatsCard
-          iconSrc='active-member.svg'
-          label='Your uploaded documents'
-          value={stats.uploaded}
-          sx={{ minHeight: '17vh' }}
-        />
-        <StatsCard
-          iconSrc='pending-member.svg'
-          label='Documents requiring review'
-          value={stats.review}
-          sx={{ minHeight: '17vh' }}
-        />
-      </Stack>
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={{ xs: 2, md: 3 }}
+            justifyContent='center'
+            alignItems='center'
+            className={styles.statsWrapper}
+            sx={{
+              px: { xs: 2, md: 4 },
+              mt: { xs: 2, md: 3 }
+            }}
+          >
+            <StatsCard
+              iconSrc='team-member.svg'
+              label='All practice documents'
+              value={stats.all}
+              sx={{ minHeight: '17vh' }}
+            />
+            <StatsCard
+              iconSrc='active-member.svg'
+              label='Your uploaded documents'
+              value={stats.uploaded}
+              sx={{ minHeight: '17vh' }}
+            />
+            <StatsCard
+              iconSrc='pending-member.svg'
+              label='Documents requiring review'
+              value={stats.review}
+              sx={{ minHeight: '17vh' }}
+            />
+          </Stack>
 
-      <Box sx={{ mt: { xs: 2, md: 4 }, px: { xs: 1, md: 3 }, width: '100%' }}>
-        <ReusableTabs tabs={tabs} initialTab={documentsTabsData[0].key} />
-      </Box>
+          <Box
+            sx={{ mt: { xs: 2, md: 4 }, px: { xs: 1, md: 3 }, width: '100%' }}
+          >
+            <ReusableTabs tabs={tabs} initialTab={documentsTabsData[0].key} />
+          </Box>
+        </>
+      ) : (
+        <Outlet />
+      )}
     </Box>
   )
 }
