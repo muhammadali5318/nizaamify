@@ -19,10 +19,10 @@ import {
 } from 'src/schema-validations/practice-onboarding'
 import { StepOne, StepTwo, StepThree, StepFour } from './components'
 import { useAuth0 } from '@auth0/auth0-react'
-import { isPracticeOwner } from 'src/utils/helper'
 import Footer from 'src/components/registration-wrapper/Footer'
 import StepFive from './components/stepFive'
 import { StepFiveFormValues } from 'src/schema-validations/practice-onboarding/stepFive'
+import useUserDetails from 'src/hooks/useUserDetails'
 
 // -------------------------------
 // INITIAL VALUES
@@ -64,6 +64,8 @@ const initialStepFive: StepFiveFormValues = {
 }
 
 const PracticeOnboardingFlow: React.FC = () => {
+  const { isUserOwnerOrDirector } = useUserDetails()
+
   const { user } = useAuth0()
   const { accessToken } = useAuth()
   const { data: practice, isLoading } = useInitialData(!!accessToken)
@@ -300,7 +302,7 @@ const PracticeOnboardingFlow: React.FC = () => {
                     connectorHeight={30}
                   />
                   <Box>
-                    {isPracticeOwner(user) && (
+                    {isUserOwnerOrDirector && (
                       <NominateNowContainer
                         onSelectNominee={() => setOpenNominate(true)}
                       />

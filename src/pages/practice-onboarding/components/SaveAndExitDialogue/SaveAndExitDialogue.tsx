@@ -10,10 +10,9 @@ import {
   Alert,
   Box
 } from '@mui/material'
-import { isPracticeOwner } from 'src/utils/helper'
-import { useAuth0 } from '@auth0/auth0-react'
 import { LoadingButton } from '@mui/lab'
 import HavingTrouble from 'src/components/contact-support/HavingTrouble'
+import useUserDetails from 'src/hooks/useUserDetails'
 
 type SaveAndExitDialogueProps = {
   open: boolean
@@ -30,7 +29,8 @@ const SaveAndExitDialogue: React.FC<SaveAndExitDialogueProps> = ({
   onOpenNominate,
   confirmLoading
 }) => {
-  const { user } = useAuth0()
+  const { isUserOwnerOrDirector } = useUserDetails()
+
   const handleOnNominate = () => {
     onOpenNominate()
     onClose()
@@ -73,7 +73,7 @@ const SaveAndExitDialogue: React.FC<SaveAndExitDialogueProps> = ({
             ⚠️ Practice setup is essential — without completing onboarding,
             Monai tech won’t work properly for your team.
           </Typography>
-          {isPracticeOwner(user) && (
+          {isUserOwnerOrDirector && (
             <Typography variant='subtitle1' color='var(--color-text-primary)'>
               You can also nominate a Practice Manager later to finish the setup
               on your behalf by clicking{' '}
@@ -94,7 +94,7 @@ const SaveAndExitDialogue: React.FC<SaveAndExitDialogueProps> = ({
             </Typography>
           )}
 
-          {isPracticeOwner(user) && (
+          {isUserOwnerOrDirector && (
             <Alert severity='info' className='alert-info-container'>
               <Typography
                 className='alert-info-text font-weight--500'
