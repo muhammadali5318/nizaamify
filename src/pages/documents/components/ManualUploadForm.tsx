@@ -101,7 +101,7 @@ const ManualEntryForm: React.FC = () => {
   //   }
 
   const handleSubmit = () => {
-    console.log('Form Data:', formData)
+    console.warn('Form Data:', formData)
   }
 
   return (
