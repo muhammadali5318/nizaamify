@@ -1,26 +1,27 @@
 import { useEffect, useState } from 'react'
 import { Box, Stack, Typography } from '@mui/material'
+import { useAuth0 } from '@auth0/auth0-react'
 import { useAuth } from 'src/context/AuthProvider'
-import StatsCard from '../components/DashboardStatsCard'
-import { fetchDashboardSummaryKpis } from '../utils/fetchDashboardSummaryKpis'
+import StatsCard from '../../components/DashboardStatsCard'
+import { fetchDashboardSummaryKpis } from '../../utils/fetchDashboardSummaryKpis'
 
-import revenueIcon from '../../../assets/revenue-icon.svg'
-import costIcon from '../../../assets/cost-icon.svg'
-import profitIcon from '../../../assets/profit-icon.svg'
-import profitPercentage from '../../../assets/profit-margin-icon.svg'
-import ebidtaIcon from '../../../assets/ebita.svg'
-import practiceValueIcon from '../../../assets/value.svg'
-import PeriodSelector from '../components/PeriodSelector'
+import revenueIcon from '../../../../assets/revenue-icon.svg'
+import costIcon from '../../../../assets/cost-icon.svg'
+import profitIcon from '../../../../assets/profit-icon.svg'
+import profitPercentage from '../../../../assets/profit-margin-icon.svg'
+import ebidtaIcon from '../../../../assets/ebita.svg'
+import practiceValueIcon from '../../../../assets/value.svg'
+import PeriodSelector from '../../components/PeriodSelector'
 import dayjs from 'dayjs'
-import { useActivePractice } from 'src/hooks/useActivePractice'
 
 const DashboardStatsSection = () => {
+  const { user } = useAuth0()
   const { accessToken } = useAuth()
-  const { activePracticeId } = useActivePractice()
 
   const [kpiData, setKpiData] = useState<any>(null)
   const [selectedPeriod, setSelectedPeriod] = useState('Current month')
   const [loading, setLoading] = useState(false)
+  const practiceId = user?.organizations_with_roles[0]?.metadata?.uuid
 
   const getDateRange = (label: string) => {
     const endDate = dayjs()
@@ -49,12 +50,12 @@ const DashboardStatsSection = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        if (activePracticeId && accessToken) {
+        if (practiceId && accessToken) {
           setLoading(true)
 
           const { start_date, end_date } = getDateRange(selectedPeriod)
           const data = await fetchDashboardSummaryKpis(
-            activePracticeId ?? '',
+            practiceId,
             accessToken,
             start_date,
             end_date
@@ -69,7 +70,7 @@ const DashboardStatsSection = () => {
     }
 
     loadData()
-  }, [activePracticeId, accessToken, selectedPeriod])
+  }, [practiceId, accessToken, selectedPeriod])
 
   if (!kpiData) return null
 
@@ -157,7 +158,7 @@ const DashboardStatsSection = () => {
       </Box>
 
       <Stack
-        direction='row'
+        direction={{ xs: 'column', sm: 'column', md: 'row', lg: 'row' }}
         spacing={2}
         flexWrap='nowrap'
         justifyContent='space-between'

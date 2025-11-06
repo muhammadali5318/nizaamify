@@ -21,7 +21,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
   trend,
   trendColor,
   subtitle,
-  backgroundColor = '#fff',
+  backgroundColor = '#FAFAFA',
   loading = false,
   type = 'default'
 }) => {
@@ -66,7 +66,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
         borderRadius: '12px',
         boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
         padding: '16px 20px',
-        minWidth: 180,
+        minWidth: '15%',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'flex-start',

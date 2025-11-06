@@ -1,19 +1,54 @@
 import { Box } from '@mui/material'
-import DocumentUploadBox from '../components/DocumentUploadBox'
 import UploadQueue from '../components/UploadQueue'
 import UploadCategories from '../upload-categories/UploadCategories'
 import styles from '../documents.module.scss'
 import ManualEntryCard from '../components/ManualEntryCard'
 import UploadDocumentCard from '../components/UploadDocumentCard'
-
+import { useNavigate } from 'react-router'
+import FileUploadBox from '../components/DocumentUploadBox'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from 'src/store/store'
+import { handleFileUpload } from 'src/utils/handleFileUpload'
+import ProcessingCompletedList from '../components/ProcessingCompletedList'
+import uploadIcon from '../../../assets/upload-box-icon.svg'
+import fileimage from '../../../assets/upload-file-combined-icon.svg'
 const UploadDocuments = () => {
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const { files, completedFiles } = useSelector(
+    (state: RootState) => state.uploads
+  )
+  const batches = useSelector((state: RootState) => state.processed.batches)
+  const hasBatches = Object.keys(batches || {}).length > 0
+
+  const handleFilesSelected = (selectedFiles: FileList) => {
+    const event = {
+      target: { files: selectedFiles }
+    } as unknown as React.ChangeEvent<HTMLInputElement>
+    handleFileUpload(event, dispatch, files.length)
+  }
+  const handleManualEntryClick = () => {
+    navigate('manual-entry')
+  }
+
   return (
     <div>
-      <ManualEntryCard onStart={() => console.warn('Manual entry started')} />
+      <ManualEntryCard onClick={handleManualEntryClick} />
 
       <Box className={styles.uploadSection}>
         <UploadDocumentCard />
-        <DocumentUploadBox />
+        <FileUploadBox
+          title='Upload or drag and drop your financial documents'
+          subtitle='You can upload unlimited files but only 5 in one go.'
+          fileInfoText='Maximum 10MB each — Supported: .CSV, .PDF, .PNG, .JPG'
+          maxFiles={5}
+          fileCount={files.length}
+          isProcessingComplete={completedFiles.length > 0 && hasBatches}
+          completedView={<ProcessingCompletedList />}
+          onFilesSelected={handleFilesSelected}
+          uploadIcon={uploadIcon}
+          fileTypeIcon={fileimage}
+        />
         <UploadQueue />
       </Box>
 

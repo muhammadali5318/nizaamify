@@ -3,10 +3,10 @@ import { Box, Typography, Button } from '@mui/material'
 import styles from './manualEntryCard.module.scss'
 
 type ManualEntryCardProps = {
-  onStart?: () => void
+  onClick?: () => void
 }
 
-const ManualEntryCard: React.FC<ManualEntryCardProps> = ({ onStart }) => {
+const ManualEntryCard: React.FC<ManualEntryCardProps> = ({ onClick }) => {
   return (
     <Box className={styles.manualEntryCard}>
       <Box className={styles.leftSection}>
@@ -29,7 +29,7 @@ const ManualEntryCard: React.FC<ManualEntryCardProps> = ({ onStart }) => {
       <Button
         variant='contained'
         className={styles.actionBtn}
-        onClick={onStart}
+        onClick={onClick}
       >
         Start manual entry
       </Button>
