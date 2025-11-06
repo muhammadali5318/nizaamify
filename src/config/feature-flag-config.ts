@@ -11,7 +11,7 @@ const rules: FeatureRule[] = [
   {
     id: FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
     description: 'Practice onboarding has been completed',
-    evaluate: (context) => context.onboardingCompleted === true
+    evaluate: (context) => !!context
   }
 ]
 

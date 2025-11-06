@@ -24,7 +24,7 @@ export type FeatureRuleId = string
 export type FeatureRule = {
   id: FeatureRuleId
   description: string
-  evaluate: (context: UserContext) => boolean
+  evaluate: (context: UserContext | boolean) => boolean
 }
 
 export type ModuleConfig = {

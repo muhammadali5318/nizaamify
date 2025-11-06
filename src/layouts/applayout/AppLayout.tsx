@@ -19,13 +19,17 @@ import {
   MenuItemData,
   menuSections
 } from './applayout-config'
-import { useFeatureFlagContext } from '../../context/FeatureFlagProvider'
 import MobileTopBar from './components/MobileTopbar'
 import PracticeSelector from './components/PracticeSelector'
+import { useSelector } from 'react-redux'
+import { selectPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 export default function AppLayout() {
   const location = useLocation()
-  const { userContext } = useFeatureFlagContext()
+  const permissionsByCategory = useSelector(selectPermissionsByCategory)
+  const { isOnboardingCompleted } = useActivePractice()
+
   const isMobile = useMediaQuery('(max-width:768px)')
   const isCollapsedBreakpoint = useMediaQuery('(max-width:1024px)')
 
@@ -112,7 +116,8 @@ export default function AppLayout() {
         const hasVisibleItem = section.items.some((item) => {
           const { state } = evaluateModuleStateWithReason(
             item.moduleId,
-            userContext || {}
+            permissionsByCategory || {},
+            isOnboardingCompleted
           )
           return state !== 'hidden'
         })
@@ -147,8 +152,10 @@ export default function AppLayout() {
                 const isActive = location.pathname.startsWith(item.to)
                 const { state, reason } = evaluateModuleStateWithReason(
                   item.moduleId,
-                  userContext || {}
+                  permissionsByCategory || {},
+                  isOnboardingCompleted
                 )
+
                 // console.log(item)
                 if (state === 'hidden') return null
 

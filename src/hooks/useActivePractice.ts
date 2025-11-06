@@ -30,10 +30,14 @@ export function useActivePractice() {
     queryClient.clear()
   }
 
+  const isOnboardingCompleted =
+    activePractice?.onboarding_status === 'COMPLETED'
+
   return {
     activePractice,
     activePracticeId,
     setActivePractice,
-    setActiveById
+    setActiveById,
+    isOnboardingCompleted
   }
 }

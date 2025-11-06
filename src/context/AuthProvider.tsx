@@ -151,9 +151,9 @@ function AuthProviderContainer({ children }: Props) {
   }, [isAuthenticated, getAccessToken])
 
   // load initial app data when accessToken becomes available (or not)
+  useFetchAllPracticesData(!!accessToken)
   useInitialData(!!accessToken)
   useFetchUserWithActivePracticeData(!!accessToken)
-  useFetchAllPracticesData(!!accessToken)
 
   const isFullyAuthenticated =
     isAuthenticated && !tokenLoading && accessToken !== null

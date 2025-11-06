@@ -20,7 +20,10 @@ export class FeatureFlagService {
     return `${ruleId}:${JSON.stringify(sortedContext)}`
   }
 
-  static evaluateRule(ruleId: FeatureRuleId, context: UserContext): boolean {
+  static evaluateRule(
+    ruleId: FeatureRuleId,
+    context: UserContext | boolean
+  ): boolean {
     try {
       const rule = this.findRule(ruleId)
       if (!rule) {

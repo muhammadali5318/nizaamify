@@ -26,6 +26,7 @@ export default function UploadQueue() {
   const { files } = useSelector((state: RootState) => state.uploads)
   const [loading, setLoading] = useState(false)
   const { user, isAuthenticated } = useAuth0()
+  const { activePracticeId } = useActivePractice()
 
   const handleStartProcessing = async () => {
     if (!isAuthenticated) {
@@ -34,7 +35,6 @@ export default function UploadQueue() {
     }
 
     const userId = user?.user_data?.user_metadata?.uuid
-    const { activePracticeId } = useActivePractice()
 
     if (!userId) {
       notify.error('User ID not found in Auth0 profile.')

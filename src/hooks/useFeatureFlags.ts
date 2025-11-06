@@ -2,8 +2,11 @@ import { useMemo } from 'react'
 import { UserContext, ModulePermission, ModuleId } from '../types/feature-flags'
 import { featureFlagConfig } from '../config/feature-flag-config'
 import { FeatureFlagService } from '../services/FeatureFlagService'
+import { useSelector } from 'react-redux'
+import { selectPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
 
 export function useFeatureFlags(userContext: UserContext) {
+  const permissionsByCategory = useSelector(selectPermissionsByCategory)
   const modulePermissions = useMemo(() => {
     const permissions: ModulePermission[] = []
 
@@ -12,7 +15,10 @@ export function useFeatureFlags(userContext: UserContext) {
       let disabledReason: string | undefined
 
       if (moduleConfig?.isEnabled) {
-        isEnabled = moduleConfig?.isEnabled?.(userContext, moduleConfig?.id)
+        isEnabled = moduleConfig?.isEnabled?.(
+          permissionsByCategory,
+          moduleConfig?.id
+        )
         if (!isEnabled) {
           disabledReason =
             moduleConfig.disabledMessage ||
@@ -40,7 +46,7 @@ export function useFeatureFlags(userContext: UserContext) {
     })
 
     return permissions
-  }, [userContext])
+  }, [userContext, permissionsByCategory])
 
   const isModuleEnabled = (moduleId: ModuleId): boolean => {
     const permission = modulePermissions.find((p) => p.moduleId === moduleId)

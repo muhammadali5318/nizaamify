@@ -32,6 +32,11 @@ export interface UseUserDetailsResult {
   practiceId: string | null
   practiceName: string | null
   initials: string
+  isUserNominated: boolean
+  isUserManager: boolean
+  isUserOwner: boolean
+  isUserDirector: boolean
+  isUserOwnerOrDirector: boolean
 }
 
 export function useUserDetails(): UseUserDetailsResult {
@@ -49,6 +54,7 @@ export function useUserDetails(): UseUserDetailsResult {
   const status = user?.user_practice_status ?? null
   const practiceId = user?.practice_id ?? null
   const practiceName = user?.practice_name ?? null
+  const isUserNominated = user?.is_nominated ?? false
 
   const userFullName = useMemo(() => {
     if (!firstName && !lastName) return ''
@@ -62,6 +68,14 @@ export function useUserDetails(): UseUserDetailsResult {
     return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase()
   }, [firstName, lastName])
 
+  const isUserManager =
+    user?.user_role?.toLowerCase().includes('manager') ?? false
+  const isUserOwner = user?.user_role?.toLowerCase().includes('owner') ?? false
+  const isUserDirector =
+    user?.user_role?.toLowerCase().includes('director') ?? false
+
+  const isUserOwnerOrDirector = isUserOwner || isUserDirector
+
   return {
     userId,
     userFullName,
@@ -74,7 +88,12 @@ export function useUserDetails(): UseUserDetailsResult {
     status,
     practiceId,
     practiceName,
-    initials
+    initials,
+    isUserNominated,
+    isUserManager,
+    isUserOwner,
+    isUserDirector,
+    isUserOwnerOrDirector
   }
 }
 

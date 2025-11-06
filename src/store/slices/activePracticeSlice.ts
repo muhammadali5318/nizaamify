@@ -10,6 +10,7 @@ export type AllPracticesDataObject = {
   premises_ownership?: string
   accounting_basis?: string
   created_at?: string
+  onboarding_status?: string
 }
 
 type ActivePracticeState = AllPracticesDataObject | null

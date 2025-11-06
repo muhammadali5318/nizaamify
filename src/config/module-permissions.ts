@@ -1,5 +1,6 @@
 import React from 'react'
-import { useFeatureFlagContext } from 'src/context/FeatureFlagProvider'
+import { useSelector } from 'react-redux'
+import { selectPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
 import { UserContext } from 'src/types/feature-flags'
 
 export type PermissionItem = {
@@ -28,28 +29,28 @@ export type Permission = {
 
 // ---------------- CHECK PERMISSION BY KEY ----------------
 export const checkPermission = (
-  userContext: UserContext | null | undefined,
+  permissionsByCategory: UserContext | null | undefined,
   permissionKey: string
 ): boolean => {
-  if (!userContext?.permissions || !permissionKey) return false
+  if (!permissionsByCategory || !permissionKey) return false
 
   const perms = Object.values(
-    userContext.permissions
+    permissionsByCategory
   ).flat() as unknown as UserPermission[]
   return perms.some((p) => p.key === permissionKey && p.is_active === true)
 }
 
 export const hasPermission = (permissionKey: string): boolean => {
-  const { userContext } = useFeatureFlagContext()
-  return checkPermission(userContext, permissionKey)
+  const permissionsByCategory = useSelector(selectPermissionsByCategory)
+  return checkPermission(permissionsByCategory, permissionKey)
 }
 
 export const useHasPermission = (permissionKey: string): boolean => {
-  const { userContext } = useFeatureFlagContext()
+  const permissionsByCategory = useSelector(selectPermissionsByCategory)
 
   return React.useMemo(() => {
-    return checkPermission(userContext, permissionKey)
-  }, [userContext, permissionKey])
+    return checkPermission(permissionsByCategory, permissionKey)
+  }, [permissionsByCategory, permissionKey])
 }
 
 // ---------- CORE: evaluateIsModuleEnabled ----------
@@ -66,10 +67,9 @@ export const MODULE_PERMISSION_MAP: Record<string, string | string[]> = {
 }
 
 export const evaluateIsModuleEnabled = (
-  userContext: { permissions?: PermissionsMap },
+  permissions: PermissionsMap,
   moduleId?: string
 ): boolean => {
-  const permissions = (userContext?.permissions ?? {}) as PermissionsMap
   if (!moduleId) return false
 
   const mapped = MODULE_PERMISSION_MAP[moduleId]

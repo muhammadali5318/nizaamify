@@ -157,7 +157,8 @@ type ModuleRenderState = 'hidden' | 'disabled' | 'enabled'
 
 export function evaluateModuleStateWithReason(
   moduleId: string,
-  userContext: Record<string, any>
+  permissions: Record<string, any>,
+  isOnboardingCompleted: boolean
 ): { state: ModuleRenderState; reason?: string } {
   const moduleConfig = featureFlagConfig.modules.find(
     (m) => m.id === (moduleId as any)
@@ -172,7 +173,7 @@ export function evaluateModuleStateWithReason(
   if (requiredRules.length === 0) {
     if (typeof moduleConfig.isEnabled === 'function') {
       try {
-        const enabled = moduleConfig.isEnabled(userContext, moduleConfig?.id)
+        const enabled = moduleConfig.isEnabled(permissions, moduleConfig?.id)
         if (!enabled) {
           reason =
             moduleConfig.disabledMessage ||
@@ -200,13 +201,16 @@ export function evaluateModuleStateWithReason(
       continue
     }
 
-    const ruleOk = FeatureFlagService.evaluateRule(ruleId, userContext)
+    const ruleOk = FeatureFlagService.evaluateRule(
+      ruleId,
+      isOnboardingCompleted
+    )
 
     if (ruleOk) {
       // Rule passed → check module-level isEnabled (if provided).
       if (typeof moduleConfig.isEnabled === 'function') {
         try {
-          const enabled = moduleConfig.isEnabled(userContext, moduleConfig?.id)
+          const enabled = moduleConfig.isEnabled(permissions, moduleConfig?.id)
           if (!enabled) {
             reason =
               moduleConfig.disabledMessage ||

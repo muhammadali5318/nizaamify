@@ -4,17 +4,18 @@ import {
   mergePermissions,
   ALL_PERMISSIONS
 } from 'src/config/module-permissions'
-import { useFeatureFlagContext } from 'src/context/FeatureFlagProvider'
 import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
 import { getUserId } from 'src/utils/helper'
 import { useDispatch } from 'react-redux'
-import { setUserDetailsInActivePractice } from 'src/store/slices/userDetailsInActivePracticeSlice'
+import {
+  setMergedPermissionsByCategory,
+  setUserDetailsInActivePractice
+} from 'src/store/slices/userDetailsInActivePracticeSlice'
 import { useActivePractice } from './useActivePractice'
 
 export const useFetchUserWithActivePracticeData = (enabled: boolean) => {
   const { user } = useAuth0()
-  const { updateUserContext } = useFeatureFlagContext()
   const { activePracticeId } = useActivePractice()
 
   const dispatch = useDispatch()
@@ -52,7 +53,7 @@ export const useFetchUserWithActivePracticeData = (enabled: boolean) => {
         activePracticeObj?.roles_and_permissions?.[0]?.permissions
       )
 
-      updateUserContext({ permissions: mergedPermissions })
+      dispatch(setMergedPermissionsByCategory(mergedPermissions))
 
       return data?.data
     },
