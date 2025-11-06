@@ -21,6 +21,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
 import { useAuth } from 'src/context/AuthProvider'
 import { toTitleCase } from 'src/utils/stringUtils'
+import useUserDetails from 'src/hooks/useUserDetails'
 
 type topbarProps = {
   title: string
@@ -34,7 +35,6 @@ type ProfilePopperProps = {
   onClose: (event?: Event | React.SyntheticEvent) => void
   onLogout: () => void
   onSettings: () => void
-  user?: any
 }
 
 // Separate function/component for the floating container
@@ -43,9 +43,10 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
   open,
   onClose,
   onLogout,
-  onSettings,
-  user
+  onSettings
 }) => {
+  const { email, userFullName, userRole } = useUserDetails()
+
   const handleListKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Tab' || e.key === 'Escape') {
       e.preventDefault()
@@ -76,26 +77,24 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                 {/* Profile summary */}
                 <Box sx={{ padding: '12px 10px' }}>
                   <Stack direction='row' spacing={1.5} alignItems='start'>
-                    <Avatar src={user?.picture} alt='avatar' />
+                    <Avatar alt='avatar' />
                     <Stack>
                       <Typography
                         variant='body1'
                         color='var(--color-text-primary)'
                       >
-                        {user?.first_name ?? '-'} {user?.last_name ?? '-'}
+                        {userFullName ?? '-'}
                       </Typography>
                       <Typography
                         variant='caption'
                         color='var(--color-primary-light)'
                         className='font-weight--700'
                       >
-                        {user?.email ?? '-'}
+                        {email ?? '-'}
                       </Typography>
                       <Box>
                         <Chip
-                          label={toTitleCase(
-                            user?.active_practices[0]?.user_role
-                          )}
+                          label={toTitleCase(userRole ?? '')}
                           size='small'
                           variant='outlined'
                           sx={{
@@ -188,7 +187,7 @@ const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
   const anchorRef = useRef<HTMLButtonElement | null>(null)
   const isMobile = useMediaQuery('(max-width:600px)')
   const { data: userData } = useFetchUserWithActivePracticeData(!!accessToken)
-
+  const { userRole, userFullName } = useUserDetails()
   const handleToggle = () => {
     setOpen((prev) => !prev)
   }
@@ -250,14 +249,14 @@ const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
           }}
         >
           <Typography variant='body1' className='font-weight--700'>
-            {userData?.first_name ?? '-'} {userData?.last_name ?? '-'}
+            {userFullName ?? '-'}
           </Typography>
           <Typography
             variant='caption'
             color='var(--color-primary-light)'
             className='font-weight--700'
           >
-            {toTitleCase(userData?.active_practices[0]?.user_role ?? '-')}
+            {toTitleCase(userRole ?? '-')}
           </Typography>
         </Box>
 
@@ -280,7 +279,6 @@ const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
           onClose={handleClose}
           onLogout={handleLogout}
           onSettings={handleSettings}
-          user={userData}
         />
       </Box>
     </Box>

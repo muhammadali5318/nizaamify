@@ -21,12 +21,11 @@ import {
   StepThreeFormValues as FormValues
 } from 'src/schema-validations/practice-onboarding/stepThree'
 import { useUpdateStepThree } from '../../hooks/useUpdateStepThree'
-import { useAuth0 } from '@auth0/auth0-react'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
 import SaveAndExitDialogue from '../SaveAndExitDialogue/SaveAndExitDialogue'
 import { isEqual } from 'lodash'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 type StepThreeProps = {
   formData: FormValues
@@ -49,11 +48,10 @@ const StepThree: React.FC<StepThreeProps> = ({
   isSubmitting = false,
   onOpenNominate
 }) => {
-  const { user } = useAuth0()
-  const orgUuid = getUserOrgUuid(user)
+  const { activePracticeId } = useActivePractice()
   const navigate = useNavigate()
 
-  const updateStepThree = useUpdateStepThree(orgUuid)
+  const updateStepThree = useUpdateStepThree(activePracticeId ?? '')
   const {
     control,
     handleSubmit,

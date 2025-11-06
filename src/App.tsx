@@ -17,26 +17,26 @@ import { PersistGate } from 'redux-persist/integration/react'
 
 function App(): JSX.Element {
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <FeatureFlagProvider>
-          <AuthProvider>
-            <ErrorBoundary>
-              <ThemeProvider theme={theme}>
-                <ReduxProvider store={store}>
-                  <PersistGate loading={null} persistor={persistor}>
+    <ReduxProvider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <BrowserRouter>
+          <QueryClientProvider client={queryClient}>
+            <FeatureFlagProvider>
+              <AuthProvider>
+                <ErrorBoundary>
+                  <ThemeProvider theme={theme}>
                     <NotificationProvider>
                       <Router />
                       <IdleSessionHandler />
                     </NotificationProvider>
-                  </PersistGate>
-                </ReduxProvider>
-              </ThemeProvider>
-            </ErrorBoundary>
-          </AuthProvider>
-        </FeatureFlagProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+                  </ThemeProvider>
+                </ErrorBoundary>
+              </AuthProvider>
+            </FeatureFlagProvider>
+          </QueryClientProvider>
+        </BrowserRouter>
+      </PersistGate>
+    </ReduxProvider>
   )
 }
 

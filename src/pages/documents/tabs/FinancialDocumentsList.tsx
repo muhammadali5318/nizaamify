@@ -10,8 +10,6 @@ import useFetchUploadedDocsList from '../hooks/useFetchUploadedDocsList'
 import useFetchUploadedByList from '../hooks/useFetchUplodedByList'
 import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
-import { useAuth0 } from '@auth0/auth0-react'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { notify } from 'src/components/notistack/NotificationProvider'
 import FilterBar, { FilterState } from '../components/documents-list/FilterBar.'
 import DocumentsTable from '../components/documents-list/DocumentsTable'
@@ -20,6 +18,7 @@ import {
   getFileNameFromUrl
 } from 'src/utils/downloadFileUtils'
 import { defaultFinancialDocumentsListFilters } from '../config/documentsConfig'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 interface FinancialDocumentsListProps {
   title: string
@@ -34,7 +33,8 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
   icon,
   isPendingDocments
 }) => {
-  const { user } = useAuth0()
+  const { activePracticeId } = useActivePractice()
+
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
   const [documentId, setDocumentId] = useState<string | null>(null)
 
@@ -68,7 +68,10 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
       setDownloadingId(id)
       try {
         const resp = await apiClient.get(
-          endpoints.documents.downloaduploadedDocument(getUserOrgUuid(user), id)
+          endpoints.documents.downloaduploadedDocument(
+            activePracticeId ?? '',
+            id
+          )
         )
 
         const fileUrl = resp?.data?.data
@@ -88,7 +91,7 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
         setDownloadingId(null)
       }
     },
-    [user]
+    [activePracticeId]
   )
 
   const handlers = useMemo(

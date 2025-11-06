@@ -9,16 +9,15 @@ import {
 import InviteUserDialog from 'src/components/team-management/InviteUserDialog'
 import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
-import { useAuth0 } from '@auth0/auth0-react'
 import { notify } from 'src/components/notistack/NotificationProvider'
 import { useAuth } from 'src/context/AuthProvider'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
 import { queryClient } from 'src/utils/queryClient'
 import ConfirmationSuccessDialog from 'src/components/team-management/InvitationSuccessDialog'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 const InviteTeamMember: React.FC = () => {
-  const { user } = useAuth0()
+  const { activePracticeId } = useActivePractice()
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
   const [invitedUserData, setInvitedUserData] =
@@ -35,7 +34,7 @@ const InviteTeamMember: React.FC = () => {
         setInviteError(null)
 
         const response = await apiClient.post(
-          endpoints.userInvitation(getUserOrgUuid(user)),
+          endpoints.userInvitation(activePracticeId ?? ''),
           {
             invited_user_email: data.email,
             invited_user_role: data.role,

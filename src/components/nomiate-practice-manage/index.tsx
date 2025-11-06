@@ -21,10 +21,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import RenderUlList from '../render-ul-list'
 import { LoadingButton } from '@mui/lab'
 import { useSendInvite } from 'src/hooks/useSendInvite'
-import { useAuth0 } from '@auth0/auth0-react'
 import { paths } from 'src/paths'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { useNavigate } from 'react-router'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 type Props = {
   open: boolean
@@ -56,9 +55,10 @@ export default function NominatePracticeManagerDialog({
   open,
   onClose
 }: Props) {
-  const { user } = useAuth0()
-  const orgUuid = getUserOrgUuid(user)
-  const { mutate: sendInvite, isPending } = useSendInvite(orgUuid)
+  const { activePracticeId } = useActivePractice()
+  const { mutate: sendInvite, isPending } = useSendInvite(
+    activePracticeId ?? ''
+  )
   const navigate = useNavigate()
 
   const {

@@ -20,11 +20,10 @@ import {
 import FormHeader from '../FormHeader'
 import { useUpdateStepTwo } from '../../hooks/useUpdateStepTwo'
 import isEqual from 'lodash/isEqual'
-import { useAuth0 } from '@auth0/auth0-react'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
-import SaveAndExitDialogue from '../SaveAndExitDialogue/SaveAndExitDialogue' // adjust path if needed
+import SaveAndExitDialogue from '../SaveAndExitDialogue/SaveAndExitDialogue'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 type StepTwoProps = {
   formData: StepTwoFormValues
@@ -43,11 +42,11 @@ const StepTwo: React.FC<StepTwoProps> = ({
   activeStep,
   onOpenNominate
 }) => {
-  const { user } = useAuth0()
-  const orgUuid = getUserOrgUuid(user)
+  const { activePracticeId } = useActivePractice()
+
   const navigate = useNavigate()
 
-  const updateStepTwo = useUpdateStepTwo(orgUuid)
+  const updateStepTwo = useUpdateStepTwo(activePracticeId ?? '')
   const {
     control,
     handleSubmit,

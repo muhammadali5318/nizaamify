@@ -10,133 +10,22 @@ import ListItemText from '@mui/material/ListItemText'
 import ListSubheader from '@mui/material/ListSubheader'
 import styles from './AppLayout.module.scss'
 import Box from '@mui/material/Box'
-import AddPracticeDialog from 'src/pages/practice-settings/components/AddNewPracticeModal.tsx'
-import {
-  Button,
-  Divider,
-  FormControl,
-  MenuItem,
-  Radio,
-  Select,
-  Stack,
-  Tooltip,
-  Typography,
-  useMediaQuery
-} from '@mui/material'
+import { Stack, Tooltip, Typography, useMediaQuery } from '@mui/material'
 import Topbar from './components/Topbar'
 import MuiDrawer from '@mui/material/Drawer'
 import {
   Drawer as DesktopDrawer,
+  evaluateModuleStateWithReason,
   MenuItemData,
   menuSections
 } from './applayout-config'
 import { useFeatureFlagContext } from '../../context/FeatureFlagProvider'
 import MobileTopBar from './components/MobileTopbar'
-import { useInitialData } from 'src/hooks/useFetchInitialData'
-import { useAuth } from 'src/context/AuthProvider'
-import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
-import { featureFlagConfig } from 'src/config/feature-flag-config'
-import { FeatureFlagService } from 'src/services/FeatureFlagService'
-import { toTitleCase } from 'src/utils/stringUtils'
-import AddIcon from '@mui/icons-material/Add'
-import { useState } from 'react'
-
-type ModuleRenderState = 'hidden' | 'disabled' | 'enabled'
-
-function evaluateModuleStateWithReason(
-  moduleId: string,
-  userContext: Record<string, any>
-): { state: ModuleRenderState; reason?: string } {
-  const moduleConfig = featureFlagConfig.modules.find(
-    (m) => m.id === (moduleId as any)
-  )
-  if (!moduleConfig) return { state: 'enabled' }
-
-  const requiredRules = moduleConfig.requiredRules || []
-  let sawDisable = false
-  let reason: string | undefined
-
-  // If there are no rules, still honor moduleConfig.isEnabled()
-  if (requiredRules.length === 0) {
-    if (typeof moduleConfig.isEnabled === 'function') {
-      try {
-        const enabled = moduleConfig.isEnabled(userContext, moduleConfig?.id)
-        if (!enabled) {
-          reason =
-            moduleConfig.disabledMessage ||
-            `${moduleConfig.name} is not available`
-          return { state: 'hidden', reason }
-        }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (e) {
-        reason =
-          moduleConfig.disabledMessage ||
-          `${moduleConfig.name} is not available`
-        return { state: 'hidden', reason }
-      }
-    }
-    return { state: 'enabled' }
-  }
-
-  for (const ruleId of requiredRules) {
-    const rule = FeatureFlagService.findRule(ruleId)
-
-    if (!rule) {
-      // Helpful to surface missing rules while debugging
-      // You can remove this console.warn in production if you want.
-      console.warn(`Feature rule not found: ${ruleId} for module ${moduleId}`)
-      continue
-    }
-
-    const ruleOk = FeatureFlagService.evaluateRule(ruleId, userContext)
-
-    if (ruleOk) {
-      // Rule passed → check module-level isEnabled (if provided).
-      if (typeof moduleConfig.isEnabled === 'function') {
-        try {
-          const enabled = moduleConfig.isEnabled(userContext, moduleConfig?.id)
-          if (!enabled) {
-            reason =
-              moduleConfig.disabledMessage ||
-              rule.description ||
-              `${moduleConfig.name} is not available`
-            return { state: 'hidden', reason }
-          }
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (e) {
-          reason =
-            moduleConfig.disabledMessage ||
-            rule.description ||
-            `${moduleConfig.name} is not available`
-          return { state: 'hidden', reason }
-        }
-      }
-      // rule passed and module enabled (or no isEnabled) → continue to next rule
-      continue
-    } else {
-      // Rule failed → disable the module (don't hide)
-      if (ruleId === FEATURE_RULE_IDS.ONBOARDING_COMPLETED) {
-        reason = 'Complete onboarding to access this module'
-      } else {
-        reason =
-          moduleConfig.disabledMessage ||
-          rule.description ||
-          `${moduleConfig.name} is disabled`
-      }
-      sawDisable = true
-      continue
-    }
-  }
-
-  return { state: sawDisable ? 'disabled' : 'enabled', reason }
-}
+import PracticeSelector from './components/PracticeSelector'
 
 export default function AppLayout() {
   const location = useLocation()
   const { userContext } = useFeatureFlagContext()
-  const { accessToken } = useAuth()
-  const { data: practiceData } = useInitialData(!!accessToken)
-  const [isAddOpen, setIsAddOpen] = useState(false)
   const isMobile = useMediaQuery('(max-width:768px)')
   const isCollapsedBreakpoint = useMediaQuery('(max-width:1024px)')
 
@@ -174,9 +63,6 @@ export default function AppLayout() {
   const handleMobileToggle = () => {
     setMobileOpen((prev) => !prev)
   }
-
-  const handleOpen = () => setIsAddOpen(true)
-  const handleClose = () => setIsAddOpen(false)
 
   // Track active item based on route
   React.useEffect(() => {
@@ -220,108 +106,7 @@ export default function AppLayout() {
       </Box>
 
       {/* Practice Selector */}
-      <Box
-        className={styles.practiceSelector}
-        sx={{ display: 'flex', alignItems: 'center' }}
-      >
-        <img src='/assets/practice-selector.svg' alt='practice selector' />
-        <FormControl className={styles.muiSelectForm} fullWidth>
-          <Select
-            value={practiceData?.practice_name}
-            onChange={(e) => console.warn(e.target.value)}
-            displayEmpty
-            className={styles.muiSelect}
-            sx={{
-              borderRadius: '16px',
-              pl: 2,
-              '& .MuiOutlinedInput-notchedOutline': { borderRadius: '16px' },
-              '& .MuiSelect-icon': { right: 0 },
-              '& .MuiSelect-select': {
-                py: 1
-              }
-            }}
-            renderValue={(selected) => (
-              <Stack padding={'0px'}>
-                <Typography
-                  variant='subtitle2'
-                  sx={{ display: showLabels ? 'inline' : 'none' }}
-                >
-                  {selected || 'Select practice'}
-                </Typography>
-                <Typography
-                  variant='subtitle2'
-                  sx={{ display: showLabels ? 'inline' : 'none' }}
-                  color='success.light'
-                  fontWeight={700}
-                  fontStyle={'italic'}
-                >
-                  {toTitleCase(practiceData?.practice_type)}
-                </Typography>
-              </Stack>
-            )}
-          >
-            <Box>
-              {practiceData && (
-                <MenuItem
-                  key={practiceData?.practice_name}
-                  value={practiceData?.practice_name}
-                >
-                  <ListItem
-                    disableGutters
-                    sx={{
-                      width: '100%',
-                      padding: 0,
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      gap: 1.5
-                    }}
-                  >
-                    <img
-                      src='/assets/practice-selector.svg'
-                      alt='practice selector icon'
-                    />
-
-                    <ListItemText
-                      primary={
-                        <Typography variant='body2' fontWeight={700}>
-                          {practiceData?.practice_name}
-                        </Typography>
-                      }
-                      secondary={
-                        <Typography
-                          variant='caption'
-                          color='var(--color-primary-light)'
-                        >
-                          {practiceData?.email}
-                        </Typography>
-                      }
-                    />
-                    <ListItemIcon sx={{ minWidth: 36 }}>
-                      <Radio checked={true} />
-                    </ListItemIcon>
-                  </ListItem>
-                </MenuItem>
-              )}
-              <Divider />
-              <Box
-                sx={{
-                  padding: '0px 10px'
-                }}
-              >
-                <Button
-                  onClick={handleOpen}
-                  startIcon={<AddIcon />}
-                  fullWidth
-                  variant='outlined'
-                >
-                  Add another practice
-                </Button>
-              </Box>
-            </Box>
-          </Select>
-        </FormControl>
-      </Box>
-
+      <PracticeSelector showLabels={open} />
       {/* Menu Sections */}
       {menuSections?.map((section) => {
         const hasVisibleItem = section.items.some((item) => {
@@ -571,7 +356,6 @@ export default function AppLayout() {
           <Outlet />
         </Box>
       </Box>
-      <AddPracticeDialog open={isAddOpen} onClose={handleClose} />
     </Box>
   )
 }

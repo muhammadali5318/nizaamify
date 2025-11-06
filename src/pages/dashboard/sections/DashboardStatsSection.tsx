@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Box, Stack, Typography } from '@mui/material'
-import { useAuth0 } from '@auth0/auth0-react'
 import { useAuth } from 'src/context/AuthProvider'
 import StatsCard from '../components/DashboardStatsCard'
 import { fetchDashboardSummaryKpis } from '../utils/fetchDashboardSummaryKpis'
@@ -13,10 +12,11 @@ import ebidtaIcon from '../../../assets/ebita.svg'
 import practiceValueIcon from '../../../assets/value.svg'
 import PeriodSelector from '../components/PeriodSelector'
 import dayjs from 'dayjs'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 const DashboardStatsSection = () => {
-  const { user } = useAuth0()
   const { accessToken } = useAuth()
+  const { activePracticeId } = useActivePractice()
 
   const [kpiData, setKpiData] = useState<any>(null)
   const [selectedPeriod, setSelectedPeriod] = useState('Current month')
@@ -49,12 +49,12 @@ const DashboardStatsSection = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        if (user && accessToken) {
+        if (activePracticeId && accessToken) {
           setLoading(true)
 
           const { start_date, end_date } = getDateRange(selectedPeriod)
           const data = await fetchDashboardSummaryKpis(
-            user,
+            activePracticeId ?? '',
             accessToken,
             start_date,
             end_date
@@ -69,7 +69,7 @@ const DashboardStatsSection = () => {
     }
 
     loadData()
-  }, [user, accessToken, selectedPeriod])
+  }, [activePracticeId, accessToken, selectedPeriod])
 
   if (!kpiData) return null
 

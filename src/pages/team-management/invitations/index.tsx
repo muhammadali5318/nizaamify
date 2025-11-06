@@ -2,7 +2,6 @@
 import React, { useState, useMemo } from 'react'
 import { Box, Stack, TablePagination, Typography } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
-import { useAuth0 } from '@auth0/auth0-react'
 
 import TeamManagementContentWrapper from '../components/TeamManagementContentWrapper'
 import useFetchTeamMembers from '../hooks/useFetchTeamMembers'
@@ -14,16 +13,16 @@ import { useAuth } from 'src/context/AuthProvider'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
 import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { notify } from 'src/components/notistack/NotificationProvider'
 import { queryClient } from 'src/utils/queryClient'
 
 import styles from './invitations.module.scss'
 import { useFetchSortedPaginatedData } from 'src/hooks/useFetchSortedData.'
 import PendingRequests from './components/PendingRequests'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 const SentInvitations: React.FC = () => {
-  const { user } = useAuth0()
+  const { activePracticeId } = useActivePractice()
   const { accessToken } = useAuth()
   const { data: practiceData } = useInitialData(!!accessToken)
 
@@ -73,7 +72,7 @@ const SentInvitations: React.FC = () => {
     setSelectedUser({ email, role })
     try {
       setLocalLoading(true)
-      await apiClient.post(endpoints.resendInvite(getUserOrgUuid(user)), {
+      await apiClient.post(endpoints.resendInvite(activePracticeId ?? ''), {
         invited_user_email: email
       })
       handleOpenSuccessDialog()

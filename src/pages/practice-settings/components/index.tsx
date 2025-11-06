@@ -6,16 +6,21 @@ import ArchivePractice from './ArchivePracticeModal'
 import { VerifyIdentityStep } from '../../../components/idetity-verification/VerifyIdentityStep'
 import { GetUserReason } from 'src/components/get-user-reason'
 import ConfirmationSuccessDialog from 'src/components/team-management/InvitationSuccessDialog'
+import { AllPracticesDataObject } from 'src/layouts/applayout/components/PracticeSelector'
+import { toTitleCase } from 'src/utils/stringUtils'
+import dayjs from 'dayjs'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 interface PracticeDetailsCardProps {
   status?: 'active' | 'inactive' | 'archived'
-  practiceName?: string
+  practice: AllPracticesDataObject
 }
 
 const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
   status = 'inactive',
-  practiceName = 'Main Dental Practice'
+  practice
 }) => {
+  const { setActivePractice } = useActivePractice()
   const [isArchiveOpen, setIsArchiveOpen] = useState<boolean>(false)
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
 
@@ -99,16 +104,26 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
 
           <Box>
             <Typography variant='subtitle1' fontWeight={700}>
-              {practiceName}
+              {practice?.practice_name}
             </Typography>
 
             <Chip
               size='small'
-              label='Private'
+              label={
+                practice?.onboarding_status !== 'COMPLETED'
+                  ? 'Practice onboarding pending'
+                  : toTitleCase(practice?.practice_type ?? '')
+              }
               sx={{
                 padding: '4px 10px',
-                bgcolor: 'rgba(76, 175, 80, 0.15)',
-                color: 'success.main',
+                bgcolor:
+                  practice?.onboarding_status !== 'COMPLETED'
+                    ? 'rgba(211, 47, 47, 0.15)'
+                    : 'rgba(76, 175, 80, 0.15)',
+                color:
+                  practice?.onboarding_status !== 'COMPLETED'
+                    ? 'error.main'
+                    : 'success.main',
                 border: 'none'
               }}
             />
@@ -146,19 +161,19 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
         <Box className={styles.detailsContainer}>
           <img src='/assets/location.svg' alt='location' />
           <Typography variant='body1' color='text.primary'>
-            123 High Street
+            {practice?.address}
           </Typography>
         </Box>
         <Box className={styles.detailsContainer}>
           <img src='/assets/suit-case.svg' alt='suit-case' />
           <Typography variant='body1' color='text.primary'>
-            Added 15 January 2024
+            Added {dayjs(practice?.created_at)?.format('DD MMMM YYYY')}
           </Typography>
         </Box>
         <Box className={styles.detailsContainer}>
           <img src='/assets/list.svg' alt='list icon' />
           <Typography variant='body1' color='text.primary'>
-            Accrual Basis
+            {toTitleCase(practice?.accounting_basis ?? '')} basis
           </Typography>
         </Box>
       </Stack>
@@ -170,19 +185,19 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
             alt='suit-case-checked icon'
           />
           <Typography variant='body1' color='text.primary'>
-            Visa •••• 4242
+            -
           </Typography>
         </Box>
 
-        <Box className={styles.detailsContainer}>
+        {/* <Box className={styles.detailsContainer}>
           <Typography
             className='font-style--italic'
             variant='body1'
             color='var(--color-primary-black)'
           >
-            Next billing: <strong> 20/11/2025</strong>
+            Next billing: <strong> -</strong>
           </Typography>
-        </Box>
+        </Box> */}
       </Stack>
 
       {status === 'archived' ? (
@@ -199,14 +214,19 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
           </Button>
         </Box>
       ) : (
-        <Box className={styles.detailsCardActionContainer}>
+        <Box
+          className={styles.detailsCardActionContainer}
+          sx={{
+            visibility: status !== 'active' ? 'visible' : 'hidden'
+          }}
+        >
           <Button
             size='small'
             variant='outlined'
             fullWidth
             color='warning'
             endIcon={<img src='/assets/archive-only.svg' alt='archive icon' />}
-            onClick={openArchive} // <-- open modal here
+            onClick={openArchive}
           >
             Archive practice
           </Button>
@@ -215,6 +235,7 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
             variant='outlined'
             fullWidth
             endIcon={<img src='/assets/switch.svg' alt='switch icon' />}
+            onClick={() => setActivePractice(practice)}
           >
             Switch to this practice
           </Button>

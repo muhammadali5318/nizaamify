@@ -14,9 +14,9 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import apiClient from 'src/services/api-client'
 
 import { notify } from 'src/components/notistack/NotificationProvider'
-import { useAuth0 } from '@auth0/auth0-react'
 
 import PageBreadcrumbs from 'src/components/bread-crumbs/PageBreadcrumbs'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 const DocumentsPage: React.FC = () => {
   const [stats, setStats] = useState({
     all: 0,
@@ -27,20 +27,17 @@ const DocumentsPage: React.FC = () => {
   const tabs = useDocumentsTabs()
   const navigate = useNavigate()
   const { data, isLoading, isError } = useInitialData(true)
-
-  const { user } = useAuth0()
-
-  const practiceId = user?.organizations_with_roles?.[0]?.metadata?.uuid
+  const { activePracticeId } = useActivePractice()
 
   const practiceName = data?.practice_name || 'Your'
 
   useEffect(() => {
     const fetchDocumentCounts = async () => {
-      if (!practiceId) return
+      if (!activePracticeId) return
 
       try {
         const response = await apiClient.get(
-          `/docs/v1/practices/${practiceId}/document-counts/`
+          `/docs/v1/practices/${activePracticeId}/document-counts/`
         )
 
         if (response.data?.status && response.data?.data) {
@@ -65,7 +62,7 @@ const DocumentsPage: React.FC = () => {
     }
 
     fetchDocumentCounts()
-  }, [practiceId])
+  }, [activePracticeId])
 
   const handleNavigateToSettings = () => navigate('/settings')
 

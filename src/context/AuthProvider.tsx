@@ -10,6 +10,7 @@ import React, {
 import { useNavigate } from 'react-router'
 import PageLoader from 'src/components/common/page-loader'
 import { CONFIG } from 'src/config-global'
+import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
 import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
 import apiClient from 'src/services/api-client'
@@ -152,6 +153,7 @@ function AuthProviderContainer({ children }: Props) {
   // load initial app data when accessToken becomes available (or not)
   useInitialData(!!accessToken)
   useFetchUserWithActivePracticeData(!!accessToken)
+  useFetchAllPracticesData(!!accessToken)
 
   const isFullyAuthenticated =
     isAuthenticated && !tokenLoading && accessToken !== null

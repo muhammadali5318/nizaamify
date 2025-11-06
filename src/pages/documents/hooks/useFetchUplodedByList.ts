@@ -2,8 +2,7 @@ import { useMemo } from 'react'
 import { useQuery, UseQueryOptions } from '@tanstack/react-query'
 import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
-import { useAuth0 } from '@auth0/auth0-react'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 type ApiResponse = {
   status?: boolean
@@ -15,9 +14,10 @@ type ApiResponse = {
 export function useFetchUploadedByList(
   options?: Omit<UseQueryOptions<string[]>, 'queryKey' | 'queryFn'>
 ) {
-  const { user } = useAuth0()
+  const { activePracticeId } = useActivePractice()
+
   const endpoint = endpoints.documents.uploadedByFilterList(
-    getUserOrgUuid(user)
+    activePracticeId ?? ''
   )
 
   const queryKey = useMemo(() => ['uploadedByListApi', endpoint], [endpoint])

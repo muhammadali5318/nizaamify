@@ -1,6 +1,4 @@
 import apiClient from 'src/services/api-client'
-import { getUserOrgUuid } from '../../../utils/getActivePracticeId'
-import { User } from '@auth0/auth0-react'
 
 interface DashboardKpiResponse {
   status: boolean
@@ -37,13 +35,12 @@ interface DashboardKpiResponse {
  * @param end_date - end date in YYYY-MM-DD format
  */
 export const fetchDashboardSummaryKpis = async (
-  user: User,
+  practiceId: string,
   token: string,
   start_date: string,
   end_date: string
 ): Promise<DashboardKpiResponse['data']> => {
   try {
-    const practiceId = getUserOrgUuid(user)
     if (!practiceId) throw new Error('Practice ID not found.')
 
     const response = await apiClient.get<DashboardKpiResponse>(

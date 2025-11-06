@@ -14,33 +14,33 @@ import {
 } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import styles from './MemberInfoHeader.module.scss'
-import { useLocation, useNavigate, useParams } from 'react-router'
+import { useParams } from 'react-router'
 import ImgIcon from 'src/components/common/ImgIcon'
 import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
 import { useFeatureRule } from 'src/hooks/useFeatureRule'
 import NominatePracticeManagerTeamList from '../../components/NominatePracticeManagerTeamList'
 import ConfirmationSuccessDialog from 'src/components/team-management/InvitationSuccessDialog'
-import { paths } from 'src/paths'
 import { useAuth0 } from '@auth0/auth0-react'
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
 import UpdateMemberRoleModal from '../../components/UpdateMemberRoleModal'
 import { useHasPermission } from 'src/config/module-permissions'
+import { selectSelectedUser } from 'src/store/slices/team-management/selectedUserSlice'
+import { useSelector } from 'react-redux'
+import DeactivateUserModal from '../../components/DeactivateUserModal'
 
 const MemberInfoHeader = () => {
   const canViewAndEditTeamMembers = useHasPermission('user.manage_users_roles')
+  const selectedUser = useSelector(selectSelectedUser)
+  const [openUnlinkUser, setOpenUnlinkUser] = useState(false)
+
   const { user } = useAuth0()
-  const navigate = useNavigate()
-  const location = useLocation()
   const { id = '' } = useParams<{ id: string }>()
   const [isNominateOpen, setIsNominateOpen] = useState(false)
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
 
   // State for Update Member Role Modal
   const [isUpdateMemberOpen, setIsUpdateMemberOpen] = useState(false)
-
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
-
-  const { name, email, role, isNominated } = location.state || {}
 
   const { isEnabled: onboardingCompleted } = useFeatureRule(
     FEATURE_RULE_IDS.ONBOARDING_COMPLETED
@@ -58,7 +58,7 @@ const MemberInfoHeader = () => {
 
   const handleNominate = () => {
     handleMenuClose()
-    if (!isNominated) {
+    if (!selectedUser?.is_nominated) {
       setIsNominateOpen(true)
     } else {
       console.log('Already nominated')
@@ -76,7 +76,7 @@ const MemberInfoHeader = () => {
             flex: '0 0 auto'
           }}
         >
-          {name
+          {selectedUser?.user_name
             ?.split(' ')
             .map((n: string) => n[0])
             .join('')
@@ -91,7 +91,7 @@ const MemberInfoHeader = () => {
             className={styles.memberName}
             noWrap
           >
-            {name}
+            {selectedUser?.user_name}
           </Typography>
           <Typography
             variant='body1'
@@ -99,13 +99,13 @@ const MemberInfoHeader = () => {
             className={styles.memberEmail}
             noWrap
           >
-            {email}
+            {selectedUser?.email}
           </Typography>
         </Box>
       </Box>
 
       {/* Right Section */}
-      {!(email === user?.email) && canViewAndEditTeamMembers && (
+      {!(selectedUser?.email === user?.email) && canViewAndEditTeamMembers && (
         <>
           {isMobile ? (
             <>
@@ -122,7 +122,12 @@ const MemberInfoHeader = () => {
                   <Button
                     fullWidth
                     variant='contained'
-                    color='error'
+                    color={
+                      selectedUser?.has_other_active_practices
+                        ? 'warning'
+                        : 'error'
+                    }
+                    onClick={() => setOpenUnlinkUser(true)}
                     startIcon={
                       <img
                         src='/assets/person-add-white.svg'
@@ -132,7 +137,9 @@ const MemberInfoHeader = () => {
                       />
                     }
                   >
-                    Deactivate user
+                    {selectedUser?.has_other_active_practices
+                      ? 'Unlink user'
+                      : 'Deactivate user'}
                   </Button>
                 </MenuItem>
 
@@ -148,23 +155,26 @@ const MemberInfoHeader = () => {
                   </Box>
                 </MenuItem>
 
-                {!onboardingCompleted && role === 'PRACTICE MANAGER' && (
-                  <MenuItem onClick={handleNominate}>
-                    <Box display='flex' alignItems='center' gap={1}>
-                      <ImgIcon
-                        src={
-                          isNominated
-                            ? '/assets/green-flag.svg'
-                            : '/assets/blue-flag.svg'
-                        }
-                        alt='flag icon'
-                      />
-                      <Typography noWrap>
-                        {isNominated ? 'Already nominated' : 'Nominate Now'}
-                      </Typography>
-                    </Box>
-                  </MenuItem>
-                )}
+                {!onboardingCompleted &&
+                  selectedUser?.user_role === 'PRACTICE MANAGER' && (
+                    <MenuItem onClick={handleNominate}>
+                      <Box display='flex' alignItems='center' gap={1}>
+                        <ImgIcon
+                          src={
+                            selectedUser?.is_nominated
+                              ? '/assets/green-flag.svg'
+                              : '/assets/blue-flag.svg'
+                          }
+                          alt='flag icon'
+                        />
+                        <Typography noWrap>
+                          {selectedUser?.is_nominated
+                            ? 'Already nominated'
+                            : 'Nominate Now'}
+                        </Typography>
+                      </Box>
+                    </MenuItem>
+                  )}
               </Menu>
             </>
           ) : (
@@ -173,7 +183,12 @@ const MemberInfoHeader = () => {
                 <Button
                   size='medium'
                   variant='contained'
-                  color='error'
+                  color={
+                    selectedUser?.has_other_active_practices
+                      ? 'warning'
+                      : 'error'
+                  }
+                  onClick={() => setOpenUnlinkUser(true)}
                   startIcon={
                     <img
                       src='/assets/person-add-white.svg'
@@ -183,7 +198,9 @@ const MemberInfoHeader = () => {
                     />
                   }
                 >
-                  Deactivate user
+                  {selectedUser?.has_other_active_practices
+                    ? 'Unlink user'
+                    : 'Deactivate user'}
                 </Button>
 
                 <Tooltip placement='top' title='Update member role'>
@@ -204,31 +221,32 @@ const MemberInfoHeader = () => {
                   </Box>
                 </Tooltip>
 
-                {!onboardingCompleted && role === 'PRACTICE MANAGER' && (
-                  <Tooltip
-                    placement='top'
-                    title={
-                      isNominated
-                        ? 'Already nominated'
-                        : 'Nominate to complete onboarding'
-                    }
-                  >
-                    <IconButton
-                      size='small'
-                      aria-label='Nomination flag'
-                      onClick={handleNominate}
+                {!onboardingCompleted &&
+                  selectedUser?.user_role === 'PRACTICE MANAGER' && (
+                    <Tooltip
+                      placement='top'
+                      title={
+                        selectedUser?.is_nominated
+                          ? 'Already nominated'
+                          : 'Nominate to complete onboarding'
+                      }
                     >
-                      <ImgIcon
-                        src={
-                          isNominated
-                            ? '/assets/green-flag.svg'
-                            : '/assets/blue-flag.svg'
-                        }
-                        alt='flag icon'
-                      />
-                    </IconButton>
-                  </Tooltip>
-                )}
+                      <IconButton
+                        size='small'
+                        aria-label='Nomination flag'
+                        onClick={handleNominate}
+                      >
+                        <ImgIcon
+                          src={
+                            selectedUser?.is_nominated
+                              ? '/assets/green-flag.svg'
+                              : '/assets/blue-flag.svg'
+                          }
+                          alt='flag icon'
+                        />
+                      </IconButton>
+                    </Tooltip>
+                  )}
               </Box>
             </>
           )}
@@ -240,7 +258,7 @@ const MemberInfoHeader = () => {
         open={isNominateOpen}
         onClose={() => setIsNominateOpen(false)}
         onSuccess={() => setSuccessDialogOpen(true)}
-        name={name ?? ''}
+        name={selectedUser?.user_name ?? ''}
         userId={id ?? ''}
       />
 
@@ -248,22 +266,16 @@ const MemberInfoHeader = () => {
         open={successDialogOpen}
         onClose={() => {
           setSuccessDialogOpen(false)
-          navigate(paths.teamManagement.gotoSpecificTeamMember(id), {
-            state: { name, email, role, isNominated: true }
-          })
         }}
         onSubmit={() => {
           setSuccessDialogOpen(false)
-          navigate(paths.teamManagement.gotoSpecificTeamMember(id), {
-            state: { name, email, role, isNominated: true }
-          })
         }}
         title='Nomination successful!'
       >
         <Typography variant='body2' color='text.secondary'>
           You’ve successfully nominated{' '}
           <Typography component='span' color='text.primary' fontWeight={700}>
-            {name}
+            {selectedUser?.user_name}
           </Typography>{' '}
           to complete the practice onboarding process.
         </Typography>
@@ -278,11 +290,15 @@ const MemberInfoHeader = () => {
       <UpdateMemberRoleModal
         open={isUpdateMemberOpen}
         onClose={() => setIsUpdateMemberOpen(false)}
-        member={{
-          user_id: id,
-          user_name: name,
-          user_role: role
-        }}
+        member={selectedUser}
+      />
+
+      <DeactivateUserModal
+        open={openUnlinkUser}
+        onClose={() => setOpenUnlinkUser(false)}
+        member={selectedUser}
+        mode={selectedUser?.has_other_active_practices ? 'unlink' : 'delete'}
+        reRouteToMainPage={true}
       />
     </Box>
   )

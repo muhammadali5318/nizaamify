@@ -3,9 +3,8 @@ import { useQuery, UseQueryOptions } from '@tanstack/react-query'
 import apiClient from 'src/services/api-client'
 import qs from 'qs'
 import { endpoints } from 'src/services/backendUrl'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
-import { useAuth0 } from '@auth0/auth0-react'
 import dayjs from 'dayjs'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 export type UploadedDocItem = {
   id: string
@@ -98,10 +97,11 @@ export function useFetchUploadedDocsList(
   params: UseUploadedDocsParams,
   options?: UseQueryOptions<{ items: UploadedDocItem[]; total: number }>
 ) {
-  const { user } = useAuth0()
+  const { activePracticeId } = useActivePractice()
+
   const endpoint =
     params.endpoint ??
-    endpoints.documents?.uploadedDocumentList(getUserOrgUuid(user))
+    endpoints.documents?.uploadedDocumentList(activePracticeId ?? '')
 
   // update queryKey to include date strings so caching behaves correctly:
   const queryKey = useMemo(() => {

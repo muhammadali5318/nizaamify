@@ -10,10 +10,14 @@ import {
   Stack,
   Alert
 } from '@mui/material'
-import { useAuth0 } from '@auth0/auth0-react'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { useNominateExistingManager } from 'src/hooks/useNominateExistingManager'
 import RenderUlList from 'src/components/render-ul-list'
+import { useActivePractice } from 'src/hooks/useActivePractice'
+import { useSelector, useDispatch } from 'react-redux'
+import {
+  selectSelectedUser,
+  setSelectedUser
+} from 'src/store/slices/team-management/selectedUserSlice'
 
 interface NominateExistingPracticeManagerProps {
   open: boolean
@@ -25,15 +29,17 @@ interface NominateExistingPracticeManagerProps {
 
 const NominateExistingPracticeManager: React.FC<NominateExistingPracticeManagerProps> =
   React.memo(({ open, onClose, onSuccess, name, userId }) => {
-    const { user } = useAuth0()
-    const orgUuid = getUserOrgUuid(user)
+    const { activePracticeId } = useActivePractice()
+    const selectedUser = useSelector(selectSelectedUser)
+    const dispatch = useDispatch()
 
     const { mutate: nominateManager, isPending } = useNominateExistingManager({
-      orgUuid,
+      orgUuid: activePracticeId ?? '',
       userId,
       onSuccess: () => {
         onSuccess()
         onClose()
+        dispatch(setSelectedUser({ ...selectedUser, is_nominated: true }))
       }
     })
 
@@ -52,7 +58,8 @@ const NominateExistingPracticeManager: React.FC<NominateExistingPracticeManagerP
             sx: {
               margin: '0px',
               py: '36px',
-              px: { xs: 2, sm: 6 }
+              px: { xs: 2, sm: 6 },
+              borderRadius: '24px'
             }
           }
         }}

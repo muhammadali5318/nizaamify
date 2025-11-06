@@ -15,7 +15,6 @@ import EditDocumentModal from './EditDocumentModal'
 import { getFileIcon } from 'src/utils/getFileIcon'
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined'
 import verifiedIcon from '../../../../public/assets/verified.svg'
-import { useAuth0 } from '@auth0/auth0-react'
 import { approveDocuments } from 'src/services/apis/approveDocs'
 import { notify } from '../../../components/notistack/NotificationProvider'
 import ConfirmDialog from 'src/components/confirm-dialog/ConfirmDialog'
@@ -26,10 +25,10 @@ import { clearFiles } from 'src/store/slices/uploadSlice'
 import { useNavigate } from 'react-router'
 import { queryClient } from 'src/utils/queryClient'
 import NotificationBanner from 'src/components/common/NotificationBanner'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 export default function ProcessingCompletedList() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { user } = useAuth0()
   const dispatch = useDispatch()
   const batches = useSelector((state: RootState) => state.processed.batches)
   const [selectedDoc, setSelectedDoc] = useState<any>(null)
@@ -43,9 +42,9 @@ export default function ProcessingCompletedList() {
       batch_id: batch.batch_id
     }))
   )
-  const practiceId = user?.organizations_with_roles[0]?.metadata?.uuid
+  const { activePracticeId } = useActivePractice()
 
-  console.warn(practiceId)
+  console.warn(activePracticeId)
   const handleEdit = (doc: any) => {
     setSelectedDoc(doc)
     setOpenModal(true)
@@ -58,7 +57,7 @@ export default function ProcessingCompletedList() {
 
       const payloadDocs = modifiedDocs.length > 0 ? modifiedDocs : undefined
 
-      await approveDocuments(practiceId, firstBatchId, payloadDocs)
+      await approveDocuments(activePracticeId ?? '', firstBatchId, payloadDocs)
       notify.success('Documents approved successfully!')
       queryClient.invalidateQueries({
         queryKey: ['uploadedDocumentListApi'],

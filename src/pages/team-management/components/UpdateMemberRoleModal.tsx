@@ -18,15 +18,18 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { USER_ROLES } from 'src/const'
 import { UserRole } from 'src/components/team-management/common/team-management'
-import { TeamMemberRow } from '../team-members'
 import { useAuth } from 'src/context/AuthProvider'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
 import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
-import { useAuth0 } from '@auth0/auth0-react'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { queryClient } from 'src/utils/queryClient'
 import { notify } from 'src/components/notistack/NotificationProvider'
+import { useActivePractice } from 'src/hooks/useActivePractice'
+import {
+  SelectedUserType,
+  setSelectedUser
+} from 'src/store/slices/team-management/selectedUserSlice'
+import { useDispatch } from 'react-redux'
 
 const userRoleValues = USER_ROLES.map((role) => role.value) as [
   string,
@@ -44,14 +47,15 @@ type FormDataValues = z.infer<typeof updateMemberRoleSchema>
 interface UpdateMemberRoleModalProps {
   open: boolean
   onClose: () => void
-  member: TeamMemberRow | null
+  member: SelectedUserType
 }
 
 const UpdateMemberRoleModal: React.FC<UpdateMemberRoleModalProps> = React.memo(
   ({ open, onClose, member }) => {
     const { accessToken } = useAuth()
+    const { activePracticeId } = useActivePractice()
     const { data: practiceData } = useInitialData(!!accessToken)
-    const { user } = useAuth0()
+    const dispatch = useDispatch()
 
     const [loading, setLoading] = useState(false)
 
@@ -87,7 +91,7 @@ const UpdateMemberRoleModal: React.FC<UpdateMemberRoleModalProps> = React.memo(
         setLoading(true)
         try {
           await apiClient.put(
-            endpoints.updateMemberRole(getUserOrgUuid(user), member?.user_id),
+            endpoints.updateMemberRole(activePracticeId ?? '', member?.user_id),
             {
               user_role: data?.role
             }
@@ -97,7 +101,7 @@ const UpdateMemberRoleModal: React.FC<UpdateMemberRoleModalProps> = React.memo(
             queryClient.invalidateQueries({
               queryKey: [
                 'membersRolesAndPermissions',
-                getUserOrgUuid(user),
+                activePracticeId,
                 member?.user_id
               ]
             })
@@ -106,6 +110,7 @@ const UpdateMemberRoleModal: React.FC<UpdateMemberRoleModalProps> = React.memo(
           reset()
           onClose()
           notify.success('Role changed successfully')
+          dispatch(setSelectedUser({ ...member, user_role: data?.role }))
         } catch (error: any) {
           console.error(error)
           notify.error(
@@ -117,7 +122,7 @@ const UpdateMemberRoleModal: React.FC<UpdateMemberRoleModalProps> = React.memo(
           setLoading(false)
         }
       },
-      [reset, onClose, user, member?.user_id]
+      [reset, onClose, activePracticeId, member?.user_id]
     )
 
     const selectedRole = watch('role')

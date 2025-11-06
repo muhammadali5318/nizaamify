@@ -31,6 +31,12 @@ import UpdateMemberRoleModal from '../components/UpdateMemberRoleModal'
 import DeactivateUserModal, { Mode } from '../components/DeactivateUserModal'
 import { toTitleCase } from 'src/utils/stringUtils'
 import { useHasPermission } from 'src/config/module-permissions'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  SelectedUserType,
+  selectSelectedUser,
+  setSelectedUser
+} from 'src/store/slices/team-management/selectedUserSlice'
 
 interface TeamMembersProps {
   onCountsUpdate?: (counts: {
@@ -50,19 +56,15 @@ export type TeamMemberRow = {
 
 const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const selectedUser = useSelector(selectSelectedUser)
+
   const [isNominateOpen, setIsNominateOpen] = useState(false)
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<{
-    name: string
-    userId: string
-  } | null>(null)
 
   // State for Update Member Role Modal
   const [isUpdateMemberOpen, setIsUpdateMemberOpen] = useState(false)
   const [mode, setMode] = useState<Mode>('')
-  const [selectedMember, setSelectedMember] = useState<TeamMemberRow | null>(
-    null
-  )
 
   const [openUnlinkUser, setOpenUnlinkUser] = useState(false)
 
@@ -124,44 +126,33 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
   const getRowClassName = (params: any) =>
     params.row.status === 'Disabled' ? styles.rowDisabled : ''
 
-  const handleNominate = useCallback((row?: TeamMemberRow) => {
+  const handleNominate = useCallback((row?: SelectedUserType) => {
     if (!row) {
       console.warn('No user row provided for nomination')
       return
     }
-
-    setSelectedUser({
-      name: row.user_name ?? '',
-      userId: row.user_id ?? String(row.id ?? '')
-    })
+    dispatch(setSelectedUser(row))
     setIsNominateOpen(true)
   }, [])
 
-  const handleOnView = (
-    id: string,
-    name: string,
-    email: string,
-    role: string,
-    isNominated: boolean
-  ) => {
-    navigate(paths.teamManagement.gotoSpecificTeamMember(id), {
-      state: { name, email, role, isNominated }
-    })
+  const handleOnView = (row: SelectedUserType) => {
+    navigate(paths.teamManagement.gotoSpecificTeamMember(row.user_id))
+    dispatch(setSelectedUser(row))
   }
 
-  const openUpdateMember = (member: TeamMemberRow) => {
-    setSelectedMember(member)
+  const openUpdateMember = (member: SelectedUserType) => {
+    dispatch(setSelectedUser(member))
     setIsUpdateMemberOpen(true)
   }
 
   const closeUpdateMember = () => {
     setIsUpdateMemberOpen(false)
-    setSelectedMember(null)
+    dispatch(setSelectedUser(null))
   }
 
   const handleOpenUnlinkUser = useCallback(
-    (member: TeamMemberRow, mode: Mode) => {
-      setSelectedMember(member)
+    (member: SelectedUserType, mode: Mode) => {
+      dispatch(setSelectedUser(member))
       setOpenUnlinkUser(true)
       setMode(mode)
     },
@@ -170,7 +161,7 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
 
   const handleCloseUnlinkUser = useCallback(() => {
     setOpenUnlinkUser(false)
-    setSelectedMember(null)
+    dispatch(setSelectedUser(null))
   }, [])
 
   const handlers = {
@@ -353,8 +344,8 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
         open={isNominateOpen}
         onClose={() => setIsNominateOpen(false)}
         onSuccess={() => setSuccessDialogOpen(true)}
-        name={selectedUser?.name ?? ''}
-        userId={selectedUser?.userId ?? ''}
+        name={selectedUser?.user_name ?? ''}
+        userId={selectedUser?.user_id ?? ''}
       />
 
       {/* Success Dialog */}
@@ -367,7 +358,7 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
         <Typography variant='body2' color='text.secondary'>
           You’ve successfully nominated{' '}
           <Typography component='span' color='text.primary' fontWeight={700}>
-            {selectedUser?.name}
+            {selectedUser?.user_name}
           </Typography>{' '}
           to complete the practice onboarding process.
         </Typography>
@@ -382,13 +373,13 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
       <UpdateMemberRoleModal
         open={isUpdateMemberOpen}
         onClose={closeUpdateMember}
-        member={selectedMember}
+        member={selectedUser}
       />
 
       <DeactivateUserModal
         open={openUnlinkUser}
         onClose={handleCloseUnlinkUser}
-        member={selectedMember}
+        member={selectedUser}
         mode={mode}
       />
     </TeamManagementContentWrapper>

@@ -12,8 +12,6 @@ import {
   Alert
 } from '@mui/material'
 import { ChevronLeft, ChevronRight } from '@mui/icons-material'
-import { useAuth0 } from '@auth0/auth0-react'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
 import FormHeader from '../FormHeader'
@@ -26,6 +24,7 @@ import {
 } from 'src/schema-validations/practice-onboarding/stepFive'
 import RadioCard from 'src/components/radio-card'
 import { CASH_BASIS_INFO, ACCRUAL_BASIS_INFO } from 'src/const'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 type StepFiveProps = {
   formData: Partial<StepFiveFormValues>
@@ -52,9 +51,9 @@ const StepFive: React.FC<StepFiveProps> = ({
   serverErrors = {},
   onOpenNominate
 }) => {
-  const { user } = useAuth0()
-  const orgUuid = getUserOrgUuid(user)
-  const updateStep = useUpdateStepFive(orgUuid)
+  const { activePracticeId } = useActivePractice()
+
+  const updateStep = useUpdateStepFive(activePracticeId ?? '')
   const isSaving = updateStep.status === 'pending'
   const navigate = useNavigate()
 
@@ -213,7 +212,7 @@ const StepFive: React.FC<StepFiveProps> = ({
               component='div'
               sx={{ margin: 0 }}
             >
-              Most practices start with Cash Basis for simplicity. You can
+              Most practices start with Accrual Basis for simplicity. You can
               change this later from Practice Settings if your accounting method
               evolves.
             </Typography>

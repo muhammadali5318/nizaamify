@@ -48,8 +48,7 @@ const modules: ModuleConfig[] = [
   {
     id: 'practice-settings',
     name: 'Practice Settings',
-    isEnabled: evaluateIsModuleEnabled,
-    requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
+    isEnabled: evaluateIsModuleEnabled
   },
   {
     id: 'billing',

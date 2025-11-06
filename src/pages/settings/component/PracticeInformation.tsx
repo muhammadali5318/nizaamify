@@ -19,8 +19,6 @@ import { ArrowDropDown } from '@mui/icons-material'
 import { useForm, Controller, Resolver, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { MuiTelInput } from 'mui-tel-input'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
-import { useAuth0 } from '@auth0/auth0-react'
 import { usePractice, useUpdatePractice } from '../hooks/usePracticeProfile'
 import {
   PracticeFormValues,
@@ -35,13 +33,14 @@ import { notify } from 'src/components/notistack/NotificationProvider'
 import AccountingBasisCard from './AccountingBasisInfo'
 import { ACCRUAL_BASIS_INFO, CASH_BASIS_INFO } from 'src/const'
 import { queryClient } from 'src/utils/queryClient'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 const PracticeInformation = () => {
   const phoneWrapperRef = useRef<HTMLDivElement | null>(null)
-  const { user } = useAuth0()
-  const value = getUserOrgUuid(user)
-  const { data: practiceApi } = usePractice(value)
-  const updatePractice = useUpdatePractice(value)
+  const { activePracticeId } = useActivePractice()
+
+  const { data: practiceApi } = usePractice(activePracticeId ?? '')
+  const updatePractice = useUpdatePractice(activePracticeId ?? '')
 
   const typedResolver = zodResolver(PracticeSchema) as Resolver<
     PracticeFormValues,
@@ -92,6 +91,12 @@ const PracticeInformation = () => {
     try {
       await updatePractice.mutateAsync(values)
       await queryClient.invalidateQueries({ queryKey: ['initialData'] })
+      await queryClient.invalidateQueries({
+        queryKey: ['listAllPracticesData']
+      })
+      await queryClient.invalidateQueries({
+        queryKey: ['UserWithActivePracticeData']
+      })
     } catch (err) {
       notify.error('Failed to update practice information')
       throw err

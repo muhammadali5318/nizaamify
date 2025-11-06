@@ -11,8 +11,6 @@ import {
 } from 'src/schema-validations/practice-onboarding/stepOne'
 import { useUpdateStepOne } from '../../hooks/useUpdateStepOne'
 import { isEqual } from 'lodash'
-import { useAuth0 } from '@auth0/auth0-react'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
 import SaveAndExitDialogue from '../SaveAndExitDialogue/SaveAndExitDialogue'
@@ -24,6 +22,7 @@ import {
   FormHelperText,
   Button
 } from '@mui/material'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 type StepOneProps = {
   formData: StepOneFormValues
@@ -40,11 +39,10 @@ const StepOne: React.FC<StepOneProps> = ({
   activeStep,
   onOpenNominate
 }) => {
-  const { user } = useAuth0()
-  const orgUuid = getUserOrgUuid(user)
+  const { activePracticeId } = useActivePractice()
   const navigate = useNavigate()
 
-  const updateStepOne = useUpdateStepOne(orgUuid)
+  const updateStepOne = useUpdateStepOne(activePracticeId ?? '')
   const {
     control,
     handleSubmit,
@@ -72,7 +70,7 @@ const StepOne: React.FC<StepOneProps> = ({
       email: formData.email,
       phone: formData.phone
     })
-  }, [formData, reset, user])
+  }, [formData, reset, activePracticeId])
 
   const phoneWrapperRef = React.useRef<HTMLDivElement | null>(null)
   const openCountryDropdown = () => {

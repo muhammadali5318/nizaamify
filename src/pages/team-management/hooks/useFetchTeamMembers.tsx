@@ -4,8 +4,7 @@ import { useQuery, UseQueryOptions } from '@tanstack/react-query'
 import apiClient from 'src/services/api-client'
 import qs from 'qs'
 import { endpoints } from 'src/services/backendUrl'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
-import { useAuth0 } from '@auth0/auth0-react'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 export type PracticeApiItem = {
   id: string
@@ -80,8 +79,8 @@ export function useFetchTeamMembers(
     'queryKey' | 'queryFn'
   >
 ) {
-  const { user } = useAuth0()
-  const endpoint = endpoints.teamMembersList(getUserOrgUuid(user))
+  const { activePracticeId } = useActivePractice()
+  const endpoint = endpoints.teamMembersList(activePracticeId ?? '')
 
   const queryKey = useMemo(
     () => [

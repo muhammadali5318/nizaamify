@@ -1,9 +1,8 @@
 // src/hooks/usePracticeRolesAndPermissions.ts
-import { useAuth0 } from '@auth0/auth0-react'
 import { useQuery } from '@tanstack/react-query'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 
 export interface RolePermission {
   id: string
@@ -13,19 +12,18 @@ export interface RolePermission {
 }
 
 export const usePracticeRolesAndPermissions = (enabled: boolean) => {
-  const { user } = useAuth0()
-  const orgUuid = user ? getUserOrgUuid(user) : null
+  const { activePracticeId } = useActivePractice()
 
   return useQuery<RolePermission[]>({
-    queryKey: ['practiceRolesAndPermissions', orgUuid],
+    queryKey: ['practiceRolesAndPermissions', activePracticeId],
     queryFn: async () => {
-      if (!orgUuid) return []
+      if (!activePracticeId) return []
       const { data } = await apiClient.get(
-        endpoints.practiceRolesAndPermission(orgUuid)
+        endpoints.practiceRolesAndPermission(activePracticeId)
       )
       return data?.data || []
     },
     staleTime: 1000 * 60 * 30, // 30 minutes
-    enabled: !!orgUuid && enabled
+    enabled: !!activePracticeId && enabled
   })
 }

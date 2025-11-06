@@ -23,6 +23,7 @@ export const useUpdateStepFive = (practiceId?: string) => {
       // invalidate initial data so UI picks up the updated onboarding state
       qc.invalidateQueries({ queryKey: ['initialData'] })
       qc.invalidateQueries({ queryKey: ['UserWithActivePracticeData'] })
+      qc.invalidateQueries({ queryKey: ['listAllPracticesData'] })
     }
   })
 }

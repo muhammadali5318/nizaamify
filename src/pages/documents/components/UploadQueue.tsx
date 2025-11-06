@@ -19,6 +19,7 @@ import { setPresignData } from 'src/store/slices/presignedSlice'
 import { getFileIcon } from 'src/utils/getFileIcon'
 import spinner from '../../../assets/spinnergif.gif'
 import NotificationBanner from 'src/components/common/NotificationBanner'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 export default function UploadQueue() {
   const dispatch = useDispatch()
@@ -33,7 +34,7 @@ export default function UploadQueue() {
     }
 
     const userId = user?.user_data?.user_metadata?.uuid
-    const org_id = user?.organizations_with_roles[0].metadata.uuid
+    const { activePracticeId } = useActivePractice()
 
     if (!userId) {
       notify.error('User ID not found in Auth0 profile.')
@@ -47,7 +48,11 @@ export default function UploadQueue() {
 
     setLoading(true)
     try {
-      const response = await presignDocuments(userId, files, org_id)
+      const response = await presignDocuments(
+        userId,
+        files,
+        activePracticeId ?? ''
+      )
       console.warn('Presign API response:', response)
       const presignData = response.data
       dispatch(setPresignData(presignData))
@@ -57,7 +62,7 @@ export default function UploadQueue() {
         files,
         presignData.batch_id,
         userId,
-        org_id
+        activePracticeId ?? ''
       )
     } catch (error: any) {
       console.error('Error starting processing:', error)

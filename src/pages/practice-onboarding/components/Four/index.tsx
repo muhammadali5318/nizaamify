@@ -24,11 +24,10 @@ import {
 import { notify } from 'src/components/notistack/NotificationProvider'
 import { useUpdateStepFour } from '../../hooks/useUpdateStepFour'
 import { isEqual } from 'lodash'
-import { useAuth0 } from '@auth0/auth0-react'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
 import SaveAndExitDialogue from '../SaveAndExitDialogue/SaveAndExitDialogue'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 type StepFourProps = {
   formData: FormValues
@@ -65,10 +64,9 @@ const StepFour: React.FC<StepFourProps> = ({
   serverErrors = {},
   onOpenNominate
 }) => {
-  const { user } = useAuth0()
-  const orgUuid = getUserOrgUuid(user)
+  const { activePracticeId } = useActivePractice()
 
-  const updateStepFour = useUpdateStepFour(orgUuid)
+  const updateStepFour = useUpdateStepFour(activePracticeId ?? '')
   const isSaving = updateStepFour.status === 'pending'
   const navigate = useNavigate()
 

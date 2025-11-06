@@ -12,9 +12,8 @@ import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
 import { useAuth } from 'src/context/AuthProvider'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
-import { useAuth0 } from '@auth0/auth0-react'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { queryClient } from 'src/utils/queryClient'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 export type ApproveOrReject = 'REJECTED' | 'ACTIVE' | ''
 
@@ -64,9 +63,9 @@ const DEFAULTS: any = {
 
 const ApproveOrRejectRequest: React.FC<ConfirmUserModalProps> = React.memo(
   ({ open, onClose, mode, userId }) => {
+    const { activePracticeId } = useActivePractice()
     const { accessToken } = useAuth()
     const { data: practiceData } = useInitialData(!!accessToken)
-    const { user } = useAuth0()
     const [loading, setLoading] = useState(false)
 
     const config = useMemo(() => {
@@ -78,7 +77,7 @@ const ApproveOrRejectRequest: React.FC<ConfirmUserModalProps> = React.memo(
         confirmColor: base?.confirmColor,
         bodyNode: base?.bodyTemplate()
       }
-    }, [mode, userId, practiceData])
+    }, [mode, userId, practiceData, activePracticeId])
 
     const isDisabled = useMemo(
       () => loading || !accessToken,
@@ -88,11 +87,11 @@ const ApproveOrRejectRequest: React.FC<ConfirmUserModalProps> = React.memo(
     const onConfirm = useCallback(async () => {
       if (!userId) return
       await apiClient.put(
-        endpoints.approveOrRejectTeamMember(getUserOrgUuid(user), userId),
+        endpoints.approveOrRejectTeamMember(activePracticeId ?? '', userId),
         { user_practice_status: mode }
       )
       await queryClient.invalidateQueries({ queryKey: ['teamMembersListApi'] })
-    }, [user, userId, mode])
+    }, [activePracticeId, userId, mode])
 
     const handleConfirm = useCallback(async () => {
       setLoading(true)

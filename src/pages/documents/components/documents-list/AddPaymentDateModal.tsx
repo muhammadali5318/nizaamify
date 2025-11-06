@@ -16,10 +16,9 @@ import dayjs from 'dayjs'
 import ReusableDatePicker from 'src/components/date-picker'
 import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
-import { useAuth0 } from '@auth0/auth0-react'
 import { queryClient } from 'src/utils/queryClient'
 import { notify } from 'src/components/notistack/NotificationProvider'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 const addPaymentSchema = z.object({
   date: z.any().refine(
@@ -42,7 +41,7 @@ interface AddPaymentProps {
 
 const AddPaymentDateModal: React.FC<AddPaymentProps> = React.memo(
   ({ open, onClose, documentId }) => {
-    const { user } = useAuth0()
+    const { activePracticeId } = useActivePractice()
     const [loading, setLoading] = useState(false)
 
     const {
@@ -73,7 +72,7 @@ const AddPaymentDateModal: React.FC<AddPaymentProps> = React.memo(
 
           await apiClient.patch(
             endpoints.documents.updateDocumentDate(
-              getUserOrgUuid(user),
+              activePracticeId ?? '',
               documentId
             ),
             { date: formatted }
@@ -92,7 +91,7 @@ const AddPaymentDateModal: React.FC<AddPaymentProps> = React.memo(
           setLoading(false)
         }
       },
-      [reset, onClose, user, documentId]
+      [reset, onClose, activePracticeId, documentId]
     )
 
     return (

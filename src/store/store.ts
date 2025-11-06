@@ -5,18 +5,24 @@ import uploadReducer from './slices/uploadSlice'
 import presignReducer from './slices/presignedSlice'
 import processingReducer from './slices/processingSlice'
 import processedReducer from './slices/processedBatchDataSlice'
+import { activePracticeReducer } from './slices/activePracticeSlice'
+import userDetailsInActivePracticeReducer from 'src/store/slices/userDetailsInActivePracticeSlice'
+import selectedUserReducer from './slices/team-management/selectedUserSlice'
 
 const rootReducer = combineReducers({
   uploads: uploadReducer,
   presign: presignReducer,
   processing: processingReducer,
-  processed: processedReducer // ✅ add here
+  processed: processedReducer,
+  activePractice: activePracticeReducer,
+  userDetailsInActivePractice: userDetailsInActivePracticeReducer,
+  selectedUser: selectedUserReducer
 })
 
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['processed'] // ✅ persist processed batches
+  whitelist: ['processed', 'activePractice', 'selectedUser']
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)

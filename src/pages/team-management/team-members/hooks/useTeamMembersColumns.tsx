@@ -13,13 +13,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { Mode } from '../../components/DeactivateUserModal'
 
 type Handlers = {
-  onView?: (
-    id: string,
-    name: string,
-    email: string,
-    role: string,
-    isNominated: boolean
-  ) => void
+  onView?: (member: TeamMemberRow) => void
   onUnlink?: (member: TeamMemberRow, mode: Mode) => void
   onUpdateMember?: (member: TeamMemberRow) => void
   onNominate?: (id: any) => void
@@ -104,13 +98,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
                     disabled={params?.row?.user_practice_status !== 'ACTIVE'}
                     onClick={() =>
                       onView
-                        ? onView(
-                            params?.row?.user_id,
-                            params?.row?.user_name,
-                            params?.row?.email,
-                            params?.row?.user_role,
-                            params?.row?.is_nominated
-                          )
+                        ? onView(params?.row)
                         : console.log('view', params.row.id)
                     }
                   >

@@ -18,7 +18,6 @@ import {
   useMemberRolesAndPermissions,
   PermissionObject
 } from './hook/useMemberRolesAndPermissions'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { notify } from 'src/components/notistack/NotificationProvider'
 import PageBreadcrumbs from 'src/components/bread-crumbs/PageBreadcrumbs'
 import {
@@ -31,15 +30,16 @@ import {
 import MemberInfoHeader from './components/MemberInfoHeader'
 import PageHeader from 'src/components/page-header'
 import { useHasPermission } from 'src/config/module-permissions'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 const MemberRolesAndPermission: React.FC = () => {
+  const { activePracticeId } = useActivePractice()
   const canUpdateMembersPermission = useHasPermission('user.update_profile')
   const canViewAndEditTeamMembers = useHasPermission('user.manage_users_roles')
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth0()
   const location = useLocation()
   const { email } = location.state || {}
-  const orgUuid = user ? getUserOrgUuid(user) : null
 
   // Detect mobile screen
   const isMobile = useMediaQuery('(max-width:600px)')
@@ -77,7 +77,7 @@ const MemberRolesAndPermission: React.FC = () => {
   }
 
   const handleSave = async (): Promise<void> => {
-    if (!orgUuid || !id) {
+    if (!activePracticeId || !id) {
       notify.error('Missing organisation or user id')
       return
     }
@@ -92,7 +92,7 @@ const MemberRolesAndPermission: React.FC = () => {
       return
     }
 
-    await updateUserPermission(orgUuid, id, roleId, changed, refetch)
+    await updateUserPermission(activePracticeId, id, roleId, changed, refetch)
     setIsEditing(false)
     setUpdatedPermissions({})
   }

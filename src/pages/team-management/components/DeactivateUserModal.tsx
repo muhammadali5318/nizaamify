@@ -12,19 +12,21 @@ import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
 import { useAuth } from 'src/context/AuthProvider'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
-import { useAuth0 } from '@auth0/auth0-react'
-import { getUserOrgUuid } from 'src/utils/getActivePracticeId'
 import { queryClient } from 'src/utils/queryClient'
-import { TeamMemberRow } from '../team-members'
 import { toTitleCase } from 'src/utils/stringUtils'
+import { useActivePractice } from 'src/hooks/useActivePractice'
+import { SelectedUserType } from 'src/store/slices/team-management/selectedUserSlice'
+import { useNavigate } from 'react-router'
+import { paths } from 'src/paths'
 
 export type Mode = 'unlink' | 'delete' | ''
 
 interface ConfirmUserModalProps {
   open: boolean
   onClose: () => void
-  member: TeamMemberRow | null
+  member: SelectedUserType | null
   mode: Mode
+  reRouteToMainPage: boolean
 }
 
 const DEFAULTS: any = {
@@ -33,7 +35,7 @@ const DEFAULTS: any = {
     title: 'Unlink user from practice',
     confirmLabel: 'Unlink user',
     confirmColor: 'warning',
-    bodyTemplate: (member: TeamMemberRow, practiceName: string) => (
+    bodyTemplate: (member: SelectedUserType, practiceName: string) => (
       <>
         <Typography variant='subtitle1'>
           Are you sure you want to unlink{' '}
@@ -54,7 +56,7 @@ const DEFAULTS: any = {
     title: 'Delete user from Monai',
     confirmLabel: 'Delete user',
     confirmColor: 'error',
-    bodyTemplate: (member: TeamMemberRow, practiceName: string) => (
+    bodyTemplate: (member: SelectedUserType, practiceName: string) => (
       <>
         <Typography variant='subtitle1'>
           Are you sure you want to remove{' '}
@@ -74,10 +76,11 @@ const DEFAULTS: any = {
 }
 
 const DeactivateUserModal: React.FC<ConfirmUserModalProps> = React.memo(
-  ({ open, onClose, member, mode }) => {
+  ({ open, onClose, member, mode, reRouteToMainPage = false }) => {
     const { accessToken } = useAuth()
+    const navigate = useNavigate()
+    const { activePracticeId } = useActivePractice()
     const { data: practiceData } = useInitialData(!!accessToken)
-    const { user } = useAuth0()
     const [loading, setLoading] = useState(false)
 
     const config = useMemo(() => {
@@ -99,11 +102,14 @@ const DeactivateUserModal: React.FC<ConfirmUserModalProps> = React.memo(
     const onConfirm = useCallback(async () => {
       if (!member) return
       await apiClient.put(
-        endpoints.deactivateTeamMember(getUserOrgUuid(user), member.user_id),
+        endpoints.deactivateTeamMember(activePracticeId ?? '', member.user_id),
         { user_practice_status: 'INACTIVE' }
       )
       await queryClient.invalidateQueries({ queryKey: ['teamMembersListApi'] })
-    }, [member, user])
+      if (reRouteToMainPage) {
+        navigate(paths.teamManagement.root)
+      }
+    }, [member, activePracticeId])
 
     const handleConfirm = useCallback(async () => {
       setLoading(true)
