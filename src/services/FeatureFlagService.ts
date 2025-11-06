@@ -3,22 +3,6 @@ import { UserContext, FeatureRule, FeatureRuleId } from '../types/feature-flags'
 
 export class FeatureFlagService {
   private static evaluationCache = new Map<string, boolean>()
-  private static cacheTimeout = 5000 // 5 seconds
-
-  private static createCacheKey(
-    ruleId: FeatureRuleId,
-    context: UserContext
-  ): string {
-    // Sort context keys for consistent cache keys
-    const sortedContext = Object.keys(context)
-      .sort()
-      .reduce((sorted, key) => {
-        sorted[key] = context[key]
-        return sorted
-      }, {} as UserContext)
-
-    return `${ruleId}:${JSON.stringify(sortedContext)}`
-  }
 
   static evaluateRule(
     ruleId: FeatureRuleId,
@@ -31,18 +15,7 @@ export class FeatureFlagService {
         return false
       }
 
-      const cacheKey = this.createCacheKey(ruleId, context)
-
-      // Check cache first
-      if (this.evaluationCache.has(cacheKey)) {
-        return this.evaluationCache.get(cacheKey)!
-      }
-
       const result = rule.evaluate(context)
-
-      // Cache result
-      this.evaluationCache.set(cacheKey, result)
-      setTimeout(() => this.evaluationCache.delete(cacheKey), this.cacheTimeout)
 
       return result
     } catch (error) {

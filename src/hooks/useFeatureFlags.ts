@@ -2,11 +2,11 @@ import { useMemo } from 'react'
 import { UserContext, ModulePermission, ModuleId } from '../types/feature-flags'
 import { featureFlagConfig } from '../config/feature-flag-config'
 import { FeatureFlagService } from '../services/FeatureFlagService'
-import { useSelector } from 'react-redux'
-import { selectPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
 
-export function useFeatureFlags(userContext: UserContext) {
-  const permissionsByCategory = useSelector(selectPermissionsByCategory)
+export function useFeatureFlags(
+  userContext: UserContext,
+  permissionsByCategory: any
+) {
   const modulePermissions = useMemo(() => {
     const permissions: ModulePermission[] = []
 
