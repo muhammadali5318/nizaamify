@@ -35,7 +35,7 @@ const ReusableDatePicker: React.FC<ReusableDatePickerProps> = ({
   const [pickerOpen, setPickerOpen] = useState(false)
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='en-gb'>
       <Controller
         name={name}
         control={control}
@@ -45,6 +45,7 @@ const ReusableDatePicker: React.FC<ReusableDatePickerProps> = ({
           return (
             <DatePicker
               value={value}
+              format='DD/MM/YYYY'
               disableFuture={disableFuture}
               minDate={minDate ?? undefined}
               maxDate={maxDate ?? undefined}

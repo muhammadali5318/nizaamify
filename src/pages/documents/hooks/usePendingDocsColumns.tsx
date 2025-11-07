@@ -85,7 +85,7 @@ export const usePendingDocsColumns = (
       },
       {
         field: 'upload_timestamp',
-        headerName: 'Document date',
+        headerName: 'Uploaded on',
         minWidth: 140,
         flex: 1,
         sortable: true,

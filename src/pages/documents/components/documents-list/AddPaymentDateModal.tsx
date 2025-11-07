@@ -24,10 +24,11 @@ const addPaymentSchema = z.object({
   date: z.any().refine(
     (val) => {
       if (!val) return false
-      if (typeof val?.isValid === 'function') return val.isValid()
-      return val instanceof Date && !isNaN(val.getTime())
+      if (typeof val?.isValid === 'function' && !val.isValid()) return false
+
+      return !dayjs(val).isAfter(dayjs(), 'day')
     },
-    { message: 'Please select a valid date' }
+    { message: 'Please select a date that is not in the future' }
   )
 })
 

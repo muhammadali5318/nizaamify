@@ -8,19 +8,19 @@ export const tabsData: {
 }[] = [
   {
     key: 0,
-    label: 'Team members',
+    label: 'Team Members',
     activeIcon: '/assets/active-team-member-tab-icon.svg',
     inactiveIcon: '/assets/inactive-team-member-tab.svg'
   },
   {
     key: 1,
-    label: 'Sent invitations',
+    label: 'Sent Invitations',
     activeIcon: '/assets/active-history-icon.svg',
     inactiveIcon: '/assets/history-icon.svg'
   },
   {
     key: 2,
-    label: 'Roles & permissions',
+    label: 'Roles & Permissions',
     activeIcon: '/assets/active-notification.svg',
     inactiveIcon: '/assets/notification-icon.svg'
   }

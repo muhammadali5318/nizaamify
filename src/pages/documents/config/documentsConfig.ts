@@ -66,20 +66,20 @@ export const documentCategories = [
 export const documentsTabsData = [
   {
     key: 0,
-    label: 'Upload documents',
+    label: 'Upload Documents',
     activeIcon: '/assets/active-document.svg',
     inactiveIcon: '/assets/inactive-document.svg'
   },
   {
     key: 1,
-    label: 'Pending documents',
+    label: 'Pending Documents',
     activeIcon: '/assets/active-union.svg',
     inactiveIcon: '/assets/in-active-union.svg',
     count: 44
   },
   {
     key: 2,
-    label: 'Upload history',
+    label: 'Upload History',
     activeIcon: '/assets/history.svg',
     inactiveIcon: '/assets/history-icon.svg'
   }

@@ -184,7 +184,7 @@ const TeamMembers: React.FC<TeamMembersProps> = ({ onCountsUpdate }) => {
     <TeamManagementContentWrapper
       imageSrc='/assets/team-members-list.svg'
       imageAlt='team-members-list'
-      title='Team members'
+      title='Team Members'
       subtitle='Manage your practice team members and their access'
       showInviteTeamMember={canViewAndEditTeamMembers}
     >

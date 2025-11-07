@@ -212,6 +212,7 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
         onClearFilters={clearFilters}
         searchKey={filters.searchKey}
         isAnyFilterApplied={isAnyFilterApplied}
+        isPendingDocments={isPendingDocments}
       />
 
       <AddPaymentDateModal

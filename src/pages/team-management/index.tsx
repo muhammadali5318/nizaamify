@@ -48,12 +48,12 @@ const TeamManagement: React.FC = () => {
         />
         <StatsCard
           iconSrc='active-member.svg'
-          label='Active members'
+          label='Active Members'
           value={teamCounts?.active_users}
         />
         <StatsCard
           iconSrc='pending-member.svg'
-          label='Pending invites'
+          label='Pending Invites'
           value={teamCounts?.pending_invited_users}
         />
       </Box>

@@ -33,7 +33,7 @@ export default function useDocumentsTabs(): ReusableTabItem[] {
           count = total
           content = (
             <FinancialDocumentsList
-              title='Pending documents'
+              title='Pending Documents'
               description='Search, filter, and manage your uploaded documents'
               icon='/assets/document-upload-card-icon.svg'
               isPendingDocments={true}
@@ -44,7 +44,7 @@ export default function useDocumentsTabs(): ReusableTabItem[] {
         case 2:
           content = (
             <FinancialDocumentsList
-              title='Upload history'
+              title='Upload History'
               description='Search, filter, and manage your uploaded documents'
               icon='/assets/history-Icon-blue.svg'
               isPendingDocments={false}
