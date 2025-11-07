@@ -49,7 +49,16 @@ const DocumentsPage: React.FC = () => {
 
   return (
     <Box className={styles.documentsRoot}>
-      <PageBreadcrumbs items={documentsModuleBreadCrumbs} />
+      <PageBreadcrumbs
+        items={
+          location.pathname === '/documents/manual-entry'
+            ? [
+                { label: 'Documents', to: '/documents' },
+                { label: 'Manual entries' }
+              ]
+            : documentsModuleBreadCrumbs
+        }
+      />
       {!isSubRoute ? (
         <>
           <Box
@@ -58,7 +67,7 @@ const DocumentsPage: React.FC = () => {
               textAlign: { xs: 'center', md: 'left' },
               color: '#01579B',
               backgroundColor: '#F2F9FC',
-              width: '100%',
+              width: { xs: '86%', sm: '94%', md: '94%' },
               border: '1px solid #0288D1',
               borderRadius: '16px'
             }}

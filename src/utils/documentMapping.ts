@@ -43,3 +43,9 @@ export const getDocumentTypes = (): string[] => Object.keys(documentMapping)
 
 export const getDocumentSubtypes = (type: string): string[] =>
   documentMapping[type] || []
+
+export const category = {
+  expense: 'Expense',
+  revenue: 'Revenue',
+  unknown: 'Unknown'
+}

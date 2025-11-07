@@ -15,7 +15,8 @@ import { updateDocumentFields } from '../../../store/slices/processedBatchDataSl
 import { notify } from '../../../components/notistack/NotificationProvider'
 import {
   getDocumentTypes,
-  getDocumentSubtypes
+  getDocumentSubtypes,
+  category
 } from '../../../utils/documentMapping'
 
 interface EditDocumentModalProps {
@@ -83,6 +84,8 @@ export default function EditDocumentModal({
   if (!document) return null
 
   const documentTypes = getDocumentTypes()
+  const documentCategories = Object.values(category)
+  const isCategoryDisabled = formData.document_subtype === 'Bank statements'
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth='sm'>
@@ -114,6 +117,22 @@ export default function EditDocumentModal({
           </Typography>
 
           <Box display='flex' flexDirection='column' gap={2}>
+            <TextField
+              select
+              fullWidth
+              label='Document category'
+              value={formData.document_category}
+              onChange={(e) =>
+                handleChange('document_category', e.target.value)
+              }
+              disabled={isCategoryDisabled}
+            >
+              {documentCategories.map((cat) => (
+                <MenuItem key={cat} value={cat}>
+                  {cat}
+                </MenuItem>
+              ))}
+            </TextField>
             <TextField
               select
               fullWidth
@@ -195,7 +214,9 @@ export default function EditDocumentModal({
           </Button>
           <Button
             sx={{
-              width: '100%'
+              width: '100%',
+              textWrap: 'nowrap',
+              minWidth: '120px'
             }}
             onClick={handleUpdate}
             variant='contained'

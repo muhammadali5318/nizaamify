@@ -1,5 +1,6 @@
 .manualEntryCard {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   background: linear-gradient(90deg, #f9f9f9 0%, #f4f4f4 100%);
@@ -10,6 +11,14 @@
 
   &:hover {
     box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.08);
+  }
+}
+@media (max-width: 600px) {
+  .manualEntryCard {
+    display: flex;
+    flex-direction: column;
+
+    gap: 16px;
   }
 }
 .documentCard {
