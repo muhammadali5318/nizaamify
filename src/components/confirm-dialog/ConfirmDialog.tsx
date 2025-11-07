@@ -1,4 +1,3 @@
-// src/components/common/ConfirmDialog.tsx
 import {
   Dialog,
   DialogContent,
@@ -56,7 +55,7 @@ const ConfirmDialog = ({
         </Typography>
       </DialogContent>
 
-      <DialogActions sx={{ px: 0, pb: 3, justifyContent: 'center', gap: 2 }}>
+      <DialogActions sx={{ px: 2, pb: 3, justifyContent: 'center', gap: 2 }}>
         <Button
           onClick={onClose}
           variant='outlined'

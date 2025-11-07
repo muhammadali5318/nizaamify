@@ -80,7 +80,7 @@ export default function UploadQueue() {
         mb={2}
         sx={{
           display: 'flex',
-          flexDirection: 'row',
+          flexDirection: { xs: 'column', sm: 'row' },
           justifyContent: 'space-between',
           alignItems: 'baseline'
         }}

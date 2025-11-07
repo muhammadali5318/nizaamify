@@ -144,9 +144,6 @@ const DashboardStatsSection = () => {
           <Typography variant='h6' fontWeight={600}>
             Practice Financial Overview
           </Typography>
-          <Typography variant='body2' color='text.secondary'>
-            Grayford dental practice - NHS-dominant (75%+ NHS revenue)
-          </Typography>
         </Box>
         <Box>
           <PeriodSelector

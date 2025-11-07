@@ -12,15 +12,38 @@ export function useFeatureFlags(userContext: UserContext) {
   const modulePermissions = useMemo(() => {
     const permissions: ModulePermission[] = []
 
+    // Normalize permissionsByCategory so each permission item contains a 'key' property
+    const permissionsMap = Object.keys(permissionsByCategory || {}).reduce(
+      (acc, cat) => {
+        acc[cat] = (permissionsByCategory[cat] || []).map((perm: any) =>
+          perm && perm.key !== undefined
+            ? perm
+            : { ...(perm || {}), key: perm?.id ?? perm?.name ?? '' }
+        )
+        return acc
+      },
+      {} as Record<string, any[]>
+    )
+
     featureFlagConfig.modules.forEach((moduleConfig) => {
       let isEnabled = true
       let disabledReason: string | undefined
 
       if (moduleConfig?.isEnabled) {
-        isEnabled = moduleConfig?.isEnabled?.(
-          permissionsByCategory,
-          moduleConfig?.id
-        )
+        try {
+          // pass the normalized map to satisfy the expected shape
+          isEnabled = moduleConfig?.isEnabled?.(
+            permissionsMap as any,
+            moduleConfig?.id
+          )
+        } catch (error) {
+          console.error(
+            `Error evaluating isEnabled for module ${moduleConfig.id}:`,
+            error
+          )
+
+          isEnabled = false
+        }
 
         if (!isEnabled) {
           disabledReason =

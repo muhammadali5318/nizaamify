@@ -9,16 +9,25 @@ import {
   Select,
   FormControl,
   Stack,
-  SelectChangeEvent
+  SelectChangeEvent,
+  Divider
 } from '@mui/material'
 
 import FileUploadBox from './DocumentUploadBox'
 import ProcessingCompletedList from './ProcessingCompletedList'
-
 import { useSelector } from 'react-redux'
 import { RootState } from 'src/store/store'
+
+import {
+  getDocumentTypes,
+  getDocumentSubtypes,
+  category
+} from '../../../utils/documentMapping'
+
 import uploadIcon from '../../../assets/upload-box-icon.svg'
 import fileimage from '../../../assets/upload-file-combined-icon.svg'
+import { notify } from 'src/components/notistack/NotificationProvider'
+import manualImg from '../../../../public/assets/manual-upload.svg'
 interface ManualEntryFormData {
   entryDate: string
   category: string
@@ -31,15 +40,6 @@ interface ManualEntryFormData {
   description: string
   attachments: File[]
 }
-
-// const UploadBox = styled(Box)(({ theme }) => ({
-//   border: '1px dashed #D0D5DD',
-//   borderRadius: 12,
-//   padding: theme.spacing(4),
-//   textAlign: 'center',
-//   backgroundColor: '#FCFCFD',
-//   color: '#344054'
-// }))
 
 const ManualEntryForm: React.FC = () => {
   const [formData, setFormData] = useState<ManualEntryFormData>({
@@ -54,8 +54,7 @@ const ManualEntryForm: React.FC = () => {
     description: '',
     attachments: []
   })
-  //  const navigate = useNavigate()
-  //   const dispatch = useDispatch()
+
   const { files, completedFiles } = useSelector(
     (state: RootState) => state.uploads
   )
@@ -63,52 +62,77 @@ const ManualEntryForm: React.FC = () => {
   const hasBatches = Object.keys(batches || {}).length > 0
 
   const handleFilesSelected = () => {
-    // const event = {
-    //   target: { files: selectedFiles }
-    // } as unknown as React.ChangeEvent<HTMLInputElement>
-    // handleFileUpload(event, dispatch, files.length)
     console.warn('handleFilesSelected to be implemented')
   }
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
+    // Prevent selecting a future date for entryDate or paymentDate
+    if ((name === 'entryDate' || name === 'paymentDate') && value) {
+      const selectedDate = new Date(value)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      if (selectedDate > today) {
+        notify.error('Future dates are not allowed.')
+        return
+      }
+    }
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target
     if (name) {
-      setFormData((prev) => ({ ...prev, [name]: value }))
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        // Reset subtype if type changes
+        ...(name === 'type' ? { subtype: '' } : {})
+      }))
     }
   }
-
-  //   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //     if (e.target.files) {
-  //       const files = Array.from(e.target.files)
-  //       setFormData((prev) => ({
-  //         ...prev,
-  //         attachments: [...prev.attachments, ...files]
-  //       }))
-  //     }
-  //   }
-
-  //   const handleRemoveFile = (index: number) => {
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       attachments: prev.attachments.filter((_, i) => i !== index)
-  //     }))
-  //   }
 
   const handleSubmit = () => {
     console.warn('Form Data:', formData)
   }
 
+  const types = getDocumentTypes()
+  const subtypes = formData.type ? getDocumentSubtypes(formData.type) : []
+
   return (
-    <Box sx={{ p: 3, maxWidth: 1100, mx: 'auto' }}>
-      <Typography variant='h6' fontWeight={600} mb={3}>
-        Add Manual Financial Entry
-      </Typography>
+    <Box
+      sx={{
+        p: 2,
+        maxWidth: 1100,
+        mx: 'auto',
+        border: '1px solid #F1F1F1',
+        borderRadius: '24px'
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          mb: 1,
+          gap: 1
+        }}
+      >
+        <img src={manualImg} alt='upload' />
+        <Box>
+          <Typography variant='h6' fontWeight={600}>
+            Add Manual Financial Entry
+          </Typography>
+          <Typography variant='body2' color='textSecondary'>
+            Enter financial transaction details manually. All fields marked with
+            * are required.
+          </Typography>
+        </Box>
+      </Box>
+      <Divider sx={{ mb: 3 }} />
 
       <Stack spacing={2}>
         {/* Row 1 */}
@@ -130,8 +154,9 @@ const ManualEntryForm: React.FC = () => {
               label='Category *'
               onChange={handleSelectChange}
             >
-              <MenuItem value='Cost/expense'>Cost/expense</MenuItem>
-              <MenuItem value='Income'>Income</MenuItem>
+              <MenuItem value={category.expense}>Expense</MenuItem>
+              <MenuItem value={category.revenue}>Revenue</MenuItem>
+              <MenuItem value={category.unknown}>Unknown</MenuItem>
             </Select>
           </FormControl>
         </Stack>
@@ -146,11 +171,14 @@ const ManualEntryForm: React.FC = () => {
               label='Type *'
               onChange={handleSelectChange}
             >
-              <MenuItem value='Staff Costs'>Staff Costs</MenuItem>
-              <MenuItem value='Office Supplies'>Office Supplies</MenuItem>
+              {types.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
-          <FormControl fullWidth>
+          <FormControl fullWidth disabled={!formData.type}>
             <InputLabel>Subtype *</InputLabel>
             <Select
               name='subtype'
@@ -158,8 +186,11 @@ const ManualEntryForm: React.FC = () => {
               label='Subtype *'
               onChange={handleSelectChange}
             >
-              <MenuItem value='Associates Fees'>Associates Fees</MenuItem>
-              <MenuItem value='Travel Expenses'>Travel Expenses</MenuItem>
+              {subtypes.map((subtype) => (
+                <MenuItem key={subtype} value={subtype}>
+                  {subtype}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Stack>
@@ -215,63 +246,9 @@ const ManualEntryForm: React.FC = () => {
           rows={3}
         />
 
-        {/* Attachments */}
-        {/* <Box>
-          <Typography fontWeight={500} mb={1}>
-            Attachments
-          </Typography>
-          <UploadBox>
-            <CloudUploadIcon sx={{ fontSize: 48, mb: 1 }} />
-            <Typography fontWeight={600}>
-              Upload supporting documents (optional)
-            </Typography>
-            <Typography variant='body2' color='text.secondary' mb={2}>
-              Maximum File Size is 10MB. Supported File Types are: .CSV, .PDF,
-              .PNG, .JPG
-            </Typography>
-            <Button
-              variant='outlined'
-              component='label'
-              startIcon={<CloudUploadIcon />}
-            >
-              Browse files
-              <input
-                hidden
-                type='file'
-                multiple
-                accept='.csv,.pdf,.png,.jpg,.jpeg'
-                onChange={handleFileUpload}
-              />
-            </Button>
-
-            {formData.attachments.length > 0 && (
-              <Stack mt={2} spacing={1}>
-                {formData.attachments.map((file, index) => (
-                  <Paper
-                    key={index}
-                    sx={{
-                      p: 1,
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}
-                    variant='outlined'
-                  >
-                    <Typography variant='body2'>{file.name}</Typography>
-                    <IconButton
-                      size='small'
-                      onClick={() => handleRemoveFile(index)}
-                    >
-                      <DeleteOutlineIcon fontSize='small' />
-                    </IconButton>
-                  </Paper>
-                ))}
-              </Stack>
-            )}
-          </UploadBox>
-        </Box> */}
+        {/* File Upload */}
         <FileUploadBox
-          title='Upload or drag and drop your financial documents'
+          title='Upload or drag and drop your supporting documents'
           subtitle='You can upload unlimited files but only 5 in one go.'
           fileInfoText='Maximum 10MB each — Supported: .CSV, .PDF, .PNG, .JPG'
           maxFiles={5}
@@ -284,7 +261,19 @@ const ManualEntryForm: React.FC = () => {
         />
 
         {/* Buttons */}
-        <Stack direction='row' justifyContent='flex-end' spacing={2} mt={2}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: {
+              xs: 'column-reverse',
+              sm: 'column-reverse',
+              md: 'row',
+              lg: 'row'
+            },
+            gap: 2
+          }}
+          mt={2}
+        >
           <Button variant='outlined'>Cancel</Button>
           <Button
             variant='contained'
@@ -296,7 +285,7 @@ const ManualEntryForm: React.FC = () => {
           >
             Save Entry
           </Button>
-        </Stack>
+        </Box>
       </Stack>
     </Box>
   )

@@ -95,9 +95,9 @@ export default function ProcessingCompletedList() {
     <Box>
       <Box
         display='flex'
-        flexDirection='row'
+        flexDirection={{ xs: 'column', sm: 'row' }}
         justifyContent='space-between'
-        alignItems='center'
+        alignItems={{ xs: 'flex-start', sm: 'center' }}
         mb={2}
       >
         <Typography variant='h6' fontWeight='600'>
