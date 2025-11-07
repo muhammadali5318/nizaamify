@@ -22,7 +22,7 @@ const rootReducer = combineReducers({
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['processed', 'selectedUser']
+  whitelist: ['processed', 'activePractice', 'selectedUser']
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)

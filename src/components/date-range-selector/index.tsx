@@ -32,7 +32,7 @@ const toISO = (d: Dayjs | null): string | null => (d ? d.toISOString() : null)
 const DateRangeSelector: React.FC<Props> = ({
   value,
   onChange,
-  label = 'MM/DD/YYYY',
+  label = 'DD/MM/YYYY',
   minDate = null,
   maxDate = null
 }) => {

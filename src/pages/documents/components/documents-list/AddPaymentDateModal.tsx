@@ -80,6 +80,9 @@ const AddPaymentDateModal: React.FC<AddPaymentProps> = React.memo(
           await queryClient.invalidateQueries({
             queryKey: ['uploadedDocumentListApi']
           })
+          await queryClient.invalidateQueries({
+            queryKey: ['docs', 'counts']
+          })
 
           reset()
           onClose()
@@ -140,6 +143,7 @@ const AddPaymentDateModal: React.FC<AddPaymentProps> = React.memo(
                 control={control}
                 label='Payment date:'
                 disabled={loading}
+                disableFuture
                 textFieldProps={{
                   variant: 'outlined'
                 }}

@@ -4,13 +4,12 @@ import { GridColDef, GridCellParams } from '@mui/x-data-grid'
 import { Box, Typography, IconButton, Tooltip } from '@mui/material'
 import { StatusChip, ImgIcon } from '../components/TeamMembers'
 import { toTitleCase } from 'src/utils/stringUtils'
-import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
-import { useFeatureRule } from 'src/hooks/useFeatureRule'
 import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined'
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
 import { TeamMemberRow } from '..'
 import { useAuth0 } from '@auth0/auth0-react'
 import { Mode } from '../../components/DeactivateUserModal'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 type Handlers = {
   onView?: (member: TeamMemberRow) => void
@@ -21,9 +20,7 @@ type Handlers = {
 
 export const useTeamMembersColumns = (handlers: Handlers = {}) => {
   const { onView, onUnlink, onUpdateMember, onNominate } = handlers
-  const { isEnabled: onboardingCompleted } = useFeatureRule(
-    FEATURE_RULE_IDS.ONBOARDING_COMPLETED
-  )
+  const { isOnboardingCompleted } = useActivePractice()
   const { user } = useAuth0()
 
   const columns: GridColDef[] = useMemo(
@@ -179,7 +176,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
                 </Box>
               </Tooltip>
 
-              {!onboardingCompleted &&
+              {!isOnboardingCompleted &&
                 params.row.user_role === 'PRACTICE MANAGER' &&
                 params.row.user_practice_status === 'ACTIVE' && (
                   <Tooltip

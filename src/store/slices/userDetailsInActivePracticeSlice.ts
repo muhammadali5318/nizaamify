@@ -22,8 +22,6 @@ export interface PracticeUserDetails {
   user_role: string
   is_nominated: boolean
   roles_and_permissions: Role[]
-
-  // ✅ New field - grouped permissions only
   merged_permissions_by_category?: Record<string, Permission[]>
 }
 
@@ -47,20 +45,24 @@ const userDetailsInActivePracticeSlice = createSlice({
       state.data = action.payload
     },
 
-    // ✅ Only update permissions, no other data touched
     setMergedPermissionsByCategory(
       state,
       action: PayloadAction<Record<string, Permission[]> | undefined>
     ) {
       if (!state.data) return
       state.data.merged_permissions_by_category = action.payload
+    },
+
+    clearUserDetailsInActivePractice(state) {
+      state.data = null
     }
   }
 })
 
 export const {
   setUserDetailsInActivePractice,
-  setMergedPermissionsByCategory
+  setMergedPermissionsByCategory,
+  clearUserDetailsInActivePractice
 } = userDetailsInActivePracticeSlice.actions
 
 export default userDetailsInActivePracticeSlice.reducer

@@ -21,6 +21,9 @@ import { useState, useEffect, useRef } from 'react'
 import AddPracticeDialog from 'src/pages/practice-settings/components/AddNewPracticeModal.tsx'
 import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import { useDispatch } from 'react-redux'
+import { setMergedPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
+import { ALL_PERMISSIONS } from 'src/config/module-permissions'
 
 export type AllPracticesDataObject = {
   id: string
@@ -43,6 +46,7 @@ export default function PracticeSelector({
   showLabels
 }: PracticeSelectorProps) {
   const { accessToken } = useAuth()
+  const dispatch = useDispatch()
   const { data: rawPractices } = useFetchAllPracticesData(!!accessToken)
 
   const practices: AllPracticesDataObject[] = Array.isArray(rawPractices)
@@ -132,6 +136,7 @@ export default function PracticeSelector({
           onChange={(e) => {
             const selected =
               practices.find((p) => p.id === e.target.value) || null
+            dispatch(setMergedPermissionsByCategory(ALL_PERMISSIONS))
             setSelectedPractice(selected)
             setActivePractice(selected)
           }}

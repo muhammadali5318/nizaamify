@@ -19,6 +19,7 @@ import {
 } from 'src/utils/downloadFileUtils'
 import { defaultFinancialDocumentsListFilters } from '../config/documentsConfig'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import { useHasPermission } from 'src/config/module-permissions'
 
 interface FinancialDocumentsListProps {
   title: string
@@ -33,6 +34,8 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
   icon,
   isPendingDocments
 }) => {
+  const canViewDocuments = useHasPermission('data.upload_archive')
+
   const { activePracticeId } = useActivePractice()
 
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
@@ -119,33 +122,40 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
     total,
     isFetching,
     isLoading
-  } = useFetchUploadedDocsList({
-    page,
-    pageSize,
-    search: filters.searchKey || undefined,
-    document_category: filters.categories.length
-      ? filters.categories
-      : undefined,
-    user_name: filters.uploadedBy.length ? filters.uploadedBy : undefined,
-    dateRange:
-      filters.dateRange && (filters.dateRange.start || filters.dateRange.end)
-        ? {
-            from: filters.dateRange.start ?? null,
-            to: filters.dateRange.end ?? null
-          }
-        : null,
-    document_type: filters.docType ? [filters.docType] : undefined,
-    document_subtype:
-      filters.docSubtype && filters.docSubtype.length
-        ? filters.docSubtype
+  } = useFetchUploadedDocsList(
+    {
+      page,
+      pageSize,
+      search: filters.searchKey || undefined,
+      document_category: filters.categories.length
+        ? filters.categories
         : undefined,
-    ordering: orderingField ?? null,
-    sortOrder: sortOrder ?? null,
-    requires_review: isPendingDocments ? true : undefined
-  })
+      user_name: filters.uploadedBy.length ? filters.uploadedBy : undefined,
+      dateRange:
+        filters.dateRange && (filters.dateRange.start || filters.dateRange.end)
+          ? {
+              from: filters.dateRange.start ?? null,
+              to: filters.dateRange.end ?? null
+            }
+          : null,
+      document_type: filters.docType ? [filters.docType] : undefined,
+      document_subtype:
+        filters.docSubtype && filters.docSubtype.length
+          ? filters.docSubtype
+          : undefined,
+      ordering: orderingField ?? null,
+      sortOrder: sortOrder ?? null,
+      requires_review: isPendingDocments ? true : undefined
+    },
+    {
+      enabled: canViewDocuments
+    }
+  )
 
   const { items: fetchedUploadedBy = [], isLoading: isUploadedByLoading } =
-    useFetchUploadedByList()
+    useFetchUploadedByList({
+      enabled: canViewDocuments
+    })
 
   const getRowClassName = (params: any) =>
     params.row.status === 'Disabled' ? 'rowDisabled' : ''

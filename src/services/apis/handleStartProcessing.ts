@@ -91,6 +91,9 @@ export const uploadFilesToS3 = async (
               queryKey: ['uploadedDocumentListApi'],
               exact: false
             })
+            await queryClient.invalidateQueries({
+              queryKey: ['docs', 'counts']
+            })
           }
           resolve()
         } else {

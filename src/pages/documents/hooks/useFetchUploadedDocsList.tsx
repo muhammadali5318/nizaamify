@@ -95,7 +95,10 @@ function buildParams(p: UseUploadedDocsParams) {
 
 export function useFetchUploadedDocsList(
   params: UseUploadedDocsParams,
-  options?: UseQueryOptions<{ items: UploadedDocItem[]; total: number }>
+  options?: Omit<
+    UseQueryOptions<{ items: UploadedDocItem[]; total: number }>,
+    'queryKey' | 'queryFn'
+  >
 ) {
   const { activePracticeId } = useActivePractice()
 

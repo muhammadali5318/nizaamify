@@ -13,9 +13,9 @@ interface ReusableDatePickerProps {
   label?: string
   disabled?: boolean
   required?: boolean
-  // <-- use `undefined` (not `null`) to match MUI types
   minDate?: Dayjs | undefined
   maxDate?: Dayjs | undefined
+  disableFuture?: boolean
   textFieldProps?: Partial<TextFieldProps>
   onChange?: (val: Dayjs | null) => void
 }
@@ -28,6 +28,7 @@ const ReusableDatePicker: React.FC<ReusableDatePickerProps> = ({
   required = false,
   minDate,
   maxDate,
+  disableFuture = false,
   textFieldProps,
   onChange
 }) => {
@@ -39,22 +40,23 @@ const ReusableDatePicker: React.FC<ReusableDatePickerProps> = ({
         name={name}
         control={control}
         render={({ field, fieldState }) => {
-          // ensure we don't accidentally pass undefined props to MUI
           const value = field.value ?? null
+
           return (
             <DatePicker
               value={value}
+              disableFuture={disableFuture}
+              minDate={minDate ?? undefined}
+              maxDate={maxDate ?? undefined}
               open={pickerOpen}
               onOpen={() => setPickerOpen(true)}
               onClose={() => setPickerOpen(false)}
-              onChange={(val: Dayjs | null) => {
+              onChange={(val) => {
                 field.onChange(val)
-                onChange?.(val)
+                onChange?.(val ?? null)
               }}
               disabled={disabled}
               label={label + (required ? ' *' : '')}
-              minDate={minDate ?? undefined}
-              maxDate={maxDate ?? undefined}
               slotProps={{
                 textField: {
                   fullWidth: true,

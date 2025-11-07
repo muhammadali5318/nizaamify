@@ -2,11 +2,13 @@ import { useMemo } from 'react'
 import { UserContext, ModulePermission, ModuleId } from '../types/feature-flags'
 import { featureFlagConfig } from '../config/feature-flag-config'
 import { FeatureFlagService } from '../services/FeatureFlagService'
+import { useSelector } from 'react-redux'
+import { selectPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
+import { useActivePractice } from './useActivePractice'
 
-export function useFeatureFlags(
-  userContext: UserContext,
-  permissionsByCategory: any
-) {
+export function useFeatureFlags(userContext: UserContext) {
+  const permissionsByCategory = useSelector(selectPermissionsByCategory)
+  const { isOnboardingCompleted } = useActivePractice()
   const modulePermissions = useMemo(() => {
     const permissions: ModulePermission[] = []
 
@@ -19,6 +21,7 @@ export function useFeatureFlags(
           permissionsByCategory,
           moduleConfig?.id
         )
+
         if (!isEnabled) {
           disabledReason =
             moduleConfig.disabledMessage ||
@@ -30,7 +33,10 @@ export function useFeatureFlags(
         for (const ruleId of moduleConfig.requiredRules) {
           const rule = FeatureFlagService.findRule(ruleId)
 
-          if (rule && !FeatureFlagService.evaluateRule(ruleId, userContext)) {
+          if (
+            rule &&
+            !FeatureFlagService.evaluateRule(ruleId, isOnboardingCompleted)
+          ) {
             isEnabled = false
             disabledReason = moduleConfig.disabledMessage || rule.description
             break
@@ -46,7 +52,7 @@ export function useFeatureFlags(
     })
 
     return permissions
-  }, [userContext, permissionsByCategory])
+  }, [userContext, permissionsByCategory, isOnboardingCompleted])
 
   const isModuleEnabled = (moduleId: ModuleId): boolean => {
     const permission = modulePermissions.find((p) => p.moduleId === moduleId)

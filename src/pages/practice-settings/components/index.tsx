@@ -10,6 +10,8 @@ import { AllPracticesDataObject } from 'src/layouts/applayout/components/Practic
 import { toTitleCase } from 'src/utils/stringUtils'
 import dayjs from 'dayjs'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import { useDispatch } from 'react-redux'
+import { setMergedPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
 
 interface PracticeDetailsCardProps {
   status?: 'active' | 'inactive' | 'archived'
@@ -20,6 +22,7 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
   status = 'inactive',
   practice
 }) => {
+  const dispatch = useDispatch()
   const { setActivePractice } = useActivePractice()
   const [isArchiveOpen, setIsArchiveOpen] = useState<boolean>(false)
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
@@ -235,7 +238,10 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
             variant='outlined'
             fullWidth
             endIcon={<img src='/assets/switch.svg' alt='switch icon' />}
-            onClick={() => setActivePractice(practice)}
+            onClick={() => {
+              setActivePractice(practice)
+              dispatch(setMergedPermissionsByCategory(ALL_PERMISSIONS))
+            }}
           >
             Switch to this practice
           </Button>

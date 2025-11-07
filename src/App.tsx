@@ -21,8 +21,8 @@ function App(): JSX.Element {
       <PersistGate loading={null} persistor={persistor}>
         <BrowserRouter>
           <QueryClientProvider client={queryClient}>
-            <FeatureFlagProvider>
-              <AuthProvider>
+            <AuthProvider>
+              <FeatureFlagProvider>
                 <ErrorBoundary>
                   <ThemeProvider theme={theme}>
                     <NotificationProvider>
@@ -31,8 +31,8 @@ function App(): JSX.Element {
                     </NotificationProvider>
                   </ThemeProvider>
                 </ErrorBoundary>
-              </AuthProvider>
-            </FeatureFlagProvider>
+              </FeatureFlagProvider>
+            </AuthProvider>
           </QueryClientProvider>
         </BrowserRouter>
       </PersistGate>

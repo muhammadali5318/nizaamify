@@ -8,7 +8,6 @@ import React, {
   useState
 } from 'react'
 import { useNavigate } from 'react-router'
-import PageLoader from 'src/components/common/page-loader'
 import { CONFIG } from 'src/config-global'
 import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
@@ -181,10 +180,6 @@ function AuthProviderContainer({ children }: Props) {
     }),
     [user, status, accessToken, getAccessToken]
   )
-
-  if (status === 'loading') {
-    return <PageLoader>Loading...</PageLoader>
-  }
 
   return (
     <AuthContext.Provider value={memoizedValue}>

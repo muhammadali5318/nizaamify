@@ -26,6 +26,7 @@ import { useNavigate } from 'react-router'
 import { queryClient } from 'src/utils/queryClient'
 import NotificationBanner from 'src/components/common/NotificationBanner'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import dayjs from 'dayjs'
 export default function ProcessingCompletedList() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -59,9 +60,12 @@ export default function ProcessingCompletedList() {
 
       await approveDocuments(activePracticeId ?? '', firstBatchId, payloadDocs)
       notify.success('Documents approved successfully!')
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: ['uploadedDocumentListApi'],
         exact: false
+      })
+      await queryClient.invalidateQueries({
+        queryKey: ['docs', 'counts']
       })
 
       setSuccessOpen(true)
@@ -196,7 +200,10 @@ export default function ProcessingCompletedList() {
                   Document summary:
                 </Typography>
                 <Typography variant='body2' sx={{ mt: 0.5, color: '#374151' }}>
-                  Date on document: <strong>{doc.document_date || '—'}</strong>{' '}
+                  Date on document:{' '}
+                  <strong>
+                    {dayjs(doc.document_date).format('DD-MM-YYYY') || '—'}
+                  </strong>{' '}
                   &nbsp; | &nbsp; Document category:{' '}
                   <strong>{doc.document_category || '—'}</strong> &nbsp; |
                   &nbsp; Document type:{' '}

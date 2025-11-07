@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+// src/pages/Documents/DocumentsPage.tsx  (or wherever your file lives)
+import React from 'react'
 import { Box, Typography, Stack, Link } from '@mui/material'
 import styles from './documents.module.scss'
 import StatsCard from 'src/components/team-management/StatsCard'
@@ -11,59 +12,26 @@ import {
 import { useInitialData } from '../../hooks/useFetchInitialData'
 import { Outlet, useLocation, useNavigate } from 'react-router'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
-import apiClient from 'src/services/api-client'
-
-import { notify } from 'src/components/notistack/NotificationProvider'
-
 import PageBreadcrumbs from 'src/components/bread-crumbs/PageBreadcrumbs'
 import { useActivePractice } from 'src/hooks/useActivePractice'
-const DocumentsPage: React.FC = () => {
-  const [stats, setStats] = useState({
-    all: 0,
-    uploaded: 0,
-    review: 0
-  })
+import { useHasPermission } from 'src/config/module-permissions'
+import useDocumentCounts from './hooks/useDocumentCounts'
 
+const DocumentsPage: React.FC = () => {
   const tabs = useDocumentsTabs()
   const navigate = useNavigate()
   const { data, isLoading, isError } = useInitialData(true)
   const { activePracticeId } = useActivePractice()
+  const canViewDocuments = useHasPermission('data.upload_archive')
+
+  const { data: counts } = useDocumentCounts(
+    activePracticeId,
+    !!canViewDocuments
+  )
 
   const practiceName = data?.practice_name || 'Your'
   const location = useLocation()
   const isSubRoute = location.pathname === '/documents/manual-entry'
-  useEffect(() => {
-    const fetchDocumentCounts = async () => {
-      if (!activePracticeId) return
-
-      try {
-        const response = await apiClient.get(
-          `/docs/v1/practices/${activePracticeId}/document-counts/`
-        )
-
-        if (response.data?.status && response.data?.data) {
-          const {
-            user_documents_count,
-            practice_documents_count,
-            practice_documents_review_count
-          } = response.data.data
-
-          setStats({
-            all: practice_documents_count,
-            uploaded: user_documents_count,
-            review: practice_documents_review_count
-          })
-        } else {
-          notify.error('Failed to retrieve document counts.')
-        }
-      } catch (error) {
-        console.error('Error fetching document counts:', error)
-        notify.error('Unable to fetch document counts.')
-      }
-    }
-
-    fetchDocumentCounts()
-  }, [activePracticeId])
 
   const handleNavigateToSettings = () => navigate('/settings')
 
@@ -71,6 +39,13 @@ const DocumentsPage: React.FC = () => {
     text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : ''
 
   const accountingBasis = toTitleCase(data?.accounting_basis || 'N/A')
+
+  // derive stats safely
+  const stats = {
+    all: counts?.all ?? 0,
+    uploaded: counts?.uploaded ?? 0,
+    review: counts?.review ?? 0
+  }
 
   return (
     <Box className={styles.documentsRoot}>
@@ -171,9 +146,7 @@ const DocumentsPage: React.FC = () => {
             />
           </Stack>
 
-          <Box
-            sx={{ mt: { xs: 2, md: 4 }, px: { xs: 1, md: 3 }, width: '100%' }}
-          >
+          <Box /* tabs wrapper props */>
             <ReusableTabs tabs={tabs} initialTab={documentsTabsData[0].key} />
           </Box>
         </>

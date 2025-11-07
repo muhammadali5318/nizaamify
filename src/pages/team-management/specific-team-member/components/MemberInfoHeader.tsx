@@ -16,8 +16,6 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'
 import styles from './MemberInfoHeader.module.scss'
 import { useParams } from 'react-router'
 import ImgIcon from 'src/components/common/ImgIcon'
-import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
-import { useFeatureRule } from 'src/hooks/useFeatureRule'
 import NominatePracticeManagerTeamList from '../../components/NominatePracticeManagerTeamList'
 import ConfirmationSuccessDialog from 'src/components/team-management/InvitationSuccessDialog'
 import { useAuth0 } from '@auth0/auth0-react'
@@ -27,9 +25,11 @@ import { useHasPermission } from 'src/config/module-permissions'
 import { selectSelectedUser } from 'src/store/slices/team-management/selectedUserSlice'
 import { useSelector } from 'react-redux'
 import DeactivateUserModal from '../../components/DeactivateUserModal'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 const MemberInfoHeader = () => {
   const canViewAndEditTeamMembers = useHasPermission('user.manage_users_roles')
+  const { isOnboardingCompleted } = useActivePractice()
   const selectedUser = useSelector(selectSelectedUser)
   const [openUnlinkUser, setOpenUnlinkUser] = useState(false)
 
@@ -41,10 +41,6 @@ const MemberInfoHeader = () => {
   // State for Update Member Role Modal
   const [isUpdateMemberOpen, setIsUpdateMemberOpen] = useState(false)
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
-
-  const { isEnabled: onboardingCompleted } = useFeatureRule(
-    FEATURE_RULE_IDS.ONBOARDING_COMPLETED
-  )
 
   const isMobile = useMediaQuery('(max-width:600px)')
 
@@ -155,7 +151,7 @@ const MemberInfoHeader = () => {
                   </Box>
                 </MenuItem>
 
-                {!onboardingCompleted &&
+                {!isOnboardingCompleted &&
                   selectedUser?.user_role === 'PRACTICE MANAGER' && (
                     <MenuItem onClick={handleNominate}>
                       <Box display='flex' alignItems='center' gap={1}>
@@ -221,7 +217,7 @@ const MemberInfoHeader = () => {
                   </Box>
                 </Tooltip>
 
-                {!onboardingCompleted &&
+                {!isOnboardingCompleted &&
                   selectedUser?.user_role === 'PRACTICE MANAGER' && (
                     <Tooltip
                       placement='top'

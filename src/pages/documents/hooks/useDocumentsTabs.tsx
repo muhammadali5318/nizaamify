@@ -4,12 +4,19 @@ import { documentsTabsData } from '../config/documentsConfig'
 import UploadedDocuments from '../tabs/UploadDocuments'
 import FinancialDocumentsList from '../tabs/FinancialDocumentsList'
 import useFetchUploadedDocsList from './useFetchUploadedDocsList'
+import { useHasPermission } from 'src/config/module-permissions'
 
 export default function useDocumentsTabs(): ReusableTabItem[] {
   // Call hook once here
-  const { total } = useFetchUploadedDocsList({
-    requires_review: true
-  })
+  const canViewDocuments = useHasPermission('data.upload_archive')
+  const { total } = useFetchUploadedDocsList(
+    {
+      requires_review: true
+    },
+    {
+      enabled: canViewDocuments
+    }
+  )
 
   return React.useMemo(() => {
     return documentsTabsData.map((t) => {

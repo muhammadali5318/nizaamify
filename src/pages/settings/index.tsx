@@ -4,18 +4,15 @@ import { Box, Stack } from '@mui/material'
 import styles from './settings.module.scss'
 import { SETTINGS_MENU } from './setting-config'
 import { MenuItem } from './type'
-import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
-import { useFeatureRule } from 'src/hooks/useFeatureRule'
 import { useAuth } from 'src/context/AuthProvider'
 import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
 import SidebarTabs from 'src/components/SidebarTabs/SidebarTabs'
 import PageHeader from 'src/components/page-header'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 const Settings = () => {
   const { accessToken } = useAuth()
-  const { isEnabled: onboardingCompleted } = useFeatureRule(
-    FEATURE_RULE_IDS.ONBOARDING_COMPLETED
-  )
+  const { isOnboardingCompleted } = useActivePractice()
 
   const { data: userData } = useFetchUserWithActivePracticeData(!!accessToken)
 
@@ -38,7 +35,7 @@ const Settings = () => {
           activeId={active}
           onChange={(id: React.SetStateAction<string>) => setActive(id)}
           userData={userData}
-          onboardingCompleted={onboardingCompleted}
+          onboardingCompleted={isOnboardingCompleted}
         />
 
         {/* Content area */}
