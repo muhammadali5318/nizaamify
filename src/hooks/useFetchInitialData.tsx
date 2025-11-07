@@ -5,8 +5,6 @@ import { useActivePractice } from './useActivePractice'
 
 export const useInitialData = (enabled: boolean) => {
   const { activePracticeId } = useActivePractice()
-  // const { userRole } = useUserDetails()
-  // const { updateUserContext } = useFeatureFlagContext()
 
   return useQuery({
     queryKey: ['initialData', activePracticeId],

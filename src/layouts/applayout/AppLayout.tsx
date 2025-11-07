@@ -24,14 +24,17 @@ import PracticeSelector from './components/PracticeSelector'
 import { useSelector } from 'react-redux'
 import { selectPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
 import { useActivePractice } from 'src/hooks/useActivePractice'
-// import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
-// import { useInitialData } from 'src/hooks/useFetchInitialData'
-// import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
-// import { useAuth } from 'src/context/AuthProvider'
-// import { SplashScreen } from 'src/components/common/SplashScreen'
+import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
+import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
+import { useAuth } from 'src/context/AuthProvider'
+import { SplashScreen } from 'src/components/common/SplashScreen'
 
 export default function AppLayout() {
   const location = useLocation()
+  const { accessToken } = useAuth()
+  const { isPending: isLoadingData1 } = useFetchAllPracticesData(!!accessToken)
+  const { isPending: isLoadingData2 } =
+    useFetchUserWithActivePracticeData(!!accessToken)
 
   const permissionsByCategory = useSelector(selectPermissionsByCategory)
   const { isOnboardingCompleted } = useActivePractice()
@@ -86,6 +89,20 @@ export default function AppLayout() {
       }
     }
   }, [location.pathname])
+  const isFetching = !!accessToken && (isLoadingData1 || isLoadingData2)
+
+  React.useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('AppLayout loading states', {
+      accessToken,
+      isLoadingData1,
+      isLoadingData2
+    })
+  }, [accessToken, isLoadingData1, isLoadingData2])
+
+  if (isFetching) {
+    return <SplashScreen />
+  }
 
   const renderDrawerContent = (showLabels: boolean) => (
     <Stack spacing={2}>
