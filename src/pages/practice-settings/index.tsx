@@ -4,13 +4,15 @@ import { Box, Button, Stack } from '@mui/material'
 import styles from './practiceSettings.module.scss'
 import PageHeader from 'src/components/page-header'
 import PracticeDetailsCard from './components'
-import AddPracticeDialog from './components/AddNewPracticeModal'
 import { useAuth } from 'src/context/AuthProvider'
 import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
 import { AllPracticesDataObject } from 'src/layouts/applayout/components/PracticeSelector'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import AddPracticeModal from './components/AddPracticeModal'
+import useUserDetails from 'src/hooks/useUserDetails'
 
 const PracticeSettings: React.FC = () => {
+  const { isUserOwnerOrDirector } = useUserDetails()
   const { activePracticeId } = useActivePractice()
   const { accessToken } = useAuth()
   const { data: practicesList } = useFetchAllPracticesData(!!accessToken)
@@ -31,15 +33,17 @@ const PracticeSettings: React.FC = () => {
           />
         </Box>
 
-        <Button
-          variant='contained'
-          startIcon={
-            <img src='/assets/practice-management.svg' alt='practice icon' />
-          }
-          onClick={handleOpen}
-        >
-          Add new practice
-        </Button>
+        {isUserOwnerOrDirector && (
+          <Button
+            variant='contained'
+            startIcon={
+              <img src='/assets/practice-management.svg' alt='practice icon' />
+            }
+            onClick={handleOpen}
+          >
+            Add new practice
+          </Button>
+        )}
       </Box>
 
       <Box className={styles.practiceDetailsWrapper}>
@@ -65,7 +69,7 @@ const PracticeSettings: React.FC = () => {
       </Box> */}
 
       {/* Add Practice dialog */}
-      <AddPracticeDialog open={isAddOpen} onClose={handleClose} />
+      <AddPracticeModal open={isAddOpen} onClose={handleClose} />
     </Stack>
   )
 }

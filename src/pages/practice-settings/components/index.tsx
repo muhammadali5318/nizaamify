@@ -12,6 +12,7 @@ import dayjs from 'dayjs'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import { useDispatch } from 'react-redux'
 import { setMergedPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
+import { ALL_PERMISSIONS } from 'src/const'
 
 interface PracticeDetailsCardProps {
   status?: 'active' | 'inactive' | 'archived'

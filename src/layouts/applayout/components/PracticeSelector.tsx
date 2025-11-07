@@ -18,12 +18,13 @@ import styles from '../AppLayout.module.scss'
 import { toTitleCase } from 'src/utils/stringUtils'
 import { useAuth } from 'src/context/AuthProvider'
 import { useState, useEffect, useRef } from 'react'
-import AddPracticeDialog from 'src/pages/practice-settings/components/AddNewPracticeModal.tsx'
+import AddPracticeModal from 'src/pages/practice-settings/components/AddPracticeModal'
 import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import { useDispatch } from 'react-redux'
 import { setMergedPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
-import { ALL_PERMISSIONS } from 'src/config/module-permissions'
+import { ALL_PERMISSIONS } from 'src/const'
+import useUserDetails from 'src/hooks/useUserDetails'
 
 export type AllPracticesDataObject = {
   id: string
@@ -47,6 +48,7 @@ export default function PracticeSelector({
 }: PracticeSelectorProps) {
   const { accessToken } = useAuth()
   const dispatch = useDispatch()
+  const { isUserOwnerOrDirector } = useUserDetails()
   const { data: rawPractices } = useFetchAllPracticesData(!!accessToken)
 
   const practices: AllPracticesDataObject[] = Array.isArray(rawPractices)
@@ -222,28 +224,30 @@ export default function PracticeSelector({
             </MenuItem>
           )}
 
-          <Divider />
+          {isUserOwnerOrDirector && <Divider />}
 
-          <MenuItem sx={{ padding: '0px 10px' }}>
-            <Box
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => e.stopPropagation()}
-              style={{ width: '100%' }}
-            >
-              <Button
-                onClick={() => setIsAddOpen(true)}
-                startIcon={<AddIcon />}
-                fullWidth
-                variant='outlined'
+          {isUserOwnerOrDirector && (
+            <MenuItem sx={{ padding: '0px 10px' }}>
+              <Box
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                style={{ width: '100%' }}
               >
-                Add another practice
-              </Button>
-            </Box>
-          </MenuItem>
+                <Button
+                  onClick={() => setIsAddOpen(true)}
+                  startIcon={<AddIcon />}
+                  fullWidth
+                  variant='outlined'
+                >
+                  Add another practice
+                </Button>
+              </Box>
+            </MenuItem>
+          )}
         </Select>
       </FormControl>
 
-      <AddPracticeDialog open={isAddOpen} onClose={() => setIsAddOpen(false)} />
+      <AddPracticeModal open={isAddOpen} onClose={() => setIsAddOpen(false)} />
     </Box>
   )
 }

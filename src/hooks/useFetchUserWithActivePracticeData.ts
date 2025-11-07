@@ -1,9 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react'
 import { useQuery } from '@tanstack/react-query'
-import {
-  mergePermissions,
-  ALL_PERMISSIONS
-} from 'src/config/module-permissions'
+import { mergePermissions } from 'src/config/module-permissions'
 import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
 import { getUserId } from 'src/utils/helper'
@@ -13,6 +10,7 @@ import {
   setUserDetailsInActivePractice
 } from 'src/store/slices/userDetailsInActivePracticeSlice'
 import { useActivePractice } from './useActivePractice'
+import { ALL_PERMISSIONS } from 'src/const'
 
 export const useFetchUserWithActivePracticeData = (enabled: boolean) => {
   const { user } = useAuth0()
