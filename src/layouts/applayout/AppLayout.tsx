@@ -24,19 +24,15 @@ import PracticeSelector from './components/PracticeSelector'
 import { useSelector } from 'react-redux'
 import { selectPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
 import { useActivePractice } from 'src/hooks/useActivePractice'
-import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
-import { useInitialData } from 'src/hooks/useFetchInitialData'
-import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
-import { useAuth } from 'src/context/AuthProvider'
-import { SplashScreen } from 'src/components/common/SplashScreen'
+// import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
+// import { useInitialData } from 'src/hooks/useFetchInitialData'
+// import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
+// import { useAuth } from 'src/context/AuthProvider'
+// import { SplashScreen } from 'src/components/common/SplashScreen'
 
 export default function AppLayout() {
   const location = useLocation()
-  const { accessToken } = useAuth()
-  const { isPending: loadingData1 } = useFetchAllPracticesData(!!accessToken)
-  const { isPending: loadingData2 } = useInitialData(!!accessToken)
-  const { isPending: loadingData3 } =
-    useFetchUserWithActivePracticeData(!!accessToken)
+
   const permissionsByCategory = useSelector(selectPermissionsByCategory)
   const { isOnboardingCompleted } = useActivePractice()
 
@@ -314,10 +310,6 @@ export default function AppLayout() {
       })}
     </Stack>
   )
-
-  if (loadingData1 || loadingData2 || loadingData3) {
-    return <SplashScreen />
-  }
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
