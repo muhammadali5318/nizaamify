@@ -36,8 +36,12 @@ export function useFeatureFlags(userContext: UserContext) {
             permissionsMap as any,
             moduleConfig?.id
           )
-        } catch (e) {
-          // If the custom predicate throws, treat the module as disabled
+        } catch (error) {
+          console.error(
+            `Error evaluating isEnabled for module ${moduleConfig.id}:`,
+            error
+          )
+
           isEnabled = false
         }
 
