@@ -103,13 +103,43 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
       )}
 
       <Box width={'100%'} display={'flex'} justifyContent={'space-between'}>
-        <Box display={'flex'} gap={1.5} alignItems='center'>
+        <Box width={'100%'} display={'flex'} gap={1.5} alignItems='center'>
           <img src='/assets/practice-selector-grey.svg' alt='practice icon' />
 
-          <Box>
-            <Typography variant='subtitle1' fontWeight={700}>
-              {practice?.practice_name}
-            </Typography>
+          <Box width={'100%'}>
+            <Box
+              width={'100%'}
+              display={'flex'}
+              justifyContent={'space-between'}
+            >
+              <Typography variant='subtitle1' fontWeight={700}>
+                {practice?.practice_name}
+              </Typography>
+              {status === 'active' && (
+                <Chip
+                  size='small'
+                  label='Active Practice'
+                  icon={<CheckCircleOutlineIcon />}
+                  variant='filled'
+                  sx={{
+                    ...activeChipSx,
+                    display: { xs: 'none', sm: 'flex' }
+                  }}
+                />
+              )}
+
+              {status === 'archived' && (
+                <Chip
+                  size='small'
+                  label='Practice archived'
+                  variant='outlined'
+                  color='warning'
+                  sx={{
+                    display: { xs: 'none', sm: 'flex' }
+                  }}
+                />
+              )}
+            </Box>
 
             <Chip
               size='small'
@@ -133,31 +163,6 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
             />
           </Box>
         </Box>
-
-        {status === 'active' && (
-          <Chip
-            size='small'
-            label='Active Practice'
-            icon={<CheckCircleOutlineIcon />}
-            variant='filled'
-            sx={{
-              ...activeChipSx,
-              display: { xs: 'none', sm: 'flex' }
-            }}
-          />
-        )}
-
-        {status === 'archived' && (
-          <Chip
-            size='small'
-            label='Practice archived'
-            variant='outlined'
-            color='warning'
-            sx={{
-              display: { xs: 'none', sm: 'flex' }
-            }}
-          />
-        )}
       </Box>
 
       <Divider sx={{ width: '100%', borderColor: 'var(--grey-200)' }} />
