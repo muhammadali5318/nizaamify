@@ -5,7 +5,7 @@ import { ReactNode, MouseEventHandler } from 'react'
 type EmailVerificationStatusProps = {
   iconSrc?: string
   iconAlt?: string
-  buttonText?: string
+  buttonText?: string | null
   onButtonClick?: MouseEventHandler<HTMLButtonElement>
   children: ReactNode
   footer?: ReactNode
@@ -29,17 +29,19 @@ const EmailVerificationStatus = ({
         <Box className={styles.verificationStatusContainer}>{children}</Box>
       </Box>
 
-      <Box>
-        <Button
-          className='width--100'
-          size='large'
-          variant='contained'
-          onClick={onButtonClick}
-          disabled={disabled}
-        >
-          {buttonText}
-        </Button>
-      </Box>
+      {buttonText && (
+        <Box>
+          <Button
+            className='width--100'
+            size='large'
+            variant='contained'
+            onClick={onButtonClick}
+            disabled={disabled}
+          >
+            {buttonText}
+          </Button>
+        </Box>
+      )}
 
       {footer && (
         <Box className={styles.verificationStatusFooter}>{footer}</Box>

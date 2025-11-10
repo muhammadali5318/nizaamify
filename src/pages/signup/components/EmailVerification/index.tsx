@@ -20,6 +20,7 @@ type VerificationStatus =
   | 'congrats'
   | 'emailNotVerified'
   | 'requestThrottled'
+  | 'accountDeactivated'
 
 const EmailVerification: React.FC = () => {
   const location = useLocation()
@@ -45,6 +46,7 @@ const EmailVerification: React.FC = () => {
     const rawEmail = searchParams.get('email')
     const rawToken = searchParams.get('token')
     const rawAuth0Id = searchParams.get('auth0Id')
+    const accountDeactivated = !!searchParams.get('accountDeactivated')
 
     setEmail(rawEmail)
     setToken(rawToken)
@@ -52,6 +54,8 @@ const EmailVerification: React.FC = () => {
 
     if (rawAuth0Id) {
       setStatus('emailNotVerified')
+    } else if (accountDeactivated) {
+      setStatus('accountDeactivated')
     }
   }, [location.search])
 
@@ -338,6 +342,24 @@ const EmailVerification: React.FC = () => {
                   {throttleMinutes
                     ? `Your request was throttled. Please try again in about ${throttleMinutes} minute${throttleMinutes > 1 ? 's' : ''}.`
                     : 'Your request was throttled. Please wait before trying again.'}
+                </Typography>
+              </>
+            </EmailVerificationStatus>
+          ) : status === 'accountDeactivated' ? (
+            <EmailVerificationStatus
+              iconSrc='/assets/danger.svg'
+              iconAlt='Request throttled'
+              buttonText='Close'
+              onButtonClick={() => navigate('/auth/login')}
+            >
+              <>
+                <Typography variant='h4' className='font-weight--700'>
+                  Account Deactivated
+                </Typography>
+                <Typography variant='subtitle1' color='textSecondary'>
+                  Your account has been deactivated by your practice
+                  administrator. Please contact support if you need any
+                  assistance. <ContactSupport />
                 </Typography>
               </>
             </EmailVerificationStatus>

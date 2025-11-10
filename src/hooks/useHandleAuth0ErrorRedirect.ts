@@ -28,17 +28,14 @@ export default function useAuthErrorRedirect(): string | null {
         { match: 'email_not_verified', path: '/auth/verify-email' },
         {
           match: 'your account has been deactivated',
-          path: 'logout'
+          path: '/auth/verify-email'
         }
       ]
 
       if (error) {
         for (const e of ERROR_MATCHERS) {
           if (errorDesc.includes(e.match)) {
-            // Try to extract auth0 id from the decoded description.
-            // Common formats:
-            //  - email_not_verified:auth0|68cae4db...
-            //  - email_not_verified:auth0|68cae4db... (already decoded)
+            // extract auth0 id from the decoded description.
             let auth0Id: string | null = null
 
             // First, look for the auth0|<id> pattern
@@ -62,6 +59,8 @@ export default function useAuthErrorRedirect(): string | null {
               // ensure we don't accidentally double-encode
               const encoded = encodeURIComponent(auth0Id)
               return `${window.location.origin}${e.path}?auth0Id=${encoded}`
+            } else if (e.match === 'your account has been deactivated') {
+              return `${window.location.origin}${e.path}?accountDeactivated=${true}`
             }
 
             return window.location.origin
