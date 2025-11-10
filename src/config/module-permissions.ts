@@ -11,7 +11,11 @@ export type PermissionItem = {
   is_active: boolean | null
 }
 
-export type PermissionsMap = Record<string, PermissionItem[]>
+type PermissionsMap = Record<
+  string,
+  Array<{ name: string; key: string; is_active: boolean | null }>
+>
+type UserPermissionByName = { name: string; is_active: boolean }[]
 
 type UserPermission = {
   id: string
@@ -91,14 +95,16 @@ export const evaluateIsModuleEnabled = (
 
 export function mergePermissions(
   allPermissions: PermissionsMap,
-  userPermissions: UserPermission[] = []
+  userPermissions: UserPermissionByName = []
 ): PermissionsMap {
-  const userMap = new Map(userPermissions.map((p) => [p.id, p.is_active]))
+  const userMap = new Map<string, boolean>(
+    userPermissions.map((p) => [p.name, p.is_active])
+  )
 
   const mergedEntries = Object.entries(allPermissions).map(
     ([moduleName, perms]) => {
       const updatedPerms = perms.map((p) => {
-        const userValue = userMap.get(p.id)
+        const userValue = userMap.get(p.name)
         // if userValue is undefined -> permission not assigned -> false
         const isActive = typeof userValue === 'boolean' ? userValue : false
         return { ...p, is_active: isActive }
