@@ -13,7 +13,7 @@ type StepOnePayload = {
 }
 
 export const useUpdateStepOne = (practiceId: string) => {
-  const queryClient = useQueryClient()
+  const qc = useQueryClient()
 
   return useMutation({
     mutationFn: async (payload: StepOnePayload) => {
@@ -23,8 +23,12 @@ export const useUpdateStepOne = (practiceId: string) => {
       )
       return data
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['initialData'] })
+    onSuccess: async () => {
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ['listAllPracticesData'] }),
+        qc.invalidateQueries({ queryKey: ['UserWithActivePracticeData'] }),
+        qc.invalidateQueries({ queryKey: ['initialData'] })
+      ])
     }
   })
 }

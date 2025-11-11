@@ -22,9 +22,12 @@ export const useUpdateStepFour = (practiceId?: string) => {
       )
       return data
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['initialData'] })
-      qc.invalidateQueries({ queryKey: ['UserWithActivePracticeData'] })
+    onSuccess: async () => {
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ['listAllPracticesData'] }),
+        qc.invalidateQueries({ queryKey: ['UserWithActivePracticeData'] }),
+        qc.invalidateQueries({ queryKey: ['initialData'] })
+      ])
     }
   })
 }

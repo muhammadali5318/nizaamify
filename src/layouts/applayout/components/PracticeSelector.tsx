@@ -25,6 +25,7 @@ import { useDispatch } from 'react-redux'
 import { setMergedPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
 import { ALL_PERMISSIONS } from 'src/const'
 import useUserDetails from 'src/hooks/useUserDetails'
+import { deepEqual } from 'src/utils/objectsUtils'
 
 export type AllPracticesDataObject = {
   id: string
@@ -60,7 +61,7 @@ export default function PracticeSelector({
   const {
     activePracticeId: persistedId,
     activePractice,
-    setActivePractice
+    setActiveById
   } = useActivePractice()
 
   const [selectedPractice, setSelectedPractice] =
@@ -76,6 +77,11 @@ export default function PracticeSelector({
     if (activePractice) {
       const match = practices.find((p) => p.id === activePractice.id)
       if (match) {
+        // If the stored activePractice is stale (same id but different properties),
+        // refresh the active practice in the store with the latest `match`.
+        if (!deepEqual(match, activePractice)) {
+          setActiveById(match.id, practices)
+        }
         setSelectedPractice(match)
         didInit.current = true
         return
@@ -86,7 +92,7 @@ export default function PracticeSelector({
     if (persistedId) {
       const match = practices.find((p) => p.id === persistedId)
       if (match) {
-        setActivePractice(match)
+        setActiveById(match?.id, practices)
         setSelectedPractice(match)
         didInit.current = true
         return
@@ -96,17 +102,21 @@ export default function PracticeSelector({
     // 3) Fallback to first practice
     const first = practices[0]
     if (first) {
-      setActivePractice(first)
+      setActiveById(first?.id, practices)
       setSelectedPractice(first)
       didInit.current = true
     }
-  }, [practices]) // run only when the list of practices arrives
+  }, [practices, rawPractices, activePractice, persistedId, setActiveById]) // run only when the list of practices arrives
 
   // SYNC: keep local selection in sync whenever activePractice changes
   useEffect(() => {
     if (!practices.length || !activePractice) return
     const match = practices.find((p) => p.id === activePractice.id)
     if (match) {
+      // if properties differ, refresh the store copy to the latest `match`
+      if (!deepEqual(match, activePractice)) {
+        setActiveById(match.id, practices)
+      }
       setSelectedPractice(match)
     } else {
       // If the incoming activePractice doesn't match any id,
@@ -121,7 +131,7 @@ export default function PracticeSelector({
       // optionally clear or keep previous selection:
       setSelectedPractice(null)
     }
-  }, [activePractice, practices])
+  }, [activePractice, practices, setActiveById])
 
   const [isAddOpen, setIsAddOpen] = useState(false)
 
@@ -140,7 +150,7 @@ export default function PracticeSelector({
               practices.find((p) => p.id === e.target.value) || null
             dispatch(setMergedPermissionsByCategory(ALL_PERMISSIONS))
             setSelectedPractice(selected)
-            setActivePractice(selected)
+            setActiveById(selected?.id ?? '', practices)
           }}
           displayEmpty
           className={styles.muiSelect}

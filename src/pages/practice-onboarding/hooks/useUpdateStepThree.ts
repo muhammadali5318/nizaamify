@@ -21,9 +21,12 @@ export const useUpdateStepThree = (practiceId?: string) => {
       )
       return data
     },
-    onSuccess: () => {
-      // refresh initialData so local state aligns with server
-      qc.invalidateQueries({ queryKey: ['initialData'] })
+    onSuccess: async () => {
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ['listAllPracticesData'] }),
+        qc.invalidateQueries({ queryKey: ['UserWithActivePracticeData'] }),
+        qc.invalidateQueries({ queryKey: ['initialData'] })
+      ])
     }
   })
 }

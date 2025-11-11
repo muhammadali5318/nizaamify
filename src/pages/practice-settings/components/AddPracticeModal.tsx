@@ -28,6 +28,7 @@ import apiClient from 'src/services/api-client'
 import { notify } from 'src/components/notistack/NotificationProvider'
 import { queryClient } from 'src/utils/queryClient'
 import { z } from 'zod'
+import { useAuth0 } from '@auth0/auth0-react'
 
 const SignupStepTwoSchema = z.object({
   practiceName: z
@@ -117,6 +118,7 @@ const AddPracticeModal: React.FC<AddPracticeDialogProps> = ({
   })
 
   const { userId } = useUserDetails()
+  const { getAccessTokenSilently } = useAuth0()
 
   const handleClose = useCallback(() => {
     if (isSubmitting) return
@@ -132,6 +134,11 @@ const AddPracticeModal: React.FC<AddPracticeDialogProps> = ({
         await queryClient.invalidateQueries({
           queryKey: ['listAllPracticesData']
         })
+        const token = await getAccessTokenSilently({
+          cacheMode: 'off'
+        })
+        apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
+
         reset()
         onClose()
         notify.success('practice has been created successfully')

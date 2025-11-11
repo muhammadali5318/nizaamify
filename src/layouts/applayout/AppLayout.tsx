@@ -91,15 +91,6 @@ export default function AppLayout() {
   }, [location.pathname])
   const isFetching = !!accessToken && (isLoadingData1 || isLoadingData2)
 
-  React.useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('AppLayout loading states', {
-      accessToken,
-      isLoadingData1,
-      isLoadingData2
-    })
-  }, [accessToken, isLoadingData1, isLoadingData2])
-
   if (isFetching) {
     return <SplashScreen />
   }

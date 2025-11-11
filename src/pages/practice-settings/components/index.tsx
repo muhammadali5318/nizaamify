@@ -13,6 +13,7 @@ import { useActivePractice } from 'src/hooks/useActivePractice'
 import { useDispatch } from 'react-redux'
 import { setMergedPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
 import { ALL_PERMISSIONS } from 'src/const'
+import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
 
 interface PracticeDetailsCardProps {
   status?: 'active' | 'inactive' | 'archived'
@@ -24,7 +25,8 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
   practice
 }) => {
   const dispatch = useDispatch()
-  const { setActivePractice } = useActivePractice()
+  const { setActiveById } = useActivePractice()
+  const { data: allPractices } = useFetchAllPracticesData(true)
   const [isArchiveOpen, setIsArchiveOpen] = useState<boolean>(false)
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
 
@@ -245,7 +247,7 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
             fullWidth
             endIcon={<img src='/assets/switch.svg' alt='switch icon' />}
             onClick={() => {
-              setActivePractice(practice)
+              setActiveById(practice?.id, allPractices)
               dispatch(setMergedPermissionsByCategory(ALL_PERMISSIONS))
             }}
           >
