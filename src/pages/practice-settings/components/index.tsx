@@ -105,7 +105,7 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
       )}
 
       <Box width={'100%'} display={'flex'} justifyContent={'space-between'}>
-        <Box width={'100%'} display={'flex'} gap={1.5} alignItems='center'>
+        <Box width={'100%'} display={'flex'} gap={1.5} alignItems='flex-start'>
           <img src='/assets/practice-selector-grey.svg' alt='practice icon' />
 
           <Box width={'100%'}>
