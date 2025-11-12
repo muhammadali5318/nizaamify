@@ -14,7 +14,6 @@ import { SignupFormDataSet, SetFormDataSet } from './types'
 import { apiClientOpen } from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
 import { sendVerificationEmail } from 'src/services/auth/emailVerification'
-import Footer from 'src/components/registration-wrapper/Footer'
 import RequestPracticeAssociation from './components/RequestPracticeAssociation/RequestPracticeAssociation'
 import { useSearchParams } from 'react-router'
 import SignupStepFour from './components/SignupStepFour'
@@ -284,52 +283,42 @@ const SignUp: React.FC = () => {
     <RegistrationWrapper>
       <Box
         sx={{
+          width: '100%',
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          height: '100vh'
+          flexDirection: 'column',
+          marginBottom: 2.5
         }}
       >
+        <RegistrationHeader
+          heading='Welcome to Monai Tech!'
+          subHeading='Let’s get you onboarded!'
+        />
+
         <Box
+          className={styles.container}
           sx={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            flexDirection: 'column'
+            maxWidth: activeStep === 7 ? '1300px' : '1000px '
           }}
         >
-          <RegistrationHeader
-            heading='Welcome to Monai Tech!'
-            subHeading='Let’s get you onboarded!'
+          {/* LEFT: Adaptive Stepper */}
+          <Box className={styles.left}>
+            <AdaptiveStepper activeStep={activeStep} steps={steps} />
+          </Box>
+
+          {/* CENTER: Divider */}
+          <Divider
+            orientation={isMobile ? 'horizontal' : 'vertical'}
+            flexItem
           />
 
-          <Box
-            className={styles.container}
-            sx={{
-              maxWidth: activeStep === 7 ? '1300px' : '1000px '
-            }}
-          >
-            {/* LEFT: Adaptive Stepper */}
-            <Box className={styles.left}>
-              <AdaptiveStepper activeStep={activeStep} steps={steps} />
-            </Box>
-
-            {/* CENTER: Divider */}
-            <Divider
-              orientation={isMobile ? 'horizontal' : 'vertical'}
-              flexItem
-            />
-
-            {/* RIGHT: Render different component per step */}
-            <Box className={styles.right}>
-              <Box className={styles.placeholderBox}>
-                {renderStepContent(activeStep)}
-              </Box>
+          {/* RIGHT: Render different component per step */}
+          <Box className={styles.right}>
+            <Box className={styles.placeholderBox}>
+              {renderStepContent(activeStep)}
             </Box>
           </Box>
         </Box>
-        <Footer />
       </Box>
     </RegistrationWrapper>
   )

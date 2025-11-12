@@ -9,7 +9,6 @@ import { endpoints } from 'src/services/backendUrl'
 import { Link, useLocation, useNavigate } from 'react-router'
 import EmailVerificationStatus from './EmailVerificationStatus'
 import { sendVerificationEmail } from 'src/services/auth/emailVerification'
-import Footer from 'src/components/registration-wrapper/Footer'
 import HavingTrouble from 'src/components/contact-support/HavingTrouble'
 import ContactSupport from 'src/components/contact-support'
 
@@ -179,153 +178,112 @@ const EmailVerification: React.FC = () => {
 
   return (
     <RegistrationWrapper>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: '100vh'
-        }}
-      >
-        <RegistrationHeader />
+      <RegistrationHeader />
 
-        <Box>
-          {status === 'loading' ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-              <CircularProgress />
-            </Box>
-          ) : status === 'expired' ? (
-            <EmailVerificationStatus
-              iconSrc='/assets/warning.svg'
-              iconAlt='Warning — link expired'
-              buttonText={
-                cooldown > 0
-                  ? `Send new verification email (${cooldown}s)`
-                  : 'Send new verification email'
-              }
-              disabled={cooldown > 0 || sending}
-              onButtonClick={handleResendClick}
-              footer={
-                <>
-                  <Typography variant='subtitle1' color='textSecondary'>
-                    If you still haven’t received the email, please{' '}
-                    <ContactSupport />
-                  </Typography>
-                </>
-              }
-            >
+      <Box>
+        {status === 'loading' ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+            <CircularProgress />
+          </Box>
+        ) : status === 'expired' ? (
+          <EmailVerificationStatus
+            iconSrc='/assets/warning.svg'
+            iconAlt='Warning — link expired'
+            buttonText={
+              cooldown > 0
+                ? `Send new verification email (${cooldown}s)`
+                : 'Send new verification email'
+            }
+            disabled={cooldown > 0 || sending}
+            onButtonClick={handleResendClick}
+            footer={
               <>
-                <Typography variant='h4' className='font-weight--700'>
-                  Link expired
-                </Typography>
                 <Typography variant='subtitle1' color='textSecondary'>
-                  This link has expired. Verification links are valid for 60
-                  minutes, but you can request a new one below.
-                </Typography>
-                <Typography variant='subtitle1' color='textSecondary'>
-                  We can send you a new link to{' '}
-                  <span className='font-weight--700 text-primary'>
-                    {email ?? 'your email'}
-                  </span>
-                  .
+                  If you still haven’t received the email, please{' '}
+                  <ContactSupport />
                 </Typography>
               </>
-            </EmailVerificationStatus>
-          ) : status === 'emailNotVerified' ? (
-            // Copied same component/structure as 'expired' case (per request).
-            <EmailVerificationStatus
-              iconSrc='/assets/warning.svg'
-              iconAlt='Email not verifiedd'
-              buttonText={
-                cooldown > 0
-                  ? `Send new verification email (${cooldown}s)`
-                  : 'Send new verification email'
-              }
-              disabled={cooldown > 0 || sending}
-              onButtonClick={handleResendClick}
-              footer={
-                <>
-                  <Typography variant='subtitle1' color='textSecondary'>
-                    If you still haven’t received the email, please{' '}
-                    <ContactSupport />
-                  </Typography>
-                </>
-              }
-            >
+            }
+          >
+            <>
+              <Typography variant='h4' className='font-weight--700'>
+                Link expired
+              </Typography>
+              <Typography variant='subtitle1' color='textSecondary'>
+                This link has expired. Verification links are valid for 60
+                minutes, but you can request a new one below.
+              </Typography>
+              <Typography variant='subtitle1' color='textSecondary'>
+                We can send you a new link to{' '}
+                <span className='font-weight--700 text-primary'>
+                  {email ?? 'your email'}
+                </span>
+                .
+              </Typography>
+            </>
+          </EmailVerificationStatus>
+        ) : status === 'emailNotVerified' ? (
+          // Copied same component/structure as 'expired' case (per request).
+          <EmailVerificationStatus
+            iconSrc='/assets/warning.svg'
+            iconAlt='Email not verifiedd'
+            buttonText={
+              cooldown > 0
+                ? `Send new verification email (${cooldown}s)`
+                : 'Send new verification email'
+            }
+            disabled={cooldown > 0 || sending}
+            onButtonClick={handleResendClick}
+            footer={
               <>
-                <Typography variant='h4' className='font-weight--700'>
-                  Email not verified
-                </Typography>
                 <Typography variant='subtitle1' color='textSecondary'>
-                  Your email has not been verified yet. If you have an account
-                  with us, check your inbox for the verification link. You can
-                  request a new verification email below.
-                </Typography>
-                <Typography variant='subtitle1' color='textSecondary'>
-                  We can send you a new link to your registered Email.
+                  If you still haven’t received the email, please{' '}
+                  <ContactSupport />
                 </Typography>
               </>
-            </EmailVerificationStatus>
-          ) : status === 'verified' ? (
-            <EmailVerificationStatus
-              iconSrc='/assets/verified.svg'
-              iconAlt='Verified'
-              buttonText='Go to sign in'
-              onButtonClick={() => navigate('/auth/login')}
-            >
+            }
+          >
+            <>
+              <Typography variant='h4' className='font-weight--700'>
+                Email not verified
+              </Typography>
+              <Typography variant='subtitle1' color='textSecondary'>
+                Your email has not been verified yet. If you have an account
+                with us, check your inbox for the verification link. You can
+                request a new verification email below.
+              </Typography>
+              <Typography variant='subtitle1' color='textSecondary'>
+                We can send you a new link to your registered Email.
+              </Typography>
+            </>
+          </EmailVerificationStatus>
+        ) : status === 'verified' ? (
+          <EmailVerificationStatus
+            iconSrc='/assets/verified.svg'
+            iconAlt='Verified'
+            buttonText='Go to sign in'
+            onButtonClick={() => navigate('/auth/login')}
+          >
+            <>
+              <Typography variant='h4' className='font-weight--700'>
+                Email already verified
+              </Typography>
+              <Typography variant='subtitle1' color='textSecondary'>
+                Your email{' '}
+                <span className='font-weight--700 text-primary'>
+                  {email ?? 'your email'}
+                </span>{' '}
+                has already been verified. You can now sign in to your account.
+              </Typography>
+            </>
+          </EmailVerificationStatus>
+        ) : status === 'invalid' ? (
+          <EmailVerificationStatus
+            iconSrc='/assets/danger.svg'
+            iconAlt='Invalid link'
+            buttonText='Go to sign in'
+            footer={
               <>
-                <Typography variant='h4' className='font-weight--700'>
-                  Email already verified
-                </Typography>
-                <Typography variant='subtitle1' color='textSecondary'>
-                  Your email{' '}
-                  <span className='font-weight--700 text-primary'>
-                    {email ?? 'your email'}
-                  </span>{' '}
-                  has already been verified. You can now sign in to your
-                  account.
-                </Typography>
-              </>
-            </EmailVerificationStatus>
-          ) : status === 'invalid' ? (
-            <EmailVerificationStatus
-              iconSrc='/assets/danger.svg'
-              iconAlt='Invalid link'
-              buttonText='Go to sign in'
-              footer={
-                <>
-                  <Typography variant='subtitle1' color='textSecondary'>
-                    Don’t have an account?{' '}
-                    <Link
-                      to={'/auth/signup'}
-                      className='font-weight--700 info-main cursor-pointer text-decoration--none'
-                    >
-                      Sign up
-                    </Link>
-                  </Typography>
-                  <HavingTrouble />
-                </>
-              }
-              onButtonClick={() => navigate('/auth/login')}
-            >
-              <>
-                <Typography variant='h4' className='font-weight--700'>
-                  Invalid verification link
-                </Typography>
-                <Typography variant='subtitle1' color='textSecondary'>
-                  Verification link is not valid. It may be broken or has
-                  already been used.
-                </Typography>
-              </>
-            </EmailVerificationStatus>
-          ) : status === 'requestThrottled' ? (
-            <EmailVerificationStatus
-              iconSrc='/assets/danger.svg'
-              iconAlt='Request throttled'
-              buttonText='Go to sign in'
-              onButtonClick={() => navigate('/auth/login')}
-              footer={
                 <Typography variant='subtitle1' color='textSecondary'>
                   Don’t have an account?{' '}
                   <Link
@@ -335,45 +293,74 @@ const EmailVerification: React.FC = () => {
                     Sign up
                   </Link>
                 </Typography>
-              }
-            >
-              <>
-                <Typography variant='h4' className='font-weight--700'>
-                  Too many requests
-                </Typography>
-                <Typography variant='subtitle1' color='textSecondary'>
-                  {throttleMinutes
-                    ? `Your request was throttled. Please try again in about ${throttleMinutes} minute${throttleMinutes > 1 ? 's' : ''}.`
-                    : 'Your request was throttled. Please wait before trying again.'}
-                </Typography>
+                <HavingTrouble />
               </>
-            </EmailVerificationStatus>
-          ) : status === 'accountDeactivated' ? (
-            <EmailVerificationStatus
-              iconSrc='/assets/danger.svg'
-              iconAlt='Request throttled'
-              buttonText='Close'
-              onButtonClick={() => navigate('/auth/login')}
-            >
-              <>
-                <Typography variant='h4' className='font-weight--700'>
-                  Account Deactivated
-                </Typography>
-                <Typography variant='subtitle1' color='textSecondary'>
-                  Your account has been deactivated by your practice
-                  administrator. Please contact support if you need any
-                  assistance. <ContactSupport />
-                </Typography>
-              </>
-            </EmailVerificationStatus>
-          ) : status === 'congrats' ? (
-            <Congratulations
-              title='Account created successfully'
-              message='Your Monai account has been created!'
-            />
-          ) : null}
-        </Box>
-        <Footer />
+            }
+            onButtonClick={() => navigate('/auth/login')}
+          >
+            <>
+              <Typography variant='h4' className='font-weight--700'>
+                Invalid verification link
+              </Typography>
+              <Typography variant='subtitle1' color='textSecondary'>
+                Verification link is not valid. It may be broken or has already
+                been used.
+              </Typography>
+            </>
+          </EmailVerificationStatus>
+        ) : status === 'requestThrottled' ? (
+          <EmailVerificationStatus
+            iconSrc='/assets/danger.svg'
+            iconAlt='Request throttled'
+            buttonText='Go to sign in'
+            onButtonClick={() => navigate('/auth/login')}
+            footer={
+              <Typography variant='subtitle1' color='textSecondary'>
+                Don’t have an account?{' '}
+                <Link
+                  to={'/auth/signup'}
+                  className='font-weight--700 info-main cursor-pointer text-decoration--none'
+                >
+                  Sign up
+                </Link>
+              </Typography>
+            }
+          >
+            <>
+              <Typography variant='h4' className='font-weight--700'>
+                Too many requests
+              </Typography>
+              <Typography variant='subtitle1' color='textSecondary'>
+                {throttleMinutes
+                  ? `Your request was throttled. Please try again in about ${throttleMinutes} minute${throttleMinutes > 1 ? 's' : ''}.`
+                  : 'Your request was throttled. Please wait before trying again.'}
+              </Typography>
+            </>
+          </EmailVerificationStatus>
+        ) : status === 'accountDeactivated' ? (
+          <EmailVerificationStatus
+            iconSrc='/assets/danger.svg'
+            iconAlt='Request throttled'
+            buttonText='Close'
+            onButtonClick={() => navigate('/auth/login')}
+          >
+            <>
+              <Typography variant='h4' className='font-weight--700'>
+                Account Deactivated
+              </Typography>
+              <Typography variant='subtitle1' color='textSecondary'>
+                Your account has been deactivated by your practice
+                administrator. Please contact support if you need any
+                assistance. <ContactSupport />
+              </Typography>
+            </>
+          </EmailVerificationStatus>
+        ) : status === 'congrats' ? (
+          <Congratulations
+            title='Account created successfully'
+            message='Your Monai account has been created!'
+          />
+        ) : null}
       </Box>
     </RegistrationWrapper>
   )

@@ -2,11 +2,13 @@
 import { useEffect, useState, useRef } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { Dialog, Button, Box, Stack, Typography } from '@mui/material'
+import { useLogout } from 'src/hooks/useLogout'
 
 const TOTAL_IDLE_TIME = 15 * 60 * 1000
 const WARNING_TIME = 14 * 60 * 1000
 
 export default function IdleSessionHandler() {
+  const { handleLogout } = useLogout()
   const { logout, getAccessTokenSilently } = useAuth0()
   const [showWarning, setShowWarning] = useState(false)
 
@@ -34,9 +36,7 @@ export default function IdleSessionHandler() {
 
       // Force logout at 15m
       idleTimeout = setTimeout(() => {
-        logout({
-          logoutParams: { returnTo: window.location.origin }
-        })
+        handleLogout()
       }, TOTAL_IDLE_TIME)
     }
 
@@ -68,9 +68,7 @@ export default function IdleSessionHandler() {
       setShowWarning(false)
     } catch (err) {
       console.error('Token renewal failed:', err)
-      logout({
-        logoutParams: { returnTo: window.location.origin }
-      })
+      handleLogout()
     }
   }
 

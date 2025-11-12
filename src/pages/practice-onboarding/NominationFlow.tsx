@@ -9,7 +9,6 @@ import InvitationSent from 'src/components/invitation-sent'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
 import { paths } from 'src/paths'
 import { useAuth } from 'src/context/AuthProvider'
-import Footer from 'src/components/registration-wrapper/Footer'
 
 enum FlowStep {
   WELCOME = 'WELCOME',
@@ -54,19 +53,8 @@ const NominationFlow = () => {
 
   return (
     <RegistrationWrapper>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: '100vh'
-        }}
-      >
-        <RegistrationHeader />
-        {isLoading ? <CircularProgress /> : <Box>{renderStep()}</Box>}
-        <Footer />
-      </Box>
+      <RegistrationHeader />
+      {isLoading ? <CircularProgress /> : <Box>{renderStep()}</Box>}
     </RegistrationWrapper>
   )
 }

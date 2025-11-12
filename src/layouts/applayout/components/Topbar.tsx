@@ -17,11 +17,11 @@ import {
   useMediaQuery
 } from '@mui/material'
 import styles from './Topbar.module.scss'
-import { useAuth0 } from '@auth0/auth0-react'
 import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
 import { useAuth } from 'src/context/AuthProvider'
 import { toTitleCase } from 'src/utils/stringUtils'
 import useUserDetails from 'src/hooks/useUserDetails'
+import { useLogout } from 'src/hooks/useLogout'
 
 type topbarProps = {
   title: string
@@ -182,7 +182,7 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
 
 const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
   const { accessToken } = useAuth()
-  const { logout } = useAuth0()
+  const { handleLogout } = useLogout()
   const [open, setOpen] = useState(false)
   const anchorRef = useRef<HTMLButtonElement | null>(null)
   const isMobile = useMediaQuery('(max-width:600px)')
@@ -194,9 +194,6 @@ const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
 
   const handleClose = () => {
     setOpen(false)
-  }
-  const handleLogout = () => {
-    logout({ logoutParams: { returnTo: window.location.origin } })
   }
 
   const handleSettings = () => {

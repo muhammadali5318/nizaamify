@@ -11,7 +11,6 @@ import apiClient from 'src/services/api-client'
 import EmailVerificationStatus from '../signup/components/EmailVerification/EmailVerificationStatus'
 import { paths } from 'src/paths'
 import { endpoints } from 'src/services/backendUrl'
-import Footer from 'src/components/registration-wrapper/Footer'
 import ContactSupport from 'src/components/contact-support'
 
 const InvitedUserOnboarding = () => {
@@ -224,19 +223,8 @@ const InvitedUserOnboarding = () => {
 
   return (
     <RegistrationWrapper>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: '100vh'
-        }}
-      >
-        <RegistrationHeader />
-        <Box>{renderStep()}</Box>
-        <Footer />
-      </Box>
+      <RegistrationHeader />
+      <Box>{renderStep()}</Box>
     </RegistrationWrapper>
   )
 }

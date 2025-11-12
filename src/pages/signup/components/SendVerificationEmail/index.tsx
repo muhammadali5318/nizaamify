@@ -6,7 +6,6 @@ import RegistrationWrapper from 'src/components/registration-wrapper/Registratio
 import RegistrationHeader from 'src/components/registration-wrapper/RegistrationHeader'
 import { notify } from 'src/components/notistack/NotificationProvider'
 import { sendVerificationEmail } from 'src/services/auth/emailVerification'
-import Footer from 'src/components/registration-wrapper/Footer'
 import ContactSupport from 'src/components/contact-support'
 
 type Props = {
@@ -99,108 +98,86 @@ const SendVerificationEmail: React.FC<Props> = ({ email }) => {
 
   return (
     <RegistrationWrapper>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: '100vh'
-        }}
-      >
-        <Box>
-          <RegistrationHeader
-            heading='Welcome to Monai Tech!'
-            subHeading='Let’s get you onboarded!'
-          />
+      <Box>
+        <RegistrationHeader
+          heading='Welcome to Monai Tech!'
+          subHeading='Let’s get you onboarded!'
+        />
 
-          <Box
-            className={styles.emailVerificationRoot}
-            sx={{
-              width: { xs: '100%', sm: '100%', md: '636px' },
-              mx: 'auto',
-              px: { xs: 2, sm: 3, md: 6 },
-              py: { xs: 3, md: 4 }
-            }}
-          >
-            <Box className={styles.emailVerificationInfoContainer}>
-              <Typography variant='h4' className='font-weight--700'>
-                Verify your email address
+        <Box
+          className={styles.emailVerificationRoot}
+          sx={{
+            width: { xs: '100%', sm: '100%', md: '636px' },
+            mx: 'auto',
+            px: { xs: 2, sm: 3, md: 6 },
+            py: { xs: 3, md: 4 }
+          }}
+        >
+          <Box className={styles.emailVerificationInfoContainer}>
+            <Typography variant='h4' className='font-weight--700'>
+              Verify your email address
+            </Typography>
+            <Typography variant='subtitle1' color='var(--color-text-secondary)'>
+              Please verify your email address before signing in. We have sent a
+              verification link to:
+            </Typography>
+          </Box>
+
+          <Box className={styles.emailVerificationInfoContainer}>
+            <Typography
+              variant='h6'
+              className={`${styles.emailText} font-weight--700 font-style--italic`}
+              sx={{ wordBreak: 'break-word' }}
+            >
+              {email}
+            </Typography>
+            <Typography variant='subtitle1' color='var(--color-text-secondary)'>
+              The verification link expires in 60 minutes.
+            </Typography>
+          </Box>
+
+          <Box className={styles.emailVerificationActionContainer}>
+            <Box
+              sx={{
+                width: '100%',
+                textAlign: 'center'
+              }}
+            >
+              <Typography
+                variant='subtitle1'
+                color='var(--color-text-secondary)'
+              >
+                Didn&apos;t receive an email?
               </Typography>
               <Typography
                 variant='subtitle1'
                 color='var(--color-text-secondary)'
               >
-                Please verify your email address before signing in. We have sent
-                a verification link to:
+                Please also check your spam/junk folder if you haven’t received
+                the email.
               </Typography>
             </Box>
 
-            <Box className={styles.emailVerificationInfoContainer}>
-              <Typography
-                variant='h6'
-                className={`${styles.emailText} font-weight--700 font-style--italic`}
-                sx={{ wordBreak: 'break-word' }}
-              >
-                {email}
-              </Typography>
-              <Typography
-                variant='subtitle1'
-                color='var(--color-text-secondary)'
-              >
-                The verification link expires in 60 minutes.
-              </Typography>
-            </Box>
+            <Button
+              size='large'
+              variant='contained'
+              onClick={handleResend}
+              loading={loading}
+              fullWidth
+              disabled={disabled}
+            >
+              {remaining > 0
+                ? `Resend verification email (${formatSecondsAsMMSS(remaining)})`
+                : 'Resend verification email'}
+            </Button>
+          </Box>
 
-            <Box className={styles.emailVerificationActionContainer}>
-              <Box
-                sx={{
-                  width: '100%',
-                  textAlign: 'center'
-                }}
-              >
-                <Typography
-                  variant='subtitle1'
-                  color='var(--color-text-secondary)'
-                >
-                  Didn&apos;t receive an email?
-                </Typography>
-                <Typography
-                  variant='subtitle1'
-                  color='var(--color-text-secondary)'
-                >
-                  Please also check your spam/junk folder if you haven’t
-                  received the email.
-                </Typography>
-              </Box>
-
-              <Button
-                size='large'
-                variant='contained'
-                onClick={handleResend}
-                loading={loading}
-                fullWidth
-                disabled={disabled}
-              >
-                {remaining > 0
-                  ? `Resend verification email (${formatSecondsAsMMSS(remaining)})`
-                  : 'Resend verification email'}
-              </Button>
-            </Box>
-
-            <Box>
-              <Typography
-                variant='subtitle1'
-                color='var(--color-text-secondary)'
-              >
-                If you still haven’t received the email, please{' '}
-                <ContactSupport />
-              </Typography>
-            </Box>
+          <Box>
+            <Typography variant='subtitle1' color='var(--color-text-secondary)'>
+              If you still haven’t received the email, please <ContactSupport />
+            </Typography>
           </Box>
         </Box>
-
-        <Footer />
       </Box>
     </RegistrationWrapper>
   )
