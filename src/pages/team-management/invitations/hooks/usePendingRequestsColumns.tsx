@@ -5,7 +5,7 @@ import { toTitleCase } from 'src/utils/stringUtils'
 import dayjs from 'dayjs'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import HighlightOffIcon from '@mui/icons-material/HighlightOff'
-import { ApproveOrReject } from '../components/ApproveOrRejectRequest'
+import { ApproveOrReject } from '../components/UserConfirmatinoModal'
 
 type Handlers = {
   onApprove?: (userId: string, mode: ApproveOrReject) => void

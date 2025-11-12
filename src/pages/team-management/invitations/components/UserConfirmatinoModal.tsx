@@ -1,3 +1,4 @@
+// File: UserConfirmatinoModal.tsx
 import React, { useCallback, useMemo, useState } from 'react'
 import {
   Dialog,
@@ -8,20 +9,19 @@ import {
   Box,
   Typography
 } from '@mui/material'
-import apiClient from 'src/services/api-client'
-import { endpoints } from 'src/services/backendUrl'
-import { useAuth } from 'src/context/AuthProvider'
-import { useInitialData } from 'src/hooks/useFetchInitialData'
-import { queryClient } from 'src/utils/queryClient'
-import { useActivePractice } from 'src/hooks/useActivePractice'
 
-export type ApproveOrReject = 'REJECTED' | 'ACTIVE' | ''
+export type UserConfirmationTypes =
+  | 'REJECTED'
+  | 'ACTIVE'
+  | 'CHOOSE_PACKAGE_LATER'
+  | ''
 
 interface ConfirmUserModalProps {
   open: boolean
   onClose: () => void
-  mode: ApproveOrReject
-  userId: string
+  mode: UserConfirmationTypes
+  onConfirm?: (opts: { mode: UserConfirmationTypes }) => Promise<void>
+  confirmDisabled?: boolean
 }
 
 const DEFAULTS: any = {
@@ -29,6 +29,8 @@ const DEFAULTS: any = {
     icon: '/assets/error-circle.svg',
     title: 'Reject access request',
     confirmLabel: 'Reject request',
+    cancelLabel: 'Cancel',
+    variant: 'h5',
     confirmColor: 'error',
     bodyTemplate: () => (
       <>
@@ -45,6 +47,8 @@ const DEFAULTS: any = {
   ACTIVE: {
     icon: '/assets/success-check.svg',
     title: 'Approve access request',
+    cancelLabel: 'Cancel',
+    variant: 'h5',
     confirmLabel: 'Approve request',
     confirmColor: 'primary',
     bodyTemplate: () => (
@@ -58,14 +62,33 @@ const DEFAULTS: any = {
         </Typography>
       </>
     )
+  },
+  CHOOSE_PACKAGE_LATER: {
+    icon: '/assets/warning.svg',
+    title: 'Choose Your Plan Later?',
+    confirmLabel: 'Choose a plan now',
+    cancelLabel: 'Continue without selecting a plan',
+    variant: 'h4',
+    confirmColor: 'primary',
+    bodyTemplate: () => (
+      <>
+        <Typography variant='subtitle1' color='text.primary'>
+          Selecting a subscription plan is required to unlock Monai’s full
+          features, including financial insights, document uploads, and
+          benchmarking.
+        </Typography>
+        <Typography variant='subtitle1' color='text.primary'>
+          If you skip this step now, you’ll have{' '}
+          <strong> limited access</strong> to the platform until a plan is
+          selected.
+        </Typography>
+      </>
+    )
   }
 }
 
-const ApproveOrRejectRequest: React.FC<ConfirmUserModalProps> = React.memo(
-  ({ open, onClose, mode, userId }) => {
-    const { activePracticeId } = useActivePractice()
-    const { accessToken } = useAuth()
-    const { data: practiceData } = useInitialData(!!accessToken)
+const UserConfirmationModal: React.FC<ConfirmUserModalProps> = React.memo(
+  ({ open, onClose, mode, onConfirm, confirmDisabled = false }) => {
     const [loading, setLoading] = useState(false)
 
     const config = useMemo(() => {
@@ -75,35 +98,30 @@ const ApproveOrRejectRequest: React.FC<ConfirmUserModalProps> = React.memo(
         title: base?.title,
         confirmLabel: base?.confirmLabel,
         confirmColor: base?.confirmColor,
-        bodyNode: base?.bodyTemplate()
+        bodyNode: base?.bodyTemplate(),
+        cancelLabel: base?.cancelLabel,
+        titleVariant: base?.variant
       }
-    }, [mode, userId, practiceData, activePracticeId])
+    }, [mode])
 
     const isDisabled = useMemo(
-      () => loading || !accessToken,
-      [loading, userId, accessToken]
+      () => loading || confirmDisabled || !onConfirm,
+      [loading, confirmDisabled, onConfirm]
     )
 
-    const onConfirm = useCallback(async () => {
-      if (!userId) return
-      await apiClient.put(
-        endpoints.approveOrRejectTeamMember(activePracticeId ?? '', userId),
-        { user_practice_status: mode }
-      )
-      await queryClient.invalidateQueries({ queryKey: ['teamMembersListApi'] })
-    }, [activePracticeId, userId, mode])
-
     const handleConfirm = useCallback(async () => {
+      if (!onConfirm) return
       setLoading(true)
       try {
-        await onConfirm()
-        onClose()
+        await onConfirm({
+          mode
+        })
       } catch (err: any) {
         console.error('ConfirmUserModal action error', err)
       } finally {
         setLoading(false)
       }
-    }, [onConfirm, userId, onClose, mode])
+    }, [onConfirm, mode])
 
     return (
       <Dialog
@@ -115,7 +133,7 @@ const ApproveOrRejectRequest: React.FC<ConfirmUserModalProps> = React.memo(
           paper: {
             sx: {
               py: '36px',
-              px: { xs: 2, sm: 6 },
+              px: { xs: 2, sm: 5 },
               borderRadius: '24px'
             }
           }
@@ -131,7 +149,7 @@ const ApproveOrRejectRequest: React.FC<ConfirmUserModalProps> = React.memo(
             />
             <Typography
               className='font-weight--700'
-              sx={{ typography: { xs: 'h6', sm: 'h5' } }}
+              sx={{ typography: { xs: 'h6', sm: config?.titleVariant } }}
             >
               {config.title}
             </Typography>
@@ -146,17 +164,17 @@ const ApproveOrRejectRequest: React.FC<ConfirmUserModalProps> = React.memo(
             mt: 2.5,
             display: 'flex',
             flexDirection: 'row',
-            gap: 2
+            gap: 0
           }}
         >
           <Button
             onClick={onClose}
             variant='outlined'
             size='large'
-            sx={{ flex: 1 }}
+            sx={{ flex: 1, padding: '7px 8px' }}
             disabled={loading}
           >
-            Cancel
+            {config.cancelLabel}
           </Button>
 
           <Button
@@ -176,6 +194,6 @@ const ApproveOrRejectRequest: React.FC<ConfirmUserModalProps> = React.memo(
   }
 )
 
-ApproveOrRejectRequest.displayName = 'ApproveOrRejectRequest'
+UserConfirmationModal.displayName = 'UserConfirmationModal'
 
-export default ApproveOrRejectRequest
+export default UserConfirmationModal

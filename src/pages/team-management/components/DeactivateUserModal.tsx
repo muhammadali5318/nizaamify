@@ -26,7 +26,7 @@ interface ConfirmUserModalProps {
   onClose: () => void
   member: SelectedUserType | null
   mode: Mode
-  reRouteToMainPage: boolean
+  reRouteToMainPage?: boolean
 }
 
 const DEFAULTS: any = {

@@ -47,6 +47,7 @@ const EmailVerification: React.FC = () => {
     const rawToken = searchParams.get('token')
     const rawAuth0Id = searchParams.get('auth0Id')
     const accountDeactivated = !!searchParams.get('accountDeactivated')
+    const emailVerified = !!searchParams.get('emailVerified')
 
     setEmail(rawEmail)
     setToken(rawToken)
@@ -56,6 +57,8 @@ const EmailVerification: React.FC = () => {
       setStatus('emailNotVerified')
     } else if (accountDeactivated) {
       setStatus('accountDeactivated')
+    } else if (emailVerified) {
+      setStatus('congrats')
     }
   }, [location.search])
 
@@ -81,7 +84,7 @@ const EmailVerification: React.FC = () => {
           response.status === 200 &&
           response.data.message === 'Email has been verified successfully!'
         ) {
-          if (!cancelled) setStatus('congrats')
+          if (!cancelled) navigate('/auth/signup?step=7')
           return
         }
 
@@ -364,7 +367,10 @@ const EmailVerification: React.FC = () => {
               </>
             </EmailVerificationStatus>
           ) : status === 'congrats' ? (
-            <Congratulations message='Your email has been verified and your account has been created successfully.' />
+            <Congratulations
+              title='Account created successfully'
+              message='Your Monai account has been created!'
+            />
           ) : null}
         </Box>
         <Footer />

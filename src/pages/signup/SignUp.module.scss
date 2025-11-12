@@ -1,5 +1,4 @@
 .container {
-  max-width: 1000px;
   width: 100%;
   display: flex;
   padding: 36px 48px;
@@ -26,7 +25,6 @@
 .left {
   width: 20%;
   min-width: 220px;
-  padding: 16px;
 
   @media (max-width: 900px) {
     width: 100%;

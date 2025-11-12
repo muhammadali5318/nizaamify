@@ -7,16 +7,24 @@ import { useFetchSortedPaginatedData } from 'src/hooks/useFetchSortedData.'
 import { useMemo, useState } from 'react'
 import useFetchTeamMembers from '../../hooks/useFetchTeamMembers'
 import { usePendingRequestsColumns } from '../hooks/usePendingRequestsColumns'
-import ApproveOrRejectRequest, {
-  ApproveOrReject
-} from './ApproveOrRejectRequest'
+import { useActivePractice } from 'src/hooks/useActivePractice'
+import { useAuth } from 'src/context/AuthProvider'
+import { queryClient } from 'src/utils/queryClient'
+import { endpoints } from 'src/services/backendUrl'
+import apiClient from 'src/services/api-client'
+import UserConfirmationModal, {
+  UserConfirmationTypes
+} from './UserConfirmatinoModal'
+import { notify } from 'src/components/notistack/NotificationProvider'
 
 const PendingRequests = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalMode, setModalMode] = useState<ApproveOrReject>('')
+  const [modalMode, setModalMode] = useState<UserConfirmationTypes>('')
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
+  const { activePracticeId } = useActivePractice()
+  const { accessToken } = useAuth()
 
-  const actionHandler = (userId: string, mode: ApproveOrReject) => {
+  const actionHandler = (userId: string, mode: UserConfirmationTypes) => {
     setSelectedUserId(userId)
     setModalMode(mode)
     setIsModalOpen(true)
@@ -54,6 +62,26 @@ const PendingRequests = () => {
 
   const getRowClassName = (params: any) =>
     params.row.status === 'Disabled' ? styles.rowDisabled : ''
+
+  const handleConfirmApi = async ({ mode }: { mode: any }) => {
+    if (!accessToken) throw new Error('No access token')
+    try {
+      await apiClient.put(
+        endpoints.approveOrRejectTeamMember(
+          activePracticeId ?? '',
+          selectedUserId ?? ''
+        ),
+        {
+          user_practice_status: mode
+        }
+      )
+      setIsModalOpen(false)
+
+      await queryClient.invalidateQueries({ queryKey: ['teamMembersListApi'] })
+    } catch {
+      notify.error('Something went wrong, Please try again')
+    }
+  }
 
   if (items?.length === 0) return
   return (
@@ -152,11 +180,11 @@ const PendingRequests = () => {
           showLastButton
         />
       </Box>
-      <ApproveOrRejectRequest
+      <UserConfirmationModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         mode={modalMode}
-        userId={selectedUserId ?? ''}
+        onConfirm={handleConfirmApi}
       />
     </Box>
   )

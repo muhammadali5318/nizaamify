@@ -2,6 +2,7 @@ import { SignupStepThreeFormValues } from 'src/schema-validations/signupStepThre
 
 export type FormHeaderProps = {
   activeStep: number
+  showHeading?: boolean
 }
 
 export type SignupStepTwoProps = {

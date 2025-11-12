@@ -39,7 +39,6 @@ const AdaptiveStepper: React.FC<AdaptiveStepperProps> = ({
     <Box
       className={className}
       sx={{
-        px: isVerySmall ? 1 : 2,
         width: '100%',
         overflowX: isMobile ? 'auto' : 'visible'
       }}

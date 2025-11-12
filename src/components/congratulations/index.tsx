@@ -3,10 +3,14 @@ import styles from './Congratulations.module.scss'
 import { useNavigate } from 'react-router'
 
 type CongratulationsProps = {
+  title?: string
   message: string
 }
 
-const Congratulations: React.FC<CongratulationsProps> = ({ message }) => {
+const Congratulations: React.FC<CongratulationsProps> = ({
+  message,
+  title = 'Congratulations!'
+}) => {
   const navigate = useNavigate()
 
   const handleContinue = () => {
@@ -39,7 +43,7 @@ const Congratulations: React.FC<CongratulationsProps> = ({ message }) => {
 
       <Box className={styles.congratsInfoContainer}>
         <Typography variant='h4' className='font-weight--700' align='center'>
-          Congratulations!
+          {title}
         </Typography>
 
         <Typography

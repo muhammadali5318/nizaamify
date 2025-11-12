@@ -16,6 +16,8 @@ import { endpoints } from 'src/services/backendUrl'
 import { sendVerificationEmail } from 'src/services/auth/emailVerification'
 import Footer from 'src/components/registration-wrapper/Footer'
 import RequestPracticeAssociation from './components/RequestPracticeAssociation/RequestPracticeAssociation'
+import { useSearchParams } from 'react-router'
+import SignupStepFour from './components/SignupStepFour'
 
 const initialFormData: SignupFormDataSet = {
   firstName: '',
@@ -50,7 +52,10 @@ export type AssociationPayload = {
 }
 
 const SignUp: React.FC = () => {
-  const [activeStep, setActiveStep] = useState<number>(0)
+  const [searchParams] = useSearchParams()
+  const step = Number(searchParams.get('step') ?? 0)
+
+  const [activeStep, setActiveStep] = useState<number>(step)
   const [formData, setFormDataState] =
     useState<SignupFormDataSet>(initialFormData)
 
@@ -252,6 +257,8 @@ const SignUp: React.FC = () => {
             serverErrors={serverErrors}
           />
         )
+      case 7:
+        return <SignupStepFour />
       default:
         return null
     }
@@ -297,7 +304,12 @@ const SignUp: React.FC = () => {
             subHeading='Let’s get you onboarded!'
           />
 
-          <Box className={styles.container}>
+          <Box
+            className={styles.container}
+            sx={{
+              maxWidth: activeStep === 7 ? '1300px' : '1000px '
+            }}
+          >
             {/* LEFT: Adaptive Stepper */}
             <Box className={styles.left}>
               <AdaptiveStepper activeStep={activeStep} steps={steps} />
@@ -305,9 +317,8 @@ const SignUp: React.FC = () => {
 
             {/* CENTER: Divider */}
             <Divider
-              orientation={isMobile ? 'horizontal' : 'horizontal'}
+              orientation={isMobile ? 'horizontal' : 'vertical'}
               flexItem
-              className={styles.divider}
             />
 
             {/* RIGHT: Render different component per step */}
