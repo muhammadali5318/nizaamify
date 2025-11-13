@@ -5,14 +5,13 @@ import { useForm, Controller, Control, Path } from 'react-hook-form'
 import { z } from 'zod'
 import { Box, Stack, TextField, MenuItem, Button } from '@mui/material'
 import PhoneField from 'src/components/phone-field'
-import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
-import { useAuth } from 'src/context/AuthProvider'
 import { capitalizeFirstLetter } from 'src/utils/stringUtils'
 import { mapUserApiToForm, mapUserFormToApi } from '../setting-config'
 import { useUpdateUserProfile, useUserProfile } from '../hooks/useUserProfile'
 import parsePhoneNumberFromString from 'libphonenumber-js'
 import { notify } from 'src/components/notistack/NotificationProvider'
 import { queryClient } from 'src/utils/queryClient'
+import useUserDetails from 'src/hooks/useUserDetails'
 
 const profileSchema = z.object({
   firstName: z
@@ -45,8 +44,6 @@ const profileSchema = z.object({
 type ProfileForm = z.infer<typeof profileSchema>
 
 const ProfileInformation = () => {
-  const { accessToken } = useAuth()
-
   const {
     control,
     handleSubmit,
@@ -68,25 +65,21 @@ const ProfileInformation = () => {
 
   const { mutateAsync: updateProfile, isPending: isUpdating } =
     useUpdateUserProfile()
-  const { data: userData } = useFetchUserWithActivePracticeData(!!accessToken)
 
-  const practiceRole =
-    userData?.active_practices && userData.active_practices.length > 0
-      ? userData.active_practices[0].user_role
-      : undefined
+  const { userRole } = useUserDetails()
 
   useEffect(() => {
-    if (!apiProfile && !practiceRole) return
+    if (!apiProfile && !userRole) return
 
     const mapped = apiProfile ? mapUserApiToForm(apiProfile) : {}
 
-    const roleValue = practiceRole
+    const roleValue = userRole
 
     reset({
       ...mapped,
-      role: roleValue
+      role: roleValue ?? undefined
     })
-  }, [apiProfile, practiceRole])
+  }, [apiProfile, userRole])
 
   const submit = async (values: ProfileForm) => {
     const payload = mapUserFormToApi(values)
@@ -189,9 +182,9 @@ const ProfileInformation = () => {
                   }}
                   disabled
                 >
-                  {practiceRole ? (
-                    <MenuItem value={practiceRole}>
-                      {capitalizeFirstLetter(practiceRole)}
+                  {userRole ? (
+                    <MenuItem value={userRole}>
+                      {capitalizeFirstLetter(userRole)}
                     </MenuItem>
                   ) : (
                     <MenuItem value='' disabled>

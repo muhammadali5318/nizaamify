@@ -17,8 +17,6 @@ import {
   useMediaQuery
 } from '@mui/material'
 import styles from './Topbar.module.scss'
-import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
-import { useAuth } from 'src/context/AuthProvider'
 import { toTitleCase } from 'src/utils/stringUtils'
 import useUserDetails from 'src/hooks/useUserDetails'
 import { useLogout } from 'src/hooks/useLogout'
@@ -181,12 +179,10 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
 }
 
 const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
-  const { accessToken } = useAuth()
   const { handleLogout } = useLogout()
   const [open, setOpen] = useState(false)
   const anchorRef = useRef<HTMLButtonElement | null>(null)
   const isMobile = useMediaQuery('(max-width:600px)')
-  const { data: userData } = useFetchUserWithActivePracticeData(!!accessToken)
   const { userRole, userFullName } = useUserDetails()
   const handleToggle = () => {
     setOpen((prev) => !prev)
@@ -266,7 +262,7 @@ const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
           aria-expanded={open ? 'true' : undefined}
           size='small'
         >
-          <Avatar src={userData?.picture} alt='profile avatar' />
+          <Avatar alt='profile avatar' />
         </IconButton>
 
         {/* Use the separate ProfilePopper function/component */}
