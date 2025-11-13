@@ -1,6 +1,6 @@
 // src/pages/Documents/DocumentsPage.tsx  (or wherever your file lives)
 import React from 'react'
-import { Box, Typography, Stack, Link } from '@mui/material'
+import { Box, Typography, Link } from '@mui/material'
 import styles from './documents.module.scss'
 import StatsCard from 'src/components/team-management/StatsCard'
 import { ReusableTabs } from 'src/components/tabs'
