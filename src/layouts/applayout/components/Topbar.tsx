@@ -148,7 +148,7 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                   <Button
                     fullWidth
                     variant='outlined'
-                    onClick={onLogout}
+                    onClick={() => onLogout()}
                     aria-label='Logout'
                     sx={{
                       display: 'flex',

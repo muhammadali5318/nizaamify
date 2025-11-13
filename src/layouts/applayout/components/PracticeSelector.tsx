@@ -26,6 +26,7 @@ import { setMergedPermissionsByCategory } from 'src/store/slices/userDetailsInAc
 import { ALL_PERMISSIONS } from 'src/const'
 import useUserDetails from 'src/hooks/useUserDetails'
 import { deepEqual } from 'src/utils/objectsUtils'
+import { notify } from 'src/components/notistack/NotificationProvider'
 
 export type AllPracticesDataObject = {
   id: string
@@ -151,6 +152,7 @@ export default function PracticeSelector({
             dispatch(setMergedPermissionsByCategory(ALL_PERMISSIONS))
             setSelectedPractice(selected)
             setActiveById(selected?.id ?? '', practices)
+            notify.success('Switched to ' + selected?.practice_name)
           }}
           displayEmpty
           className={styles.muiSelect}

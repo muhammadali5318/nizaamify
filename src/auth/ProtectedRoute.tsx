@@ -19,7 +19,7 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = function ProtectedRoute({
   const redirectTo = useAuthErrorRedirect()
 
   if (redirectTo) {
-    handleLogout()
+    handleLogout(redirectTo)
     return null
   }
 

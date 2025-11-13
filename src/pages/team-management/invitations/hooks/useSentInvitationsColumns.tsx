@@ -119,8 +119,6 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
                               email: params.row?.email,
                               role: params.row?.user_role
                             })
-                          } else {
-                            // eslint-disable-next-line no-console
                           }
                         }
                       : undefined

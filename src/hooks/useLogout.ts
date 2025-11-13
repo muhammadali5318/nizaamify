@@ -8,14 +8,17 @@ export const useLogout = () => {
   const store = useStore()
   const { logout } = useAuth0()
 
-  const handleLogout = useCallback(() => {
-    store.dispatch(clearAll())
-    logout({
-      logoutParams: {
-        returnTo: window.location.origin
-      }
-    })
-  }, [store, logout])
+  const handleLogout = useCallback(
+    (redirectTo: string | null = null) => {
+      store.dispatch(clearAll())
+      logout({
+        logoutParams: {
+          returnTo: redirectTo ?? window.location.origin
+        }
+      })
+    },
+    [store, logout]
+  )
 
   return { handleLogout }
 }

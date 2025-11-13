@@ -14,6 +14,7 @@ import { useDispatch } from 'react-redux'
 import { setMergedPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
 import { ALL_PERMISSIONS } from 'src/const'
 import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
+import { notify } from 'src/components/notistack/NotificationProvider'
 
 interface PracticeDetailsCardProps {
   status?: 'active' | 'inactive' | 'archived'
@@ -249,6 +250,7 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
             onClick={() => {
               setActiveById(practice?.id, allPractices)
               dispatch(setMergedPermissionsByCategory(ALL_PERMISSIONS))
+              notify.success('Switched to ' + practice?.practice_name)
             }}
           >
             Switch to this practice
