@@ -90,13 +90,14 @@ const PracticeInformation = () => {
   const onSubmit = async (values: PracticeFormValues) => {
     try {
       await updatePractice.mutateAsync(values)
-      await queryClient.invalidateQueries({ queryKey: ['initialData'] })
-      await queryClient.invalidateQueries({
-        queryKey: ['listAllPracticesData']
-      })
-      await queryClient.invalidateQueries({
-        queryKey: ['UserWithActivePracticeData']
-      })
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['initialData'] }),
+        queryClient.invalidateQueries({ queryKey: ['listAllPracticesData'] }),
+        queryClient.invalidateQueries({
+          queryKey: ['UserWithActivePracticeData']
+        })
+      ])
     } catch (err) {
       notify.error('Failed to update practice information')
       throw err

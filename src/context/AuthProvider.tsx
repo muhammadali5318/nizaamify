@@ -8,6 +8,7 @@ import React, {
   useState
 } from 'react'
 import { useNavigate } from 'react-router'
+import { SplashScreen } from 'src/components/common/SplashScreen'
 import { CONFIG } from 'src/config-global'
 import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
 import { useInitialData } from 'src/hooks/useFetchInitialData'
@@ -150,9 +151,12 @@ function AuthProviderContainer({ children }: Props) {
   }, [isAuthenticated, getAccessToken])
 
   // load initial app data when accessToken becomes available (or not)
-  useFetchAllPracticesData(!!accessToken)
-  useFetchUserWithActivePracticeData(!!accessToken)
+  const { isPending: isLoading1 } = useFetchAllPracticesData(!!accessToken)
+  const { isPending: isLoading2 } =
+    useFetchUserWithActivePracticeData(!!accessToken)
   useInitialData(!!accessToken)
+
+  const isFetching = !!accessToken && (isLoading1 || isLoading2)
 
   const isFullyAuthenticated =
     isAuthenticated && !tokenLoading && accessToken !== null
@@ -180,6 +184,10 @@ function AuthProviderContainer({ children }: Props) {
     }),
     [user, status, accessToken, getAccessToken]
   )
+
+  if (isFetching) {
+    return <SplashScreen />
+  }
 
   return (
     <AuthContext.Provider value={memoizedValue}>
