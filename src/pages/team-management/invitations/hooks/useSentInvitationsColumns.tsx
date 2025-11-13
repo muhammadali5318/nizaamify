@@ -121,7 +121,6 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
                             })
                           } else {
                             // eslint-disable-next-line no-console
-                            console.log('invite', params.row.id)
                           }
                         }
                       : undefined

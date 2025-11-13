@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Box, Stack, Typography } from '@mui/material'
-import { useAuth0 } from '@auth0/auth0-react'
+import { Box, Stack } from '@mui/material'
 import { useAuth } from 'src/context/AuthProvider'
 import StatsCard from '../../components/DashboardStatsCard'
 import { fetchDashboardSummaryKpis } from '../../utils/fetchDashboardSummaryKpis'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 import revenueIcon from '../../../../assets/revenue-icon.svg'
 import costIcon from '../../../../assets/cost-icon.svg'
@@ -11,54 +11,32 @@ import profitIcon from '../../../../assets/profit-icon.svg'
 import profitPercentage from '../../../../assets/profit-margin-icon.svg'
 import ebidtaIcon from '../../../../assets/ebita.svg'
 import practiceValueIcon from '../../../../assets/value.svg'
-import PeriodSelector from '../../components/PeriodSelector'
-import dayjs from 'dayjs'
 
-const DashboardStatsSection = () => {
-  const { user } = useAuth0()
+interface DashboardStatsSectionProps {
+  selectedPeriod: string
+  startDate: string
+  endDate: string
+}
+
+const DashboardStatsSection = ({
+  startDate,
+  endDate
+}: DashboardStatsSectionProps) => {
   const { accessToken } = useAuth()
-
+  const { activePracticeId } = useActivePractice()
   const [kpiData, setKpiData] = useState<any>(null)
-  const [selectedPeriod, setSelectedPeriod] = useState('Current month')
   const [loading, setLoading] = useState(false)
-  const practiceId = user?.organizations_with_roles[0]?.metadata?.uuid
-
-  const getDateRange = (label: string) => {
-    const endDate = dayjs()
-    let startDate
-
-    switch (label) {
-      case 'Current month':
-        startDate = endDate.startOf('month')
-        break
-      case '3-month view':
-        startDate = endDate.subtract(3, 'month')
-        break
-      case 'Yearly':
-        startDate = endDate.subtract(12, 'month')
-        break
-      default:
-        startDate = endDate.startOf('month')
-    }
-
-    return {
-      start_date: startDate.format('YYYY-MM-DD'),
-      end_date: endDate.format('YYYY-MM-DD')
-    }
-  }
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        if (practiceId && accessToken) {
+        if (activePracticeId && accessToken) {
           setLoading(true)
-
-          const { start_date, end_date } = getDateRange(selectedPeriod)
           const data = await fetchDashboardSummaryKpis(
-            practiceId,
+            activePracticeId,
             accessToken,
-            start_date,
-            end_date
+            startDate,
+            endDate
           )
           setKpiData(data)
         }
@@ -70,7 +48,7 @@ const DashboardStatsSection = () => {
     }
 
     loadData()
-  }, [practiceId, accessToken, selectedPeriod])
+  }, [activePracticeId, accessToken, startDate, endDate])
 
   if (!kpiData) return null
 
@@ -79,17 +57,8 @@ const DashboardStatsSection = () => {
       ? `${prefix}${value}${suffix}`
       : 'N/A'
 
-  const safeTrend = (value: any) => {
-    if (
-      value === null ||
-      value === undefined ||
-      value === '' ||
-      isNaN(parseFloat(value))
-    ) {
-      return 'N/A'
-    }
-    return parseFloat(value)
-  }
+  const safeTrend = (value: any) =>
+    value && !isNaN(parseFloat(value)) ? parseFloat(value) : 'N/A'
 
   const stats = [
     {
@@ -132,28 +101,6 @@ const DashboardStatsSection = () => {
 
   return (
     <Box>
-      <Box
-        mb={2}
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between'
-        }}
-      >
-        <Box>
-          <Typography variant='h6' fontWeight={600}>
-            Practice Financial Overview
-          </Typography>
-        </Box>
-        <Box>
-          <PeriodSelector
-            options={['Current month', '3-month view', 'Yearly']}
-            selected={selectedPeriod}
-            onSelect={setSelectedPeriod}
-          />
-        </Box>
-      </Box>
-
       <Stack
         direction={{ xs: 'column', sm: 'column', md: 'row', lg: 'row' }}
         spacing={2}
