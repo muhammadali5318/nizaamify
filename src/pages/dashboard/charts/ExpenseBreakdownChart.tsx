@@ -1,4 +1,11 @@
-import { Card, CardContent, Typography } from '@mui/material'
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  useMediaQuery,
+  useTheme
+} from '@mui/material'
 import {
   PieChart,
   Pie,
@@ -8,53 +15,118 @@ import {
   ResponsiveContainer
 } from 'recharts'
 
-const data = [
-  { name: 'Clinician pay', value: 40 },
-  { name: 'Lab fees', value: 10 },
-  { name: 'Staff', value: 25 },
-  { name: 'Marketing', value: 5 },
-  { name: 'Materials', value: 10 },
-  { name: 'Premises', value: 10 }
-]
+interface ExpenseBreakdownChartProps {
+  granularity: string
+  month: number | null
+  year: number
+  data?: any
+}
 
 const COLORS = [
-  '#0088FE',
-  '#00C49F',
-  '#FFBB28',
-  '#FF8042',
-  '#AF19FF',
-  '#FF4D4F'
+  '#5B8FF9',
+  '#5AD8A6',
+  '#5D7092',
+  '#F6BD16',
+  '#E8684A',
+  '#1ca0dd',
+  '#9270CA',
+  '#FF9D4D',
+  '#269A99',
+  '#FF99C3'
 ]
 
-const ExpenseBreakdownChart = () => (
-  <Card>
-    <CardContent>
-      <Typography variant='h6' mb={1}>
-        Expense Breakdown (as % of revenue){' '}
-      </Typography>
-      <ResponsiveContainer width='100%' height={250}>
-        <PieChart>
-          <Legend align='right' amplitude={20} />
+const ExpenseBreakdownChart = ({ data }: ExpenseBreakdownChartProps) => {
+  const chartData =
+    data?.current?.expense_types?.map((item: any) => ({
+      name: item?.expense_type,
+      value: parseFloat(item?.share_of_total_percent || 0),
+      amount: parseFloat(item?.amount || 0)
+    })) || []
 
-          <Pie
-            data={data}
-            cx='20%'
-            cy='50%'
-            innerRadius='50%'
-            outerRadius='80%'
-            dataKey='value'
-            label
-            paddingAngle={1}
-          >
-            {data.map((_, index) => (
-              <Cell key={index} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip />
-        </PieChart>
-      </ResponsiveContainer>
-    </CardContent>
-  </Card>
-)
+  const theme = useTheme()
+
+  const isXs = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMd = useMediaQuery(theme.breakpoints.between('sm', 'md'))
+  const isLg = useMediaQuery(theme.breakpoints.up('md'))
+
+  // Adjust Pie radii based on screen size
+  let innerRadius = '35%'
+  let outerRadius = '60%'
+  if (isXs) {
+    innerRadius = '25%'
+    outerRadius = '45%'
+  } else if (isMd) {
+    innerRadius = '30%'
+    outerRadius = '55%'
+  } else if (isLg) {
+    innerRadius = '35%'
+    outerRadius = '60%'
+  }
+
+  return (
+    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <CardContent sx={{ flex: 1 }}>
+        <Typography variant='h6' mb={2}>
+          Expense Breakdown (as % of total)
+        </Typography>
+
+        <Box sx={{ width: '100%', height: 320 }}>
+          <ResponsiveContainer>
+            <PieChart>
+              <Pie
+                data={chartData}
+                cx='50%'
+                cy='50%'
+                innerRadius={innerRadius}
+                outerRadius={outerRadius}
+                cornerRadius={6}
+                dataKey='value'
+                paddingAngle={2}
+              >
+                {chartData.map((_: any, index: any) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                    stroke='#fefefe'
+                    strokeWidth={1}
+                  />
+                ))}
+              </Pie>
+
+              <Legend
+                verticalAlign='middle'
+                align='right'
+                layout='vertical'
+                iconType='circle'
+                formatter={(value: string) => {
+                  const percentage = chartData
+                    .find((d: any) => d.name === value)
+                    ?.value?.toFixed(1)
+                  return `${value} (${percentage}%)`
+                }}
+                wrapperStyle={{
+                  paddingLeft: '10px',
+                  width: isXs ? '35%' : '40%',
+                  fontSize: '0.9rem',
+                  lineHeight: '1.5'
+                }}
+              />
+
+              <Tooltip
+                formatter={(value: number, name: string, props: any) => {
+                  const { payload } = props
+                  return [
+                    `  ${payload.amount?.toLocaleString?.() ?? 0} (${value.toFixed(2)}%)`,
+                    name
+                  ]
+                }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </Box>
+      </CardContent>
+    </Card>
+  )
+}
 
 export default ExpenseBreakdownChart

@@ -201,7 +201,7 @@ export default function UploadQueue() {
                 {file.status === 'completed' && 'Completed ✅'}
               </Typography>
 
-              {file.status !== 'completed' && (
+              {file.status !== 'completed' && !loading && (
                 <IconButton
                   onClick={() => dispatch(removeFile(file.id))}
                   size='small'

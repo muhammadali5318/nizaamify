@@ -32,7 +32,7 @@ const UploadDocuments = () => {
   }
 
   return (
-    <div>
+    <Box sx={{ width: { xs: '99%', sm: '94%', md: '94%', lg: '96%' } }}>
       <ManualEntryCard onClick={handleManualEntryClick} />
 
       <Box className={styles.uploadSection}>
@@ -43,7 +43,7 @@ const UploadDocuments = () => {
           fileInfoText='Maximum 10MB each — Supported: .CSV, .PDF, .PNG, .JPG'
           maxFiles={5}
           fileCount={files.length}
-          isProcessingComplete={completedFiles.length > 0 && hasBatches}
+          isProcessingComplete={completedFiles.length > 0 || hasBatches}
           completedView={<ProcessingCompletedList />}
           onFilesSelected={handleFilesSelected}
           uploadIcon={uploadIcon}
@@ -53,7 +53,7 @@ const UploadDocuments = () => {
       </Box>
 
       <UploadCategories />
-    </div>
+    </Box>
   )
 }
 

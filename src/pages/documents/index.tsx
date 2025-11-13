@@ -67,7 +67,8 @@ const DocumentsPage: React.FC = () => {
               textAlign: { xs: 'center', md: 'left' },
               color: '#01579B',
               backgroundColor: '#F2F9FC',
-              width: { xs: '86%', sm: '94%', md: '94%' },
+              width: { xs: '96%', sm: '94%', md: '94%', lg: '96%' },
+              marginLeft: '0px',
               border: '1px solid #0288D1',
               borderRadius: '16px'
             }}
@@ -124,15 +125,18 @@ const DocumentsPage: React.FC = () => {
             )}
           </Box>
 
-          <Stack
-            direction={{ xs: 'column', md: 'row' }}
-            spacing={{ xs: 2, md: 3 }}
-            justifyContent='center'
+          <Box
+            flexDirection={{ xs: 'column', md: 'row', lg: 'row' }}
+            gap={{ xs: 2, md: 3 }}
+            justifyContent={{
+              xs: 'flex-start',
+              md: 'flex-start',
+              lg: 'flex-start'
+            }}
             alignItems='center'
             className={styles.statsWrapper}
             sx={{
-              px: { xs: 2, md: 4 },
-              mt: { xs: 2, md: 3 }
+              width: { xs: '96%', sm: '100%', md: '99%', lg: '96%' }
             }}
           >
             <StatsCard
@@ -153,7 +157,7 @@ const DocumentsPage: React.FC = () => {
               value={stats.review}
               sx={{ minHeight: '17vh' }}
             />
-          </Stack>
+          </Box>
 
           <Box /* tabs wrapper props */>
             <ReusableTabs tabs={tabs} initialTab={documentsTabsData[0].key} />

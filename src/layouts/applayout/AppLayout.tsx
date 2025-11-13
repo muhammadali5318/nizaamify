@@ -170,7 +170,6 @@ export default function AppLayout() {
                   isOnboardingCompleted
                 )
 
-                // console.log(item)
                 if (state === 'hidden') return null
 
                 const showTooltip = !showLabels
