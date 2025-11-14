@@ -20,9 +20,7 @@ export type ArchiveStepRenderControls = {
 }
 
 export type ArchiveStepItem = {
-  // text shown under the stepper circle (desktop)
   label: string
-  // either provide `render` for full control, or `Component` + optional `componentProps`
   render?: (controls: ArchiveStepRenderControls) => React.ReactNode
   Component?: React.ComponentType<any>
   componentProps?: Record<string, any>
@@ -32,7 +30,6 @@ interface ArchivePracticeProps {
   open: boolean
   onClose: () => void
   steps: ArchiveStepItem[]
-  // optional starting step
   initialStep?: number
 }
 
@@ -94,7 +91,6 @@ export default function ArchivePractice({
           >
             {steps.map((s, idx) => (
               <Step key={`${s.label}-${idx}`}>
-                {/* Desktop label */}
                 <StepLabel
                   sx={{
                     display: { xs: 'none', sm: 'flex' }
@@ -103,7 +99,6 @@ export default function ArchivePractice({
                   {s.label}
                 </StepLabel>
 
-                {/* Mobile label (hidden text node so the step circle stays aligned) */}
                 <StepLabel
                   sx={{
                     display: { xs: 'block', sm: 'none' }
@@ -118,13 +113,11 @@ export default function ArchivePractice({
           {steps.map((s, idx) => {
             if (idx !== activeStep) return null
 
-            // prefer `render` if provided (gives full control)
             if (s.render)
               return (
                 <React.Fragment key={idx}>{s.render(controls)}</React.Fragment>
               )
 
-            // otherwise, render `Component` if provided and pass helpful controls and any custom props
             if (s.Component) {
               const Component = s.Component
               return (
@@ -136,7 +129,6 @@ export default function ArchivePractice({
               )
             }
 
-            // fallback: show nothing
             return null
           })}
         </Box>

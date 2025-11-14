@@ -41,13 +41,7 @@ export type AllPracticesDataObject = {
   onboarding_status?: string
 }
 
-interface PracticeSelectorProps {
-  showLabels: boolean
-}
-
-export default function PracticeSelector({
-  showLabels
-}: PracticeSelectorProps) {
+export default function PracticeSelector() {
   const { accessToken } = useAuth()
   const dispatch = useDispatch()
   const { isUserOwnerOrDirector } = useUserDetails()
@@ -146,6 +140,14 @@ export default function PracticeSelector({
       <FormControl className={styles.muiSelectForm} fullWidth>
         <Select
           value={selectedPractice?.id ?? ''}
+          SelectDisplayProps={{
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              overflow: 'hidden' // ensure the display container doesn't push children out
+            }
+          }}
+          MenuProps={{ disablePortal: false }}
           onChange={(e) => {
             const selected =
               practices.find((p) => p.id === e.target.value) || null
@@ -161,27 +163,49 @@ export default function PracticeSelector({
             pl: 2,
             '& .MuiOutlinedInput-notchedOutline': { borderRadius: '16px' },
             '& .MuiSelect-icon': { right: 0 },
-            '& .MuiSelect-select': { py: 1 }
+            '& .MuiSelect-select': {
+              py: 1,
+              pr: 5,
+              display: 'block',
+              whiteSpace: 'normal',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }
           }}
           renderValue={() => (
-            <Stack padding={'0px'}>
+            <Stack direction='column' spacing={0} sx={{ minWidth: 0 }}>
+              {/* Practice name */}
               <Typography
                 variant='subtitle2'
-                sx={{ display: showLabels ? 'inline' : 'none' }}
+                noWrap
+                sx={{
+                  display: 'block',
+                  fontWeight: 700,
+                  maxWidth: { xs: '140px', sm: '240px' },
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
               >
                 {selectedPractice?.practice_name || 'Select practice'}
               </Typography>
 
               <Typography
-                variant='subtitle2'
-                sx={{ display: showLabels ? 'inline' : 'none' }}
+                variant='caption'
+                noWrap
+                sx={{
+                  maxWidth: { xs: '140px', sm: '240px' },
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
                 color={
                   selectedPractice?.onboarding_status !== 'COMPLETED'
                     ? 'error.light'
                     : 'success.light'
                 }
                 fontWeight={700}
-                fontStyle={'italic'}
+                fontStyle='italic'
               >
                 {selectedPractice?.onboarding_status !== 'COMPLETED'
                   ? 'Pending onboarding'

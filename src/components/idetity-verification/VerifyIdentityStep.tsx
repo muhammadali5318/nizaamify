@@ -68,7 +68,11 @@ export function VerifyIdentityStep({
           )}
         />
 
-        <Box display={'flex'} gap={1.2}>
+        <Box
+          display={'flex'}
+          gap={1.2}
+          flexDirection={{ xs: 'column', sm: 'row' }}
+        >
           <Button fullWidth variant='outlined' onClick={onCancel}>
             Cancel
           </Button>
@@ -79,7 +83,7 @@ export function VerifyIdentityStep({
             type='submit'
             disabled={!isValid}
           >
-            Verify & continue{' '}
+            Verify & continue
           </Button>
         </Box>
       </Stack>

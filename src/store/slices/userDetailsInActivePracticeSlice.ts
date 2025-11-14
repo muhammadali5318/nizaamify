@@ -3,9 +3,9 @@ import { RootState } from '../store'
 
 // --- Types ---
 export interface Permission {
-  id: string
+  id: string | number
   name: string
-  is_active: boolean
+  is_active: boolean | null
 }
 
 export interface Role {
