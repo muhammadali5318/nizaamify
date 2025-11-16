@@ -195,6 +195,7 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
           Array.isArray(fetchedUploadedBy) ? fetchedUploadedBy : []
         }
         isUploadedByLoading={isUploadedByLoading}
+        onClearFilters={clearFilters}
       />
 
       <DocumentsTable
@@ -212,7 +213,7 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
         onClearFilters={clearFilters}
         searchKey={filters.searchKey}
         isAnyFilterApplied={isAnyFilterApplied}
-        isPendingDocments={isPendingDocments}
+        // isPendingDocments={isPendingDocments}
       />
 
       <AddPaymentDateModal
