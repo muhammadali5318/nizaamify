@@ -86,7 +86,8 @@
 
   @media (max-width: 600px) {
     flex-direction: column;
-    padding: 12px;
+    padding: 6px;
+    min-width: 20rem;
   }
 }
 

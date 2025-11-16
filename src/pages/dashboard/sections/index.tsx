@@ -40,13 +40,13 @@ const MainDashboard = () => {
         break
 
       case '3-month view':
-        startDate = endDate.subtract(3, 'month').startOf('month')
+        startDate = endDate.subtract(2, 'month').startOf('month')
         granularity = 'quarter'
         month = startDate.month() + 1
         break
 
       case 'Yearly':
-        startDate = endDate.subtract(12, 'month').startOf('year')
+        startDate = endDate.subtract(0, 'month').startOf('year')
         granularity = 'year'
         month = null
         break

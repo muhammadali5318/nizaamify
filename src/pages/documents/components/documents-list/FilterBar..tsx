@@ -11,7 +11,8 @@ import {
   Checkbox,
   ListItemText,
   InputAdornment,
-  IconButton
+  IconButton,
+  Button
 } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { debounce } from 'lodash'
@@ -21,7 +22,7 @@ import {
   CATEGORY_OPTIONS,
   DOCUMENT_TYPE_OPTIONS
 } from '../../config/documentsConfig'
-
+import CloseIcon from '@mui/icons-material/Close'
 export interface FilterState {
   searchKey: string
   categories: string[]
@@ -36,11 +37,13 @@ const FilterBar: React.FC<{
   onChange: (next: Partial<FilterState>) => void
   uploadedByOptions?: string[]
   isUploadedByLoading?: boolean
+  onClearFilters?: () => void // Prop to handle clear filters
 }> = ({
   value,
   onChange,
   uploadedByOptions = [],
-  isUploadedByLoading = false
+  isUploadedByLoading = false,
+  onClearFilters
 }) => {
   const {
     searchKey = '',
@@ -94,6 +97,13 @@ const FilterBar: React.FC<{
     setLocalSearch('')
     onChange({ searchKey: '' })
   }, [debouncedUpdateSearch, onChange])
+
+  // Handle clear filters logic
+  const handleClearFilters = () => {
+    if (onClearFilters) {
+      onClearFilters()
+    }
+  }
 
   return (
     <Box
@@ -252,6 +262,19 @@ const FilterBar: React.FC<{
         value={dateRange}
         onChange={(next) => onChange({ dateRange: next })}
       />
+
+      {/* Clear Filters Button */}
+      <Box>
+        <Button
+          startIcon={<CloseIcon />}
+          variant='text'
+          color='primary'
+          onClick={handleClearFilters}
+          sx={{ minWidth: 120 }}
+        >
+          Clear Filters
+        </Button>
+      </Box>
     </Box>
   )
 }

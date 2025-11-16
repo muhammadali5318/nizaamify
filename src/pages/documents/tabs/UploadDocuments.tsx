@@ -32,7 +32,7 @@ const UploadDocuments = () => {
   }
 
   return (
-    <Box sx={{ width: { xs: '99%', sm: '94%', md: '94%', lg: '96%' } }}>
+    <Box sx={{ width: { xs: '100%', sm: '94%', md: '94%', lg: '96%' } }}>
       <ManualEntryCard onClick={handleManualEntryClick} />
 
       <Box className={styles.uploadSection}>

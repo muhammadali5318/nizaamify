@@ -92,7 +92,12 @@ export default function ProcessingCompletedList() {
     setSuccessOpen(false)
   }
   return (
-    <Box sx={{ width: { xs: '99%', sm: '96%', md: '94%', lg: '96%' } }}>
+    <Box
+      sx={{
+        width: { xs: '100%', sm: '96%', md: '94%', lg: '96%' },
+        minWidth: '19rem'
+      }}
+    >
       <Box
         display='flex'
         flexDirection={{ xs: 'column', sm: 'row' }}
