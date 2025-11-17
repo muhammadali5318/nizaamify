@@ -27,6 +27,9 @@ import { setMergedPermissionsByCategory } from 'src/store/slices/userDetailsInAc
 import { ALL_PERMISSIONS } from 'src/const'
 import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
 import { notify } from 'src/components/notistack/NotificationProvider'
+import { clearAll } from 'src/store/slices/processedBatchDataSlice'
+import { clearFiles } from 'src/store/slices/uploadSlice'
+import { clearPresignData } from 'src/store/slices/presignedSlice'
 
 interface PracticeDetailsCardProps {
   status?: 'active' | 'inactive' | 'archived'
@@ -133,6 +136,9 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
   const handleSwitchToPractice = useCallback(() => {
     setActiveById(practice?.id, allPractices)
     dispatch(setMergedPermissionsByCategory(ALL_PERMISSIONS))
+    dispatch(clearAll())
+    dispatch(clearFiles())
+    dispatch(clearPresignData())
     notify.success('Switched to ' + practice?.practice_name)
   }, [practice, setActiveById, allPractices, dispatch])
 

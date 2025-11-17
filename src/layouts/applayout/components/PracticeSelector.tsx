@@ -27,6 +27,9 @@ import { ALL_PERMISSIONS } from 'src/const'
 import useUserDetails from 'src/hooks/useUserDetails'
 import { deepEqual } from 'src/utils/objectsUtils'
 import { notify } from 'src/components/notistack/NotificationProvider'
+import { clearAll } from 'src/store/slices/processedBatchDataSlice'
+import { clearPresignData } from 'src/store/slices/presignedSlice'
+import { clearFiles } from 'src/store/slices/uploadSlice'
 
 export type AllPracticesDataObject = {
   id: string
@@ -152,6 +155,9 @@ export default function PracticeSelector() {
             const selected =
               practices.find((p) => p.id === e.target.value) || null
             dispatch(setMergedPermissionsByCategory(ALL_PERMISSIONS))
+            dispatch(clearAll())
+            dispatch(clearFiles())
+            dispatch(clearPresignData())
             setSelectedPractice(selected)
             setActiveById(selected?.id ?? '', practices)
             notify.success('Switched to ' + selected?.practice_name)
