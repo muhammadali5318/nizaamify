@@ -7,7 +7,10 @@ import AdaptiveStepper from 'src/components/common/AdaptiveStepper'
 import SignupStepOne from './components/SignupStepOne'
 import SignupStepTwo from './components/SignupStepTwo'
 import SignupStepThree from './components/SignupStepThree'
-import { generatePayloadForSignUp, steps } from './signUp-config'
+import {
+  generatePayloadForSignUp,
+  steps as defaultSteps
+} from './signUp-config'
 import SendVerificationEmail from './components/SendVerificationEmail'
 import RegistrationHeader from 'src/components/registration-wrapper/RegistrationHeader'
 import { SignupFormDataSet, SetFormDataSet } from './types'
@@ -17,6 +20,7 @@ import { sendVerificationEmail } from 'src/services/auth/emailVerification'
 import RequestPracticeAssociation from './components/RequestPracticeAssociation/RequestPracticeAssociation'
 import { useSearchParams } from 'react-router'
 import SignupStepFour from './components/SignupStepFour'
+import { CONFIG } from 'src/config-global'
 
 const initialFormData: SignupFormDataSet = {
   firstName: '',
@@ -51,10 +55,14 @@ export type AssociationPayload = {
 }
 
 const SignUp: React.FC = () => {
+  const steps =
+    CONFIG.envName === 'dev' ? defaultSteps : defaultSteps.slice(0, -1)
   const [searchParams] = useSearchParams()
   const step = Number(searchParams.get('step') ?? 0)
 
   const [activeStep, setActiveStep] = useState<number>(step)
+  const [newlyCreatedPracticeId, setNewlyCreatedPracticeId] =
+    useState<string>('')
   const [formData, setFormDataState] =
     useState<SignupFormDataSet>(initialFormData)
 
@@ -133,7 +141,12 @@ const SignUp: React.FC = () => {
       const response = await apiClientOpen.post(createUser, payload)
       if (response.status === 201) {
         setActiveStep(4)
-        sendVerificationEmail({ email: finalForm?.email })
+        const id = response?.data?.data?.practice?.id
+        setNewlyCreatedPracticeId(id)
+        sendVerificationEmail({
+          email: finalForm?.email,
+          practiceId: id
+        })
       }
     } catch (err: any) {
       const respData = err?.error
@@ -275,7 +288,10 @@ const SignUp: React.FC = () => {
 
   if (activeStep === 4) {
     return (
-      <SendVerificationEmail email={formData.email || 'user@example.com'} />
+      <SendVerificationEmail
+        email={formData.email || 'user@example.com'}
+        pracitceId={newlyCreatedPracticeId}
+      />
     )
   }
 

@@ -4,7 +4,7 @@ import { endpoints } from 'src/services/backendUrl'
 
 const { verifyEmail } = endpoints.signup
 
-type Payload = { email?: string; auth0Id?: string }
+type Payload = { email?: string; auth0Id?: string; practiceId?: string }
 
 /**
  * Send verification request using either email or auth0Id.
@@ -12,14 +12,17 @@ type Payload = { email?: string; auth0Id?: string }
  */
 export const sendVerificationEmail = async ({
   email,
-  auth0Id
+  auth0Id,
+  practiceId
 }: Payload): Promise<boolean> => {
   if (!auth0Id && !email) {
     console.error('sendVerificationEmail: missing email and auth0Id')
     return false
   }
 
-  const body = auth0Id ? { auth0_id: auth0Id } : { email }
+  const body = auth0Id
+    ? { auth0_id: auth0Id }
+    : { email, practice_id: practiceId }
 
   try {
     await apiClientOpen.post(verifyEmail, body)

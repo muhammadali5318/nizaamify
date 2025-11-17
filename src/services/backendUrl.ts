@@ -19,6 +19,9 @@ export const endpoints = {
     createUser: `${API_BASE}/users/signup/`,
     verifyEmail: `${API_BASE}/users/verify-email/`
   },
+  subscription: {
+    checkoutUrl: `${API_BASE}/users/signup/subscription/`
+  },
   userInvitation: (id: string) => `${API_BASE}/practices/${id}/invite/`,
   currentPractice: (id: string) => `${API_BASE}/practices/${id}/`,
   listAllPractices: (userId: string) =>

@@ -24,12 +24,12 @@ import { useActivePractice } from 'src/hooks/useActivePractice'
 import { useDispatch } from 'react-redux'
 import { setMergedPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
 import { ALL_PERMISSIONS } from 'src/const'
-import useUserDetails from 'src/hooks/useUserDetails'
 import { deepEqual } from 'src/utils/objectsUtils'
 import { notify } from 'src/components/notistack/NotificationProvider'
 import { clearAll } from 'src/store/slices/processedBatchDataSlice'
 import { clearPresignData } from 'src/store/slices/presignedSlice'
 import { clearFiles } from 'src/store/slices/uploadSlice'
+import { CONFIG } from 'src/config-global'
 
 export type AllPracticesDataObject = {
   id: string
@@ -45,9 +45,9 @@ export type AllPracticesDataObject = {
 }
 
 export default function PracticeSelector() {
+  const readOnlySelect = CONFIG.envName === 'dev' ? false : true
   const { accessToken } = useAuth()
   const dispatch = useDispatch()
-  const { isUserOwnerOrDirector } = useUserDetails()
   const { data: rawPractices } = useFetchAllPracticesData(!!accessToken)
 
   const practices: AllPracticesDataObject[] = Array.isArray(rawPractices)
@@ -147,11 +147,12 @@ export default function PracticeSelector() {
             style: {
               display: 'flex',
               alignItems: 'center',
-              overflow: 'hidden' // ensure the display container doesn't push children out
+              overflow: 'hidden'
             }
           }}
           MenuProps={{ disablePortal: false }}
           onChange={(e) => {
+            if (readOnlySelect) return
             const selected =
               practices.find((p) => p.id === e.target.value) || null
             dispatch(setMergedPermissionsByCategory(ALL_PERMISSIONS))
@@ -266,9 +267,9 @@ export default function PracticeSelector() {
             </MenuItem>
           )}
 
-          {isUserOwnerOrDirector && <Divider />}
+          {!readOnlySelect && <Divider />}
 
-          {isUserOwnerOrDirector && (
+          {!readOnlySelect && (
             <MenuItem sx={{ padding: '0px 10px' }}>
               <Box
                 onMouseDown={(e) => e.stopPropagation()}

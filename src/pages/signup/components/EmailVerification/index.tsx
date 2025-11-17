@@ -11,6 +11,7 @@ import EmailVerificationStatus from './EmailVerificationStatus'
 import { sendVerificationEmail } from 'src/services/auth/emailVerification'
 import HavingTrouble from 'src/components/contact-support/HavingTrouble'
 import ContactSupport from 'src/components/contact-support'
+import { CONFIG } from 'src/config-global'
 
 type VerificationStatus =
   | 'expired'
@@ -20,6 +21,7 @@ type VerificationStatus =
   | 'emailNotVerified'
   | 'requestThrottled'
   | 'accountDeactivated'
+  | 'subscribed'
 
 const EmailVerification: React.FC = () => {
   const location = useLocation()
@@ -29,6 +31,7 @@ const EmailVerification: React.FC = () => {
     'loading'
   )
   const [email, setEmail] = useState<string | null>(null)
+  const [practiceId, setPracticeId] = useState<string | null>(null)
   const [token, setToken] = useState<string | null>(null)
   const [auth0Id, setAuth0Id] = useState<string | null>(null)
   const [throttleMinutes, setThrottleMinutes] = useState<number | null>(null)
@@ -36,21 +39,24 @@ const EmailVerification: React.FC = () => {
   const [cooldown, setCooldown] = useState<number>(0)
   const [sending, setSending] = useState<boolean>(false)
   const intervalRef = useRef<number | null>(null)
-
+  // auth/subscribed?session_id=cs_test_a1jeHBsQ7FZW2MxNXQqP2GTxOzJbvolP5D9xXONG30UJX8O2GjHtcZBiLz
   useEffect(() => {
     // keep + signs intact
     const fixedSearch = location.search.replace(/\+/g, '%2B')
     const searchParams = new URLSearchParams(fixedSearch)
 
     const rawEmail = searchParams.get('email')
+    const rawPracticeId = searchParams.get('practice_id')
     const rawToken = searchParams.get('token')
     const rawAuth0Id = searchParams.get('auth0Id')
     const accountDeactivated = !!searchParams.get('accountDeactivated')
     const emailVerified = !!searchParams.get('emailVerified')
+    const sessionId = !!searchParams.get('session_id')
 
     setEmail(rawEmail)
     setToken(rawToken)
     setAuth0Id(rawAuth0Id)
+    setPracticeId(rawPracticeId)
 
     if (rawAuth0Id) {
       setStatus('emailNotVerified')
@@ -58,6 +64,8 @@ const EmailVerification: React.FC = () => {
       setStatus('accountDeactivated')
     } else if (emailVerified) {
       setStatus('congrats')
+    } else if (sessionId) {
+      setStatus('subscribed')
     }
   }, [location.search])
 
@@ -76,6 +84,7 @@ const EmailVerification: React.FC = () => {
       try {
         const response = await apiClientOpen.put(endpoints.signup.verifyEmail, {
           email,
+          practice_id: practiceId,
           token
         })
 
@@ -83,7 +92,15 @@ const EmailVerification: React.FC = () => {
           response.status === 200 &&
           response.data.message === 'Email has been verified successfully!'
         ) {
-          if (!cancelled) navigate('/auth/signup?step=7')
+          if (!cancelled) {
+            if (CONFIG.envName === 'dev') {
+              navigate(
+                `/auth/signup?step=7&practiceId=${practiceId}&email=${email}`
+              )
+            } else {
+              setStatus('congrats')
+            }
+          }
           return
         }
 
@@ -359,6 +376,11 @@ const EmailVerification: React.FC = () => {
           <Congratulations
             title='Account created successfully'
             message='Your Monai account has been created!'
+          />
+        ) : status === 'subscribed' ? (
+          <Congratulations
+            title='Congratulation!'
+            message='Your subscription plan has been subscribed!'
           />
         ) : null}
       </Box>

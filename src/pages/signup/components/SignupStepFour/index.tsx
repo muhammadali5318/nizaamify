@@ -35,6 +35,7 @@ const SignupStepFour = () => {
         <SignupSupscriptionCard
           mode='light'
           title='Free trial'
+          planType='FREE TRIAL'
           subtitle='30 Days'
           buttonTitle='30 days free trial'
           price={0}
@@ -52,6 +53,7 @@ const SignupStepFour = () => {
         <SignupSupscriptionCard
           mode='dark'
           title='Professional plan'
+          planType='PROFESSIONAL'
           price={99}
           buttonTitle='Get started now'
           priceSuffix='/ Month'

@@ -10,6 +10,7 @@ import ContactSupport from 'src/components/contact-support'
 
 type Props = {
   email: string
+  pracitceId: string
 }
 
 const COOLDOWN_SECONDS = 60
@@ -24,7 +25,7 @@ function formatSecondsAsMMSS(seconds: number) {
   return `${mm}:${ss}`
 }
 
-const SendVerificationEmail: React.FC<Props> = ({ email }) => {
+const SendVerificationEmail: React.FC<Props> = ({ email, pracitceId }) => {
   const [remaining, setRemaining] = useState<number>(COOLDOWN_SECONDS)
   const [loading, setLoading] = useState<boolean>(false)
 
@@ -83,7 +84,7 @@ const SendVerificationEmail: React.FC<Props> = ({ email }) => {
 
     setLoading(true)
     try {
-      await sendVerificationEmail({ email: email })
+      await sendVerificationEmail({ email: email, practiceId: pracitceId })
       startTimer(COOLDOWN_SECONDS)
       notify?.success?.('A new verification email has been sent to your inbox.')
     } catch (err) {
@@ -92,7 +93,7 @@ const SendVerificationEmail: React.FC<Props> = ({ email }) => {
     } finally {
       if (mountedRef.current) setLoading(false)
     }
-  }, [email, loading, remaining, startTimer])
+  }, [email, loading, remaining, startTimer, pracitceId])
 
   const disabled = loading || remaining > 0
 

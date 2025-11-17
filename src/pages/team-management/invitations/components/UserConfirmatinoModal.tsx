@@ -126,7 +126,7 @@ const UserConfirmationModal: React.FC<ConfirmUserModalProps> = React.memo(
     return (
       <Dialog
         open={open}
-        onClose={onClose}
+        onClose={mode === 'CHOOSE_PACKAGE_LATER' ? undefined : onClose}
         maxWidth='sm'
         fullWidth
         slotProps={{
