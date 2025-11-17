@@ -8,6 +8,7 @@ import processedReducer from './slices/processedBatchDataSlice'
 import { activePracticeReducer } from './slices/activePracticeSlice'
 import userDetailsInActivePracticeReducer from 'src/store/slices/userDetailsInActivePracticeSlice'
 import selectedUserReducer from './slices/team-management/selectedUserSlice'
+import pollingJobsReducer from './slices/pollingJobSlice'
 
 const rootReducer = combineReducers({
   uploads: uploadReducer,
@@ -16,13 +17,21 @@ const rootReducer = combineReducers({
   processed: processedReducer,
   activePractice: activePracticeReducer,
   userDetailsInActivePractice: userDetailsInActivePracticeReducer,
-  selectedUser: selectedUserReducer
+  selectedUser: selectedUserReducer,
+  pollingJobs: pollingJobsReducer
 })
 
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['processed', 'activePractice', 'selectedUser']
+  whitelist: [
+    'processed',
+    'activePractice',
+    'selectedUser',
+    'processing',
+    'uploads',
+    'pollingJobs'
+  ]
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)

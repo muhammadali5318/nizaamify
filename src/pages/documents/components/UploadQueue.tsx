@@ -73,6 +73,9 @@ export default function UploadQueue() {
   }
 
   if (files.length === 0) return null
+  const hasProcessingOrCompleted = files.some(
+    (f) => f.status === 'processing' || f.status === 'completed'
+  )
 
   return (
     <Box mt={3}>
@@ -89,23 +92,30 @@ export default function UploadQueue() {
           Upload queue ({files.length}/5)
         </Typography>
 
-        <Button
-          sx={{
-            background: '#2E7D32',
-            color: '#fff',
-            borderRadius: '12px',
-            textTransform: 'none',
-            '&:hover': { background: '#256528' }
-          }}
-          startIcon={
-            <img src={processingIcon} alt='Processing' width={20} height={20} />
-          }
-          variant='contained'
-          disabled={loading}
-          onClick={handleStartProcessing}
-        >
-          {loading ? 'Processing...' : 'Start documents processing'}
-        </Button>
+        {!hasProcessingOrCompleted && (
+          <Button
+            sx={{
+              background: '#2E7D32',
+              color: '#fff',
+              borderRadius: '12px',
+              textTransform: 'none',
+              '&:hover': { background: '#256528' }
+            }}
+            startIcon={
+              <img
+                src={processingIcon}
+                alt='Processing'
+                width={20}
+                height={20}
+              />
+            }
+            variant='contained'
+            disabled={loading}
+            onClick={handleStartProcessing}
+          >
+            {loading ? 'Processing...' : 'Start documents processing'}
+          </Button>
+        )}
       </Box>
 
       {files.some((f) => f.status === 'queued') && (
@@ -201,15 +211,17 @@ export default function UploadQueue() {
                 {file.status === 'completed' && 'Completed ✅'}
               </Typography>
 
-              {file.status !== 'completed' && !loading && (
-                <IconButton
-                  onClick={() => dispatch(removeFile(file.id))}
-                  size='small'
-                  color='error'
-                >
-                  <CancelOutlinedIcon />
-                </IconButton>
-              )}
+              {file.status !== 'completed' &&
+                file.status !== 'processing' &&
+                !loading && (
+                  <IconButton
+                    onClick={() => dispatch(removeFile(file.id))}
+                    size='small'
+                    color='error'
+                  >
+                    <CancelOutlinedIcon />
+                  </IconButton>
+                )}
             </Box>
           </Box>
 
