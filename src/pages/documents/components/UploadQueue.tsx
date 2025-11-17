@@ -74,7 +74,10 @@ export default function UploadQueue() {
 
   if (files.length === 0) return null
   const hasProcessingOrCompleted = files.some(
-    (f) => f.status === 'processing' || f.status === 'completed'
+    (f) =>
+      f.status === 'processing' ||
+      f.status === 'completed' ||
+      f.status === 'uploading'
   )
 
   return (
