@@ -5,16 +5,32 @@ import { notify } from '../components/notistack/NotificationProvider'
 import { addOrUpdateProcessedBatchStatus } from '../store/slices/processedBatchDataSlice'
 import { addOrUpdateBatchStatus } from 'src/store/slices/processingSlice'
 
+import {
+  addPollingJob,
+  removePollingJob
+} from '../store/slices/pollingJobSlice'
+
 export const pollBatchStatusUntilComplete = async (
   batchId: string,
   key: string,
   filename: string,
   userId: string,
   practiceId: string,
-  maxAttempts: number = 60,
+  maxAttempts: number = 120,
   pollInterval: number = 3000
 ) => {
   try {
+    store.dispatch(
+      addPollingJob({
+        batchId,
+        key,
+        filename,
+        userId,
+        practiceId,
+        startedAt: Date.now()
+      })
+    )
+
     const triggerRes = await triggerProcessAPI(
       batchId,
       key,
@@ -106,6 +122,7 @@ export const pollBatchStatusUntilComplete = async (
         )
 
         if (allProcessed) {
+          store.dispatch(removePollingJob(batchId))
           return batchData
         }
       } catch (batchErr) {
@@ -118,19 +135,23 @@ export const pollBatchStatusUntilComplete = async (
         )
       }
 
-      // Wait before next attempt
       await new Promise((resolve) => setTimeout(resolve, pollInterval))
     }
 
-    // ❌ Step 3: If max attempts reached, stop and notify
     notify.error(
       `Polling stopped for ${filename}: exceeded ${maxAttempts} attempts without completion`
     )
+
+    store.dispatch(removePollingJob(batchId))
+
     throw new Error(
       `Max polling attempts (${maxAttempts}) reached for ${filename}`
     )
   } catch (err) {
     console.error(`Error in pollBatchStatusUntilComplete for ${filename}:`, err)
+
+    store.dispatch(removePollingJob(batchId))
+
     notify.error(`Processing failed for ${filename}`)
     throw err
   }

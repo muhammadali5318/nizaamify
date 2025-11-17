@@ -12,6 +12,7 @@ import { handleFileUpload } from 'src/utils/handleFileUpload'
 import ProcessingCompletedList from '../components/ProcessingCompletedList'
 import uploadIcon from '../../../assets/upload-box-icon.svg'
 import fileimage from '../../../assets/upload-file-combined-icon.svg'
+import { useResumePolling } from 'src/utils/autoResumePollingJob'
 const UploadDocuments = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -31,6 +32,8 @@ const UploadDocuments = () => {
     navigate('manual-entry')
   }
 
+  useResumePolling()
+
   return (
     <Box sx={{ width: { xs: '100%', sm: '94%', md: '94%', lg: '96%' } }}>
       <ManualEntryCard onClick={handleManualEntryClick} />
@@ -49,7 +52,7 @@ const UploadDocuments = () => {
           uploadIcon={uploadIcon}
           fileTypeIcon={fileimage}
         />
-        <UploadQueue />
+        {completedFiles.length > 0 || hasBatches ? '' : <UploadQueue />}
       </Box>
 
       <UploadCategories />
