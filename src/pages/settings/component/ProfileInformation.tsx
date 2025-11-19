@@ -12,16 +12,23 @@ import parsePhoneNumberFromString from 'libphonenumber-js'
 import { notify } from 'src/components/notistack/NotificationProvider'
 import { queryClient } from 'src/utils/queryClient'
 import useUserDetails from 'src/hooks/useUserDetails'
+import { nameRegex } from 'src/const'
 
 const profileSchema = z.object({
   firstName: z
     .string()
     .nonempty('First name is required')
-    .max(148, 'Last name must be less than 149 characters'),
+    .min(2, 'First name must be at least 2 characters')
+    .max(50, 'First name must be under 50 characters')
+    .regex(nameRegex, 'First name contains invalid characters'),
+
   lastName: z
     .string()
     .nonempty('Last name is required')
-    .max(148, 'Last name must be less than 149 characters'),
+    .min(2, 'Last name must be at least 2 characters')
+    .max(50, 'Last name must be under 50 characters')
+    .regex(nameRegex, 'Last name contains invalid characters'),
+
   email: z
     .string()
     .nonempty('Email is required')

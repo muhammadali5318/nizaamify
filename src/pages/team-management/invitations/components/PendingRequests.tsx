@@ -16,8 +16,10 @@ import UserConfirmationModal, {
   UserConfirmationTypes
 } from './UserConfirmatinoModal'
 import { notify } from 'src/components/notistack/NotificationProvider'
+import { useHasPermission } from 'src/config/module-permissions'
 
 const PendingRequests = () => {
+  const canViewAndEditTeamMembers = useHasPermission('user.manage_users_roles')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<UserConfirmationTypes>('')
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
@@ -42,13 +44,18 @@ const PendingRequests = () => {
   } = useFetchSortedPaginatedData()
 
   // Fetch data
-  const { items, total, isLoading } = useFetchTeamMembers({
-    page,
-    pageSize,
-    user_practice_status: ['PENDING'],
-    ordering,
-    sortOrder
-  })
+  const { items, total, isLoading } = useFetchTeamMembers(
+    {
+      page,
+      pageSize,
+      user_practice_status: ['PENDING'],
+      ordering,
+      sortOrder
+    },
+    {
+      enabled: canViewAndEditTeamMembers
+    }
+  )
 
   const handlers = { onApprove: actionHandler, onReject: actionHandler }
 

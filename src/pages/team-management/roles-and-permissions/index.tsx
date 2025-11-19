@@ -5,9 +5,13 @@ import { TEAM_ROLES_MENU } from './role-and-permissions-config'
 import SidebarTabs from 'src/components/SidebarTabs/SidebarTabs'
 import { usePracticeRolesAndPermissions } from './hooks/usePracticeRolesAndPermissions'
 import PageHeader from 'src/components/page-header'
+import { useHasPermission } from 'src/config/module-permissions'
 
 const RolesPermissions: React.FC = () => {
-  const { isPending } = usePracticeRolesAndPermissions(true)
+  const canViewAndEditTeamMembers = useHasPermission('user.manage_users_roles')
+  const { isPending } = usePracticeRolesAndPermissions(
+    canViewAndEditTeamMembers
+  )
   const [active, setActive] = useState<string>(TEAM_ROLES_MENU[0].id)
   const activeItem: any | undefined = TEAM_ROLES_MENU.find(
     (m) => m.id === active
@@ -69,7 +73,9 @@ const RolesPermissions: React.FC = () => {
             }}
             className='roles-permissions__content'
           >
-            {isPending ? (
+            {!canViewAndEditTeamMembers ? (
+              <div>You don’t have permission to view this.</div>
+            ) : isPending ? (
               <CircularProgress />
             ) : (
               <Stack spacing={2.5} width={'100%'}>

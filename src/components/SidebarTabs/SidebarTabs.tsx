@@ -11,7 +11,12 @@ import {
 } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import { useHasPermission } from 'src/config/module-permissions'
+import {
+  evaluateIsModuleEnabled,
+  useHasPermission
+} from 'src/config/module-permissions'
+import { selectPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
+import { useSelector } from 'react-redux'
 
 type SidebarTabsProps = {
   menu: any[]
@@ -36,12 +41,19 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
   scrollAmount = 200
 }) => {
   const theme = useTheme()
-  // use 'sm' breakpoint so 600px+ keeps sidebar; <600px becomes top row
   const isSmUp = useMediaQuery(theme.breakpoints.up('sm'))
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const [showLeft, setShowLeft] = useState(false)
   const [showRight, setShowRight] = useState(false)
+
   const canEditPractice = useHasPermission('user.edit_practice_profile')
+  const permissionsByCategory = useSelector(selectPermissionsByCategory)
+
+  // module permission for subscription
+  const canViewSubscription = evaluateIsModuleEnabled(
+    permissionsByCategory,
+    'billing'
+  )
 
   const updateArrows = () => {
     const el = scrollRef.current
@@ -50,14 +62,16 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
       setShowRight(false)
       return
     }
-    // hide arrows for >= 600px (sidebar mode)
+
     if (isSmUp) {
       setShowLeft(false)
       setShowRight(false)
       return
     }
+
     const { scrollWidth, clientWidth, scrollLeft } = el
     const hasOverflow = scrollWidth > clientWidth + 1
+
     setShowLeft(hasOverflow && scrollLeft > 5)
     setShowRight(hasOverflow && scrollLeft + clientWidth < scrollWidth - 5)
   }
@@ -141,7 +155,6 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
         </IconButton>
       ) : null}
 
-      {/* Scroll container: row on xs (top), column on sm+ (sidebar) */}
       <Box
         ref={scrollRef}
         sx={{
@@ -166,16 +179,20 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
             flexDirection: { xs: 'row', sm: 'column' },
             flexWrap: 'nowrap',
             padding: 0,
-            // ensure horizontal list can overflow naturally on xs
             width: { xs: 0, sm: '100%' }
           }}
         >
           {menu.map((m) => {
             const isPracticeTab = m.id === 'practice'
+            const isSubscriptionTab = m.id === 'billing'
 
+            // 🔥 FINAL DISABLE LOGIC
             const isDisabled = isPracticeTab
               ? !onboardingCompleted || !canEditPractice
-              : false
+              : isSubscriptionTab
+                ? !canViewSubscription
+                : false
+
             return (
               <ListItemButton
                 key={m.id}

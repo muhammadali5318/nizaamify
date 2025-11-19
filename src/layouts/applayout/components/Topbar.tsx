@@ -20,6 +20,8 @@ import styles from './Topbar.module.scss'
 import { toTitleCase } from 'src/utils/stringUtils'
 import useUserDetails from 'src/hooks/useUserDetails'
 import { useLogout } from 'src/hooks/useLogout'
+import { useNavigate } from 'react-router'
+import { paths } from 'src/paths'
 
 type topbarProps = {
   title: string
@@ -40,9 +42,9 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
   anchorEl,
   open,
   onClose,
-  onLogout,
-  onSettings
+  onLogout
 }) => {
+  const navigate = useNavigate()
   const { email, userFullName, userRole } = useUserDetails()
 
   const handleListKeyDown = (e: React.KeyboardEvent) => {
@@ -113,7 +115,7 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                 <Box px={'6px'}>
                   <MenuItem
                     onClick={() => {
-                      onSettings()
+                      navigate(paths.settings)
                       onClose()
                     }}
                   >
@@ -122,7 +124,7 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                       Profile
                     </Typography>
                   </MenuItem>
-
+                  {/* 
                   <MenuItem
                     onClick={() => {
                       onSettings()
@@ -137,7 +139,7 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                     <Typography variant='body2' color='text.primary' pl={1}>
                       Account Settings
                     </Typography>
-                  </MenuItem>
+                  </MenuItem> */}
                 </Box>
 
                 <Divider sx={{ my: '8px' }} />

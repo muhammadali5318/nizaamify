@@ -20,6 +20,7 @@ import styles from './invitations.module.scss'
 import { useFetchSortedPaginatedData } from 'src/hooks/useFetchSortedData.'
 import PendingRequests from './components/PendingRequests'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import { useHasPermission } from 'src/config/module-permissions'
 
 const SentInvitations: React.FC = () => {
   const { activePracticeId } = useActivePractice()
@@ -38,6 +39,8 @@ const SentInvitations: React.FC = () => {
     sortOrder
   } = useFetchSortedPaginatedData()
 
+  const canViewAndEditTeamMembers = useHasPermission('user.manage_users_roles')
+
   // Local UI state
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
   const [localLoading, setLocalLoading] = useState(false)
@@ -50,13 +53,18 @@ const SentInvitations: React.FC = () => {
   })
 
   // Fetch data
-  const { items, total, isLoading } = useFetchTeamMembers({
-    page,
-    pageSize,
-    user_practice_status: ['INVITED', 'RESEND INVITE'],
-    ordering,
-    sortOrder
-  })
+  const { items, total, isLoading } = useFetchTeamMembers(
+    {
+      page,
+      pageSize,
+      user_practice_status: ['INVITED', 'RESEND INVITE'],
+      ordering,
+      sortOrder
+    },
+    {
+      enabled: canViewAndEditTeamMembers
+    }
+  )
 
   // Handlers
   const handleOpenSuccessDialog = () => setSuccessDialogOpen(true)
