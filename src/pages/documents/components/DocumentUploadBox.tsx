@@ -68,7 +68,16 @@ const FileUploadBox: React.FC<FileUploadBoxProps> = ({
   }
 
   if (isProcessingComplete && completedView) {
-    return <Box sx={{ mt: '20px', width: '72vw' }}>{completedView}</Box>
+    return (
+      <Box
+        sx={{
+          mt: '10px',
+          width: { xs: '96%', sm: '100%', md: '99%', lg: '99%' }
+        }}
+      >
+        {completedView}
+      </Box>
+    )
   }
 
   const limitReached = fileCount >= maxFiles
