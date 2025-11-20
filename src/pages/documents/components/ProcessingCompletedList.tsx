@@ -4,7 +4,8 @@ import {
   Card,
   CardContent,
   Button,
-  Divider
+  Divider,
+  CircularProgress
 } from '@mui/material'
 import aiIcon from '../../../assets/sparkles.svg'
 import editIcon from '../../../assets/message-edit.svg'
@@ -45,7 +46,7 @@ export default function ProcessingCompletedList() {
   )
   const { activePracticeId } = useActivePractice()
 
-  console.warn(activePracticeId)
+  console.warn(allDocuments)
   const handleEdit = (doc: any) => {
     setSelectedDoc(doc)
     setOpenModal(true)
@@ -94,7 +95,7 @@ export default function ProcessingCompletedList() {
   return (
     <Box
       sx={{
-        width: { xs: '100%', sm: '96%', md: '94%', lg: '96%' },
+        width: { xs: '100%', sm: '96%', md: '100%', lg: '100%' },
         minWidth: '19rem'
       }}
     >
@@ -177,61 +178,88 @@ export default function ProcessingCompletedList() {
             <Divider sx={{ my: 2 }} />
 
             {/* AI Summary Section */}
-            <Box>
-              <Typography
-                variant='subtitle2'
-                sx={{
-                  fontWeight: 600,
-                  mb: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  background: '#FAFAFA',
-                  padding: '0px 0px 0px 0px',
-                  borderRadius: '12px'
-                }}
-              >
-                <img src={aiIcon} alt='ai icon'></img> <p>AI summary</p>
-              </Typography>
-
+            {/* AI Summary Section */}
+            {doc.status === 'PENDING' ? (
+              // 🔵 Show loader if pending
               <Box
                 sx={{
-                  backgroundColor: '#F9FAFB',
-                  borderRadius: '8px',
-                  p: 2,
-                  border: '1px solid #E5E7EB',
-                  textAlign: 'left'
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  p: 4
                 }}
               >
-                <Typography variant='body2' fontWeight='600'>
-                  Document summary:
-                </Typography>
-                <Typography variant='body2' sx={{ mt: 0.5, color: '#374151' }}>
-                  Date on document:{' '}
-                  <strong>
-                    {dayjs(doc.document_date).format('DD-MM-YYYY') || '—'}
-                  </strong>{' '}
-                  &nbsp; | &nbsp; Document category:{' '}
-                  <strong>{doc.document_category || '—'}</strong> &nbsp; |
-                  &nbsp; Document type:{' '}
-                  <strong>{doc.document_type || '—'}</strong> &nbsp; | &nbsp;
-                  Document subtype:{' '}
-                  <strong>{doc.document_subtype || '—'}</strong>
-                </Typography>
-                <Divider sx={{ mt: '5px' }} />
-                <Typography
-                  variant='body2'
-                  fontWeight='600'
-                  sx={{ mt: 2, color: '#111827' }}
-                >
-                  Financial data summary:
-                </Typography>
-                <Typography variant='body2' sx={{ mt: 0.5, color: '#374151' }}>
-                  Extracted amount:{' '}
-                  <strong>£ {Number(doc.amount || 0).toLocaleString()}</strong>
-                </Typography>
+                <CircularProgress />
               </Box>
-            </Box>
+            ) : (
+              // ✅ Show AI summary if SUCCESS
+              <Box>
+                <Typography
+                  variant='subtitle2'
+                  sx={{
+                    fontWeight: 600,
+                    mb: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    background: '#FAFAFA',
+                    padding: '0px 0px 0px 0px',
+                    borderRadius: '12px'
+                  }}
+                >
+                  <img src={aiIcon} alt='ai icon'></img> <p>AI summary</p>
+                </Typography>
+
+                <Box
+                  sx={{
+                    backgroundColor: '#F9FAFB',
+                    borderRadius: '8px',
+                    p: 2,
+                    border: '1px solid #E5E7EB',
+                    textAlign: 'left'
+                  }}
+                >
+                  <Typography variant='body2' fontWeight='600'>
+                    Document summary:
+                  </Typography>
+                  <Typography
+                    variant='body2'
+                    sx={{ mt: 0.5, color: '#374151' }}
+                  >
+                    Date on document:{' '}
+                    <strong>
+                      {dayjs(doc.document_date).format('DD-MM-YYYY') || '—'}
+                    </strong>
+                    &nbsp; | &nbsp; Document category:{' '}
+                    <strong>{doc.document_category || '—'}</strong> &nbsp; |
+                    &nbsp; Document type:{' '}
+                    <strong>{doc.document_type || '—'}</strong> &nbsp; | &nbsp;
+                    Document subtype:{' '}
+                    <strong>{doc.document_subtype || '—'}</strong>
+                  </Typography>
+
+                  <Divider sx={{ mt: '5px' }} />
+
+                  <Typography
+                    variant='body2'
+                    fontWeight='600'
+                    sx={{ mt: 2, color: '#111827' }}
+                  >
+                    Financial data summary:
+                  </Typography>
+
+                  <Typography
+                    variant='body2'
+                    sx={{ mt: 0.5, color: '#374151' }}
+                  >
+                    Extracted amount:{' '}
+                    <strong>
+                      £ {Number(doc.amount || 0).toLocaleString()}
+                    </strong>
+                  </Typography>
+                </Box>
+              </Box>
+            )}
           </CardContent>
         </Card>
       ))}

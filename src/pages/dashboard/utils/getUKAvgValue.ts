@@ -44,6 +44,12 @@ export const getUKAvgValue = (
       MIXED: '12–22%',
       'NHS-DOMINANT': '8–16%',
       'SQUAT/START-UP': '0–10% → 8–15% by Y2'
+    },
+    'Business Operations': {
+      PRIVATE: '5–8%',
+      MIXED: '5–8%',
+      'NHS-DOMINANT': '4–7%',
+      'SQUAT/START-UP': '10–20%'
     }
   }
 
