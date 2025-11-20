@@ -69,10 +69,10 @@ const ExpandableBenchmarkTable = ({ data }: ExpandableBenchmarkTableProps) => {
                   Your practice value
                 </TableCell>
                 <TableCell sx={{ pt: 2 }} align='left'>
-                  Monai benchmarking
+                  UK Avg (NHS)
                 </TableCell>
                 <TableCell sx={{ pt: 2 }} align='left'>
-                  UK Avg (NHS)
+                  Monai benchmarking
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -141,10 +141,10 @@ const ExpandableRow = ({
         <TableCell align='left'>
           {parseFloat(row.share_of_total_percent).toFixed(2)}%
         </TableCell>
-        <TableCell align='left'>-</TableCell>
         <TableCell align='left'>
           {getUKAvgValue(row.expense_type, activePracticeType)}
         </TableCell>
+        <TableCell align='left'>-</TableCell>
       </TableRow>
 
       {/* Expanded Section with Header + Child Rows */}
@@ -179,8 +179,8 @@ const ExpandableRow = ({
                       <TableCell />
                       <TableCell>Subcategory</TableCell>
                       <TableCell align='right'>Your practice value</TableCell>
-                      <TableCell align='right'>Monai Benchmarking</TableCell>
                       <TableCell align='right'>UK Avg (NHS)</TableCell>
+                      <TableCell align='right'>Monai Benchmarking</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -195,16 +195,17 @@ const ExpandableRow = ({
                         <TableCell component='th' scope='row'>
                           {cat.expense_category}
                         </TableCell>
+
                         <TableCell align='right'>
                           {parseFloat(cat.share_of_total_percent).toFixed(2)}%
                         </TableCell>
-                        <TableCell align='right'>-</TableCell>
                         <TableCell align='right'>
                           {getUKAvgValue(
                             cat.expense_category,
                             activePracticeType
                           )}
                         </TableCell>
+                        <TableCell align='right'>-</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

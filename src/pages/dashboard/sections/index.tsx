@@ -161,14 +161,6 @@ const MainDashboard = () => {
                 year={year}
               />
             </Box>
-            {/* <Box flex={1.3}>
-              <ExpenseTrendChart
-                data={expenseData}
-                granularity={granularity}
-                month={month}
-                year={year}
-              />
-            </Box> */}
           </Box>
         )}
       </Box>
@@ -176,14 +168,6 @@ const MainDashboard = () => {
       {/* 4. Benchmark Table */}
 
       <Box display='flex' flexDirection={{ xs: 'column', md: 'row' }} gap={2}>
-        {/* <Box flex={1}>
-              <ExpenseBreakdownChart
-                data={expenseData}
-                granularity={granularity}
-                month={month}
-                year={year}
-              />
-            </Box> */}
         <Box flex={1.3}>
           <ExpenseTrendChart
             data={expenseData}
