@@ -93,41 +93,40 @@ export const CATEGORY_OPTIONS = [
 
 export const DOCUMENT_SUBTYPE_MAP: Record<string, string[]> = {
   'Income & Revenue': [
-    'Practice management reports',
     'Bank statements',
+    'Practice management reports',
     'Capitation scheme statements',
     'Subletting or rental income evidence'
   ],
-  'Staff Costs': [
-    'PAYE payslips',
-    'Associate invoices',
-    'Hygienist/Therapist invoices',
-    'Locum invoices'
-  ],
-  'Dental Labs & Materials': [
-    'Dental lab invoices',
-    'Supplier invoices',
-    'Manufacturer receipts'
-  ],
+  'Staff Costs': ['PAYE payslips', 'Staff Training', 'Locum invoices'],
+  'Clinician Costs': ['Associate invoices', 'Hygienist/Therapist invoices'],
+  Materials: ['Supplier invoices', 'Manufacturer receipts'],
+  'Lab Fees': ['Dental lab invoices'],
   'Premises & Equipment': [
+    'Cleaning',
+    'Utility Bills',
     'Lease/rent documents',
     'Business rates invoices',
-    'Utility Bills',
-    'Repairs or maintenance bills',
+    'Repairs or building maintenance bills',
     'Equipment purchases or leasing agreements'
   ],
   'Business Operations': [
+    'IT',
+    'Bank Charges',
+    'Clinical Waste',
     'Marketing invoices',
+    'Printing and Postage',
+    'CQC/GDC-related fees',
+    'Card Merchant Charges',
     'Software subscriptions',
     'Legal or accountancy fees',
     'Professional indemnity certificates',
-    'CQC/GDC-related fees',
     'Compliance-related invoices or documentation'
   ],
   'Tax Documents': [
-    'Corporation tax statements',
     'VAT returns',
     'HMRC communications',
+    'Corporation tax statements',
     'Accountant summaries or filings'
   ]
 }
