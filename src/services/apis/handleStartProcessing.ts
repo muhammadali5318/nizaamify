@@ -86,7 +86,7 @@ export const uploadFilesToS3 = async (
           } catch (processError) {
             console.error('Processing error:', processError)
             store.dispatch(updateStatus({ id: fileId, status: 'error' }))
-            notify.error(`Processing failed for ${filename}`)
+            console.error(`Processing failed for ${filename}`)
             queryClient.invalidateQueries({
               queryKey: ['uploadedDocumentListApi'],
               exact: false

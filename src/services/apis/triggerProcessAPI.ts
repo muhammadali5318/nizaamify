@@ -1,4 +1,4 @@
-import { notify } from 'src/components/notistack/NotificationProvider'
+// import { notify } from 'src/components/notistack/NotificationProvider'
 import apiClient from '../api-client'
 
 export const triggerProcessAPI = async (
@@ -25,6 +25,6 @@ export const triggerProcessAPI = async (
     return response.data
   } catch (error: any) {
     console.error('Error processing document:', error)
-    notify.error(`Failed to process ${name}`)
+    console.error(`Failed to process ${name}`)
   }
 }
