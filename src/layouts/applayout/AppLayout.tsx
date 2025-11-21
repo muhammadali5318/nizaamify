@@ -24,6 +24,7 @@ import PracticeSelector from './components/PracticeSelector'
 import { useSelector } from 'react-redux'
 import { selectPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import { useEffect, useRef } from 'react'
 
 export default function AppLayout() {
   const location = useLocation()
@@ -44,7 +45,7 @@ export default function AppLayout() {
 
   const [activeItem, setActiveItem] = React.useState<MenuItemData | null>(null)
 
-  React.useEffect(() => {
+  useEffect(() => {
     const stored = localStorage.getItem('drawerOpen')
     const parsed = stored ? JSON.parse(stored) : true
 
@@ -69,8 +70,31 @@ export default function AppLayout() {
     setMobileOpen((prev) => !prev)
   }
 
+  /**
+   * SCROLL / LAYOUT helpers
+   */
+
+  // a small utility that climbs parents and finds the first scrollable element.
+  function findScrollParent(el: HTMLElement | null): HTMLElement | Window {
+    if (!el) return window
+    let cur: HTMLElement | null = el
+    while (cur) {
+      const style = window.getComputedStyle(cur)
+      const overflowY = style.overflowY
+      const isScrollable =
+        (overflowY === 'auto' || overflowY === 'scroll') &&
+        cur.scrollHeight > cur.clientHeight
+      if (isScrollable) return cur
+      cur = cur.parentElement
+    }
+    return window
+  }
+
+  // ref for the outlet container (the element we want to be the scroller)
+  const outletRef = useRef<HTMLDivElement | null>(null)
+
   // Track active item based on route
-  React.useEffect(() => {
+  useEffect(() => {
     for (const section of menuSections) {
       const found = section.items.find((item) =>
         location.pathname.startsWith(item.to)
@@ -80,6 +104,46 @@ export default function AppLayout() {
         break
       }
     }
+  }, [location.pathname])
+
+  // disable native history scroll restoration (we manage it manually)
+  useEffect(() => {
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual'
+    }
+  }, [])
+
+  // Reset scroll on route change (robust: immediate, rAF, timeout)
+  useEffect(() => {
+    const scrollParent = findScrollParent(outletRef.current)
+
+    const doScrollTop = () => {
+      if (scrollParent === window) {
+        window.scrollTo(0, 0)
+      } else {
+        ;(scrollParent as HTMLElement).scrollTop = 0
+      }
+    }
+
+    // try immediately
+    doScrollTop()
+
+    // ensure after paint/layout
+    requestAnimationFrame(() => {
+      doScrollTop()
+      // second rAF to be extra robust for async layout
+      requestAnimationFrame(() => {
+        doScrollTop()
+      })
+    })
+
+    // micro fallback
+    const t = window.setTimeout(doScrollTop, 60)
+
+    return () => {
+      window.clearTimeout(t)
+    }
+    // we want to run on each navigation
   }, [location.pathname])
 
   const renderDrawerContent = (showLabels: boolean) => (
@@ -111,7 +175,7 @@ export default function AppLayout() {
       </Box>
 
       {/* Practice Selector */}
-      <PracticeSelector showLabels={open} />
+      <PracticeSelector />
       {/* Menu Sections */}
       {menuSections?.map((section) => {
         const hasVisibleItem = section.items.some((item) => {
@@ -359,7 +423,7 @@ export default function AppLayout() {
           title={activeItem?.text || ''}
           icon={activeItem?.activeIcon || ''}
         />
-        <Box className={styles.outletContainer}>
+        <Box className={styles.outletContainer} ref={outletRef}>
           <Outlet />
         </Box>
       </Box>
