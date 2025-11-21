@@ -191,7 +191,7 @@ export default function UploadQueue() {
 
                 <Typography variant='caption' color='textSecondary'>
                   {file.fromBatch
-                    ? 'Server Document'
+                    ? `${file.type || 'Unknown'}`
                     : `${(file.size / 1024).toFixed(2)} KB — ${file.type || 'Unknown'}`}
                 </Typography>
               </Box>
