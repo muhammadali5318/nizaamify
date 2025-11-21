@@ -130,7 +130,7 @@ export const pollBatchStatusUntilComplete = async (
           `Error fetching batch status (attempt ${attempt}):`,
           batchErr
         )
-        notify.error(
+        console.error(
           `Failed to fetch batch status for ${filename} (Attempt ${attempt})`
         )
       }
@@ -152,7 +152,7 @@ export const pollBatchStatusUntilComplete = async (
 
     store.dispatch(removePollingJob(batchId))
 
-    notify.error(`Processing failed for ${filename}`)
+    console.error(`Processing failed for ${filename}`)
     throw err
   }
 }
