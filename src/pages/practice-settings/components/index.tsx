@@ -30,6 +30,7 @@ import { notify } from 'src/components/notistack/NotificationProvider'
 import { clearAll } from 'src/store/slices/processedBatchDataSlice'
 import { clearFiles } from 'src/store/slices/uploadSlice'
 import { clearPresignData } from 'src/store/slices/presignedSlice'
+import { clearProcessing } from 'src/store/slices/processingSlice'
 
 interface PracticeDetailsCardProps {
   status?: 'active' | 'inactive' | 'archived'
@@ -137,6 +138,7 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
     setActiveById(practice?.id, allPractices)
     dispatch(setMergedPermissionsByCategory(ALL_PERMISSIONS))
     dispatch(clearAll())
+    dispatch(clearProcessing())
     dispatch(clearFiles())
     dispatch(clearPresignData())
     notify.success('Switched to ' + practice?.practice_name)

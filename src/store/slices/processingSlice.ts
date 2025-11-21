@@ -35,9 +35,13 @@ const processingSlice = createSlice({
       } else {
         state.batches.push(action.payload)
       }
+    },
+    clearProcessing: (state) => {
+      state.batches = []
     }
   }
 })
 
-export const { addOrUpdateBatchStatus } = processingSlice.actions
+export const { addOrUpdateBatchStatus, clearProcessing } =
+  processingSlice.actions
 export default processingSlice.reducer
