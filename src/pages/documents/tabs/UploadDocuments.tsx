@@ -45,14 +45,14 @@ const UploadDocuments = () => {
           subtitle='You can upload unlimited files but only 5 in one go.'
           fileInfoText='Maximum 10MB each — Supported: .CSV, .PDF, .PNG, .JPG'
           maxFiles={5}
-          fileCount={files.length}
-          isProcessingComplete={completedFiles.length > 0 || hasBatches}
+          fileCount={files?.length}
+          isProcessingComplete={completedFiles?.length > 0 || hasBatches}
           completedView={<ProcessingCompletedList />}
           onFilesSelected={handleFilesSelected}
           uploadIcon={uploadIcon}
           fileTypeIcon={fileimage}
         />
-        {completedFiles.length > 0 || hasBatches ? '' : <UploadQueue />}
+        {completedFiles?.length > 0 || hasBatches ? '' : <UploadQueue />}
       </Box>
 
       <UploadCategories />

@@ -30,6 +30,7 @@ import { clearAll } from 'src/store/slices/processedBatchDataSlice'
 import { clearPresignData } from 'src/store/slices/presignedSlice'
 import { clearFiles } from 'src/store/slices/uploadSlice'
 import { CONFIG } from 'src/config-global'
+import { clearProcessing } from 'src/store/slices/processingSlice'
 
 export type AllPracticesDataObject = {
   id: string
@@ -157,6 +158,7 @@ export default function PracticeSelector() {
               practices.find((p) => p.id === e.target.value) || null
             dispatch(setMergedPermissionsByCategory(ALL_PERMISSIONS))
             dispatch(clearAll())
+            dispatch(clearProcessing())
             dispatch(clearFiles())
             dispatch(clearPresignData())
             setSelectedPractice(selected)
