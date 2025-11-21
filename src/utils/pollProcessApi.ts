@@ -83,14 +83,6 @@ export const pollBatchStatusUntilComplete = async (
           await new Promise((resolve) => setTimeout(resolve, pollInterval))
           continue
         }
-        // Notify immediately if any document has ERROR status
-        batchData.documents.forEach((doc: any) => {
-          if (doc.status?.toUpperCase() === 'ERROR') {
-            notify.error(
-              `Processing failed for ${doc.file_name || filename}: ${doc.error_message || 'Unknown error'}`
-            )
-          }
-        })
 
         const changedDocs = batchData.documents.filter((doc: any) => {
           const currentStatus = doc.status?.toUpperCase?.() ?? 'UNKNOWN'
