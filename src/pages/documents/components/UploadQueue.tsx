@@ -24,6 +24,8 @@ import { useActivePractice } from 'src/hooks/useActivePractice'
 export default function UploadQueue() {
   const dispatch = useDispatch()
   const { files } = useSelector((state: RootState) => state.uploads)
+  const { batches } = useSelector((state: RootState) => state.processing)
+
   const [loading, setLoading] = useState(false)
   const { user, isAuthenticated } = useAuth0()
   const { activePracticeId } = useActivePractice()
@@ -72,30 +74,57 @@ export default function UploadQueue() {
     }
   }
 
-  if (files.length === 0) return null
   const hasProcessingOrCompleted = files.some(
     (f) =>
       f.status === 'processing' ||
       f.status === 'completed' ||
-      f.status === 'uploading'
+      f.status === 'uploading' ||
+      f.status === 'queued'
   )
+  // Map batch documents
+  const batchDocs = batches.flatMap((batch) =>
+    batch.documents.map((doc) => ({
+      id: doc.document_id,
+      name: doc.file_name,
+      size: 0, // backend doesn't send size
+      type: 'Document',
+      file: null,
+      progress: doc.status === 'processing' ? 90 : 100,
+      status:
+        doc.status === 'processing'
+          ? 'processing'
+          : doc.status === 'completed'
+            ? 'completed'
+            : 'queued',
+      fromBatch: true,
+      batch_id: batch.batch_id
+    }))
+  )
+
+  // Filter out files that are already in batches
+  const filesNotInBatch = files.filter(
+    (f) => !batchDocs.some((b) => b.name === f.name)
+  )
+
+  // Final list to render
+  const combinedList = [...filesNotInBatch, ...batchDocs]
 
   return (
     <Box mt={3}>
-      <Box
-        mb={2}
-        sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          justifyContent: 'space-between',
-          alignItems: 'baseline'
-        }}
-      >
-        <Typography sx={{ fontWeight: '700' }} mb={1}>
-          Upload queue ({files.length}/5)
-        </Typography>
+      {hasProcessingOrCompleted && (
+        <Box
+          mb={2}
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            justifyContent: 'space-between',
+            alignItems: 'baseline'
+          }}
+        >
+          <Typography sx={{ fontWeight: '700' }} mb={1}>
+            Upload queue ({files.length}/5)
+          </Typography>
 
-        {!hasProcessingOrCompleted && (
           <Button
             sx={{
               background: '#2E7D32',
@@ -118,8 +147,8 @@ export default function UploadQueue() {
           >
             {loading ? 'Processing...' : 'Start documents processing'}
           </Button>
-        )}
-      </Box>
+        </Box>
+      )}
 
       {files.some((f) => f.status === 'queued') && (
         <NotificationBanner content='Please review your uploaded documents carefully, these files will be used to process and update your practice’s financial data.' />
@@ -128,7 +157,7 @@ export default function UploadQueue() {
         <NotificationBanner content='Your documents are now being processed. This may take a few moments, please stay patient while our system analyses and extracts the financial data.' />
       )}
 
-      {files.map((file) => (
+      {combinedList.map((file: any) => (
         <Box
           key={file.id}
           sx={{
@@ -155,9 +184,15 @@ export default function UploadQueue() {
               />
 
               <Box textAlign='left'>
-                <Typography variant='body2'>{file.name}</Typography>
+                <Typography variant='body2'>
+                  {file.name}
+                  {file.fromBatch && ' (Processing)'}
+                </Typography>
+
                 <Typography variant='caption' color='textSecondary'>
-                  {(file.size / 1024).toFixed(2)} KB — {file.type || 'Unknown'}
+                  {file.fromBatch
+                    ? 'Server Document'
+                    : `${(file.size / 1024).toFixed(2)} KB — ${file.type || 'Unknown'}`}
                 </Typography>
               </Box>
             </Box>
@@ -194,7 +229,7 @@ export default function UploadQueue() {
                   </>
                 )}
 
-                {file.status === 'processing' && (
+                {file.fromBatch && ' (Processing)' && (
                   <>
                     <img
                       src={spinner}
@@ -210,11 +245,13 @@ export default function UploadQueue() {
                   </>
                 )}
 
-                {file.status === 'queued' && 'Queued'}
+                {/* {file.status === 'queued' && 'Queued'} */}
                 {file.status === 'completed' && 'Completed ✅'}
               </Typography>
 
-              {file.status !== 'completed' &&
+              {/* Remove button only for uploaded files */}
+              {!file.fromBatch &&
+                file.status !== 'completed' &&
                 file.status !== 'processing' &&
                 !loading && (
                   <IconButton

@@ -29,7 +29,7 @@ const persistConfig = {
     'activePractice',
     'selectedUser',
     'processing',
-    'uploads',
+    // 'uploads',
     'pollingJobs'
   ]
 }

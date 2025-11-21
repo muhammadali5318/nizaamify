@@ -28,6 +28,7 @@ import { queryClient } from 'src/utils/queryClient'
 import NotificationBanner from 'src/components/common/NotificationBanner'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import dayjs from 'dayjs'
+import { clearProcessing } from 'src/store/slices/processingSlice'
 export default function ProcessingCompletedList() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -82,6 +83,7 @@ export default function ProcessingCompletedList() {
     setSuccessOpen(false)
     dispatch(clearAll())
     dispatch(clearFiles())
+    dispatch(clearProcessing())
     setSuccessOpen(false)
 
     navigate('/dashboard')
@@ -90,6 +92,7 @@ export default function ProcessingCompletedList() {
   const handleUploadMore = () => {
     dispatch(clearAll())
     dispatch(clearFiles())
+    dispatch(clearProcessing())
     setSuccessOpen(false)
   }
   return (
