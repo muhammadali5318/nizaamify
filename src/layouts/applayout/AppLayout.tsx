@@ -30,7 +30,7 @@ export default function AppLayout() {
   const location = useLocation()
 
   const permissionsByCategory = useSelector(selectPermissionsByCategory)
-  const { isOnboardingCompleted } = useActivePractice()
+  const { isPracticeSubscribedAndOnboardingIsCompleted } = useActivePractice()
 
   const isMobile = useMediaQuery('(max-width:768px)')
   const isCollapsedBreakpoint = useMediaQuery('(max-width:1024px)')
@@ -182,7 +182,7 @@ export default function AppLayout() {
           const { state } = evaluateModuleStateWithReason(
             item.moduleId,
             permissionsByCategory || {},
-            isOnboardingCompleted
+            isPracticeSubscribedAndOnboardingIsCompleted
           )
           return state !== 'hidden'
         })
@@ -218,7 +218,7 @@ export default function AppLayout() {
                 const { state, reason } = evaluateModuleStateWithReason(
                   item.moduleId,
                   permissionsByCategory || {},
-                  isOnboardingCompleted
+                  isPracticeSubscribedAndOnboardingIsCompleted
                 )
 
                 if (state === 'hidden') return null

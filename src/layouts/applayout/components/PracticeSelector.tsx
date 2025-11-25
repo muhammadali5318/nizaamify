@@ -30,20 +30,8 @@ import { clearAll } from 'src/store/slices/processedBatchDataSlice'
 import { clearPresignData } from 'src/store/slices/presignedSlice'
 import { clearFiles } from 'src/store/slices/uploadSlice'
 import { CONFIG } from 'src/config-global'
+import { AllPracticesDataObject } from 'src/store/slices/activePracticeSlice'
 import { clearProcessing } from 'src/store/slices/processingSlice'
-
-export type AllPracticesDataObject = {
-  id: string
-  practice_name: string
-  email?: string | null
-  practice_type?: string
-  address?: string | null
-  contact_number?: string | null
-  premises_ownership?: string
-  accounting_basis?: string
-  created_at?: string
-  onboarding_status?: string
-}
 
 export default function PracticeSelector() {
   const readOnlySelect = CONFIG.envName === 'dev' ? false : true
@@ -206,7 +194,8 @@ export default function PracticeSelector() {
                   maxWidth: { xs: '140px', sm: '240px' },
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
-                  textOverflow: 'ellipsis'
+                  textOverflow: 'ellipsis',
+                  paddingRight: '1px'
                 }}
                 color={
                   selectedPractice?.onboarding_status !== 'COMPLETED'

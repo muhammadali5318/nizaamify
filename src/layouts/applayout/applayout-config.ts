@@ -32,20 +32,6 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         activeIcon: 'active-document.svg',
         inactiveIcon: 'inactive-document.svg',
         moduleId: 'documents'
-      },
-      {
-        text: 'Reports',
-        to: paths.reports,
-        activeIcon: 'active-reports.svg',
-        inactiveIcon: 'inactive-reports.svg',
-        moduleId: 'reports'
-      },
-      {
-        text: 'Benchmarks',
-        to: paths.benchmarks,
-        activeIcon: 'active-benchmarks.svg',
-        inactiveIcon: 'inactive-benchmarks.svg',
-        moduleId: 'benchmarks'
       }
     ]
   },
@@ -65,19 +51,19 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         activeIcon: 'active-practice-management.svg',
         inactiveIcon: 'inactive-practice-management.svg',
         moduleId: 'practice-settings'
+      },
+      {
+        text: 'Subscription & Billing',
+        to: paths.billing,
+        activeIcon: 'active-billing.svg',
+        inactiveIcon: 'inactive-billing.svg',
+        moduleId: 'billing'
       }
     ]
   },
   {
     title: 'Account',
     items: [
-      {
-        text: 'Billing',
-        to: paths.billing,
-        activeIcon: 'active-billing.svg',
-        inactiveIcon: 'inactive-billing.svg',
-        moduleId: 'billing'
-      },
       {
         text: 'Settings',
         to: paths.settings,

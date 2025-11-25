@@ -1,20 +1,19 @@
-// src/components/dashboard/PendingOnboardingForManager.tsx
+// src/components/dashboard/PendingSubscription.tsx
 import React from 'react'
 import { Button } from '@mui/material'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
 import WarningBanner from './WarningBanner'
 
-const PendingOnboardingForManager: React.FC = () => {
+const PendingSubscription: React.FC = () => {
   const navigate = useNavigate()
 
   return (
     <WarningBanner
       message={
         <>
-          <span className='font-weight--700'> Practice onboarding </span> You
-          have been nominated by the Practice Owner to complete the practice
-          onboarding process.
+          You need to select a <strong> subscription plan </strong> to
+          completely unlock the MonAI platform and access all features.
         </>
       }
       actions={
@@ -22,13 +21,13 @@ const PendingOnboardingForManager: React.FC = () => {
           variant='contained'
           color='warning'
           size='medium'
-          onClick={() => navigate(paths.practiceOnboardingStepper)}
+          onClick={() => navigate(paths.billing)}
         >
-          Complete onboarding
+          Choose plan
         </Button>
       }
     />
   )
 }
 
-export default PendingOnboardingForManager
+export default PendingSubscription

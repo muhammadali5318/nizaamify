@@ -31,11 +31,19 @@ export function useActivePractice() {
   const isOnboardingCompleted =
     activePractice?.onboarding_status === 'COMPLETED'
 
+  const isActivePracticeSubscribed =
+    activePractice?.subscription_details?.is_subscribed
+
+  const isPracticeSubscribedAndOnboardingIsCompleted =
+    !!isActivePracticeSubscribed && !!isOnboardingCompleted
+
   return {
     activePractice,
     activePracticeId,
     setActivePractice,
     setActiveById,
-    isOnboardingCompleted
+    isOnboardingCompleted,
+    isActivePracticeSubscribed,
+    isPracticeSubscribedAndOnboardingIsCompleted
   }
 }
