@@ -27,10 +27,12 @@ export interface PracticeUserDetails {
 
 interface UserDetailsInActivePracticeState {
   data: PracticeUserDetails | null
+  hasOwnerOrDirector: boolean
 }
 
 const initialState: UserDetailsInActivePracticeState = {
-  data: null
+  data: null,
+  hasOwnerOrDirector: false
 }
 
 // --- Slice ---
@@ -53,15 +55,22 @@ const userDetailsInActivePracticeSlice = createSlice({
       state.data.merged_permissions_by_category = action.payload
     },
 
+    setHasOwnerOrDirector(state, action: PayloadAction<boolean>) {
+      state.hasOwnerOrDirector = action.payload
+    },
+
     clearUserDetailsInActivePractice(state) {
       state.data = null
+      state.hasOwnerOrDirector = false
     }
   }
 })
 
+// --- Exports ---
 export const {
   setUserDetailsInActivePractice,
   setMergedPermissionsByCategory,
+  setHasOwnerOrDirector,
   clearUserDetailsInActivePractice
 } = userDetailsInActivePracticeSlice.actions
 
@@ -71,10 +80,11 @@ export default userDetailsInActivePracticeSlice.reducer
 export const selectUserDetailsInActivePractice = (state: RootState) =>
   state.userDetailsInActivePractice.data
 
-// roles as originally
 export const selectPermissionsInActivePractice = (state: RootState) =>
   state.userDetailsInActivePractice.data?.roles_and_permissions ?? []
 
-// ✅ new selector for grouped permissions
 export const selectPermissionsByCategory = (state: RootState) =>
   state.userDetailsInActivePractice.data?.merged_permissions_by_category ?? {}
+
+export const selectHasOwnerOrDirector = (state: RootState) =>
+  state.userDetailsInActivePractice.hasOwnerOrDirector

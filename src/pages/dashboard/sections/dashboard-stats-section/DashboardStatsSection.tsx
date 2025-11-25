@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Box, Stack } from '@mui/material'
-import { useAuth } from 'src/context/AuthProvider'
 import StatsCard from '../../components/DashboardStatsCard'
 import { fetchDashboardSummaryKpis } from '../../utils/fetchDashboardSummaryKpis'
 import { useActivePractice } from 'src/hooks/useActivePractice'
@@ -22,7 +21,6 @@ const DashboardStatsSection = ({
   startDate,
   endDate
 }: DashboardStatsSectionProps) => {
-  const { accessToken } = useAuth()
   const { activePracticeId } = useActivePractice()
   const [kpiData, setKpiData] = useState<any>(null)
   const [loading, setLoading] = useState(false)
@@ -30,11 +28,10 @@ const DashboardStatsSection = ({
   useEffect(() => {
     const loadData = async () => {
       try {
-        if (activePracticeId && accessToken) {
+        if (activePracticeId) {
           setLoading(true)
           const data = await fetchDashboardSummaryKpis(
             activePracticeId,
-            accessToken,
             startDate,
             endDate
           )
@@ -48,7 +45,7 @@ const DashboardStatsSection = ({
     }
 
     loadData()
-  }, [activePracticeId, accessToken, startDate, endDate])
+  }, [activePracticeId, startDate, endDate])
 
   if (!kpiData) return null
 

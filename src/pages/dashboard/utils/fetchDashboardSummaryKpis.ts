@@ -36,7 +36,6 @@ interface DashboardKpiResponse {
  */
 export const fetchDashboardSummaryKpis = async (
   practiceId: string,
-  token: string,
   start_date: string,
   end_date: string
 ): Promise<DashboardKpiResponse['data']> => {
@@ -46,8 +45,7 @@ export const fetchDashboardSummaryKpis = async (
     const response = await apiClient.get<DashboardKpiResponse>(
       `/docs/v1/practices/${practiceId}/dashboard/summary-kpis`,
       {
-        params: { start_date, end_date },
-        headers: { Authorization: `Bearer ${token}` }
+        params: { start_date, end_date }
       }
     )
 

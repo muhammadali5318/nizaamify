@@ -1,7 +1,10 @@
 // src/hooks/useUserDetails.ts
 import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
-import { selectUserDetailsInActivePractice } from 'src/store/slices/userDetailsInActivePracticeSlice'
+import {
+  selectHasOwnerOrDirector,
+  selectUserDetailsInActivePractice
+} from 'src/store/slices/userDetailsInActivePracticeSlice'
 
 /** shape based on the object you provided */
 export interface UserDetailsInActivePractice {
@@ -37,9 +40,11 @@ export interface UseUserDetailsResult {
   isUserOwner: boolean
   isUserDirector: boolean
   isUserOwnerOrDirector: boolean
+  isOwnerOrDirectorInAnyPractice: boolean
 }
 
 export function useUserDetails(): UseUserDetailsResult {
+  const isOwnerOrDirectorInAnyPractice = useSelector(selectHasOwnerOrDirector)
   const user = useSelector(selectUserDetailsInActivePractice) as
     | UserDetailsInActivePractice
     | undefined
@@ -93,7 +98,8 @@ export function useUserDetails(): UseUserDetailsResult {
     isUserManager,
     isUserOwner,
     isUserDirector,
-    isUserOwnerOrDirector
+    isUserOwnerOrDirector,
+    isOwnerOrDirectorInAnyPractice
   }
 }
 

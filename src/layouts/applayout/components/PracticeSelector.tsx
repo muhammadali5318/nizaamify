@@ -32,8 +32,10 @@ import { clearFiles } from 'src/store/slices/uploadSlice'
 import { CONFIG } from 'src/config-global'
 import { AllPracticesDataObject } from 'src/store/slices/activePracticeSlice'
 import { clearProcessing } from 'src/store/slices/processingSlice'
+import useUserDetails from 'src/hooks/useUserDetails'
 
 export default function PracticeSelector() {
+  const { isOwnerOrDirectorInAnyPractice } = useUserDetails()
   const readOnlySelect = CONFIG.envName === 'dev' ? false : true
   const { accessToken } = useAuth()
   const dispatch = useDispatch()
@@ -258,9 +260,9 @@ export default function PracticeSelector() {
             </MenuItem>
           )}
 
-          {!readOnlySelect && <Divider />}
+          {!readOnlySelect && isOwnerOrDirectorInAnyPractice && <Divider />}
 
-          {!readOnlySelect && (
+          {!readOnlySelect && isOwnerOrDirectorInAnyPractice && (
             <MenuItem sx={{ padding: '0px 10px' }}>
               <Box
                 onMouseDown={(e) => e.stopPropagation()}

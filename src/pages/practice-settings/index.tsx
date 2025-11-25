@@ -6,13 +6,13 @@ import PageHeader from 'src/components/page-header'
 import PracticeDetailsCard from './components'
 import { useAuth } from 'src/context/AuthProvider'
 import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
-import { AllPracticesDataObject } from 'src/layouts/applayout/components/PracticeSelector'
+import { AllPracticesDataObject } from 'src/store/slices/activePracticeSlice'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import AddPracticeModal from './components/AddPracticeModal'
 import useUserDetails from 'src/hooks/useUserDetails'
 
 const PracticeSettings: React.FC = () => {
-  const { isUserOwnerOrDirector } = useUserDetails()
+  const { isOwnerOrDirectorInAnyPractice } = useUserDetails()
   const { activePracticeId } = useActivePractice()
   const { accessToken } = useAuth()
   const { data: practicesList } = useFetchAllPracticesData(!!accessToken)
@@ -33,7 +33,7 @@ const PracticeSettings: React.FC = () => {
           />
         </Box>
 
-        {isUserOwnerOrDirector && (
+        {isOwnerOrDirectorInAnyPractice && (
           <Button
             variant='contained'
             startIcon={
