@@ -14,7 +14,7 @@ const DashboardWarningAlertBox = () => {
   const { isUserNominated, isUserOwnerOrDirector, isUserManager } =
     useUserDetails()
 
-  if (isPracticeSubscribedAndOnboardingIsCompleted) {
+  if (isPracticeSubscribedAndOnboardingIsCompleted || !isUserOwnerOrDirector) {
     return
   }
 

@@ -15,6 +15,7 @@ export type AllPracticesDataObject = {
     is_subscribed: boolean
     subscription_plan_name: string
   }
+  user_role?: string
 }
 
 type ActivePracticeState = AllPracticesDataObject | null
