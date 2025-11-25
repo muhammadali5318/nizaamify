@@ -16,7 +16,7 @@ export const pollBatchStatusUntilComplete = async (
   filename: string,
   userId: string,
   practiceId: string,
-  maxAttempts: number = 120,
+  maxAttempts: number = 550,
   pollInterval: number = 3000
 ) => {
   try {
