@@ -69,9 +69,7 @@ export const getFreePlan = (activePractice: any) => {
   let proBtnText = ''
   let freeBtnText = ''
 
-  if (subscriptionPlan === 'PROFESSIONAL') {
-    proBtnText = 'Current Plan'
-  } else if (subscriptionPlan === 'FREE TRIAL') {
+  if (subscriptionPlan === 'FREE TRIAL') {
     proBtnText = 'Upgrade to professional plan'
     freeBtnText = 'Current Plan'
   } else {

@@ -46,8 +46,8 @@ export const Step2 = ({ goBack, close }: any) => {
       )
       notify.success(res?.data?.message)
       close()
-    } catch (err) {
-      notify.error('Something went wrong')
+    } catch (err: any) {
+      notify.error(err?.message || 'Something went wrong')
     } finally {
       setLoading(false)
     }
