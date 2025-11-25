@@ -47,7 +47,7 @@ export const Step1 = ({ goNext, close }: any) => {
 
       <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
         <Button variant='outlined' onClick={close} fullWidth size='small'>
-          Back
+          Cancel
         </Button>
 
         <Button

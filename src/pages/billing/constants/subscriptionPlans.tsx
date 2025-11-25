@@ -69,10 +69,13 @@ export const getFreePlan = (activePractice: any) => {
   let proBtnText = ''
   let freeBtnText = ''
 
-  if (subscriptionPlan === 'FREE TRIAL') {
+  if (subscriptionPlan === 'PROFESSIONAL') {
+    proBtnText = 'Current Plan'
+  } else if (subscriptionPlan === 'FREE TRIAL') {
     proBtnText = 'Upgrade to professional plan'
     freeBtnText = 'Current Plan'
   } else {
+    proBtnText = 'Subscribe to professional plan'
     freeBtnText = 'Subscribe'
   }
 
@@ -105,6 +108,7 @@ export const getFreePlan = (activePractice: any) => {
     buttonFontColor: '#000',
     footerIcon: <img src={freeWarning} alt='warning' />,
     footerText: '8 days left till expiry date',
-    footerBgColor: '#FFF8E1'
+    footerBgColor: '#FFF8E1',
+    proBtnText
   }
 }
