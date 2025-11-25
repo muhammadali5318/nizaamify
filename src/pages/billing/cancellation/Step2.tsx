@@ -33,7 +33,7 @@ export const Step2 = ({ goBack, close }: any) => {
 
   const submitCancellation = async () => {
     const payload = {
-      email: currentUserEmail,
+      email: '',
       cancellation_reason:
         selected === 'Other' ? ['other', otherReason] : [selected]
     }
@@ -46,8 +46,9 @@ export const Step2 = ({ goBack, close }: any) => {
       )
       notify.success(res?.data?.message)
       close()
-    } catch (err) {
-      notify.error('Something went wrong')
+    } catch (err: any) {
+      console.error(err?.message)
+      notify.error(err?.message || 'Something went wrong')
     } finally {
       setLoading(false)
     }

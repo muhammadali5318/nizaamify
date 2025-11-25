@@ -75,7 +75,6 @@ export const getFreePlan = (activePractice: any) => {
     proBtnText = 'Upgrade to professional plan'
     freeBtnText = 'Current Plan'
   } else {
-    proBtnText = 'Subscribe to professional plan'
     freeBtnText = 'Subscribe'
   }
 
