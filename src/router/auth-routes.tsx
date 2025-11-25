@@ -69,6 +69,14 @@ export const authRoutes = [
         )
       },
       {
+        path: 'subscription-failed',
+        element: (
+          <AuthLayout>
+            <AuthPages.EmailVerification />
+          </AuthLayout>
+        )
+      },
+      {
         path: 'invite-user',
         element: (
           <AuthLayout>

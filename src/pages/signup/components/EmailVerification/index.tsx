@@ -22,6 +22,7 @@ type VerificationStatus =
   | 'requestThrottled'
   | 'accountDeactivated'
   | 'subscribed'
+  | 'subscriptionFailed'
 
 const EmailVerification: React.FC = () => {
   const location = useLocation()
@@ -66,6 +67,8 @@ const EmailVerification: React.FC = () => {
       setStatus('congrats')
     } else if (sessionId) {
       setStatus('subscribed')
+    } else if (location.pathname === '/auth/subscription-failed') {
+      setStatus('subscriptionFailed')
     }
   }, [location.search])
 
@@ -369,6 +372,25 @@ const EmailVerification: React.FC = () => {
                 Your account has been deactivated by your practice
                 administrator. Please contact support if you need any
                 assistance. <ContactSupport />
+              </Typography>
+            </>
+          </EmailVerificationStatus>
+        ) : status === 'subscriptionFailed' ? (
+          <EmailVerificationStatus
+            iconSrc='/assets/danger.svg'
+            iconAlt='Request throttled'
+            buttonText='Go to sign in'
+            onButtonClick={() => navigate('/auth/login')}
+          >
+            <>
+              <Typography variant='h4' className='font-weight--700'>
+                Oops! Subscription Failed
+              </Typography>
+              <Typography variant='subtitle1' color='textSecondary'>
+                Something went wrong, but you can still log in.
+              </Typography>
+              <Typography variant='subtitle1' color='textSecondary'>
+                Once logged in, you can easily choose a plan from the app.
               </Typography>
             </>
           </EmailVerificationStatus>
