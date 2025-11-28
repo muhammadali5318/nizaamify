@@ -276,14 +276,31 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
       {(practice?.user_role === 'COMPANY DIRECTOR' ||
         practice?.user_role === 'PRACTICE OWNER') && (
         <Stack spacing='10px'>
-          <InfoRow icon='/assets/suit-case-checked.svg'>-</InfoRow>
+          <InfoRow icon='/assets/suit-case-checked.svg'>
+            {practice?.subscription_details?.card_last_four_digits ? (
+              <>
+                {practice?.subscription_details?.card_brand} ••••{' '}
+                {practice?.subscription_details?.card_last_four_digits}
+              </>
+            ) : (
+              '-'
+            )}
+          </InfoRow>
+
           <Box className={styles.detailsContainer}>
             <Typography
               className='font-style--italic'
               variant='body1'
               color='var(--color-primary-black)'
             >
-              Next billing: <strong> -</strong>
+              Next billing:{' '}
+              <strong>
+                {practice?.subscription_details?.next_billing_date
+                  ? dayjs(
+                      practice.subscription_details.next_billing_date
+                    ).format('DD/MM/YYYY')
+                  : '-'}
+              </strong>
             </Typography>
           </Box>
         </Stack>
