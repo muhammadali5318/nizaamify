@@ -21,6 +21,7 @@ type VerificationStatus =
   | 'emailNotVerified'
   | 'requestThrottled'
   | 'accountDeactivated'
+  | 'unauthorized'
   | 'subscribed'
   | 'subscriptionFailed'
 
@@ -51,6 +52,7 @@ const EmailVerification: React.FC = () => {
     const rawToken = searchParams.get('token')
     const rawAuth0Id = searchParams.get('auth0Id')
     const accountDeactivated = !!searchParams.get('accountDeactivated')
+    const unauthorized = !!searchParams.get('unauthorized')
     const emailVerified = !!searchParams.get('emailVerified')
     const sessionId = !!searchParams.get('session_id')
 
@@ -63,6 +65,8 @@ const EmailVerification: React.FC = () => {
       setStatus('emailNotVerified')
     } else if (accountDeactivated) {
       setStatus('accountDeactivated')
+    } else if (unauthorized) {
+      setStatus('unauthorized')
     } else if (emailVerified) {
       setStatus('congrats')
     } else if (sessionId) {
@@ -372,6 +376,23 @@ const EmailVerification: React.FC = () => {
                 Your account has been deactivated by your practice
                 administrator. Please contact support if you need any
                 assistance. <ContactSupport />
+              </Typography>
+            </>
+          </EmailVerificationStatus>
+        ) : status === 'unauthorized' ? (
+          <EmailVerificationStatus
+            iconSrc='/assets/danger.svg'
+            iconAlt='Request throttled'
+            buttonText='Close'
+            onButtonClick={() => navigate('/auth/login')}
+          >
+            <>
+              <Typography variant='h4' className='font-weight--700'>
+                Unauthorized Access
+              </Typography>
+              <Typography variant='subtitle1' color='textSecondary'>
+                It appears that you do not have permission to access the Monai
+                platform. <ContactSupport />
               </Typography>
             </>
           </EmailVerificationStatus>
