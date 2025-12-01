@@ -159,7 +159,17 @@ const DocumentsPage: React.FC = () => {
             />
           </Box>
 
-          <Box /* tabs wrapper props */>
+          <Box
+            sx={{
+              width: {
+                xs: '100%',
+                sm: '94%',
+                md: '94%',
+                lg: '97%',
+                xl: '97%'
+              }
+            }}
+          >
             <ReusableTabs tabs={tabs} initialTab={documentsTabsData[0].key} />
           </Box>
         </>
