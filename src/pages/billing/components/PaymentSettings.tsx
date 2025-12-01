@@ -6,7 +6,17 @@ import { useState } from 'react'
 import ArchivePractice from '../../practice-settings/components/ArchivePracticeModal'
 import CancelSubscriptionStepper from '../cancellation/CancelSubscriptionStepper'
 import CloseIcon from '@mui/icons-material/Close'
-const PaymentSettings = () => {
+import React from 'react'
+
+type PaymentSettingsProps = {
+  subscriptionPlanAmount?: string | number
+  billingDate?: any
+}
+
+const PaymentSettings: React.FC<PaymentSettingsProps> = ({
+  subscriptionPlanAmount,
+  billingDate
+}) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [openCancelModal, setOpenCancelModal] = useState(false)
 
@@ -76,7 +86,7 @@ const PaymentSettings = () => {
             />
 
             <Typography variant='body2'>
-              Due by:<strong> 23/11/2025 </strong>
+              Due by:<strong> {billingDate}</strong>
             </Typography>
 
             <Divider
@@ -86,7 +96,7 @@ const PaymentSettings = () => {
             />
 
             <Typography variant='body2'>
-              Amount:<strong> £99.00</strong>
+              Amount:<strong> £{subscriptionPlanAmount}.00</strong>
             </Typography>
           </Box>
 

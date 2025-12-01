@@ -9,7 +9,8 @@ import { activePracticeReducer } from './slices/activePracticeSlice'
 import userDetailsInActivePracticeReducer from 'src/store/slices/userDetailsInActivePracticeSlice'
 import selectedUserReducer from './slices/team-management/selectedUserSlice'
 import pollingJobsReducer from './slices/pollingJobSlice'
-
+import manualEntryQueueReducer from './slices/manualEntryQueueSlice'
+import manualEntryFileReducer from './slices/manualEntryFilesSlice'
 const rootReducer = combineReducers({
   uploads: uploadReducer,
   presign: presignReducer,
@@ -18,7 +19,9 @@ const rootReducer = combineReducers({
   activePractice: activePracticeReducer,
   userDetailsInActivePractice: userDetailsInActivePracticeReducer,
   selectedUser: selectedUserReducer,
-  pollingJobs: pollingJobsReducer
+  pollingJobs: pollingJobsReducer,
+  manualEntryQueue: manualEntryQueueReducer,
+  manualEntryFiles: manualEntryFileReducer
 })
 
 const persistConfig = {

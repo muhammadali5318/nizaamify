@@ -24,6 +24,14 @@ const Billing = () => {
     ?.is_subscribed
   const subscriptionPlan = (activePractice as any)?.subscription_details
     ?.subscription_plan_name
+  const subscriptionPlanAmount = (activePractice as any)?.subscription_details
+    ?.subscription_plan_amount
+  const rawDate = (activePractice as any)?.subscription_details
+    ?.next_billing_date
+
+  const billingDate = rawDate
+    ? new Date(rawDate).toISOString().split('T')[0].replace(/-/g, '/')
+    : ''
   const SUBSCRIBED_PLAN = getSubscribedPlan(activePractice)
   const FREE_PLAN = getFreePlan(activePractice)
   const [rows, setRows] = useState<any[]>([])
@@ -147,7 +155,7 @@ const Billing = () => {
           />
         </Box>
       )}
-      {isSubscribed && (
+      {subscriptionPlan === 'PROFESSIONAL' && (
         <Box
           sx={{
             border: '1px solid #EEEEEE',
@@ -156,7 +164,10 @@ const Billing = () => {
             mt: 2
           }}
         >
-          <PaymentSettings />
+          <PaymentSettings
+            subscriptionPlanAmount={subscriptionPlanAmount}
+            billingDate={billingDate}
+          />
         </Box>
       )}
       {/* -------------------- INVOICE HISTORY TABLE -------------------- */}
