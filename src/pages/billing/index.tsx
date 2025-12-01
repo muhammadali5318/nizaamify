@@ -17,7 +17,11 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { useDebounce } from 'src/hooks/useDebounce'
 import CloseIcon from '@mui/icons-material/Close'
 import PaymentSettings from './components/PaymentSettings'
+import { useQueryClient } from '@tanstack/react-query'
+
 const Billing = () => {
+  const queryClient = useQueryClient()
+
   const { activePractice, activePracticeId } = useActivePractice()
   const practiceId = activePracticeId
   const isSubscribed = (activePractice as any)?.subscription_details
@@ -43,6 +47,7 @@ const Billing = () => {
   const [searchKey, setSearchKey] = useState('')
   const debouncedSearchKey = useDebounce(searchKey, 500)
   const [dateRange, setDateRange] = useState<[any, any]>([null, null])
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false)
 
   const fetchInvoices = async () => {
     if (!practiceId) return
@@ -86,19 +91,30 @@ const Billing = () => {
       notify.error('No active practice selected.')
       return
     }
+
     try {
+      setSubscriptionLoading(true) // ⬅️ Start loader
+
       const res = await handleSubscriptionAction({
         buttonLabel,
         practiceId,
         title
       })
+
       if (res?.data?.checkout_url) {
         window.location.href = res.data.checkout_url
         return
       }
+
       notify.success('Subscription updated successfully!')
+      await queryClient.invalidateQueries({
+        queryKey: ['listAllPracticesData']
+      })
+      await fetchInvoices()
     } catch (error: any) {
       notify.error(error?.message)
+    } finally {
+      setSubscriptionLoading(false) // ⬅️ Stop loader
     }
   }
 
@@ -133,6 +149,7 @@ const Billing = () => {
       {isSubscribed && subscriptionPlan === 'PROFESSIONAL' ? (
         <SubscriptionCard
           {...SUBSCRIBED_PLAN}
+          loading={subscriptionLoading}
           onButtonClick={handleButtonClick}
         />
       ) : (
@@ -146,11 +163,13 @@ const Billing = () => {
           <SubscriptionCard
             isSubscribed={isSubscribed}
             {...FREE_PLAN}
+            loading={subscriptionLoading}
             onButtonClick={handleButtonClick}
           />
           <SubscriptionCard
             isSubscribed={isSubscribed}
             {...SUBSCRIBED_PLAN}
+            loading={subscriptionLoading}
             onButtonClick={handleButtonClick}
           />
         </Box>

@@ -5,7 +5,8 @@ import {
   Typography,
   Button,
   SxProps,
-  Theme
+  Theme,
+  CircularProgress
 } from '@mui/material'
 import { ReactNode } from 'react'
 export interface SubscriptionCardProps {
@@ -34,6 +35,7 @@ export interface SubscriptionCardProps {
   buttonBorder?: string | any
   isSubscribed?: any
   subscriptionPlan?: string
+  loading?: boolean
 }
 
 const SubscriptionCard = ({
@@ -59,7 +61,8 @@ const SubscriptionCard = ({
   footerText,
   footerBgColor,
   buttonFontColor,
-  isSubscribed
+  isSubscribed,
+  loading
 }: SubscriptionCardProps) => {
   let isDisabled = false
   if (buttonLabel === 'Current Plan') {
@@ -182,6 +185,7 @@ const SubscriptionCard = ({
         ) : (
           <Button
             variant={buttonVariant}
+            disabled={loading}
             sx={{
               mt: 3,
               py: 1,
@@ -192,7 +196,7 @@ const SubscriptionCard = ({
               color: '#4f4f4f'
             }}
           >
-            {buttonLabel}
+            {loading ? <CircularProgress size={22} /> : buttonLabel}
           </Button>
         )}
 

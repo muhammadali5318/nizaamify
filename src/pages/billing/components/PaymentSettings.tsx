@@ -6,7 +6,6 @@ import { useState } from 'react'
 import ArchivePractice from '../../practice-settings/components/ArchivePracticeModal'
 import CancelSubscriptionStepper from '../cancellation/CancelSubscriptionStepper'
 import CloseIcon from '@mui/icons-material/Close'
-import React from 'react'
 
 type PaymentSettingsProps = {
   subscriptionPlanAmount?: string | number
