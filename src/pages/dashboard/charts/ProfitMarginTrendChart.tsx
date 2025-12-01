@@ -57,7 +57,8 @@ const ProfitMarginTrendChart = ({
 
         setChartData(formatted)
       } catch (err: any) {
-        setError('Failed to load profit margin trend')
+        console.error(err)
+        setError(err?.message || 'Failed to load profit margin trend')
       } finally {
         setLoading(false)
       }
