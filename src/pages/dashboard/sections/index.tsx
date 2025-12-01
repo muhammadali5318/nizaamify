@@ -197,7 +197,12 @@ const MainDashboard = () => {
         sx={{ backgroundColor: '#fff', borderRadius: '12px', width: '100%' }}
       >
         <Box flex={1.4} mr={2}>
-          <RevenueVsCostChart />
+          <RevenueVsCostChart
+            granularity={granularity}
+            month={month}
+            year={year}
+            practiceId={activePracticeId}
+          />
         </Box>
         <Box flex={1}>
           <ProfitMarginTrendChart />

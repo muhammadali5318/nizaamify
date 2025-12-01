@@ -79,15 +79,17 @@ const ExpandableBenchmarkTable = ({ data }: ExpandableBenchmarkTableProps) => {
 
             <TableBody>
               {expenseTypes.map((type: any) => {
-                const children = getChildCategories(type.expense_type)
-                return (
-                  <ExpandableRow
-                    key={type.expense_type}
-                    row={type}
-                    childCategories={children}
-                    activePracticeType={activePracticeType}
-                  />
-                )
+                if (type.expense_type != 'Tax Documents') {
+                  const children = getChildCategories(type.expense_type)
+                  return (
+                    <ExpandableRow
+                      key={type.expense_type}
+                      row={type}
+                      childCategories={children}
+                      activePracticeType={activePracticeType}
+                    />
+                  )
+                }
               })}
             </TableBody>
           </Table>

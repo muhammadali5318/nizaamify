@@ -2,7 +2,6 @@ import StarImg from '../../../assets/SubscriptionStar.svg'
 import cardBg from '../../../assets/subs-card-bg.svg'
 import badgeIcon from '../../../assets/premium-Badge.svg'
 import tickImg from '../../../assets/tick-sub.svg'
-
 import freeBadge from '../../../assets/free-badge.svg'
 import freeTick from '../../../assets/free-tick.svg'
 import freeClock from '../../../assets/free-clock.svg'
@@ -65,7 +64,16 @@ export const getSubscribedPlan = (activePractice: any) => {
 export const getFreePlan = (activePractice: any) => {
   const subscriptionPlan =
     activePractice?.subscription_details?.subscription_plan_name
+  const billingDateRaw = activePractice?.subscription_details?.next_billing_date
 
+  const billingDate = billingDateRaw ? new Date(billingDateRaw) : null
+
+  let daysLeft = null
+  if (billingDate) {
+    const today = new Date()
+    const diffTime = billingDate.getTime() - today.getTime()
+    daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) // convert ms → days
+  }
   let proBtnText = ''
   let freeBtnText = ''
 
@@ -107,7 +115,10 @@ export const getFreePlan = (activePractice: any) => {
     buttonBorder: '#000',
     buttonFontColor: '#000',
     footerIcon: <img src={freeWarning} alt='warning' />,
-    footerText: '8 days left till expiry date',
+    footerText:
+      daysLeft !== null
+        ? `${daysLeft} days left till expiry date`
+        : 'No billing date available',
     footerBgColor: '#FFF8E1',
     proBtnText
   }

@@ -13,7 +13,7 @@ interface FileUploadBoxProps {
   /** Max number of files that can be uploaded at once */
   maxFiles?: number
   /** Called when files are selected or dropped */
-  onFilesSelected: (files: FileList) => void
+  onFilesSelected: (files: FileList | File[] | any) => void
   /** Optional: Current uploaded file count */
   fileCount?: number
   /** Optional: Total completed file count */
