@@ -66,8 +66,7 @@ const MainDashboard = () => {
     }
   }
 
-  const { start_date, end_date, granularity, month, year } =
-    getDateRange(selectedPeriod)
+  const { granularity, month, year } = getDateRange(selectedPeriod)
 
   // Fetch expense data
   useEffect(() => {
@@ -120,9 +119,9 @@ const MainDashboard = () => {
 
       {/* 1. KPI Cards */}
       <DashboardStatsSection
-        selectedPeriod={selectedPeriod}
-        startDate={start_date}
-        endDate={end_date}
+        granularity={granularity}
+        month={month}
+        year={year}
       />
 
       {/* 2. Revenue & Profit Charts */}
@@ -205,7 +204,12 @@ const MainDashboard = () => {
           />
         </Box>
         <Box flex={1}>
-          <ProfitMarginTrendChart />
+          <ProfitMarginTrendChart
+            granularity={granularity}
+            month={month}
+            year={year}
+            practiceId={activePracticeId}
+          />
         </Box>
       </Box>
       {/* 5. AI Insights */}

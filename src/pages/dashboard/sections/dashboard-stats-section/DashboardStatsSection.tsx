@@ -12,14 +12,15 @@ import ebidtaIcon from '../../../../assets/ebita.svg'
 import practiceValueIcon from '../../../../assets/value.svg'
 
 interface DashboardStatsSectionProps {
-  selectedPeriod: string
-  startDate: string
-  endDate: string
+  month?: number | null
+  year?: number
+  granularity?: 'month' | 'quarter' | 'year'
 }
 
 const DashboardStatsSection = ({
-  startDate,
-  endDate
+  month,
+  year,
+  granularity
 }: DashboardStatsSectionProps) => {
   const { activePracticeId } = useActivePractice()
   const [kpiData, setKpiData] = useState<any>(null)
@@ -32,8 +33,9 @@ const DashboardStatsSection = ({
           setLoading(true)
           const data = await fetchDashboardSummaryKpis(
             activePracticeId,
-            startDate,
-            endDate
+            month,
+            year,
+            granularity
           )
           setKpiData(data)
         }
@@ -45,7 +47,7 @@ const DashboardStatsSection = ({
     }
 
     loadData()
-  }, [activePracticeId, startDate, endDate])
+  }, [activePracticeId, month, year, granularity])
 
   if (!kpiData) return null
 

@@ -5,7 +5,8 @@ import {
   FormControlLabel,
   Radio,
   TextField,
-  Button
+  Button,
+  CircularProgress
 } from '@mui/material'
 import { useState } from 'react'
 import apiClient from '../../../services/api-client'
@@ -47,7 +48,29 @@ export const Step2 = ({ goBack, close }: any) => {
       notify.success(res?.data?.message)
       close()
     } catch (err: any) {
-      notify.error(err?.message || 'Something went wrong')
+      let errorMessage = 'Something went wrong'
+
+      if (err?.message) {
+        errorMessage = err.message
+      }
+
+      if (err?.error && typeof err.error === 'object') {
+        const messages: string[] = []
+
+        Object.values(err.error).forEach((val) => {
+          if (Array.isArray(val)) {
+            messages.push(...val)
+          } else if (typeof val === 'string') {
+            messages.push(val)
+          }
+        })
+
+        if (messages.length) {
+          errorMessage = messages.join(', ')
+        }
+      }
+
+      notify.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -105,7 +128,7 @@ export const Step2 = ({ goBack, close }: any) => {
           disabled={!selected || (selected === 'Other' && !otherReason)}
           onClick={submitCancellation}
         >
-          {loading ? 'Processing...' : 'Cancel Subscription'}
+          {loading ? <CircularProgress size={22} /> : 'Cancel Subscription'}
         </Button>
       </Box>
     </Box>
