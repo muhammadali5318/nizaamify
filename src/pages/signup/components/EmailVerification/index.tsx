@@ -12,6 +12,8 @@ import { sendVerificationEmail } from 'src/services/auth/emailVerification'
 import HavingTrouble from 'src/components/contact-support/HavingTrouble'
 import ContactSupport from 'src/components/contact-support'
 import { CONFIG } from 'src/config-global'
+import { paths } from 'src/paths'
+import { useAuth } from 'src/context/AuthProvider'
 
 type VerificationStatus =
   | 'expired'
@@ -28,6 +30,7 @@ type VerificationStatus =
 const EmailVerification: React.FC = () => {
   const location = useLocation()
   const navigate = useNavigate()
+  const accessToken = useAuth()
 
   const [status, setStatus] = useState<VerificationStatus | 'loading'>(
     'loading'
@@ -72,7 +75,11 @@ const EmailVerification: React.FC = () => {
     } else if (sessionId) {
       setStatus('subscribed')
     } else if (location.pathname === '/auth/subscription-failed') {
-      setStatus('subscriptionFailed')
+      if (accessToken) {
+        navigate(paths.billing)
+      } else {
+        setStatus('subscriptionFailed')
+      }
     }
   }, [location.search])
 
@@ -424,6 +431,9 @@ const EmailVerification: React.FC = () => {
           <Congratulations
             title='Congratulation!'
             message='Your subscription plan has been subscribed!'
+            onContinue={() =>
+              navigate(accessToken ? paths.billing : '/auth/login')
+            }
           />
         ) : null}
       </Box>
