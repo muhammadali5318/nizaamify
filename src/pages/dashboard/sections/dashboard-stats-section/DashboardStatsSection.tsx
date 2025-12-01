@@ -63,7 +63,7 @@ const DashboardStatsSection = ({
       subtitle: '(This period)',
       value: safeValue(kpiData.revenue, '£'),
       trend: safeTrend(kpiData.revenue_change_percent),
-      icon: <img src={revenueIcon} alt='revenue' />,
+      icon: <img src={costIcon} alt='cost' />,
       type: 'revenue'
     },
     {
@@ -71,7 +71,7 @@ const DashboardStatsSection = ({
       subtitle: '(This period)',
       value: safeValue(kpiData.costs, '£'),
       trend: safeTrend(kpiData.costs_change_percent),
-      icon: <img src={costIcon} alt='cost' />,
+      icon: <img src={revenueIcon} alt='revenue' />,
       type: 'cost'
     },
     {

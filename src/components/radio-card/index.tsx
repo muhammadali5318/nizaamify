@@ -19,7 +19,8 @@ const RadioCard: React.FC<{
   onSelect: (v: StepFiveFormValues['accountingBasis']) => void
   header: string
   description: string
-  bullets: string[]
+  pros: string[]
+  cons: string[]
   alertText: string
   iconPath: string
   'data-testid'?: string
@@ -29,7 +30,8 @@ const RadioCard: React.FC<{
   onSelect,
   header,
   description,
-  bullets,
+  pros,
+  cons,
   alertText,
   iconPath,
   'data-testid': testId
@@ -96,16 +98,13 @@ const RadioCard: React.FC<{
           </Box>
 
           <Box>
+            {/* Pros */}
             <Typography variant='h6' fontWeight={700}>
-              You’ll get:
+              Pros:
             </Typography>
 
-            <List
-              sx={{
-                padding: '0px'
-              }}
-            >
-              {bullets.map((b, i) => (
+            <List sx={{ padding: 0 }}>
+              {pros.map((p, i) => (
                 <ListItem
                   key={i}
                   sx={{
@@ -119,17 +118,52 @@ const RadioCard: React.FC<{
                   <ListItemIcon sx={{ minWidth: 28, pt: '2px' }}>
                     <img
                       src='/assets/ticket-icon-black.svg'
+                      width={20}
+                      height={20}
                       alt='tick'
-                      style={{ width: 20, height: 20, display: 'block' }}
                     />
                   </ListItemIcon>
                   <ListItemText
-                    primary={b}
-                    slotProps={{
-                      primary: {
-                        variant: 'body1',
-                        component: 'div'
-                      }
+                    primary={p}
+                    primaryTypographyProps={{
+                      variant: 'body1',
+                      component: 'div'
+                    }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+
+            {/* Cons */}
+            <Typography variant='h6' fontWeight={700} sx={{ mt: 2 }}>
+              Cons:
+            </Typography>
+
+            <List sx={{ padding: 0 }}>
+              {cons.map((c, i) => (
+                <ListItem
+                  key={i}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    py: 0.5,
+                    px: 0,
+                    gap: '14px'
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 28, pt: '2px' }}>
+                    <img
+                      src='/assets/ticket-icon-black.svg'
+                      width={20}
+                      height={20}
+                      alt='tick'
+                    />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={c}
+                    primaryTypographyProps={{
+                      variant: 'body1',
+                      component: 'div'
                     }}
                   />
                 </ListItem>

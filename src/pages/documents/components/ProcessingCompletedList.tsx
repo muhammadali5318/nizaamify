@@ -122,7 +122,7 @@ export default function ProcessingCompletedList() {
         </Button>
       </Box>
 
-      <NotificationBanner content='Make sure to review the extracted data before approving them. These data will be used in calculating financial records of your practice.' />
+      <NotificationBanner content='Please ensure you review the extracted data before approving them. The data will be used to produce financial records for your practice.' />
 
       {allDocuments.map((doc) => (
         <Card

@@ -15,7 +15,6 @@ import {
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import styles from '../AppLayout.module.scss'
-import { toTitleCase } from 'src/utils/stringUtils'
 import { useAuth } from 'src/context/AuthProvider'
 import { useState, useEffect, useRef } from 'react'
 import AddPracticeModal from 'src/pages/practice-settings/components/AddPracticeModal'
@@ -23,7 +22,7 @@ import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import { useDispatch } from 'react-redux'
 import { setMergedPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
-import { ALL_PERMISSIONS } from 'src/const'
+import { ALL_PERMISSIONS, PRACTICE_TYPE } from 'src/const'
 import { deepEqual } from 'src/utils/objectsUtils'
 import { notify } from 'src/components/notistack/NotificationProvider'
 import { clearAll } from 'src/store/slices/processedBatchDataSlice'
@@ -209,7 +208,8 @@ export default function PracticeSelector() {
               >
                 {selectedPractice?.onboarding_status !== 'COMPLETED'
                   ? 'Pending onboarding'
-                  : toTitleCase(selectedPractice?.practice_type ?? '')}
+                  : selectedPractice?.practice_type &&
+                    PRACTICE_TYPE[selectedPractice.practice_type]}
               </Typography>
             </Stack>
           )}

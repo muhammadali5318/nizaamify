@@ -145,7 +145,7 @@ export default function UploadQueue() {
             disabled={loading}
             onClick={handleStartProcessing}
           >
-            {loading ? 'Processing...' : 'Start documents processing'}
+            {loading ? 'Processing...' : 'Start Processing Document(s)'}
           </Button>
         </Box>
       )}
