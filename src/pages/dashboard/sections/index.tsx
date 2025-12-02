@@ -46,7 +46,7 @@ const MainDashboard = () => {
         break
 
       case 'Yearly':
-        startDate = endDate.subtract(0, 'month').startOf('year')
+        startDate = endDate.startOf('year')
         granularity = 'year'
         month = null
         break
@@ -58,8 +58,8 @@ const MainDashboard = () => {
     }
 
     return {
-      start_date: startDate.format('YYYY-MM-DD'),
-      end_date: endDate.format('YYYY-MM-DD'),
+      start_date: startDate.format('DD-MM-YYYY'),
+      end_date: endDate.format('DD-MM-YYYY'),
       granularity,
       month,
       year
@@ -68,7 +68,6 @@ const MainDashboard = () => {
 
   const { granularity, month, year } = getDateRange(selectedPeriod)
 
-  // Fetch expense data
   useEffect(() => {
     const fetchExpenseData = async () => {
       if (!activePracticeId) {
@@ -95,15 +94,16 @@ const MainDashboard = () => {
   }, [selectedPeriod, granularity, month, year, activePracticeId])
 
   return (
-    <Box display='flex' flexDirection='column' gap={2}>
-      {/* Header + Period Selector */}
+    <Box display='flex' flexDirection='column' gap={2} sx={{ width: '100%' }}>
+      {/* HEADER */}
       <Box
         mb={1}
         sx={{
           display: 'flex',
-          flexDirection: 'row',
+          flexDirection: { xs: 'column', sm: 'row' },
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: { xs: 'start', sm: 'center' },
+          gap: 1
         }}
       >
         <Typography variant='h6' fontWeight={600}>
@@ -117,42 +117,42 @@ const MainDashboard = () => {
         />
       </Box>
 
-      {/* 1. KPI Cards */}
+      {/* KPI CARDS */}
       <DashboardStatsSection
         granularity={granularity}
         month={month}
         year={year}
       />
 
-      {/* 2. Revenue & Profit Charts */}
-
-      {/* 3. Expense Breakdown & Trends */}
+      {/* EXPENSE SECTION */}
       <Box
-        display='flex'
-        flexDirection='column'
-        gap={2}
-        sx={{ backgroundColor: '#fafafa', borderRadius: '12px', p: 2 }}
+        sx={{
+          backgroundColor: '#fafafa',
+          borderRadius: '12px',
+          p: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2
+        }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <img src={expenseIcon} alt='Expense' />
-          <Typography variant='h6' mb={1}>
-            Expense Breakdown & Trends
-          </Typography>
+          <Typography variant='h6'>Expense Breakdown & Trends</Typography>
         </Box>
 
         {loading ? (
           <CircularProgress
             size={28}
-            thickness={4}
-            sx={{ color: '#000', alignSelf: 'center' }}
+            sx={{ alignSelf: 'center', color: '#000' }}
           />
         ) : (
           <Box
             display='flex'
             flexDirection={{ xs: 'column', md: 'row' }}
             gap={2}
+            sx={{ width: '100%' }}
           >
-            <Box flex={1}>
+            <Box flex={1} sx={{ minHeight: 250 }}>
               <ExpenseBreakdownChart
                 data={expenseData}
                 granularity={granularity}
@@ -164,10 +164,9 @@ const MainDashboard = () => {
         )}
       </Box>
 
-      {/* 4. Benchmark Table */}
-
+      {/* EXPENSE TREND */}
       <Box display='flex' flexDirection={{ xs: 'column', md: 'row' }} gap={2}>
-        <Box flex={1.3}>
+        <Box flex={1} sx={{ minHeight: 280 }}>
           <ExpenseTrendChart
             data={expenseData}
             granularity={granularity}
@@ -177,25 +176,33 @@ const MainDashboard = () => {
         </Box>
       </Box>
 
+      {/* BENCHMARK TABLE */}
       <Box
-        mt={1}
-        sx={{ backgroundColor: '#fafafa', borderRadius: '12px', p: 2 }}
+        sx={{
+          backgroundColor: '#fafafa',
+          borderRadius: '12px',
+          p: 2,
+          width: '100%'
+        }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
           <img src={benchmarkIcon} alt='Benchmark' />
-          <Typography variant='h6' mb={1}>
+          <Typography variant='h6'>
             Benchmark Comparison (as % of Revenue)
           </Typography>
         </Box>
+
         <BenchmarkComparisonTable data={expenseData} />
       </Box>
+
+      {/* REVENUE VS PROFIT SECTION */}
       <Box
         display='flex'
         flexDirection={{ xs: 'column', md: 'row' }}
-        gap={{ xs: 2, md: 0 }}
-        sx={{ backgroundColor: '#fff', borderRadius: '12px', width: '100%' }}
+        gap={2}
+        sx={{ width: '100%' }}
       >
-        <Box flex={1.4} mr={2}>
+        <Box flex={1.4} sx={{ minHeight: 280 }}>
           <RevenueVsCostChart
             granularity={granularity}
             month={month}
@@ -203,7 +210,8 @@ const MainDashboard = () => {
             practiceId={activePracticeId}
           />
         </Box>
-        <Box flex={1}>
+
+        <Box flex={1} sx={{ minHeight: 280 }}>
           <ProfitMarginTrendChart
             granularity={granularity}
             month={month}
@@ -212,23 +220,33 @@ const MainDashboard = () => {
           />
         </Box>
       </Box>
-      {/* 5. AI Insights */}
+
+      {/* AI INSIGHTS */}
       <Box
-        display='flex'
-        flexDirection='column'
-        gap={2}
-        sx={{ backgroundColor: '#FAFAFA', p: 2, borderRadius: '12px' }}
+        sx={{
+          backgroundColor: '#FAFAFA',
+          p: 2,
+          borderRadius: '12px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2
+        }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <img src={aiIcon} alt='AI Insights' />
-          <Typography variant='h6' mb={1}>
-            AI-Driven Insights
-          </Typography>
+          <Typography variant='h6'>AI-Driven Insights</Typography>
         </Box>
-        <Box display='flex' flexDirection={{ xs: 'column', md: 'row' }} gap={2}>
+
+        <Box
+          display='flex'
+          flexDirection={{ xs: 'column', md: 'row' }}
+          gap={2}
+          sx={{ width: '100%' }}
+        >
           <Box flex={1}>
             <ExpenseAnalysisCard />
           </Box>
+
           <Box flex={1}>
             <AISummaryCard />
           </Box>

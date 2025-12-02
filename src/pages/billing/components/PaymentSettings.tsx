@@ -35,15 +35,17 @@ const PaymentSettings: React.FC<PaymentSettingsProps> = ({
       <Box
         sx={{
           display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'flex-start', sm: 'center' },
           gap: 2
         }}
       >
         <img src={poundIcon} alt='pound' />
         <Box>
-          <Typography variant='h6'>Payment Settings</Typography>
-          <Typography variant='body2'>
+          <Typography variant='h6' fontSize={{ xs: '16px', sm: '18px' }}>
+            Payment Settings
+          </Typography>
+          <Typography variant='body2' sx={{ color: '#757575' }}>
             Payments will be automatically deducted on the billing date
           </Typography>
         </Box>
@@ -54,7 +56,7 @@ const PaymentSettings: React.FC<PaymentSettingsProps> = ({
         sx={{
           border: '1px solid #EEEEEE',
           borderRadius: '12px',
-          padding: 1,
+          padding: 2,
           mt: 2,
           backgroundColor: '#FAFAFA'
         }}
@@ -62,15 +64,25 @@ const PaymentSettings: React.FC<PaymentSettingsProps> = ({
         <Box
           sx={{
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: { xs: 'flex-start', md: 'center' },
+            justifyContent: 'space-between',
+            gap: { xs: 2, md: 0 }
           }}
         >
-          {/* Left */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {/* LEFT BLOCK */}
+          <Box
+            sx={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: 2
+            }}
+          >
             <img src={calendarIcon} alt='calendar' />
+
             <Box>
-              <Typography variant='h6' sx={{ fontSize: '16px' }}>
+              <Typography variant='h6' fontSize='16px'>
                 Next payment date
               </Typography>
               <Typography variant='body2' sx={{ color: '#898989' }}>
@@ -78,29 +90,38 @@ const PaymentSettings: React.FC<PaymentSettingsProps> = ({
               </Typography>
             </Box>
 
+            {/* Divider only visible on md+ */}
             <Divider
               orientation='vertical'
               flexItem
-              sx={{ height: 44, mx: 1 }}
+              sx={{ display: { xs: 'none', md: 'block' }, mx: 1, height: 44 }}
             />
 
             <Typography variant='body2'>
-              Due by:<strong> {billingDate}</strong>
+              Due by:
+              <strong> {billingDate}</strong>
             </Typography>
 
             <Divider
               orientation='vertical'
               flexItem
-              sx={{ height: 44, mx: 1 }}
+              sx={{ display: { xs: 'none', md: 'block' }, mx: 1, height: 44 }}
             />
 
             <Typography variant='body2'>
-              Amount:<strong> £{subscriptionPlanAmount}.00</strong>
+              Amount:
+              <strong> £{subscriptionPlanAmount}.00</strong>
             </Typography>
           </Box>
 
-          {/* Menu Trigger */}
-          <Box sx={{ cursor: 'pointer' }} onClick={handleMenuOpen}>
+          {/* MENU BUTTON */}
+          <Box
+            sx={{
+              alignSelf: { xs: 'flex-end', md: 'center' },
+              cursor: 'pointer'
+            }}
+            onClick={handleMenuOpen}
+          >
             <MoreVertIcon />
           </Box>
         </Box>
@@ -118,11 +139,9 @@ const PaymentSettings: React.FC<PaymentSettingsProps> = ({
               color: '#D32F2F',
               '&:hover': {
                 backgroundColor: 'transparent',
-                color: '#D32F2F',
-                boxShadow: 'none'
+                color: '#D32F2F'
               }
             }}
-            size='small'
             startIcon={<CloseIcon />}
           >
             Cancel Subscription

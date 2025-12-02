@@ -70,7 +70,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'flex-start',
-        maxHeight: 140
+        maxHeight: 160
       }}
     >
       <Stack direction='row' alignItems='center' spacing={1}>
@@ -111,13 +111,18 @@ const StatsCard: React.FC<StatsCardProps> = ({
         {loading ? (
           <CircularProgress size={28} thickness={4} sx={{ color: '#000' }} />
         ) : (
-          <>
+          <Box display='flex' flexDirection='column' alignItems='flex-start'>
             <Typography variant='h6' fontWeight={600}>
               {value}
             </Typography>
 
             {trend !== null && (
-              <Stack direction='row' alignItems='center' spacing={0.3} ml={1}>
+              <Box
+                display='flex'
+                flexDirection='row'
+                alignItems='center'
+                gap={0.5}
+              >
                 {displayIcon}
                 <Typography
                   variant='body2'
@@ -128,9 +133,9 @@ const StatsCard: React.FC<StatsCardProps> = ({
                 >
                   {trend !== 'N/A' ? `${Math.abs(trend)}%` : 'N/A'}
                 </Typography>
-              </Stack>
+              </Box>
             )}
-          </>
+          </Box>
         )}
       </Box>
     </Box>
