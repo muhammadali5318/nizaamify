@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Card, CardContent, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import DocumentCategoryCard from '../components/DocumentCategoryCard'
 import styles from '../documents.module.scss'
 import incomeIcon from '../../../../public/assets/income-icon.svg'
@@ -13,7 +13,7 @@ import { RootState } from 'src/store/store'
 import historyIcon from '../../../assets/history-Icon-blue.svg'
 const categories = [
   {
-    title: 'Income & revenue',
+    title: 'Income & Revenue',
     color: '#007bff',
     icon: incomeIcon,
     examples: [
@@ -24,7 +24,7 @@ const categories = [
     ]
   },
   {
-    title: 'Staff costs',
+    title: 'Staff Costs',
     color: '#ff8c00',
     icon: staffIcon,
     examples: ['PAYE payslips', 'Staff Training', 'Locum invoices']
@@ -36,7 +36,7 @@ const categories = [
     examples: ['Dental lab invoices ']
   },
   {
-    title: 'Business operations',
+    title: 'Business Operations',
     color: '#9333ea',
     icon: operationsIcon,
     examples: [
@@ -54,7 +54,7 @@ const categories = [
     ]
   },
   {
-    title: 'Premises & equipment',
+    title: 'Premises & Equipment',
     color: '#0284c7',
     icon: premisesIcon,
     examples: [
@@ -67,7 +67,7 @@ const categories = [
     ]
   },
   {
-    title: 'Tax documents ',
+    title: 'Tax Documents ',
     color: '#0284c7',
     icon: taxIcon,
     examples: [
@@ -106,76 +106,6 @@ const UploadCategories: React.FC = () => {
           <Typography variant='h6' mb={2} mt={2}>
             Document Categories & Examples
           </Typography>
-          <Box
-            className={styles.practiceInfoBox}
-            sx={{
-              display: 'flex',
-              gap: 2,
-              mb: 3,
-              flexWrap: 'wrap'
-            }}
-          >
-            <Card
-              sx={{
-                flex: 1,
-                minWidth: '300px',
-                backgroundColor: '#F2F9FD'
-              }}
-            >
-              <CardContent>
-                <Typography
-                  variant='subtitle1'
-                  fontWeight='bold'
-                  gutterBottom
-                  color='#01579B'
-                >
-                  SQUAT and PRIVATE PRACTICE
-                </Typography>
-                <Box component='ul' sx={{ pl: 3, m: 0 }}>
-                  <li>
-                    <Typography variant='body2'>
-                      If they are accrual basis: allocated payments report (or
-                      equivalent report depending on the software they use)
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant='body2'>
-                      Cash basis: Income from bank statement
-                    </Typography>
-                  </li>
-                </Box>
-              </CardContent>
-            </Card>
-
-            <Card
-              sx={{ flex: 1, minWidth: '300px', backgroundColor: '#F2F9FD' }}
-            >
-              <CardContent>
-                <Typography
-                  variant='subtitle1'
-                  fontWeight='bold'
-                  gutterBottom
-                  color='#01579B'
-                >
-                  NHS and MIXED
-                </Typography>
-                <Box component='ul' sx={{ pl: 3, m: 0 }}>
-                  <li>
-                    <Typography variant='body2'>
-                      If they are accrual basis: allocated payments report (or
-                      equivalent report depending on the software they use) +
-                      NHS compass statement
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant='body2'>
-                      Cash basis: Income from bank statement
-                    </Typography>
-                  </li>
-                </Box>
-              </CardContent>
-            </Card>
-          </Box>
           <Box className={styles.categoriesGrid}>
             {categories.map((cat, idx) => (
               <DocumentCategoryCard
