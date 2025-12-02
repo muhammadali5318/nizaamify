@@ -18,32 +18,42 @@ import { useDebounce } from 'src/hooks/useDebounce'
 import CloseIcon from '@mui/icons-material/Close'
 import PaymentSettings from './components/PaymentSettings'
 import { useQueryClient } from '@tanstack/react-query'
-
+import { hasPermission } from 'src/config/module-permissions'
 const Billing = () => {
   const queryClient = useQueryClient()
-
   const { activePractice, activePracticeId } = useActivePractice()
   const practiceId = activePracticeId
+
   const isSubscribed = (activePractice as any)?.subscription_details
     ?.is_subscribed
   const subscriptionPlan = (activePractice as any)?.subscription_details
     ?.subscription_plan_name
   const subscriptionPlanAmount = (activePractice as any)?.subscription_details
     ?.subscription_plan_amount
+
   const rawDate = (activePractice as any)?.subscription_details
     ?.next_billing_date
 
-  const billingDate = rawDate
-    ? new Date(rawDate).toISOString().split('T')[0].replace(/-/g, '/')
-    : ''
+  const formatDate = (date: string) => {
+    const d = new Date(date)
+    return `${String(d.getDate()).padStart(2, '0')}-${String(
+      d.getMonth() + 1
+    ).padStart(2, '0')}-${d.getFullYear()}`
+  }
+  const canViewInvoices = hasPermission('subs.view_invoices')
+
+  const billingDate = rawDate ? formatDate(rawDate) : ''
+
   const SUBSCRIBED_PLAN = getSubscribedPlan(activePractice)
   const FREE_PLAN = getFreePlan(activePractice)
+
   const [rows, setRows] = useState<any[]>([])
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
   const [sortModel, setSortModel] = useState<any>([])
   const [loading, setLoading] = useState(false)
   const [totalCount, setTotalCount] = useState(0)
+
   const [searchKey, setSearchKey] = useState('')
   const debouncedSearchKey = useDebounce(searchKey, 500)
   const [dateRange, setDateRange] = useState<[any, any]>([null, null])
@@ -60,10 +70,10 @@ const Billing = () => {
         pageSize,
         search: debouncedSearchKey || undefined,
         start_date: dateRange[0]
-          ? dayjs(dateRange[0]).format('YYYY-MM-DD')
+          ? dayjs(dateRange[0]).format('DD-MM-YYYY')
           : undefined,
         end_date: dateRange[1]
-          ? dayjs(dateRange[1]).format('YYYY-MM-DD')
+          ? dayjs(dateRange[1]).format('DD-MM-YYYY')
           : undefined
       }
 
@@ -72,6 +82,7 @@ const Billing = () => {
       setRows(res?.data?.results || [])
       setTotalCount(res?.data?.count || 0)
     } catch {
+      console.error('Failed to load invoices')
       notify.error('Failed to load invoices')
     } finally {
       setLoading(false)
@@ -79,13 +90,23 @@ const Billing = () => {
   }
 
   useEffect(() => {
-    fetchInvoices()
-  }, [practiceId, page, pageSize, debouncedSearchKey, dateRange])
+    if (canViewInvoices) {
+      fetchInvoices()
+    }
+  }, [
+    practiceId,
+    page,
+    pageSize,
+    debouncedSearchKey,
+    dateRange,
+    canViewInvoices
+  ])
   const handleClearFilters = () => {
     setSearchKey('')
     setDateRange([null, null])
     setPage(0)
   }
+
   const handleButtonClick = async (buttonLabel: string, title: string) => {
     if (!practiceId) {
       notify.error('No active practice selected.')
@@ -93,7 +114,7 @@ const Billing = () => {
     }
 
     try {
-      setSubscriptionLoading(true) // ⬅️ Start loader
+      setSubscriptionLoading(true)
 
       const res = await handleSubscriptionAction({
         buttonLabel,
@@ -114,28 +135,29 @@ const Billing = () => {
     } catch (error: any) {
       notify.error(error?.message)
     } finally {
-      setSubscriptionLoading(false) // ⬅️ Stop loader
+      setSubscriptionLoading(false)
     }
   }
 
   return (
     <Box
       sx={{
-        marginLeft: { xs: 3, sm: 3, md: 3 },
-        paddingTop: 2,
-        width: { xs: '100%', sm: '94%', md: '94%', lg: '96%' }
+        px: { xs: 1.5, sm: 3, md: 4 },
+        pt: 2,
+        width: '100%'
       }}
     >
+      {/* Heading Section */}
       <Box
         sx={{
           display: 'flex',
           flexDirection: 'row',
           gap: 2,
-          mb: 2,
+          mb: 3,
           alignItems: 'center'
         }}
       >
-        <img src={billImg} alt='bill' />
+        <img src={billImg} alt='bill' style={{ width: 40, height: 40 }} />
         <Box>
           <Typography variant='h6' fontWeight={700}>
             Subscription Packages
@@ -146,6 +168,7 @@ const Billing = () => {
         </Box>
       </Box>
 
+      {/* Subscription Cards */}
       {isSubscribed && subscriptionPlan === 'PROFESSIONAL' ? (
         <SubscriptionCard
           {...SUBSCRIBED_PLAN}
@@ -174,13 +197,15 @@ const Billing = () => {
           />
         </Box>
       )}
+
+      {/* Payment Settings */}
       {subscriptionPlan === 'PROFESSIONAL' && (
         <Box
           sx={{
             border: '1px solid #EEEEEE',
             borderRadius: '24px',
-            padding: 1,
-            mt: 2
+            padding: 2,
+            mt: 3
           }}
         >
           <PaymentSettings
@@ -189,78 +214,80 @@ const Billing = () => {
           />
         </Box>
       )}
-      {/* -------------------- INVOICE HISTORY TABLE -------------------- */}
+
+      {/* Invoice History */}
       <Box
         sx={{
-          mt: 2,
+          mt: 4,
           border: '1px solid #efefef',
-          pt: 1,
           borderRadius: '12px',
-          mb: 5
+          pb: 3
         }}
       >
+        {/* Header */}
         <Box
           sx={{
             display: 'flex',
             flexDirection: 'row',
             gap: 2,
-            mb: 2,
             alignItems: 'center',
-            ml: 1
+            p: 2
           }}
         >
-          <img src={fileBlueIcon} alt='file' />
+          <img src={fileBlueIcon} alt='file' width={38} />
           <Box>
             <Typography variant='h6' fontWeight={700}>
               Billing History
             </Typography>
-            <Typography sx={{ color: '#BEBEBE', fontSize: '16px' }}>
+            <Typography sx={{ color: '#BEBEBE', fontSize: '14px' }}>
               Search, filter, and manage your uploaded documents
             </Typography>
           </Box>
         </Box>
-        <Box sx={{ display: 'flex', gap: 2, px: 2, pb: 2 }}>
-          <Box>
-            <TextField
-              variant='outlined'
-              label='Search'
-              placeholder='Search invoice number…'
-              value={searchKey}
-              onChange={(e) => {
-                setSearchKey(e.target.value)
+
+        {/* Filters */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: 2,
+            px: 2,
+            pb: 2
+          }}
+        >
+          <TextField
+            fullWidth
+            variant='outlined'
+            label='Search'
+            placeholder='Search invoice number…'
+            value={searchKey}
+            onChange={(e) => setSearchKey(e.target.value)}
+            sx={{
+              '& .MuiOutlinedInput-notchedOutline': { borderRadius: '12px' }
+            }}
+          />
+
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              format='DD-MM-YYYY'
+              label='Start date'
+              value={dateRange[0]}
+              onChange={(newValue) => {
+                setDateRange([newValue, dateRange[1]])
+                setPage(0)
               }}
-              sx={{
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderRadius: '12px'
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  sx: {
+                    '& .MuiPickersInputBase-root': { borderRadius: '12px' }
+                  }
                 }
               }}
             />
-          </Box>
-
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Box>
-              <DatePicker
-                format='YYYY/MM/DD'
-                label='Start date'
-                value={dateRange[0]}
-                onChange={(newValue) => {
-                  setDateRange([newValue, dateRange[1]])
-                  setPage(0)
-                }}
-                slotProps={{
-                  textField: {
-                    sx: {
-                      '& .MuiPickersInputBase-root': {
-                        borderRadius: '12px'
-                      }
-                    }
-                  }
-                }}
-              />
-            </Box>
 
             <DatePicker
-              format='YYYY/MM/DD'
+              format='DD-MM-YYYY'
               label='End date'
               value={dateRange[1]}
               onChange={(newValue) => {
@@ -269,10 +296,9 @@ const Billing = () => {
               }}
               slotProps={{
                 textField: {
+                  fullWidth: true,
                   sx: {
-                    '& .MuiPickersInputBase-root': {
-                      borderRadius: '12px' // outer container
-                    }
+                    '& .MuiPickersInputBase-root': { borderRadius: '12px' }
                   }
                 }
               }}
@@ -283,22 +309,27 @@ const Billing = () => {
             variant='text'
             onClick={handleClearFilters}
             startIcon={<CloseIcon />}
+            sx={{ alignSelf: 'center' }}
           >
             Clear
           </Button>
         </Box>
-        <DocumentsTable
-          rows={rows}
-          columns={invoiceColumns}
-          page={page}
-          pageSize={pageSize}
-          setPage={setPage}
-          setPageSize={setPageSize}
-          sortModel={sortModel}
-          onSortModelChange={setSortModel}
-          loading={loading}
-          totalCount={totalCount}
-        />
+
+        {/* Responsive Table Wrapper */}
+        <Box sx={{ width: '100%', overflowX: 'auto' }}>
+          <DocumentsTable
+            rows={rows}
+            columns={invoiceColumns}
+            page={page}
+            pageSize={pageSize}
+            setPage={setPage}
+            setPageSize={setPageSize}
+            sortModel={sortModel}
+            onSortModelChange={setSortModel}
+            loading={loading}
+            totalCount={totalCount}
+          />
+        </Box>
       </Box>
     </Box>
   )

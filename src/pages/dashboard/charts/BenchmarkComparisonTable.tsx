@@ -50,7 +50,6 @@ const ExpandableBenchmarkTable = ({ data }: ExpandableBenchmarkTableProps) => {
           <Table
             size='small'
             sx={{
-              minWidth: 650,
               '& th': {
                 fontWeight: 700,
                 fontSize: { xs: '0.8rem', sm: '0.9rem' },
