@@ -18,25 +18,31 @@ import aiIcon from '../../../assets/ai-icon.svg'
 
 import { getExpenseData } from '../../../services/apis/expense'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 const MainDashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('Current month')
   const [expenseData, setExpenseData] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const { activePracticeId } = useActivePractice()
+  const [selectedMonth, setSelectedMonth] = useState(dayjs())
 
   const getDateRange = (label: string) => {
     const endDate = dayjs()
     let startDate
     let granularity: 'month' | 'quarter' | 'year'
     let month: number | null = null
-    const year = endDate.year()
+    let year = endDate.year()
 
     switch (label) {
       case 'Current month':
+        const targetDate = selectedMonth ?? endDate
+
         startDate = endDate.startOf('month')
         granularity = 'month'
-        month = endDate.month() + 1
+        month = targetDate.month() + 1
+        year = targetDate.year()
         break
 
       case '3-month view':
@@ -109,12 +115,48 @@ const MainDashboard = () => {
         <Typography variant='h6' fontWeight={600}>
           Practice Financial Overview
         </Typography>
+        <Box
+          mb={1}
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
 
-        <PeriodSelector
-          options={['Current month', '3-month view', 'Yearly']}
-          selected={selectedPeriod}
-          onSelect={setSelectedPeriod}
-        />
+            alignItems: { xs: 'start', sm: 'center' },
+            gap: 1
+          }}
+        >
+          <Box>
+            {' '}
+            {selectedPeriod === 'Current month' && (
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  views={['year', 'month']}
+                  label='Select Month'
+                  value={selectedMonth}
+                  onChange={(newValue: any) => {
+                    setSelectedMonth(newValue)
+
+                    setSelectedPeriod('Current month')
+                  }}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      sx: {
+                        '& .MuiPickersInputBase-root': { borderRadius: '12px' },
+                        size: 'small'
+                      }
+                    }
+                  }}
+                />
+              </LocalizationProvider>
+            )}
+          </Box>
+          <PeriodSelector
+            options={['Current month', '3-month view', 'Yearly']}
+            selected={selectedPeriod}
+            onSelect={setSelectedPeriod}
+          />
+        </Box>
       </Box>
 
       {/* KPI CARDS */}
@@ -182,14 +224,13 @@ const MainDashboard = () => {
           backgroundColor: '#fafafa',
           borderRadius: '12px',
           p: 2,
-          width: '100%'
+          width: '100%',
+          overflowX: 'auto'
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
           <img src={benchmarkIcon} alt='Benchmark' />
-          <Typography variant='h6'>
-            Benchmark Comparison (as % of Revenue)
-          </Typography>
+          <Typography variant='h6'>Benchmark Comparison</Typography>
         </Box>
 
         <BenchmarkComparisonTable data={expenseData} />

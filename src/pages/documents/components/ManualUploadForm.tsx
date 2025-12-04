@@ -23,9 +23,9 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
 import {
-  getDocumentTypes,
   getDocumentSubtypes,
-  category
+  category,
+  getFilteredDocumentTypes
 } from '../../../utils/documentMapping'
 import {
   addFilesToQueue,
@@ -42,7 +42,8 @@ import { useActivePractice } from 'src/hooks/useActivePractice'
 import { createManualEntry } from 'src/services/apis/manualEntryApi'
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
 import { getFileIcon } from 'src/utils/getFileIcon'
-
+import { useNavigate } from 'react-router'
+import { resetPresignResponse } from 'src/store/slices/manualEntryFilesSlice'
 interface ManualEntryFormData {
   entryDate: string
   category: string
@@ -69,22 +70,43 @@ const ManualEntryForm: React.FC = () => {
     description: '',
     attachments: []
   })
-
-  const { files, completedFiles } = useSelector(
-    (state: RootState) => state.uploads
-  )
+  const { completedFiles } = useSelector((state: RootState) => state.uploads)
   const batches = useSelector((state: RootState) => state.processed.batches)
   const hasBatches = Object.keys(batches || {}).length > 0
   const dispatch = useDispatch()
   const queue = useSelector((state: RootState) => state.manualEntryQueue.queue)
   const { user } = useAuth0()
   const { activePracticeId } = useActivePractice()
-  const types = getDocumentTypes()
+  const types = getFilteredDocumentTypes(formData.category)
   const subtypes = formData.type ? getDocumentSubtypes(formData.type) : []
-  const handleFilesSelected = (files: FileList | File[]) => {
-    const arr = Array.from(files)
-    dispatch(addFilesToQueue(arr))
+  const MAX_FILES = 5
+
+  const handleFilesSelected = (incomingFiles: FileList | File[]) => {
+    const newFiles = Array.from(incomingFiles)
+
+    const uploadedCount = manualEntryFiles.items.length
+    const queuedCount = queue.length
+    const totalCount = uploadedCount + queuedCount
+
+    const availableSlots = MAX_FILES - totalCount
+
+    if (availableSlots <= 0) {
+      notify.error(`You already have ${MAX_FILES} files uploaded.`)
+      return
+    }
+
+    if (newFiles.length > availableSlots) {
+      notify.error(
+        `You can only upload ${availableSlots} more file(s). All selected files were discarded.`
+      )
+      return
+    }
+
+    dispatch(addFilesToQueue(newFiles))
   }
+
+  const navigate = useNavigate()
+  const [amountError, setAmountError] = useState<string>('')
   const userId = user?.user_data?.user_metadata?.uuid
   const manualEntryFiles = useSelector(
     (state: RootState) => state.manualEntryFiles
@@ -103,6 +125,21 @@ const ManualEntryForm: React.FC = () => {
         return
       }
     }
+    if (name === 'amount') {
+      const numberValue = parseFloat(value)
+
+      if (value !== '' && numberValue < 0) {
+        setAmountError('Amount cannot be negative')
+        notify.error(amountError || 'Amount cannot be negative')
+      } else {
+        setAmountError('')
+      }
+    }
+
+    if (name === 'amount' && value !== '' && parseFloat(value) < 0) {
+      return
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
@@ -112,6 +149,7 @@ const ManualEntryForm: React.FC = () => {
       setFormData((prev) => ({
         ...prev,
         [name]: value,
+        ...(name === 'category' ? { type: '', subtype: '' } : {}),
         ...(name === 'type' ? { subtype: '' } : {})
       }))
     }
@@ -126,6 +164,10 @@ const ManualEntryForm: React.FC = () => {
     })
   }
 
+  const handleCancel = () => {
+    navigate('/documents')
+    dispatch(resetPresignResponse())
+  }
   const handleSubmit = async () => {
     try {
       if (!activePracticeId) {
@@ -161,7 +203,7 @@ const ManualEntryForm: React.FC = () => {
       })
 
       notify.success(res.message || 'Manual entry saved successfully')
-
+      navigate('/documents')
       setFormData({
         entryDate: '',
         category: '',
@@ -222,12 +264,12 @@ const ManualEntryForm: React.FC = () => {
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
-              format='YYYY-MM-DD'
+              format='DD-MM-YYYY'
               label='Entry Date *'
               value={formData.entryDate ? dayjs(formData.entryDate) : null}
               onChange={(newValue) => {
                 if (newValue) {
-                  const formattedDate = newValue.format('YYYY-MM-DD')
+                  const formattedDate = newValue.format('DD-MM-YYYY')
 
                   const today = dayjs().startOf('day')
                   if (newValue.isAfter(today)) {
@@ -330,12 +372,12 @@ const ManualEntryForm: React.FC = () => {
           />
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
-              format='YYYY-MM-DD'
+              format='DD-MM-YYYY'
               label='Payment Date'
               value={formData.paymentDate ? dayjs(formData.paymentDate) : null}
               onChange={(newValue) => {
                 if (newValue) {
-                  const formattedDate = newValue.format('YYYY-MM-DD')
+                  const formattedDate = newValue.format('DD-MM-YYYY')
 
                   const today = dayjs().startOf('day')
                   if (newValue.isAfter(today)) {
@@ -379,7 +421,7 @@ const ManualEntryForm: React.FC = () => {
           subtitle='You can upload unlimited files but only 5 in one go.'
           fileInfoText='Maximum 10MB each — Supported: .CSV, .PDF, .PNG, .JPG'
           maxFiles={5}
-          fileCount={files.length}
+          fileCount={manualEntryFiles.items.length + queue.length}
           isProcessingComplete={completedFiles.length > 0 && hasBatches}
           completedView={<ProcessingCompletedList />}
           onFilesSelected={handleFilesSelected}
@@ -464,7 +506,39 @@ const ManualEntryForm: React.FC = () => {
             ))}
           </Box>
         )}
+        <Box>
+          {manualEntryFiles.items.length > 0 && (
+            <Box mt={3}>
+              <Typography variant='h6'>
+                Successfully Uploaded ({manualEntryFiles.items.length})
+              </Typography>
 
+              {manualEntryFiles.items.map((file: any, index: number) => (
+                <Box
+                  key={index}
+                  sx={{
+                    p: 1.5,
+                    mb: 1,
+                    background: '#E8F5E9',
+                    borderRadius: '8px',
+                    border: '1px solid #C8E6C9'
+                  }}
+                >
+                  <Stack direction='row' spacing={1.5} alignItems='center'>
+                    <img src={getFileIcon(file.filename)} width={28} />
+
+                    <div>
+                      <Typography>{file.filename}</Typography>
+                      <Typography variant='caption'>
+                        {file.headers['Content-Type']}
+                      </Typography>
+                    </div>
+                  </Stack>
+                </Box>
+              ))}
+            </Box>
+          )}
+        </Box>
         {/* Buttons */}
         <Box
           sx={{
@@ -479,7 +553,9 @@ const ManualEntryForm: React.FC = () => {
           }}
           mt={2}
         >
-          <Button variant='outlined'>Cancel</Button>
+          <Button variant='outlined' onClick={handleCancel}>
+            Cancel
+          </Button>
           <Button
             variant='contained'
             onClick={handleSubmit}

@@ -93,7 +93,10 @@ const DashboardStatsSection = ({
     },
     {
       title: 'Practice Value',
-      value: safeValue(kpiData.practice_value, '£'),
+      value:
+        kpiData.practice_value >= 0
+          ? safeValue(kpiData.practice_value, '£')
+          : 'N/A',
       icon: <img src={practiceValueIcon} alt='practice value' />
     }
   ]

@@ -48,3 +48,16 @@ export const category = {
   revenue: 'Revenue',
   unknown: 'Unknown'
 }
+export const getFilteredDocumentTypes = (category: string): string[] => {
+  const allTypes = Object.keys(documentMapping)
+
+  if (category === 'Revenue') {
+    return ['Income & Revenue']
+  }
+
+  if (category === 'Expense') {
+    return allTypes.filter((t) => t !== 'Income & Revenue')
+  }
+
+  return allTypes // Unknown → ALL
+}
