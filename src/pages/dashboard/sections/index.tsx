@@ -34,11 +34,10 @@ const MainDashboard = () => {
     let granularity: 'month' | 'quarter' | 'year'
     let month: number | null = null
     let year = endDate.year()
+    let targetDate = selectedMonth ?? endDate
 
     switch (label) {
       case 'Current month':
-        const targetDate = selectedMonth ?? endDate
-
         startDate = endDate.startOf('month')
         granularity = 'month'
         month = targetDate.month() + 1

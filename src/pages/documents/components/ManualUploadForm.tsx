@@ -525,7 +525,11 @@ const ManualEntryForm: React.FC = () => {
                   }}
                 >
                   <Stack direction='row' spacing={1.5} alignItems='center'>
-                    <img src={getFileIcon(file.filename)} width={28} />
+                    <img
+                      alt='file'
+                      src={getFileIcon(file.filename)}
+                      width={28}
+                    />
 
                     <div>
                       <Typography>{file.filename}</Typography>
