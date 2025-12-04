@@ -29,8 +29,10 @@ export const manualEntryFilesSlice = createSlice({
     ) => {
       state.batchId = action.payload.batchId
       state.expiresIn = action.payload.expiresIn
-      state.items = action.payload.items
+
+      state.items = [...state.items, ...action.payload.items]
     },
+
     resetPresignResponse: (state) => {
       state.batchId = null
       state.expiresIn = null

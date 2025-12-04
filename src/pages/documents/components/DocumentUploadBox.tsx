@@ -36,7 +36,6 @@ const FileUploadBox: React.FC<FileUploadBoxProps> = ({
   maxFiles = 5,
   onFilesSelected,
   fileCount = 0,
-
   isProcessingComplete,
   completedView,
   uploadIcon,
@@ -49,6 +48,7 @@ const FileUploadBox: React.FC<FileUploadBoxProps> = ({
     e.preventDefault()
     e.stopPropagation()
     setIsDragging(true)
+    if (limitReached) return
   }
 
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {

@@ -33,7 +33,8 @@ const persistConfig = {
     'selectedUser',
     'processing',
     // 'uploads',
-    'pollingJobs'
+    'pollingJobs',
+    'manualEntryFiles'
   ]
 }
 

@@ -37,64 +37,66 @@ const ExpandableBenchmarkTable = ({ data }: ExpandableBenchmarkTableProps) => {
     )
 
   return (
-    <Card
-      sx={{
-        backgroundColor: theme.palette.background.paper,
-        boxShadow: 3,
-        borderRadius: 3,
-        overflow: 'hidden'
-      }}
-    >
-      <CardContent sx={{ p: 0 }}>
-        <Box sx={{ overflowX: 'auto' }}>
-          <Table
-            size='small'
-            sx={{
-              '& th': {
-                fontWeight: 700,
-                fontSize: { xs: '0.8rem', sm: '0.9rem' },
-                backgroundColor: '#f9fafb'
-              },
-              '& td': {
-                fontSize: { xs: '0.8rem', sm: '0.9rem' }
-              }
-            }}
-          >
-            <TableHead sx={{ backgroundColor: '#F5F5F5' }}>
-              <TableRow>
-                <TableCell />
-                <TableCell sx={{ pt: 2 }}>Category</TableCell>
-                <TableCell sx={{ pt: 2 }} align='left'>
-                  Your practice value
-                </TableCell>
-                <TableCell sx={{ pt: 2 }} align='left'>
-                  UK Avg (NHS)
-                </TableCell>
-                <TableCell sx={{ pt: 2 }} align='left'>
-                  Monai benchmarking
-                </TableCell>
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {expenseTypes.map((type: any) => {
-                if (type.expense_type != 'Tax Documents') {
-                  const children = getChildCategories(type.expense_type)
-                  return (
-                    <ExpandableRow
-                      key={type.expense_type}
-                      row={type}
-                      childCategories={children}
-                      activePracticeType={activePracticeType}
-                    />
-                  )
+    <Box>
+      <Card
+        sx={{
+          backgroundColor: theme.palette.background.paper,
+          boxShadow: 3,
+          borderRadius: 3,
+          overflow: 'hidden'
+        }}
+      >
+        <CardContent sx={{ p: 0 }}>
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table
+              size='small'
+              sx={{
+                '& th': {
+                  fontWeight: 700,
+                  fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                  backgroundColor: '#f9fafb'
+                },
+                '& td': {
+                  fontSize: { xs: '0.8rem', sm: '0.9rem' }
                 }
-              })}
-            </TableBody>
-          </Table>
-        </Box>
-      </CardContent>
-    </Card>
+              }}
+            >
+              <TableHead sx={{ backgroundColor: '#F5F5F5' }}>
+                <TableRow>
+                  <TableCell />
+                  <TableCell sx={{ pt: 2 }}>Category</TableCell>
+                  <TableCell sx={{ pt: 2 }} align='left'>
+                    Your practice value
+                  </TableCell>
+                  <TableCell sx={{ pt: 2 }} align='left'>
+                    UK Avg (NHS)
+                  </TableCell>
+                  <TableCell sx={{ pt: 2 }} align='left'>
+                    Monai benchmarking
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {expenseTypes.map((type: any) => {
+                  if (type.expense_type != 'Tax Documents') {
+                    const children = getChildCategories(type.expense_type)
+                    return (
+                      <ExpandableRow
+                        key={type.expense_type}
+                        row={type}
+                        childCategories={children}
+                        activePracticeType={activePracticeType}
+                      />
+                    )
+                  }
+                })}
+              </TableBody>
+            </Table>
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
   )
 }
 
@@ -153,7 +155,7 @@ const ExpandableRow = ({
         <TableRow>
           <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
             <Collapse in={open} timeout='auto' unmountOnExit>
-              <Box sx={{ m: 1 }}>
+              <Box sx={{ m: 1, overflowX: 'auto' }}>
                 <Typography
                   variant='subtitle2'
                   sx={{
