@@ -22,7 +22,7 @@ const LABELS: Record<AgreementKeys, React.ReactNode> = {
     <>
       I agree to the{' '}
       <a
-        href='/auth/signup/agreements'
+        href={'/auth/signup/agreements?doc=terms'}
         target='_blank'
         rel='noopener noreferrer'
         className='info-main font-weight--700 cursor-pointer'
@@ -36,7 +36,7 @@ const LABELS: Record<AgreementKeys, React.ReactNode> = {
     <>
       I agree to the{' '}
       <a
-        href='/auth/signup/agreements'
+        href={'/auth/signup/agreements?doc=privacy'}
         target='_blank'
         rel='noopener noreferrer'
         className='info-main font-weight--700 cursor-pointer'
@@ -50,7 +50,7 @@ const LABELS: Record<AgreementKeys, React.ReactNode> = {
     <>
       I acknowledge the{' '}
       <a
-        href='/auth/signup/agreements'
+        href={'/auth/signup/agreements?doc=disclaimer'}
         target='_blank'
         rel='noopener noreferrer'
         className='info-main font-weight--700 cursor-pointer'
@@ -64,7 +64,7 @@ const LABELS: Record<AgreementKeys, React.ReactNode> = {
     <>
       I consent to data usage under{' '}
       <a
-        href='/auth/signup/agreements'
+        href={'/auth/signup/agreements?doc=dataProcessingAgreement'}
         target='_blank'
         rel='noopener noreferrer'
         className='info-main font-weight--700 cursor-pointer'
@@ -78,7 +78,7 @@ const LABELS: Record<AgreementKeys, React.ReactNode> = {
     <>
       I agree to the{' '}
       <a
-        href='/auth/signup/agreements'
+        href={'/auth/signup/agreements?doc=cookiePolicy'}
         target='_blank'
         rel='noopener noreferrer'
         className='info-main font-weight--700 cursor-pointer'

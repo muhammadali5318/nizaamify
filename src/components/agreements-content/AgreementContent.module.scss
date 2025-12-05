@@ -1,11 +1,57 @@
 .wrapper {
-  height: 360px;
-  width: 100%;
-  flex: 1;
+  height: 330px;
   background: url('/assets/agreemens-bg.svg') center top;
-  background-repeat: repeat-x;
   background-size: auto;
   display: flex;
   align-items: flex-start;
   justify-content: center;
+}
+
+
+.docIframe {
+  border: none;
+  width: 100%;
+  height: 100%;
+  display: block;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+  /* default large side gutters for wide screens */
+  padding: 0 300px;
+  background: transparent;
+}
+
+/* start reducing gutters at 1200px and below */
+@media (max-width: 1200px) {
+  .docIframe {
+    padding: 0 200px;
+  }
+}
+
+/* tablet-ish */
+@media (max-width: 992px) {
+  .docIframe {
+    padding: 0 120px;
+  }
+}
+
+/* small tablets / large phones */
+@media (max-width: 768px) {
+  .docIframe {
+    padding: 0 48px;
+  }
+}
+
+/* phones */
+@media (max-width: 600px) {
+  .docIframe {
+    padding: 0 16px;
+  }
+}
+
+/* optional utility if you want the centered header overlay to remain readable on small screens */
+@media (max-width: 600px) {
+  .wrapper {
+    align-items: center;
+    background-position: center top;
+  }
 }
