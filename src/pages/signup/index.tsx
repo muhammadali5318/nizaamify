@@ -58,7 +58,7 @@ const SignUp: React.FC = () => {
   const steps =
     CONFIG.envName === 'dev' ? defaultSteps : defaultSteps.slice(0, -1)
   const [searchParams] = useSearchParams()
-  const step = Number(searchParams.get('step') ?? 0)
+  const step = Number(searchParams.get('step') ?? 2)
 
   const [activeStep, setActiveStep] = useState<number>(step)
   const [newlyCreatedPracticeId, setNewlyCreatedPracticeId] =

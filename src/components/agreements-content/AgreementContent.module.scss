@@ -1,0 +1,11 @@
+.wrapper {
+  height: 360px;
+  width: 100%;
+  flex: 1;
+  background: url('/assets/agreemens-bg.svg') center top;
+  background-repeat: repeat-x;
+  background-size: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}

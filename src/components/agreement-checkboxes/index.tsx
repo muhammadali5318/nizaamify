@@ -2,15 +2,13 @@ import React from 'react'
 import { Stack, Checkbox, Typography, FormHelperText } from '@mui/material'
 import { Controller, Control, Path, FieldValues } from 'react-hook-form'
 
-type AgreementKeys = 'terms' | 'privacy' | 'disclaimer' | 'gdpr'
+type AgreementKeys = 'terms' | 'privacy' | 'disclaimer' | 'gdpr' | 'gdpr1'
 
 type AgreementsCheckboxesProps<TFieldValues extends FieldValues> = {
   control: Control<TFieldValues>
   names?: Record<AgreementKeys, Path<TFieldValues>>
   namePrefix?: string
   spacing?: number
-  /** When true, individual per-checkbox errors are not shown.
-   * Useful when you want a single global error message instead. */
   hideIndividualErrors?: boolean
 }
 
@@ -18,31 +16,71 @@ const LABELS: Record<AgreementKeys, React.ReactNode> = {
   terms: (
     <>
       I agree to the{' '}
-      <span className='info-main font-weight--700 cursor-pointer'>
-        Terms of Service
-      </span>
+      <a
+        href='/auth/signup/agreements'
+        target='_blank'
+        rel='noopener noreferrer'
+        className='info-main font-weight--700 cursor-pointer'
+        style={{ textDecoration: 'none' }}
+      >
+        Terms of Service Privacy Policy
+      </a>
     </>
   ),
   privacy: (
     <>
       I agree to the{' '}
-      <span className='info-main font-weight--700 cursor-pointer'>
+      <a
+        href='/auth/signup/agreements'
+        target='_blank'
+        rel='noopener noreferrer'
+        className='info-main font-weight--700 cursor-pointer'
+        style={{ textDecoration: 'none' }}
+      >
         Privacy Policy
-      </span>
+      </a>
     </>
   ),
   disclaimer: (
     <>
       I acknowledge the{' '}
-      <span className='info-main font-weight--700 cursor-pointer'>
+      <a
+        href='/auth/signup/agreements'
+        target='_blank'
+        rel='noopener noreferrer'
+        className='info-main font-weight--700 cursor-pointer'
+        style={{ textDecoration: 'none' }}
+      >
         Financial Disclaimer
-      </span>
+      </a>
     </>
   ),
   gdpr: (
     <>
       I consent to data usage under{' '}
-      <span className='info-main font-weight--700 cursor-pointer'>GDPR</span>
+      <a
+        href='/auth/signup/agreements'
+        target='_blank'
+        rel='noopener noreferrer'
+        className='info-main font-weight--700 cursor-pointer'
+        style={{ textDecoration: 'none' }}
+      >
+        GDPR
+      </a>
+    </>
+  ),
+  gdpr1: (
+    <>
+      I consent to data usage under{' '}
+      <a
+        href='/auth/signup/agreements'
+        target='_blank'
+        rel='noopener noreferrer'
+        className='info-main font-weight--700 cursor-pointer'
+        style={{ textDecoration: 'none' }}
+      >
+        GDPR1
+      </a>
     </>
   )
 }
@@ -93,6 +131,7 @@ function AgreementsCheckboxes<TFieldValues extends FieldValues>({
       {renderCtrl('privacy')}
       {renderCtrl('disclaimer')}
       {renderCtrl('gdpr')}
+      {renderCtrl('gdpr1')}
     </Stack>
   )
 }
