@@ -2,7 +2,12 @@ import React from 'react'
 import { Stack, Checkbox, Typography, FormHelperText } from '@mui/material'
 import { Controller, Control, Path, FieldValues } from 'react-hook-form'
 
-type AgreementKeys = 'terms' | 'privacy' | 'disclaimer' | 'gdpr' | 'gdpr1'
+type AgreementKeys =
+  | 'terms'
+  | 'privacy'
+  | 'disclaimer'
+  | 'dataProcessingAgreement'
+  | 'cookiePolicy'
 
 type AgreementsCheckboxesProps<TFieldValues extends FieldValues> = {
   control: Control<TFieldValues>
@@ -23,7 +28,7 @@ const LABELS: Record<AgreementKeys, React.ReactNode> = {
         className='info-main font-weight--700 cursor-pointer'
         style={{ textDecoration: 'none' }}
       >
-        Terms of Service Privacy Policy
+        Terms of Service
       </a>
     </>
   ),
@@ -55,7 +60,7 @@ const LABELS: Record<AgreementKeys, React.ReactNode> = {
       </a>
     </>
   ),
-  gdpr: (
+  dataProcessingAgreement: (
     <>
       I consent to data usage under{' '}
       <a
@@ -65,13 +70,13 @@ const LABELS: Record<AgreementKeys, React.ReactNode> = {
         className='info-main font-weight--700 cursor-pointer'
         style={{ textDecoration: 'none' }}
       >
-        GDPR
+        Data Processing Agreement
       </a>
     </>
   ),
-  gdpr1: (
+  cookiePolicy: (
     <>
-      I consent to data usage under{' '}
+      I agree to the{' '}
       <a
         href='/auth/signup/agreements'
         target='_blank'
@@ -79,7 +84,7 @@ const LABELS: Record<AgreementKeys, React.ReactNode> = {
         className='info-main font-weight--700 cursor-pointer'
         style={{ textDecoration: 'none' }}
       >
-        GDPR1
+        Cookie Policy
       </a>
     </>
   )
@@ -130,8 +135,8 @@ function AgreementsCheckboxes<TFieldValues extends FieldValues>({
       {renderCtrl('terms')}
       {renderCtrl('privacy')}
       {renderCtrl('disclaimer')}
-      {renderCtrl('gdpr')}
-      {renderCtrl('gdpr1')}
+      {renderCtrl('dataProcessingAgreement')}
+      {renderCtrl('cookiePolicy')}
     </Stack>
   )
 }
