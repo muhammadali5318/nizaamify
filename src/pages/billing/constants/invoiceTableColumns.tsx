@@ -1,5 +1,4 @@
 import { GridColDef } from '@mui/x-data-grid'
-import dayjs from 'dayjs'
 import downloadImg from '../../../assets/document-download.svg'
 export const invoiceColumns: GridColDef[] = [
   {
@@ -12,15 +11,13 @@ export const invoiceColumns: GridColDef[] = [
     field: 'period_start',
     headerName: 'Purchase date',
     minWidth: 140,
-    valueFormatter: (params: any) =>
-      params ? dayjs(params).format(' DD/MM/YYYY') : '/'
+    type: 'string'
   },
   {
     field: 'period_end',
     headerName: 'Billing date',
     minWidth: 140,
-    valueFormatter: (params: any) =>
-      params ? dayjs(params).format(' DD/MM/YYYY') : '/'
+    type: 'string'
   },
   {
     field: 'amount',

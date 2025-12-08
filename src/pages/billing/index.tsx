@@ -267,7 +267,7 @@ const Billing = () => {
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
-              format='DD-MM-YYYY'
+              format='DD/MM/YYYY'
               label='Start date'
               value={dateRange[0]}
               onChange={(newValue) => {
@@ -285,7 +285,7 @@ const Billing = () => {
             />
 
             <DatePicker
-              format='DD-MM-YYYY'
+              format='DD/MM/YYYY'
               label='End date'
               value={dateRange[1]}
               onChange={(newValue) => {
