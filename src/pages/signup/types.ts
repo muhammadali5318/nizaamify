@@ -45,7 +45,8 @@ export type SignupFormDataSet = {
   terms: boolean
   privacy: boolean
   disclaimer: boolean
-  gdpr: boolean
+  dataProcessingAgreement: boolean
+  cookiePolicy: boolean
 }
 
 export type SetFormDataSet = (patch: Partial<SignupFormDataSet>) => void

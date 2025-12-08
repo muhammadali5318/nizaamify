@@ -28,7 +28,10 @@ export const SignupStepThreeSchema = z
     disclaimer: z.boolean().refine((val) => val === true, {
       message: 'You must acknowledge Financial Disclaimer'
     }),
-    gdpr: z.boolean().refine((val) => val === true, {
+    dataProcessingAgreement: z.boolean().refine((val) => val === true, {
+      message: 'You must consent to GDPR'
+    }),
+    cookiePolicy: z.boolean().refine((val) => val === true, {
       message: 'You must consent to GDPR'
     })
   })

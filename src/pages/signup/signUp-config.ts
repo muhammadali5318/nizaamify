@@ -29,7 +29,8 @@ export const generatePayloadForSignUp = (form: SignupFormDataSet) => {
       is_terms_of_service_accepted: form.terms,
       is_privacy_policy_accepted: form.privacy,
       is_financial_disclaimer_acknowledged: form.disclaimer,
-      is_gdpr_consent_given: form.gdpr
+      is_dpa_consent_accepted: form.dataProcessingAgreement,
+      is_cookie_consent_accepted: form.cookiePolicy
     }
   }
 }

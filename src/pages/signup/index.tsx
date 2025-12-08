@@ -39,7 +39,8 @@ const initialFormData: SignupFormDataSet = {
   terms: false,
   privacy: false,
   disclaimer: false,
-  gdpr: false
+  dataProcessingAgreement: false,
+  cookiePolicy: false
 }
 
 export type AssociationPayload = {
@@ -130,7 +131,6 @@ const SignUp: React.FC = () => {
 
   const handleSubmitAll = async (patch?: Partial<SignupFormDataSet>) => {
     if (patch) setFormData(patch)
-
     const finalForm: SignupFormDataSet = { ...formData, ...(patch || {}) }
 
     const payload = generatePayloadForSignUp(finalForm)
