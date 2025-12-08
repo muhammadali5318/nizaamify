@@ -2,15 +2,18 @@ import React from 'react'
 import { Stack, Checkbox, Typography, FormHelperText } from '@mui/material'
 import { Controller, Control, Path, FieldValues } from 'react-hook-form'
 
-type AgreementKeys = 'terms' | 'privacy' | 'disclaimer' | 'gdpr'
+type AgreementKeys =
+  | 'terms'
+  | 'privacy'
+  | 'disclaimer'
+  | 'dataProcessingAgreement'
+  | 'cookiePolicy'
 
 type AgreementsCheckboxesProps<TFieldValues extends FieldValues> = {
   control: Control<TFieldValues>
   names?: Record<AgreementKeys, Path<TFieldValues>>
   namePrefix?: string
   spacing?: number
-  /** When true, individual per-checkbox errors are not shown.
-   * Useful when you want a single global error message instead. */
   hideIndividualErrors?: boolean
 }
 
@@ -18,31 +21,71 @@ const LABELS: Record<AgreementKeys, React.ReactNode> = {
   terms: (
     <>
       I agree to the{' '}
-      <span className='info-main font-weight--700 cursor-pointer'>
+      <a
+        href={'/auth/signup/agreements?doc=terms'}
+        target='_blank'
+        rel='noopener noreferrer'
+        className='info-main font-weight--700 cursor-pointer'
+        style={{ textDecoration: 'none' }}
+      >
         Terms of Service
-      </span>
+      </a>
     </>
   ),
   privacy: (
     <>
       I agree to the{' '}
-      <span className='info-main font-weight--700 cursor-pointer'>
+      <a
+        href={'/auth/signup/agreements?doc=privacy'}
+        target='_blank'
+        rel='noopener noreferrer'
+        className='info-main font-weight--700 cursor-pointer'
+        style={{ textDecoration: 'none' }}
+      >
         Privacy Policy
-      </span>
+      </a>
     </>
   ),
   disclaimer: (
     <>
       I acknowledge the{' '}
-      <span className='info-main font-weight--700 cursor-pointer'>
+      <a
+        href={'/auth/signup/agreements?doc=disclaimer'}
+        target='_blank'
+        rel='noopener noreferrer'
+        className='info-main font-weight--700 cursor-pointer'
+        style={{ textDecoration: 'none' }}
+      >
         Financial Disclaimer
-      </span>
+      </a>
     </>
   ),
-  gdpr: (
+  dataProcessingAgreement: (
     <>
       I consent to data usage under{' '}
-      <span className='info-main font-weight--700 cursor-pointer'>GDPR</span>
+      <a
+        href={'/auth/signup/agreements?doc=dataProcessingAgreement'}
+        target='_blank'
+        rel='noopener noreferrer'
+        className='info-main font-weight--700 cursor-pointer'
+        style={{ textDecoration: 'none' }}
+      >
+        Data Processing Agreement
+      </a>
+    </>
+  ),
+  cookiePolicy: (
+    <>
+      I agree to the{' '}
+      <a
+        href={'/auth/signup/agreements?doc=cookiePolicy'}
+        target='_blank'
+        rel='noopener noreferrer'
+        className='info-main font-weight--700 cursor-pointer'
+        style={{ textDecoration: 'none' }}
+      >
+        Cookie Policy
+      </a>
     </>
   )
 }
@@ -92,7 +135,8 @@ function AgreementsCheckboxes<TFieldValues extends FieldValues>({
       {renderCtrl('terms')}
       {renderCtrl('privacy')}
       {renderCtrl('disclaimer')}
-      {renderCtrl('gdpr')}
+      {renderCtrl('dataProcessingAgreement')}
+      {renderCtrl('cookiePolicy')}
     </Stack>
   )
 }
