@@ -1,4 +1,3 @@
-// src/utils/handleSubscriptionAction.ts
 import {
   createCheckoutSession,
   switchPlan

@@ -83,7 +83,6 @@ const ManualEntryForm: React.FC = () => {
 
   const handleFilesSelected = (incomingFiles: FileList | File[]) => {
     const newFiles = Array.from(incomingFiles)
-
     const uploadedCount = manualEntryFiles.items.length
     const queuedCount = queue.length
     const totalCount = uploadedCount + queuedCount
@@ -138,6 +137,14 @@ const ManualEntryForm: React.FC = () => {
 
     if (name === 'amount' && value !== '' && parseFloat(value) < 0) {
       return
+    }
+    if (name === 'vendorName' || name === 'invoiceNumber') {
+      if (value.length > 255) {
+        notify.error(
+          `${name === 'vendorName' ? 'Vendor Name' : 'Invoice Number'} cannot exceed 255 characters`
+        )
+        return
+      }
     }
 
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -221,9 +228,18 @@ const ManualEntryForm: React.FC = () => {
       dispatch({ type: 'manualEntryFiles/clearFiles' })
 
       dispatch({ type: 'processed/clearBatches' })
-    } catch (err) {
-      notify.error('Failed to save entry')
+    } catch (err: any) {
       console.error(err)
+
+      const backendErrors = err?.error
+
+      const { parseApiErrors } = await import('src/utils/parseApiErrors')
+      const messages = parseApiErrors(backendErrors)
+      if (messages.length > 0) {
+        messages.forEach((msg) => notify.error(msg))
+      } else {
+        notify.error(err?.response?.data?.message || 'Failed to save entry')
+      }
     }
   }
 
@@ -264,12 +280,12 @@ const ManualEntryForm: React.FC = () => {
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
-              format='DD-MM-YYYY'
+              format='DD/MM/YYYY'
               label='Entry Date *'
               value={formData.entryDate ? dayjs(formData.entryDate) : null}
               onChange={(newValue) => {
                 if (newValue) {
-                  const formattedDate = newValue.format('DD-MM-YYYY')
+                  const formattedDate = newValue.format('DD/MM/YYYY')
 
                   const today = dayjs().startOf('day')
                   if (newValue.isAfter(today)) {
@@ -372,12 +388,12 @@ const ManualEntryForm: React.FC = () => {
           />
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
-              format='DD-MM-YYYY'
+              format='DD/MM/YYYY'
               label='Payment Date'
               value={formData.paymentDate ? dayjs(formData.paymentDate) : null}
               onChange={(newValue) => {
                 if (newValue) {
-                  const formattedDate = newValue.format('DD-MM-YYYY')
+                  const formattedDate = newValue.format('DD/MM/YYYY')
 
                   const today = dayjs().startOf('day')
                   if (newValue.isAfter(today)) {

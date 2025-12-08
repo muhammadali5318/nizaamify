@@ -13,14 +13,14 @@ export const invoiceColumns: GridColDef[] = [
     headerName: 'Purchase date',
     minWidth: 140,
     valueFormatter: (params: any) =>
-      params ? dayjs(params).format(' YYYY/ MM/ DD') : '-'
+      params ? dayjs(params).format(' DD/MM/YYYY') : '/'
   },
   {
     field: 'period_end',
     headerName: 'Billing date',
     minWidth: 140,
     valueFormatter: (params: any) =>
-      params ? dayjs(params).format(' YYYY/ MM/ DD') : '-'
+      params ? dayjs(params).format(' DD/MM/YYYY') : '/'
   },
   {
     field: 'amount',
