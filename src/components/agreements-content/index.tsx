@@ -122,8 +122,14 @@ const AgreementContent: React.FC = () => {
               <Typography
                 textAlign='center'
                 color='#fff'
-                variant='h3'
                 fontWeight={700}
+                sx={{
+                  fontSize: {
+                    xs: '1.5rem',
+                    sm: '3rem'
+                  },
+                  lineHeight: 1.2
+                }}
               >
                 {display.title}
               </Typography>

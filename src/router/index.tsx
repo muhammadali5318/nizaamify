@@ -19,6 +19,7 @@ import Placeholder from 'src/components/common/Placeholder'
 const Dashboard = lazy(() => import('src/pages/dashboard'))
 const Documents = lazy(() => import('src/pages/documents'))
 const Reports = lazy(() => import('src/pages/reports'))
+const AgreementContent = lazy(() => import('src/components/agreements-content'))
 const Benchmarks = lazy(() => import('src/pages/benchmarks'))
 const TeamManagement = lazy(() => import('src/pages/team-management'))
 const MemberRolesAndPermission = lazy(
@@ -52,6 +53,14 @@ export function Router() {
       { path: paths.root, element: <RedirectComponent /> },
 
       // practice onboarding routes (can be outside layout)
+      {
+        path: paths.agreements,
+        element: (
+          <ProtectedRoute>
+            <AgreementContent />
+          </ProtectedRoute>
+        )
+      },
       {
         path: paths.practiceOnboarding,
         element: (

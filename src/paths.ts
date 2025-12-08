@@ -3,6 +3,7 @@ export const paths = {
   root: '/',
   dashboard: '/dashboard',
   practiceOnboarding: '/practice-onboarding',
+  agreements: '/agreements',
   practiceOnboardingStepper: '/practice-onboarding/stepper',
   documents: '/documents',
   reports: '/reports',
