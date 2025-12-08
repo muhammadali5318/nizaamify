@@ -14,9 +14,9 @@ import { useDispatch } from 'react-redux'
 import { updateDocumentFields } from '../../../store/slices/processedBatchDataSlice'
 import { notify } from '../../../components/notistack/NotificationProvider'
 import {
-  getDocumentTypes,
   getDocumentSubtypes,
-  category
+  category,
+  getFilteredDocumentTypes
 } from '../../../utils/documentMapping'
 
 interface EditDocumentModalProps {
@@ -66,6 +66,9 @@ export default function EditDocumentModal({
     setFormData((prev) => ({
       ...prev,
       [field]: value,
+      ...(field === 'document_category'
+        ? { document_type: '', document_subtype: '' }
+        : {}),
       ...(field === 'document_type' ? { document_subtype: '' } : {})
     }))
   }
@@ -83,7 +86,7 @@ export default function EditDocumentModal({
 
   if (!document) return null
 
-  const documentTypes = getDocumentTypes()
+  const documentTypes = getFilteredDocumentTypes(formData.document_category)
   const documentCategories = Object.values(category)
   const isCategoryDisabled = formData.document_subtype === 'Bank statements'
 

@@ -106,7 +106,6 @@ const Billing = () => {
     setDateRange([null, null])
     setPage(0)
   }
-
   const handleButtonClick = async (buttonLabel: string, title: string) => {
     if (!practiceId) {
       notify.error('No active practice selected.')
@@ -121,7 +120,6 @@ const Billing = () => {
         practiceId,
         title
       })
-
       if (res?.data?.checkout_url) {
         window.location.href = res.data.checkout_url
         return
