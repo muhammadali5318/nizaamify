@@ -15,12 +15,17 @@ import stripeImg from '../../../assets/Stripe wordmark.svg'
 export const getSubscribedPlan = (activePractice: any) => {
   const subscriptionPlan =
     activePractice?.subscription_details?.subscription_plan_name
+  const cancelled_at = activePractice?.subscription_details?.cancelled_at
+  const has_used_free_trial =
+    activePractice?.subscription_details?.has_used_free_trial
 
   let proBtnText = ''
   let freeBtnText = ''
 
-  if (subscriptionPlan === 'PROFESSIONAL') {
-    proBtnText = 'Current Plan'
+  if (subscriptionPlan === 'PROFESSIONAL' && cancelled_at != null) {
+    proBtnText = 'Subscribe'
+  } else if (subscriptionPlan === 'PROFESSIONAL' && has_used_free_trial) {
+    proBtnText = 'Subscribe'
   } else if (subscriptionPlan === 'FREE TRIAL') {
     proBtnText = 'Upgrade to professional plan'
     freeBtnText = 'Current Plan'

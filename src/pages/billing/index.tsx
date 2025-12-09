@@ -30,20 +30,28 @@ const Billing = () => {
     ?.subscription_plan_name
   const subscriptionPlanAmount = (activePractice as any)?.subscription_details
     ?.subscription_plan_amount
-
+  const has_used_free_trial = (activePractice as any)?.subscription_details
+    ?.has_used_free_trial
+  const has_free_trial_eligibility = (activePractice as any)
+    ?.subscription_details?.has_free_trial_eligibility
+  const current_period_end = (activePractice as any)?.subscription_details
+    ?.current_period_end
   const rawDate = (activePractice as any)?.subscription_details
     ?.next_billing_date
 
   const formatDate = (date: string) => {
     const d = new Date(date)
-    return `${String(d.getDate()).padStart(2, '0')}-${String(
+    return `${String(d.getDate()).padStart(2, '0')}/${String(
       d.getMonth() + 1
-    ).padStart(2, '0')}-${d.getFullYear()}`
+    ).padStart(2, '0')}/${d.getFullYear()}`
   }
+  const formattedDate = current_period_end
+    ? dayjs(current_period_end).format('DD MMMM YYYY')
+    : ''
   const canViewInvoices = hasPermission('subs.view_invoices')
 
   const billingDate = rawDate ? formatDate(rawDate) : ''
-
+  const cancelledAtDate = current_period_end ? formattedDate : ''
   const SUBSCRIBED_PLAN = getSubscribedPlan(activePractice)
   const FREE_PLAN = getFreePlan(activePractice)
 
@@ -172,6 +180,10 @@ const Billing = () => {
           {...SUBSCRIBED_PLAN}
           loading={subscriptionLoading}
           onButtonClick={handleButtonClick}
+          has_free_trial_eligibility={has_free_trial_eligibility}
+          has_used_free_trial={has_used_free_trial}
+          cancelled_at={cancelledAtDate}
+          isSubscribed={isSubscribed}
         />
       ) : (
         <Box
@@ -197,21 +209,19 @@ const Billing = () => {
       )}
 
       {/* Payment Settings */}
-      {subscriptionPlan === 'PROFESSIONAL' && (
-        <Box
-          sx={{
-            border: '1px solid #EEEEEE',
-            borderRadius: '24px',
-            padding: 2,
-            mt: 3
-          }}
-        >
-          <PaymentSettings
-            subscriptionPlanAmount={subscriptionPlanAmount}
-            billingDate={billingDate}
-          />
-        </Box>
-      )}
+      <Box
+        sx={{
+          border: '1px solid #EEEEEE',
+          borderRadius: '24px',
+          padding: 2,
+          mt: 3
+        }}
+      >
+        <PaymentSettings
+          subscriptionPlanAmount={subscriptionPlanAmount}
+          billingDate={billingDate}
+        />
+      </Box>
 
       {/* Invoice History */}
       <Box

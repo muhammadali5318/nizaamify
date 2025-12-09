@@ -226,6 +226,7 @@ const ManualEntryForm: React.FC = () => {
       dispatch({ type: 'manualEntryQueue/clearQueue' })
 
       dispatch({ type: 'manualEntryFiles/clearFiles' })
+      dispatch(resetPresignResponse())
 
       dispatch({ type: 'processed/clearBatches' })
     } catch (err: any) {
@@ -236,7 +237,7 @@ const ManualEntryForm: React.FC = () => {
       const { parseApiErrors } = await import('src/utils/parseApiErrors')
       const messages = parseApiErrors(backendErrors)
       if (messages.length > 0) {
-        messages.forEach((msg) => notify.error(msg))
+        notify.error(messages.join('\n'))
       } else {
         notify.error(err?.response?.data?.message || 'Failed to save entry')
       }

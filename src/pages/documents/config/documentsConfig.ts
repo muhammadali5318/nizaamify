@@ -151,3 +151,10 @@ export const documentsModuleBreadCrumbs = [
   { label: 'Documents', to: '/documents' },
   { label: 'Doc upload' }
 ]
+export const CATEGORY_TYPE_MAP: Record<string, string[]> = {
+  Revenue: ['Income & Revenue'],
+  Expense: Object.keys(DOCUMENT_SUBTYPE_MAP).filter(
+    (type) => type !== 'Income & Revenue'
+  ),
+  Unknown: Object.keys(DOCUMENT_SUBTYPE_MAP)
+}

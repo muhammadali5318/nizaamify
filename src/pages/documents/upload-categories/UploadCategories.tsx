@@ -10,7 +10,8 @@ import premisesIcon from '../../../../public/assets/premises-icon.svg'
 import taxIcon from '../../../../public/assets/tax-icon.svg'
 import { useSelector } from 'react-redux'
 import { RootState } from 'src/store/store'
-import historyIcon from '../../../assets/history-Icon-blue.svg'
+import clinicianCostIcon from '../../../assets/clinician-cost-icon.svg'
+import materialsIcon from '../../../assets/material-icon.svg'
 const categories = [
   {
     title: 'Income & Revenue',
@@ -40,17 +41,17 @@ const categories = [
     color: '#9333ea',
     icon: operationsIcon,
     examples: [
-      'IT',
-      'Bank Charges',
-      'Clinical Waste',
-      'Marketing invoices',
-      'Printing and Postage',
-      'CQC/GDC-related fees',
-      'Card Merchant Charges',
-      'Software subscriptions',
-      'Legal or accountancy fees',
-      'Professional indemnity certificates',
-      'Compliance-related invoices or documentation'
+      'Marketing invoices ',
+      'Software subscriptions ',
+      'Legal or accountancy fees ',
+      'Professional indemnity certificates ',
+      'CQC/GDC-related fees '
+      // 'CQC/GDC-related fees',
+      // 'Card Merchant Charges',
+      // 'Software subscriptions',
+      // 'Legal or accountancy fees',
+      // 'Professional indemnity certificates',
+      // 'Compliance-related invoices or documentation'
     ]
   },
   {
@@ -80,13 +81,13 @@ const categories = [
   {
     title: 'Clinician Costs',
     color: '#0284c7',
-    icon: historyIcon,
+    icon: clinicianCostIcon,
     examples: ['Associate invoices', 'Hygienist/Therapist invoices']
   },
   {
     title: 'Materials',
     color: '#0284c7',
-    icon: historyIcon,
+    icon: materialsIcon,
     examples: ['Supplier invoices', 'Manufacturer receipts']
   }
 ]

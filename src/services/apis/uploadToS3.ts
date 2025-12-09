@@ -40,6 +40,7 @@ export const handleConfirmUploadUtil = async ({
     dispatch(clearQueue())
     notify.success('File(s) uploaded successfully!')
   } catch (err: any) {
-    notify.error(err?.message || 'Failed to upload file(s)')
+    console.error('Upload failed:', err)
+    notify.error(err?.files[0] || 'Failed to upload file(s)')
   }
 }

@@ -20,7 +20,8 @@ import DateRangeSelector, { RangeISO } from 'src/components/date-range-selector'
 import {
   DOCUMENT_SUBTYPE_MAP,
   CATEGORY_OPTIONS,
-  DOCUMENT_TYPE_OPTIONS
+  DOCUMENT_TYPE_OPTIONS,
+  CATEGORY_TYPE_MAP
 } from '../../config/documentsConfig'
 import CloseIcon from '@mui/icons-material/Close'
 export interface FilterState {
@@ -104,7 +105,14 @@ const FilterBar: React.FC<{
       onClearFilters()
     }
   }
+  const allowedDocTypes = useMemo(() => {
+    if (categories.length === 0) return DOCUMENT_TYPE_OPTIONS
 
+    const allowedSets = categories.map((c) => CATEGORY_TYPE_MAP[c] || [])
+    const merged = new Set(allowedSets.flat())
+
+    return DOCUMENT_TYPE_OPTIONS.filter((opt) => merged.has(opt.value))
+  }, [categories])
   return (
     <Box
       className={styles.filterContainer}
@@ -216,7 +224,7 @@ const FilterBar: React.FC<{
           <MenuItem value=''>
             <em>All</em>
           </MenuItem>
-          {DOCUMENT_TYPE_OPTIONS.map((opt) => (
+          {allowedDocTypes.map((opt) => (
             <MenuItem key={opt.value} value={opt.value}>
               {opt.label}
             </MenuItem>
