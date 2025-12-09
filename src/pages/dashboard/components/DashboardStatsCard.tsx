@@ -1,6 +1,13 @@
 import React from 'react'
-import { Box, Typography, Stack, CircularProgress } from '@mui/material'
+import {
+  Box,
+  Typography,
+  Stack,
+  CircularProgress,
+  Tooltip
+} from '@mui/material'
 import { TrendingDown, TrendingUp } from '@mui/icons-material'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 
 interface StatsCardProps {
   title: string
@@ -12,6 +19,8 @@ interface StatsCardProps {
   backgroundColor?: string
   loading?: boolean
   type?: string
+  showInfoIcon?: boolean
+  infoTooltip?: string
 }
 
 const StatsCard: React.FC<StatsCardProps> = ({
@@ -23,7 +32,9 @@ const StatsCard: React.FC<StatsCardProps> = ({
   subtitle,
   backgroundColor = '#FAFAFA',
   loading = false,
-  type = 'default'
+  type = 'default',
+  showInfoIcon,
+  infoTooltip
 }) => {
   if (trend === 'N/A' || trend === null || trend === undefined) trend = null
 
@@ -92,8 +103,22 @@ const StatsCard: React.FC<StatsCardProps> = ({
       </Stack>
 
       <Box mt={1}>
-        <Typography variant='body2' color='text.secondary'>
+        <Typography
+          variant='body2'
+          color='text.secondary'
+          display='flex'
+          alignItems='center'
+        >
           {title}
+
+          {showInfoIcon && infoTooltip && (
+            <Tooltip title={infoTooltip} arrow placement='top'>
+              <InfoOutlinedIcon
+                sx={{ fontSize: 16, ml: 0.5, cursor: 'pointer', color: '#000' }}
+              />
+            </Tooltip>
+          )}
+
           {subtitle && (
             <Typography variant='caption' color='text.disabled' ml={0.5}>
               {subtitle}

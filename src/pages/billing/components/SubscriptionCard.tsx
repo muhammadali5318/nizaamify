@@ -8,7 +8,9 @@ import {
   Theme,
   CircularProgress
 } from '@mui/material'
-import { ReactNode } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+
 export interface SubscriptionCardProps {
   icon?: ReactNode
   badgeIcon?: ReactNode | string
@@ -31,11 +33,16 @@ export interface SubscriptionCardProps {
   sx?: SxProps<Theme>
   footerIcon?: string | any
   footerText?: string | any
+  headerIcon?: any
+  headerText?: any
   footerBgColor?: string | any
   buttonBorder?: string | any
   isSubscribed?: any
   subscriptionPlan?: string
   loading?: boolean
+  cancelled_at?: string | null
+  has_used_free_trial?: boolean
+  has_free_trial_eligibility?: boolean
 }
 
 const SubscriptionCard = ({
@@ -62,12 +69,35 @@ const SubscriptionCard = ({
   footerBgColor,
   buttonFontColor,
   isSubscribed,
-  loading
+  loading,
+  has_free_trial_eligibility,
+  has_used_free_trial,
+  cancelled_at
 }: SubscriptionCardProps) => {
   let isDisabled = false
   if (buttonLabel === 'Current Plan') {
     isDisabled = true
   } else isDisabled = false
+
+  const [headerText, setHeaderText] = useState('')
+
+  useEffect(() => {
+    if (cancelled_at != null) {
+      setHeaderText(
+        `Your subscription has been cancelled. You can continue using the service until the end of your billing period ${cancelled_at}, or reactivate anytime.`
+      )
+    } else if (
+      has_free_trial_eligibility === false ||
+      has_used_free_trial === true ||
+      cancelled_at == null
+    ) {
+      setHeaderText(
+        'Your free trial has ended. Subscribe to the Professional plan to continue accessing advanced insights and tools to manage finances effectively.'
+      )
+    } else {
+      setHeaderText('')
+    }
+  }, [cancelled_at, has_free_trial_eligibility, has_used_free_trial])
 
   return (
     <Card
@@ -88,6 +118,27 @@ const SubscriptionCard = ({
         ...sx
       }}
     >
+      {isSubscribed && (
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            gap: '5px',
+            borderRadius: '12px',
+            paddingLeft: '10px',
+            backgroundColor: cancelled_at ? '#D32F2F' : '#0288D1',
+            marginLeft: '5px',
+            marginRight: '5px'
+          }}
+        >
+          <InfoOutlinedIcon
+            sx={{ fontSize: 20, cursor: 'pointer', color: '#fff' }}
+          />
+          <p>{headerText}</p>
+        </Box>
+      )}
       <CardContent>
         {/* Parent Flex Container */}
         <Box

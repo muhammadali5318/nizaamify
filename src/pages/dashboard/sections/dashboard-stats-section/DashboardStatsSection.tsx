@@ -89,7 +89,10 @@ const DashboardStatsSection = ({
     {
       title: 'EBITDA',
       value: safeValue(kpiData.ebidta, '£'),
-      icon: <img src={ebidtaIcon} alt='ebidta' />
+      icon: <img src={ebidtaIcon} alt='ebidta' />,
+      showInfoIcon: true,
+      infoTooltip:
+        'Guide values only. Based on the data you supplied. The more accurate and complete the data you upload, the more accurate the guide values. Always seek professional advice before acting.'
     },
     {
       title: 'Practice Value',
