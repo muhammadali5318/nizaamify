@@ -13,6 +13,7 @@ import apiClient from '../../../services/api-client'
 import { notify } from 'src/components/notistack/NotificationProvider'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import useUserDetails from 'src/hooks/useUserDetails'
+import { useQueryClient } from '@tanstack/react-query'
 
 const reasons = [
   'Too expensive',
@@ -27,6 +28,7 @@ export const Step2 = ({ goBack, close }: any) => {
   const practiceId = activePractice?.id
   const { email } = useUserDetails()
   const currentUserEmail = email
+  const queryClient = useQueryClient()
 
   const [selected, setSelected] = useState('')
   const [otherReason, setOtherReason] = useState('')
@@ -46,6 +48,10 @@ export const Step2 = ({ goBack, close }: any) => {
         payload
       )
       notify.success(res?.data?.message)
+      await queryClient.invalidateQueries({
+        queryKey: ['listAllPracticesData']
+      })
+
       close()
     } catch (err: any) {
       let errorMessage = 'Something went wrong'

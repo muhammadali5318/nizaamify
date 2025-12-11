@@ -17,10 +17,10 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { useDebounce } from 'src/hooks/useDebounce'
 import CloseIcon from '@mui/icons-material/Close'
 import PaymentSettings from './components/PaymentSettings'
-import { useQueryClient } from '@tanstack/react-query'
 import { hasPermission } from 'src/config/module-permissions'
+import { useQueryClient } from '@tanstack/react-query'
+
 const Billing = () => {
-  const queryClient = useQueryClient()
   const { activePractice, activePracticeId } = useActivePractice()
   const practiceId = activePracticeId
 
@@ -38,6 +38,8 @@ const Billing = () => {
     ?.current_period_end
   const rawDate = (activePractice as any)?.subscription_details
     ?.next_billing_date
+  const cancelled_at = (activePractice as any)?.subscription_details
+    ?.cancelled_at
 
   const formatDate = (date: string) => {
     const d = new Date(date)
@@ -54,6 +56,7 @@ const Billing = () => {
   const cancelledAtDate = current_period_end ? formattedDate : ''
   const SUBSCRIBED_PLAN = getSubscribedPlan(activePractice)
   const FREE_PLAN = getFreePlan(activePractice)
+  const queryClient = useQueryClient()
 
   const [rows, setRows] = useState<any[]>([])
   const [page, setPage] = useState(0)
@@ -122,7 +125,7 @@ const Billing = () => {
 
     try {
       setSubscriptionLoading(true)
-
+      await fetchInvoices()
       const res = await handleSubscriptionAction({
         buttonLabel,
         practiceId,
@@ -137,7 +140,6 @@ const Billing = () => {
       await queryClient.invalidateQueries({
         queryKey: ['listAllPracticesData']
       })
-      await fetchInvoices()
     } catch (error: any) {
       notify.error(error?.message)
     } finally {
@@ -182,8 +184,10 @@ const Billing = () => {
           onButtonClick={handleButtonClick}
           has_free_trial_eligibility={has_free_trial_eligibility}
           has_used_free_trial={has_used_free_trial}
-          cancelled_at={cancelledAtDate}
+          cancelled_at={cancelled_at}
           isSubscribed={isSubscribed}
+          periodEndDate={cancelledAtDate}
+          showHeader
         />
       ) : (
         <Box
@@ -198,6 +202,8 @@ const Billing = () => {
             {...FREE_PLAN}
             loading={subscriptionLoading}
             onButtonClick={handleButtonClick}
+            cancelled_at={cancelled_at}
+            periodEndDate={cancelledAtDate}
           />
           <SubscriptionCard
             isSubscribed={isSubscribed}
@@ -209,6 +215,7 @@ const Billing = () => {
       )}
 
       {/* Payment Settings */}
+
       <Box
         sx={{
           border: '1px solid #EEEEEE',
@@ -217,10 +224,12 @@ const Billing = () => {
           mt: 3
         }}
       >
-        <PaymentSettings
-          subscriptionPlanAmount={subscriptionPlanAmount}
-          billingDate={billingDate}
-        />
+        {
+          <PaymentSettings
+            subscriptionPlanAmount={subscriptionPlanAmount}
+            billingDate={billingDate}
+          />
+        }
       </Box>
 
       {/* Invoice History */}

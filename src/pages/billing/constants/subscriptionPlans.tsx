@@ -24,6 +24,8 @@ export const getSubscribedPlan = (activePractice: any) => {
 
   if (subscriptionPlan === 'PROFESSIONAL' && cancelled_at != null) {
     proBtnText = 'Subscribe'
+  } else if (subscriptionPlan === 'PROFESSIONAL' && cancelled_at == null) {
+    proBtnText = 'Current Plan'
   } else if (subscriptionPlan === 'PROFESSIONAL' && has_used_free_trial) {
     proBtnText = 'Subscribe'
   } else if (subscriptionPlan === 'FREE TRIAL') {
