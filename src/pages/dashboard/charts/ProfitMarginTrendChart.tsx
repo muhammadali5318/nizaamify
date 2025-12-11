@@ -52,7 +52,7 @@ const ProfitMarginTrendChart = ({
         const formatted =
           data?.series?.map((item: any) => ({
             label: item.label,
-            margin: Number(item.total_operating_profit)
+            margin: Number(item?.total_operating_profit)
           })) || []
 
         setChartData(formatted)

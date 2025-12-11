@@ -100,7 +100,10 @@ const DashboardStatsSection = ({
         kpiData.practice_value >= 0
           ? safeValue(kpiData.practice_value, '£')
           : 'N/A',
-      icon: <img src={practiceValueIcon} alt='practice value' />
+      icon: <img src={practiceValueIcon} alt='practice value' />,
+      showInfoIcon: true,
+      infoTooltip:
+        'Guide values only. Based on the data you supplied. The more accurate and complete the data you upload, the more accurate the guide values. Always seek professional advice before acting.'
     }
   ]
 

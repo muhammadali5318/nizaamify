@@ -40,9 +40,11 @@ export interface SubscriptionCardProps {
   isSubscribed?: any
   subscriptionPlan?: string
   loading?: boolean
-  cancelled_at?: string | null
+  cancelled_at?: any | null
   has_used_free_trial?: boolean
   has_free_trial_eligibility?: boolean
+  showHeader?: boolean
+  periodEndDate?: string | null
 }
 
 const SubscriptionCard = ({
@@ -72,19 +74,20 @@ const SubscriptionCard = ({
   loading,
   has_free_trial_eligibility,
   has_used_free_trial,
-  cancelled_at
+  cancelled_at,
+  periodEndDate,
+  subscriptionPlan
 }: SubscriptionCardProps) => {
   let isDisabled = false
-  if (buttonLabel === 'Current Plan') {
+  if (cancelled_at == null && buttonLabel === 'Current Plan') {
     isDisabled = true
   } else isDisabled = false
 
   const [headerText, setHeaderText] = useState('')
-
   useEffect(() => {
-    if (cancelled_at != null) {
+    if (cancelled_at !== null) {
       setHeaderText(
-        `Your subscription has been cancelled. You can continue using the service until the end of your billing period ${cancelled_at}, or reactivate anytime.`
+        `Your subscription has been cancelled. You can continue using the service until the end of your billing period ${periodEndDate}, or reactivate anytime.`
       )
     } else if (
       has_free_trial_eligibility === false ||
@@ -118,27 +121,31 @@ const SubscriptionCard = ({
         ...sx
       }}
     >
-      {isSubscribed && (
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            gap: '5px',
-            borderRadius: '12px',
-            paddingLeft: '10px',
-            backgroundColor: cancelled_at ? '#D32F2F' : '#0288D1',
-            marginLeft: '5px',
-            marginRight: '5px'
-          }}
-        >
-          <InfoOutlinedIcon
-            sx={{ fontSize: 20, cursor: 'pointer', color: '#fff' }}
-          />
-          <p>{headerText}</p>
-        </Box>
-      )}
+      {(subscriptionPlan === 'FREE TRIAL' && cancelled_at != null) ||
+        (has_used_free_trial === true && cancelled_at != null) ||
+        (cancelled_at != null && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              gap: '5px',
+              borderRadius: '12px',
+              paddingLeft: '10px',
+              backgroundColor: cancelled_at ? '#D32F2F' : '#0288D1',
+              marginLeft: '5px',
+              marginRight: '5px',
+              color: '#fff'
+            }}
+          >
+            <InfoOutlinedIcon
+              sx={{ fontSize: 20, cursor: 'pointer', color: '#fff' }}
+            />
+            <p>{headerText}</p>
+          </Box>
+        ))}
+
       <CardContent>
         {/* Parent Flex Container */}
         <Box
@@ -231,7 +238,7 @@ const SubscriptionCard = ({
               backgroundColor: buttonColor
             }}
           >
-            {buttonLabel}
+            {loading ? <CircularProgress size={22} /> : buttonLabel}
           </Button>
         ) : (
           <Button
