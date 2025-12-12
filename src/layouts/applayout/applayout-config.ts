@@ -70,6 +70,13 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         activeIcon: 'active-settings.svg',
         inactiveIcon: 'inactive-settings.svg',
         moduleId: 'settings'
+      },
+      {
+        text: 'Bank Integrator',
+        to: paths.bankIntegrator,
+        activeIcon: 'bank-active.svg',
+        inactiveIcon: 'bank-inactive.svg',
+        moduleId: 'bank-integrator'
       }
     ]
   },
