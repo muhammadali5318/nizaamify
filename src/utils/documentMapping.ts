@@ -1,53 +1,111 @@
-export const documentMapping: Record<string, string[]> = {
-  'Income & Revenue': [
-    'Bank statements',
-    'Practice management reports',
-    'Capitation scheme statements',
-    'Subletting or rental income evidence'
-  ],
-  'Staff Costs': ['PAYE payslips', 'Staff Training', 'Locum invoices'],
-  'Clinician Costs': ['Associate invoices', 'Hygienist/Therapist invoices'],
-  Materials: ['Supplier invoices', 'Manufacturer receipts'],
-  'Lab Fees': ['Dental lab invoices'],
-  'Premises & Equipment': [
-    'Cleaning',
-    'Utility Bills',
-    'Lease/rent documents',
-    'Business rates invoices',
-    'Repairs or building maintenance bills',
-    'Equipment purchases or leasing agreements'
-  ],
-  'Business Operations': [
-    'IT',
-    'Bank Charges',
-    'Clinical Waste',
-    'Marketing invoices',
-    'Printing and Postage',
-    'CQC/GDC-related fees',
-    'Card Merchant Charges',
-    'Software subscriptions',
-    'Legal or accountancy fees',
-    'Professional indemnity certificates',
-    'Compliance-related invoices or documentation'
-  ],
-  'Tax Documents': [
-    'VAT returns',
-    'HMRC communications',
-    'Corporation tax statements',
-    'Accountant summaries or filings'
-  ]
+export const documentMapping: Record<string, Record<string, string[]>> = {
+  // --- Income & Revenue (Not in the Expense table, keeping original flat structure for this non-expense category) ---
+  'Income & Revenue': {
+    Revenue: [
+      'Bank statements',
+      'Practice management reports',
+      'Capitation scheme statements',
+      'Subletting or rental income evidence'
+    ]
+  },
+
+  // --- Staff Costs ---
+  'Staff Costs': {
+    PAYE: ['Staff Cost'],
+    'Locum/Agency Fees': ['Locum Agency Fees'],
+    'Staff training & CPD': ['Staff Training'],
+    'Recruitment costs': ['Recruitment Cost'],
+    'HR services': ['HR Services'],
+    Other: ['Staff Cost']
+  },
+
+  // --- Clinician Costs ---
+  'Clinician Costs': {
+    'Dentist Pay': ['Dentist Pay'],
+    'Hygs/Therapy Pay': ['Hygs/Therapist Pay'],
+    Materials: ['Materials']
+  },
+
+  // --- Materials & Equipment ---
+  'Materials & Equipment': {
+    Materials: [
+      'Materials' // As pointed out in your example
+    ],
+    Equipment: [
+      'Equipment purchases',
+      'Equipment leasing',
+      'Equipment repairs/servicing'
+    ]
+  },
+
+  // --- Lab Fees ---
+  'Lab Fees': {
+    'Lab Fees': ['Lab Fees']
+  },
+
+  // --- Premises ---
+  Premises: {
+    'Lease/Mortgage Payments': ['Lease/Mortgage Payments'],
+    'Business Rates': ['Business Rates'],
+    Utilities: ['Utilities'],
+    'Premises Insurance': ['Premises Insurance'],
+    'Repairs/Maintenance (building)': ['Repairs/Maintenance (building)'],
+    'Cleaning Services': ['Cleaning Services'],
+    'Security & Alarm Contracts': ['Security & Alarm Contracts'],
+    'Waste disposal': ['Waste disposal'],
+    Other: ['Premises']
+  },
+
+  // --- Business Operations ---
+  'Business Operations': {
+    Marketing: [
+      'Paid Advertising',
+      'Agency/Service Fees',
+      'Website & Digital Assets',
+      'Offline Marketing',
+      'Other – Marketing'
+    ],
+    Subscriptions: ['PMS', 'AI tools', 'Other – Subscriptions'],
+    Compliance: ['Compliance'],
+    'Legal / Accounting': ['Accountant/Bookkeeping', 'Legal Fees'],
+    IT: ['IT support contracts', 'Hardware', 'Cloud storage', 'Other – IT'],
+    Communications: ['Communications'],
+    'Finance Fees': ['Finance Fees'],
+    'Miscellaneous Ops': ['Miscellaneous Ops']
+  },
+
+  // --- Tax Documents (Keeping original flat structure) ---
+  'Tax Documents': {
+    'Tax Filings': [
+      'VAT returns',
+      'HMRC communications',
+      'Corporation tax statements',
+      'Accountant summaries or filings'
+    ]
+  }
 }
 
 export const getDocumentTypes = (): string[] => Object.keys(documentMapping)
 
+// Updated: Now returns Subtypes (keys of the nested object)
 export const getDocumentSubtypes = (type: string): string[] =>
-  documentMapping[type] || []
+  documentMapping[type] ? Object.keys(documentMapping[type]) : []
+
+// New Function: To retrieve the third level (Expense Sub-categories)
+export const getExpenseSubcategories = (
+  type: string,
+  subtype: string
+): string[] =>
+  documentMapping[type] && documentMapping[type][subtype]
+    ? documentMapping[type][subtype]
+    : []
 
 export const category = {
   expense: 'Expense',
   revenue: 'Revenue',
   unknown: 'Unknown'
 }
+
 export const getFilteredDocumentTypes = (category: string): string[] => {
   const allTypes = Object.keys(documentMapping)
 
@@ -56,7 +114,10 @@ export const getFilteredDocumentTypes = (category: string): string[] => {
   }
 
   if (category === 'Expense') {
-    return allTypes.filter((t) => t !== 'Income & Revenue')
+    // Filter out non-expense types
+    return allTypes.filter(
+      (t) => t !== 'Income & Revenue' && t !== 'Tax Documents'
+    )
   }
 
   return allTypes // Unknown → ALL

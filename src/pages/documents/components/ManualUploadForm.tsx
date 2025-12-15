@@ -25,7 +25,8 @@ import dayjs from 'dayjs'
 import {
   getDocumentSubtypes,
   category,
-  getFilteredDocumentTypes
+  getFilteredDocumentTypes,
+  getExpenseSubcategories
 } from '../../../utils/documentMapping'
 import {
   addFilesToQueue,
@@ -54,6 +55,8 @@ interface ManualEntryFormData {
   invoiceNumber: string
   paymentDate: string
   description: string
+  lineItem: string
+
   attachments: File[]
 }
 
@@ -64,6 +67,8 @@ const ManualEntryForm: React.FC = () => {
     type: '',
     subtype: '',
     amount: '',
+    lineItem: '',
+
     vendorName: '',
     invoiceNumber: '',
     paymentDate: '',
@@ -149,17 +154,23 @@ const ManualEntryForm: React.FC = () => {
 
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
+  const lineItems =
+    formData.type && formData.subtype
+      ? getExpenseSubcategories(formData.type, formData.subtype)
+      : []
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target
-    if (name) {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-        ...(name === 'category' ? { type: '', subtype: '' } : {}),
-        ...(name === 'type' ? { subtype: '' } : {})
-      }))
-    }
+
+    if (!name) return
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === 'category' ? { type: '', subtype: '', lineItem: '' } : {}),
+      ...(name === 'type' ? { subtype: '', lineItem: '' } : {}),
+      ...(name === 'subtype' ? { lineItem: '' } : {})
+    }))
   }
 
   const handleConfirmUpload = () => {
@@ -217,6 +228,7 @@ const ManualEntryForm: React.FC = () => {
         type: '',
         subtype: '',
         amount: '',
+        lineItem: '',
         vendorName: '',
         invoiceNumber: '',
         paymentDate: '',
@@ -353,6 +365,21 @@ const ManualEntryForm: React.FC = () => {
               {subtypes.map((subtype) => (
                 <MenuItem key={subtype} value={subtype}>
                   {subtype}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth disabled={!formData.subtype}>
+            <InputLabel>Line Item *</InputLabel>
+            <Select
+              name='lineItem'
+              value={formData.lineItem}
+              label='Line Item *'
+              onChange={handleSelectChange}
+            >
+              {lineItems.map((item) => (
+                <MenuItem key={item} value={item}>
+                  {item}
                 </MenuItem>
               ))}
             </Select>
