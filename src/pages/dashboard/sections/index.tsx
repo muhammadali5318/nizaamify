@@ -11,7 +11,7 @@ import BenchmarkComparisonTable from '../charts/BenchmarkComparisonTable'
 import ExpenseAnalysisCard from '../insights/ExpenseAnalysisCard'
 import AISummaryCard from '../insights/AISummaryCard'
 import PeriodSelector from '../components/PeriodSelector'
-
+import downlaodBtn from '../../../assets/document-download-black.svg'
 import expenseIcon from '../../../assets/expense-icon.svg'
 import benchmarkIcon from '../../../assets/benchmark-comp-icon.svg'
 import aiIcon from '../../../assets/ai-icon.svg'
@@ -21,7 +21,6 @@ import { useActivePractice } from 'src/hooks/useActivePractice'
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
-// ⭐ Import PDF utility
 import { downloadDashboardPDF } from '../utils/downloadPdf'
 
 const MainDashboard = () => {
@@ -31,7 +30,6 @@ const MainDashboard = () => {
   const { activePracticeId } = useActivePractice()
   const [selectedMonth, setSelectedMonth] = useState(dayjs())
 
-  // ⭐ Reference for PDF capture
   const dashboardRef = useRef<any>(null)
 
   const getDateRange = (label: string) => {
@@ -161,10 +159,17 @@ const MainDashboard = () => {
             onSelect={setSelectedPeriod}
           />
 
-          {/* ⭐ PDF DOWNLOAD BUTTON */}
           <Button
             variant='contained'
-            sx={{ borderRadius: '10px', height: 40 }}
+            startIcon={<img src={downlaodBtn} alt='Download' />}
+            sx={{
+              borderRadius: '10px',
+              height: 55,
+              backgroundColor: '#fff',
+              color: '#000',
+              border: '1px solid #E0E0E0',
+              boxShadow: 'none'
+            }}
             onClick={() =>
               downloadDashboardPDF(dashboardRef, 'Financial-Dashboard')
             }

@@ -16,7 +16,8 @@ import { notify } from '../../../components/notistack/NotificationProvider'
 import {
   getDocumentSubtypes,
   category,
-  getFilteredDocumentTypes
+  getFilteredDocumentTypes,
+  getExpenseSubcategories
 } from '../../../utils/documentMapping'
 
 interface EditDocumentModalProps {
@@ -38,18 +39,20 @@ export default function EditDocumentModal({
     document_type: '',
     document_subtype: '',
     amount: '',
+    line_item: '',
+
     document_date: '',
     payment_date: ''
   })
 
   const [availableSubtypes, setAvailableSubtypes] = useState<string[]>([])
-
   useEffect(() => {
     if (document) {
       setFormData({
         document_category: document.document_category || '',
         document_type: document.document_type || '',
         document_subtype: document.document_subtype || '',
+        line_item: document.line_item || '',
         amount: document.amount || '',
         document_date: document.document_date || '',
         payment_date: document.payment_date || document.document_date || ''
@@ -61,15 +64,38 @@ export default function EditDocumentModal({
     const subtypes = getDocumentSubtypes(formData.document_type)
     setAvailableSubtypes(subtypes)
   }, [formData.document_type])
-
+  const availableLineItems =
+    formData.document_type && formData.document_subtype
+      ? getExpenseSubcategories(
+          formData.document_type,
+          formData.document_subtype
+        )
+      : []
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
+
       ...(field === 'document_category'
-        ? { document_type: '', document_subtype: '' }
+        ? {
+            document_type: '',
+            document_subtype: '',
+            line_item: ''
+          }
         : {}),
-      ...(field === 'document_type' ? { document_subtype: '' } : {})
+
+      ...(field === 'document_type'
+        ? {
+            document_subtype: '',
+            line_item: ''
+          }
+        : {}),
+
+      ...(field === 'document_subtype'
+        ? {
+            line_item: ''
+          }
+        : {})
     }))
   }
 
@@ -161,6 +187,20 @@ export default function EditDocumentModal({
               {availableSubtypes.map((sub) => (
                 <MenuItem key={sub} value={sub}>
                   {sub}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              select
+              fullWidth
+              label='Line item'
+              value={formData.line_item}
+              onChange={(e) => handleChange('line_item', e.target.value)}
+              disabled={!formData.document_subtype}
+            >
+              {availableLineItems.map((item) => (
+                <MenuItem key={item} value={item}>
+                  {item}
                 </MenuItem>
               ))}
             </TextField>
