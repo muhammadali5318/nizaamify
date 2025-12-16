@@ -11,7 +11,7 @@ import useFetchUploadedByList from '../hooks/useFetchUplodedByList'
 import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
 import { notify } from 'src/components/notistack/NotificationProvider'
-import FilterBar, { FilterState } from '../components/documents-list/FilterBar.'
+import FilterBar, { FilterState } from '../components/documents-list/FilterBar'
 import DocumentsTable from '../components/documents-list/DocumentsTable'
 import {
   fetchAndSaveFile,

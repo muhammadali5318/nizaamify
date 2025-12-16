@@ -75,11 +75,10 @@ const SubscriptionCard = ({
   has_free_trial_eligibility,
   has_used_free_trial,
   cancelled_at,
-  periodEndDate,
-  subscriptionPlan
+  periodEndDate
 }: SubscriptionCardProps) => {
   let isDisabled = false
-  if (cancelled_at == null && buttonLabel === 'Current Plan') {
+  if (buttonLabel === 'Current Plan') {
     isDisabled = true
   } else isDisabled = false
 
@@ -121,30 +120,28 @@ const SubscriptionCard = ({
         ...sx
       }}
     >
-      {(subscriptionPlan === 'FREE TRIAL' && cancelled_at != null) ||
-        (has_used_free_trial === true && cancelled_at != null) ||
-        (cancelled_at != null && (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              gap: '5px',
-              borderRadius: '12px',
-              paddingLeft: '10px',
-              backgroundColor: cancelled_at ? '#D32F2F' : '#0288D1',
-              marginLeft: '5px',
-              marginRight: '5px',
-              color: '#fff'
-            }}
-          >
-            <InfoOutlinedIcon
-              sx={{ fontSize: 20, cursor: 'pointer', color: '#fff' }}
-            />
-            <p>{headerText}</p>
-          </Box>
-        ))}
+      {cancelled_at != null && (
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            gap: '5px',
+            borderRadius: '12px',
+            paddingLeft: '10px',
+            backgroundColor: cancelled_at ? '#D32F2F' : '#0288D1',
+            marginLeft: '5px',
+            marginRight: '5px',
+            color: '#fff'
+          }}
+        >
+          <InfoOutlinedIcon
+            sx={{ fontSize: 20, cursor: 'pointer', color: '#fff' }}
+          />
+          <p>{headerText}</p>
+        </Box>
+      )}
 
       <CardContent>
         {/* Parent Flex Container */}

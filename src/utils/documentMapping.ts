@@ -1,12 +1,10 @@
 export const documentMapping: Record<string, Record<string, string[]>> = {
   // --- Income & Revenue (Not in the Expense table, keeping original flat structure for this non-expense category) ---
   'Income & Revenue': {
-    Revenue: [
-      'Bank statements',
-      'Practice management reports',
-      'Capitation scheme statements',
-      'Subletting or rental income evidence'
-    ]
+    'Practice management reports': [],
+    'Bank statements': [],
+    'Capitation scheme statements': [],
+    'Subletting or rental income evidence': []
   },
 
   // --- Staff Costs ---
@@ -22,7 +20,7 @@ export const documentMapping: Record<string, Record<string, string[]>> = {
   // --- Clinician Costs ---
   'Clinician Costs': {
     'Dentist Pay': ['Dentist Pay'],
-    'Hygs/Therapy Pay': ['Hygs/Therapist Pay'],
+    'Hyg/Therapy Pay': ['Hyg/Therapist Pay'],
     Materials: ['Materials']
   },
 
@@ -72,16 +70,6 @@ export const documentMapping: Record<string, Record<string, string[]>> = {
     Communications: ['Communications'],
     'Finance Fees': ['Finance Fees'],
     'Miscellaneous Ops': ['Miscellaneous Ops']
-  },
-
-  // --- Tax Documents (Keeping original flat structure) ---
-  'Tax Documents': {
-    'Tax Filings': [
-      'VAT returns',
-      'HMRC communications',
-      'Corporation tax statements',
-      'Accountant summaries or filings'
-    ]
   }
 }
 

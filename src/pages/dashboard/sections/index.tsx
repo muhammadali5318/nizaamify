@@ -263,7 +263,7 @@ const MainDashboard = () => {
           gap={2}
           sx={{ width: '100%' }}
         >
-          <Box flex={1.4} sx={{ minHeight: 280 }}>
+          <Box flex={1} sx={{ minHeight: 280 }}>
             <RevenueVsCostChart
               granularity={granularity}
               month={month}

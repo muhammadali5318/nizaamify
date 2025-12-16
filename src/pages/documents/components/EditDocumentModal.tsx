@@ -190,20 +190,22 @@ export default function EditDocumentModal({
                 </MenuItem>
               ))}
             </TextField>
-            <TextField
-              select
-              fullWidth
-              label='Line item'
-              value={formData.line_item}
-              onChange={(e) => handleChange('line_item', e.target.value)}
-              disabled={!formData.document_subtype}
-            >
-              {availableLineItems.map((item) => (
-                <MenuItem key={item} value={item}>
-                  {item}
-                </MenuItem>
-              ))}
-            </TextField>
+            {formData.document_type !== 'Income & Revenue' && (
+              <TextField
+                select
+                fullWidth
+                label='Line item'
+                value={formData.line_item}
+                onChange={(e) => handleChange('line_item', e.target.value)}
+                disabled={!formData.document_subtype}
+              >
+                {availableLineItems.map((item) => (
+                  <MenuItem key={item} value={item}>
+                    {item}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
 
             <TextField
               fullWidth
