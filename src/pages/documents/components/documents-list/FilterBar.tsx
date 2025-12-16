@@ -162,6 +162,7 @@ const FilterBar: React.FC<{
         <InputLabel>Categories</InputLabel>
         <Select
           multiple
+          label='Categories'
           value={categories}
           onChange={(e) =>
             onChange({
@@ -193,6 +194,7 @@ const FilterBar: React.FC<{
       <FormControl>
         <InputLabel>Uploaded By</InputLabel>
         <Select
+          label='Uploaded By'
           multiple
           value={uploadedBy}
           disabled={isUploadedByLoading}
@@ -219,6 +221,7 @@ const FilterBar: React.FC<{
       <FormControl>
         <InputLabel>Document Type</InputLabel>
         <Select
+          label='Document Type'
           value={docType ?? ''}
           onChange={(e) =>
             onChange({
@@ -243,6 +246,7 @@ const FilterBar: React.FC<{
       <FormControl>
         <InputLabel>Document Subtype</InputLabel>
         <Select
+          label='Document Subtype'
           multiple
           value={docSubtype}
           disabled={!docType}
@@ -271,6 +275,7 @@ const FilterBar: React.FC<{
         <FormControl>
           <InputLabel>Line Item</InputLabel>
           <Select
+            label='Line Item'
             multiple
             value={lineItems}
             disabled={lineItemOptions.length === 0}
