@@ -68,7 +68,6 @@ const ManualEntryForm: React.FC = () => {
     subtype: '',
     amount: '',
     lineItem: '',
-
     vendorName: '',
     invoiceNumber: '',
     paymentDate: '',
@@ -369,21 +368,23 @@ const ManualEntryForm: React.FC = () => {
               ))}
             </Select>
           </FormControl>
-          <FormControl fullWidth disabled={!formData.subtype}>
-            <InputLabel>Line Item *</InputLabel>
-            <Select
-              name='lineItem'
-              value={formData.lineItem}
-              label='Line Item *'
-              onChange={handleSelectChange}
-            >
-              {lineItems.map((item) => (
-                <MenuItem key={item} value={item}>
-                  {item}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          {formData.type !== 'Income & Revenue' && (
+            <FormControl fullWidth disabled={!formData.subtype}>
+              <InputLabel>Line Item *</InputLabel>
+              <Select
+                name='lineItem'
+                value={formData.lineItem}
+                label='Line Item *'
+                onChange={handleSelectChange}
+              >
+                {lineItems.map((item) => (
+                  <MenuItem key={item} value={item}>
+                    {item}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
         </Stack>
 
         {/* Row 3 */}

@@ -23,13 +23,13 @@ export const getSubscribedPlan = (activePractice: any) => {
   let freeBtnText = ''
 
   if (subscriptionPlan === 'PROFESSIONAL' && cancelled_at != null) {
-    proBtnText = 'Subscribe'
+    proBtnText = 'Resubscribe'
   } else if (subscriptionPlan === 'PROFESSIONAL' && cancelled_at == null) {
     proBtnText = 'Current Plan'
   } else if (subscriptionPlan === 'PROFESSIONAL' && has_used_free_trial) {
     proBtnText = 'Subscribe'
-  } else if (subscriptionPlan === 'FREE TRIAL') {
-    proBtnText = 'Upgrade to professional plan'
+  } else if (subscriptionPlan === 'FREE TRIAL' && cancelled_at != null) {
+    proBtnText = 'Resubscribe'
     freeBtnText = 'Current Plan'
   } else {
     proBtnText = 'Subscribe to professional plan'
@@ -74,6 +74,7 @@ export const getFreePlan = (activePractice: any) => {
   const billingDateRaw = activePractice?.subscription_details?.next_billing_date
 
   const billingDate = billingDateRaw ? new Date(billingDateRaw) : null
+  const cancelled_at = activePractice?.subscription_details?.cancelled_at
 
   let daysLeft = null
   if (billingDate) {
@@ -86,8 +87,11 @@ export const getFreePlan = (activePractice: any) => {
 
   if (subscriptionPlan === 'PROFESSIONAL') {
     proBtnText = 'Current Plan'
-  } else if (subscriptionPlan === 'FREE TRIAL') {
+  } else if (subscriptionPlan === 'FREE TRIAL' && cancelled_at == null) {
     proBtnText = 'Upgrade to professional plan'
+    freeBtnText = 'Current Plan'
+  } else if (subscriptionPlan === 'FREE TRIAL' && cancelled_at != null) {
+    proBtnText = 'Subscribe to professional plan'
     freeBtnText = 'Current Plan'
   } else {
     proBtnText = 'Subscribe to professional plan'

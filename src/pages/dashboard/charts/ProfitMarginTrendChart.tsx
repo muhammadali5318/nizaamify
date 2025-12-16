@@ -48,7 +48,6 @@ const ProfitMarginTrendChart = ({
           year,
           month
         })
-
         const formatted =
           data?.series?.map((item: any) => ({
             label: item.label,
