@@ -32,6 +32,13 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         activeIcon: 'active-document.svg',
         inactiveIcon: 'inactive-document.svg',
         moduleId: 'documents'
+      },
+      {
+        text: 'Expenses',
+        to: paths.expense,
+        activeIcon: 'active-wallet.svg',
+        inactiveIcon: 'inactive-document.svg',
+        moduleId: 'expenses'
       }
     ]
   },

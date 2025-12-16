@@ -27,6 +27,7 @@ const MemberRolesAndPermission = lazy(
 )
 const PracticeSettings = lazy(() => import('src/pages/practice-settings'))
 const BankIntegrator = lazy(() => import('src/pages/bank-integrator'))
+const ExpenseBreakdown = lazy(() => import('src/pages/expense-breakdown'))
 const Billing = lazy(() => import('src/pages/billing'))
 const Settings = lazy(() => import('src/pages/settings'))
 const HelpAndSupport = lazy(() => import('src/pages/HelpAndSupport'))
@@ -172,6 +173,14 @@ export function Router() {
             element: (
               <FeatureProtectedRoute moduleId='bank-integrator'>
                 <BankIntegrator />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.expense,
+            element: (
+              <FeatureProtectedRoute moduleId='expenses'>
+                <ExpenseBreakdown />
               </FeatureProtectedRoute>
             )
           },

@@ -6,6 +6,7 @@ export const paths = {
   agreements: '/agreements',
   practiceOnboardingStepper: '/practice-onboarding/stepper',
   documents: '/documents',
+  expense: '/expense-breakdown',
   reports: '/reports',
   benchmarks: '/benchmarks',
   teamManagement: {
