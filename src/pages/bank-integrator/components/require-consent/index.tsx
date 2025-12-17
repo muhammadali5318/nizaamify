@@ -1,4 +1,11 @@
-import { Box, Button, Link, Stack, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Link,
+  Stack,
+  Typography
+} from '@mui/material'
 import styles from './requireConsent.module.scss'
 import { ChevronLeft } from '@mui/icons-material'
 import RenderUlList from 'src/components/render-ul-list'
@@ -21,6 +28,7 @@ interface RequireConsentProps {
 const RequireConsent = ({ goToStep }: RequireConsentProps) => {
   const institution = useSelector(selectSelectedInstitution)
   const [connectionURL, setConnectionURL] = useState(null)
+  const [isRedirecting, setIsRedirecting] = useState(false)
   const { activePracticeId } = useActivePractice()
   const [searchParams] = useSearchParams()
   const reconfirmConnection =
@@ -58,7 +66,9 @@ const RequireConsent = ({ goToStep }: RequireConsentProps) => {
   }, [institution])
 
   const handleConfirm = () => {
-    if (!connectionURL) return
+    if (!connectionURL || isRedirecting) return
+
+    setIsRedirecting(true)
     window.location.href = connectionURL
   }
 
@@ -141,10 +151,18 @@ const RequireConsent = ({ goToStep }: RequireConsentProps) => {
             variant='contained'
             sx={{ flex: 1 }}
             onClick={handleConfirm}
-            disabled={!connectionURL}
-            loading={!connectionURL}
+            disabled={!connectionURL || isRedirecting}
+            startIcon={
+              (isRedirecting || !connectionURL) && (
+                <CircularProgress size={20} color='inherit' />
+              )
+            }
           >
-            Confirm
+            {!connectionURL
+              ? 'Preparing secure connection...'
+              : isRedirecting
+                ? 'Redirecting to bank...'
+                : 'Confirm'}
           </Button>
         </Box>
       </Box>
