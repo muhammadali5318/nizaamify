@@ -1,5 +1,6 @@
 export const API_BASE = 'user-workstation/v1'
 export const API_BASE_DOCUMENTS = 'docs/v1'
+export const API_BASE_BANK_INTEGRATOR = 'banking/v1'
 
 export const endpoints = {
   practiceOnboarding: {
@@ -13,6 +14,24 @@ export const endpoints = {
       `${API_BASE}/practices/${practiceId}/onboarding/steps/4/`,
     stepFive: (practiceId: string) =>
       `${API_BASE}/practices/${practiceId}/onboarding/steps/5/`
+  },
+  bankIntegrator: {
+    list: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/institutions/`,
+    connectionUrl: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/connect/start/`,
+    finalzieConnection: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/connect/finalise/`,
+    connectionHealth: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/connection/health/`,
+    revokeConnection: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/revoke/`,
+    connectionDetails: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/connection/`,
+    accountsDetails: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/accounts/`,
+    reconsentConfirm: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/reconsent/confirm/`
   },
   signup: {
     requestPracticeAssociation: `${API_BASE}/users/signup/access-requests/`,

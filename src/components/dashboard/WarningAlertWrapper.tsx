@@ -4,10 +4,12 @@ import React from 'react'
 
 type WarningAlertWrapperProps = {
   children: React.ReactNode
+  title?: string
 }
 
 const WarningAlertWrapper: React.FC<WarningAlertWrapperProps> = ({
-  children
+  children,
+  title = 'Needs attention'
 }) => {
   return (
     <Box className={styles.warningAlertBannerRoot}>
@@ -17,8 +19,8 @@ const WarningAlertWrapper: React.FC<WarningAlertWrapperProps> = ({
           src='/assets/warning.svg'
           alt='warning icon'
         />
-        <Typography color='warning.dark' variant='h6' fontWeight={700}>
-          Needs attention
+        <Typography color='warning.main' variant='h6' fontWeight={700}>
+          {title}
         </Typography>
       </Box>
 

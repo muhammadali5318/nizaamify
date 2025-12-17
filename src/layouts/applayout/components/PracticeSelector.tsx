@@ -32,6 +32,10 @@ import { CONFIG } from 'src/config-global'
 import { AllPracticesDataObject } from 'src/store/slices/activePracticeSlice'
 import { clearProcessing } from 'src/store/slices/processingSlice'
 import useUserDetails from 'src/hooks/useUserDetails'
+import {
+  setConnectionId,
+  setStatus
+} from 'src/store/slices/bankConnectionSlice'
 
 export default function PracticeSelector() {
   const { isOwnerOrDirectorInAnyPractice } = useUserDetails()
@@ -150,6 +154,9 @@ export default function PracticeSelector() {
             dispatch(clearProcessing())
             dispatch(clearFiles())
             dispatch(clearPresignData())
+            localStorage.removeItem('bank_connection_id')
+            dispatch(setStatus(null))
+            dispatch(setConnectionId(null))
             setSelectedPractice(selected)
             setActiveById(selected?.id ?? '', practices)
             notify.success('Switched to ' + selected?.practice_name)

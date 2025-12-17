@@ -11,6 +11,9 @@ import selectedUserReducer from './slices/team-management/selectedUserSlice'
 import pollingJobsReducer from './slices/pollingJobSlice'
 import manualEntryQueueReducer from './slices/manualEntryQueueSlice'
 import manualEntryFileReducer from './slices/manualEntryFilesSlice'
+import selectedInstitutionReducer from './slices/selectedInstitution'
+import bankConnectionReducer from './slices/bankConnectionSlice'
+
 const rootReducer = combineReducers({
   uploads: uploadReducer,
   presign: presignReducer,
@@ -21,7 +24,9 @@ const rootReducer = combineReducers({
   selectedUser: selectedUserReducer,
   pollingJobs: pollingJobsReducer,
   manualEntryQueue: manualEntryQueueReducer,
-  manualEntryFiles: manualEntryFileReducer
+  manualEntryFiles: manualEntryFileReducer,
+  selectedInstitution: selectedInstitutionReducer,
+  bankConnection: bankConnectionReducer
 })
 
 const persistConfig = {

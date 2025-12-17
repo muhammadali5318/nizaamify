@@ -1,7 +1,16 @@
 import { Box, Button, Stack, Typography } from '@mui/material'
-import styles from './connnectBank.module.scss'
+import styles from './connectBank.module.scss'
+import { Step } from '../..'
 
-const ContectYourBank = () => {
+interface ConnectYourBankProps {
+  goToStep: (step: Step) => void
+}
+
+const ConnectYourBank = ({ goToStep }: ConnectYourBankProps) => {
+  const handleConnectBank = () => {
+    goToStep('select-bank')
+  }
+
   return (
     <Box className={styles.contectYourBankRoot}>
       <Box className={styles.contentWrapper}>
@@ -30,6 +39,7 @@ const ContectYourBank = () => {
             variant='contained'
             fullWidth
             sx={{ maxWidth: 320 }}
+            onClick={handleConnectBank}
           >
             Link Bank Account
           </Button>
@@ -46,4 +56,4 @@ const ContectYourBank = () => {
   )
 }
 
-export default ContectYourBank
+export default ConnectYourBank

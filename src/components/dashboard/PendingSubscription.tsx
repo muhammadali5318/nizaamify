@@ -1,29 +1,49 @@
 // src/components/dashboard/PendingSubscription.tsx
-import React from 'react'
-import { Button } from '@mui/material'
+import React, { ReactNode } from 'react'
+import { Button, ButtonProps } from '@mui/material'
 import { useNavigate } from 'react-router'
-import { paths } from 'src/paths'
 import WarningBanner from './WarningBanner'
 
-const PendingSubscription: React.FC = () => {
+interface PendingSubscriptionProps {
+  message: ReactNode
+  actionLabel: string
+  actionPath?: string
+  onActionClick?: () => void
+  buttonProps?: ButtonProps
+}
+
+const PendingSubscription: React.FC<PendingSubscriptionProps> = ({
+  message,
+  actionLabel,
+  actionPath,
+  onActionClick,
+  buttonProps
+}) => {
   const navigate = useNavigate()
+
+  const handleClick = () => {
+    if (onActionClick) {
+      onActionClick()
+      return
+    }
+
+    if (actionPath) {
+      navigate(actionPath)
+    }
+  }
 
   return (
     <WarningBanner
-      message={
-        <>
-          You need to select a <strong> subscription plan </strong> to
-          completely unlock the MonAI platform and access all features.
-        </>
-      }
+      message={message}
       actions={
         <Button
           variant='contained'
           color='warning'
           size='medium'
-          onClick={() => navigate(paths.billing)}
+          onClick={handleClick}
+          {...buttonProps}
         >
-          Choose plan
+          {actionLabel}
         </Button>
       }
     />

@@ -31,6 +31,10 @@ import { clearFiles } from 'src/store/slices/uploadSlice'
 import { clearPresignData } from 'src/store/slices/presignedSlice'
 import { clearProcessing } from 'src/store/slices/processingSlice'
 import { AllPracticesDataObject } from 'src/store/slices/activePracticeSlice'
+import {
+  setConnectionId,
+  setStatus
+} from 'src/store/slices/bankConnectionSlice'
 
 interface PracticeDetailsCardProps {
   status?: 'active' | 'inactive' | 'archived'
@@ -141,6 +145,9 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
     dispatch(clearProcessing())
     dispatch(clearFiles())
     dispatch(clearPresignData())
+    localStorage.removeItem('bank_connection_id')
+    dispatch(setStatus(null))
+    dispatch(setConnectionId(null))
     notify.success('Switched to ' + practice?.practice_name)
   }, [practice, setActiveById, allPractices, dispatch])
 
