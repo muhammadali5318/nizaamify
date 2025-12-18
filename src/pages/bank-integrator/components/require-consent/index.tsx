@@ -35,6 +35,7 @@ const RequireConsent = ({ goToStep }: RequireConsentProps) => {
     searchParams.get('reconfirm-connection') === 'true'
   const institutionIdParam = searchParams.get('institution-id')
   const handleBack = () => {
+    localStorage.removeItem('bank_connection_id')
     goToStep('select-bank')
   }
   const consentValidUntil = dayjs().add(90, 'day').format('DD/MM/YYYY')

@@ -22,6 +22,7 @@ import {
   setStatus
 } from 'src/store/slices/bankConnectionSlice'
 import { toTitleCase } from 'src/utils/stringUtils'
+import { queryClient } from 'src/utils/queryClient'
 
 /* ---------------------------
    Types for API responses
@@ -96,14 +97,26 @@ const BankDetails: React.FC<BankDetailsProps> = ({ goToStep }) => {
   const [connection, setConnection] = useState<ConnectionData | null>(null)
   const [accounts, setAccounts] = useState<BankAccount[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isDisconnecting, setIsDisconnecting] = useState(false)
 
   const disconnectBank = useCallback(async () => {
     if (!activePracticeId) return
+    setIsDisconnecting(true)
+
     try {
       const response = await apiClient.delete(
         endpoints.bankIntegrator.revokeConnection(activePracticeId)
       )
       if (response.status === 204) {
+        await queryClient.invalidateQueries({
+          queryKey: ['checkBankConnectionHealth', activePracticeId]
+        })
+
+        // Optional: immediately remove cached data
+        queryClient.setQueryData(
+          ['checkBankConnectionHealth', activePracticeId],
+          null
+        )
         goToStep('connect-bank')
         localStorage.removeItem('bank_connection_id')
         dispatch(setStatus(null))
@@ -116,6 +129,8 @@ const BankDetails: React.FC<BankDetailsProps> = ({ goToStep }) => {
       }
     } catch {
       notify.error('Something went wrong, Please try again later.')
+    } finally {
+      setIsDisconnecting(false)
     }
   }, [activePracticeId, dispatch, goToStep])
 
@@ -343,11 +358,18 @@ const BankDetails: React.FC<BankDetailsProps> = ({ goToStep }) => {
             size='large'
             color='error'
             onClick={disconnectBank}
+            disabled={isDisconnecting}
             startIcon={
-              <img src='/assets/disconnect.svg' alt='disconnect icon' />
+              isDisconnecting ? (
+                <CircularProgress size={18} color='inherit' />
+              ) : (
+                <img src='/assets/disconnect.svg' alt='disconnect icon' />
+              )
             }
           >
-            Disconnect {connection?.institution?.name ?? 'Bank'}
+            {isDisconnecting
+              ? `Disconnecting ${connection?.institution?.name ?? 'Bank'}`
+              : `Disconnect ${connection?.institution?.name ?? 'Bank'}`}
           </Button>
         </Box>
       </Box>
