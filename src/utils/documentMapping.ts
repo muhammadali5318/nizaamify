@@ -20,8 +20,7 @@ export const documentMapping: Record<string, Record<string, string[]>> = {
   // --- Clinician Costs ---
   'Clinician Costs': {
     'Dentist Pay': ['Dentist Pay'],
-    'Hyg/Therapy Pay': ['Hyg/Therapist Pay'],
-    Materials: ['Materials']
+    'Hyg/Therapy Pay': ['Hyg/Therapist Pay']
   },
 
   // --- Materials & Equipment ---
