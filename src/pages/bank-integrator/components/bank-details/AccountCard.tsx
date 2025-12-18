@@ -7,6 +7,7 @@ interface AccountCardProps {
 }
 
 const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
+  const lastFourDigits = account?.iban ? account.iban.slice(-4) : '-'
   return (
     <Box className={styles.accountCard}>
       <img src='/assets/wallet.svg' alt='wallet icon' />
@@ -14,8 +15,9 @@ const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
         <Typography variant='subtitle1' fontWeight={700}>
           {account.name}
         </Typography>
+
         <Typography variant='caption' color='text.secondary'>
-          {account.iban}
+          Account ending {lastFourDigits}
         </Typography>
       </Stack>
     </Box>

@@ -2,7 +2,7 @@ import { Box, Button, Stack, Typography, CircularProgress } from '@mui/material'
 import styles from './connectionSuccessful.module.scss'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { endpoints } from 'src/services/backendUrl'
 import apiClient from 'src/services/api-client'
 import { useActivePractice } from 'src/hooks/useActivePractice'
@@ -20,6 +20,8 @@ import {
 const ConnectionSuccessful = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
+
+  const [bankName, setBankName] = useState()
 
   const connectionId = useSelector(selectBankConnectionId)
   const loading = useSelector(selectBankConnectionLoading)
@@ -44,7 +46,7 @@ const ConnectionSuccessful = () => {
         connection_id: connectionId
       }
     )
-    return response.data.data.status
+    return response.data.data
   }
 
   useEffect(() => {
@@ -52,10 +54,11 @@ const ConnectionSuccessful = () => {
 
     const interval = setInterval(async () => {
       try {
-        const newStatus = await pollConsentStatus()
-        dispatch(setStatus(newStatus))
+        const data = await pollConsentStatus()
+        dispatch(setStatus(data?.status))
 
-        if (newStatus === 'AUTHORIZED') {
+        if (data?.status === 'AUTHORIZED') {
+          setBankName(data?.institution?.full_name)
           dispatch(setLoading(false))
           clearInterval(interval)
         }
@@ -130,7 +133,8 @@ const ConnectionSuccessful = () => {
               Connection Established Successfully
             </Typography>
             <Typography variant='body1' color='text.secondary'>
-              Your bank account has been connected to Monai.
+              Your <strong>{bankName ?? 'bank'}</strong> account has been
+              connected to Monai.
               <br />
               <br />
               We can now securely access your account balances and transaction

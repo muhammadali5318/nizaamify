@@ -37,7 +37,7 @@ const RequireConsent = ({ goToStep }: RequireConsentProps) => {
   const handleBack = () => {
     goToStep('select-bank')
   }
-  const consentValidUntil = dayjs().add(89, 'day').format('DD/MM/YYYY')
+  const consentValidUntil = dayjs().add(90, 'day').format('DD/MM/YYYY')
 
   const fetchConnectionURL = async () => {
     const institutionId = institution?.id ?? institutionIdParam

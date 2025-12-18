@@ -303,7 +303,11 @@ const BankDetails: React.FC<BankDetailsProps> = ({ goToStep }) => {
           </Box>
 
           <Stack spacing={'10px'} width={'100%'}>
-            {connection?.feature_scope?.map((feature, idx) => (
+            {[
+              'Account details and holder information',
+              'Current account balances',
+              'Transaction history'
+            ].map((feature, idx) => (
               <Box
                 key={idx}
                 display={'flex'}

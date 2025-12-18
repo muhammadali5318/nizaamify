@@ -30,17 +30,36 @@ const BankIntegrator = () => {
 
   const { data } = useCheckBankConnectionHealth(!!accessToken)
 
+  const searchString = searchParams.toString()
+  const hasError =
+    !!searchParams.get('error') ||
+    !!searchParams.get('error-source') ||
+    !!searchParams.get('error-description')
+
   useEffect(() => {
+    if (hasError) {
+      setCurrentStep('connect-bank')
+      return
+    }
+
     if (reconfirmConnection) {
       setCurrentStep('require-consent')
       return
     }
+
     if (isConnectionSuccessful && connectionId) {
       setCurrentStep('success')
     } else if (data?.has_connection && data?.days_left) {
       setCurrentStep('bank-details')
     }
-  }, [data, isConnectionSuccessful])
+  }, [
+    data,
+    isConnectionSuccessful,
+    reconfirmConnection,
+    connectionId,
+    searchString,
+    hasError
+  ])
 
   const goToStep = (step: Step) => {
     setCurrentStep(step)
