@@ -24,17 +24,17 @@ import { formatAmountWithCommas } from 'src/utils/stringUtils'
 
 interface ExpenseBreakdownTableProps {
   data?: any
-  dateRange?: RangeISO
+  dateRange: RangeISO
   total?: any
   title?: string
 }
 
-const ExpenseBreakdownTable = ({
+const ExpenseBreakdownTable: React.FC<ExpenseBreakdownTableProps> = ({
   data,
   dateRange,
   total,
   title
-}: ExpenseBreakdownTableProps) => {
+}) => {
   const categories = data || []
 
   // theme & breakpoint helpers used to adapt spacing/font sizes on small screens
@@ -102,9 +102,9 @@ const ExpenseBreakdownTable = ({
           </TableRow>
 
           {/* PARENT ROWS */}
-          {categories.map((type: any) => (
+          {categories.map((type: any, idx: number) => (
             <ExpandableRow
-              key={type.expense_type}
+              key={type?.expense_subtype ?? idx}
               row={type}
               childCategories={type}
               dateRange={dateRange}
@@ -149,19 +149,20 @@ export default ExpenseBreakdownTable
 // ----------------------------------------------------------
 interface ExpandableRowProps {
   row: any
-  childCategories: any[]
+  childCategories: any
   dateRange: RangeISO
 }
 
-const ExpandableRow = ({
+const ExpandableRow: React.FC<ExpandableRowProps> = ({
   row,
   childCategories,
   dateRange
-}: ExpandableRowProps) => {
+}) => {
   const [open, setOpen] = useState(false)
   const { activePracticeId } = useActivePractice()
   const [openDocumentDetails, setOpenDocumentDetails] = useState<boolean>(false)
-  const [downloadableDocuments, setDownloadableDocuments] = useState<any>()
+  const [downloadableDocuments, setDownloadableDocuments] =
+    useState<any>(undefined)
   const theme = useTheme()
   const isSmDown = useMediaQuery(theme.breakpoints.down('sm'))
 
@@ -351,76 +352,82 @@ const ExpandableRow = ({
                   </TableRow>
 
                   {/* CHILD DATA ROWS */}
-                  {childCategories?.expense_sub_categories?.map(
-                    (cat: any, idx: number) => {
-                      const [key, value] = Object.entries(cat)[0] || []
+                  {Array.isArray(childCategories?.expense_sub_categories) &&
+                    childCategories.expense_sub_categories.map(
+                      (cat: any, idx: number) => {
+                        // safer handling of Object.entries(cat)[0]
+                        const entry = Object.entries(cat)[0] as
+                          | [string, any]
+                          | undefined
+                        const key = entry ? entry[0] : ''
+                        const value = entry ? entry[1] : 0
 
-                      return (
-                        <TableRow
-                          key={idx}
-                          sx={{
-                            background: '#F0F0F0',
-                            borderRadius: '12px',
-                            '& > td': {
-                              padding: isSmDown ? '8px 10px' : '12px 16px',
-                              border: 'none',
-                              whiteSpace: 'normal',
-                              wordBreak: 'break-word',
-                              '&:first-of-type': {
-                                borderTopLeftRadius: '12px',
-                                borderBottomLeftRadius: '12px'
-                              },
-                              '&:last-of-type': {
-                                borderTopRightRadius: '12px',
-                                borderBottomRightRadius: '12px'
+                        return (
+                          <TableRow
+                            key={idx}
+                            sx={{
+                              background: '#F0F0F0',
+                              borderRadius: '12px',
+                              '& > td': {
+                                padding: isSmDown ? '8px 10px' : '12px 16px',
+                                border: 'none',
+                                whiteSpace: 'normal',
+                                wordBreak: 'break-word',
+                                '&:first-of-type': {
+                                  borderTopLeftRadius: '12px',
+                                  borderBottomLeftRadius: '12px'
+                                },
+                                '&:last-of-type': {
+                                  borderTopRightRadius: '12px',
+                                  borderBottomRightRadius: '12px'
+                                }
                               }
-                            }
-                          }}
-                        >
-                          <TableCell
-                            sx={{
-                              width: isSmDown ? '36px' : '40px',
-                              padding: '0px !important'
                             }}
                           >
-                            <IconButton
-                              size='small'
-                              disabled
-                              sx={{ padding: isSmDown ? '4px' : undefined }}
-                            />
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              width: { xs: '50%', sm: '30%' },
-                              fontWeight: 500
-                            }}
-                          >
-                            {key}
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              width: { xs: '30%', sm: '30%' },
-                              fontWeight: 500
-                            }}
-                          >
-                            £{formatAmountWithCommas(value)}
-                          </TableCell>
-                          <TableCell sx={{ width: { xs: '20%', sm: '40%' } }}>
-                            <IconButton
-                              size={isSmDown ? 'small' : 'small'}
-                              aria-label='View Expense details'
-                              onClick={() => {
-                                handleDocumentDetails(key)
+                            <TableCell
+                              sx={{
+                                width: isSmDown ? '36px' : '40px',
+                                padding: '0px !important'
                               }}
-                              sx={{ padding: isSmDown ? '6px' : undefined }}
                             >
-                              <RemoveRedEyeOutlinedIcon fontSize='small' />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      )
-                    }
-                  )}
+                              <IconButton
+                                size='small'
+                                disabled
+                                sx={{ padding: isSmDown ? '4px' : undefined }}
+                              />
+                            </TableCell>
+                            <TableCell
+                              sx={{
+                                width: { xs: '50%', sm: '30%' },
+                                fontWeight: 500
+                              }}
+                            >
+                              {key}
+                            </TableCell>
+                            <TableCell
+                              sx={{
+                                width: { xs: '30%', sm: '30%' },
+                                fontWeight: 500
+                              }}
+                            >
+                              £{formatAmountWithCommas(value)}
+                            </TableCell>
+                            <TableCell sx={{ width: { xs: '20%', sm: '40%' } }}>
+                              <IconButton
+                                size={isSmDown ? 'small' : 'small'}
+                                aria-label='View Expense details'
+                                onClick={() => {
+                                  handleDocumentDetails(key)
+                                }}
+                                sx={{ padding: isSmDown ? '6px' : undefined }}
+                              >
+                                <RemoveRedEyeOutlinedIcon fontSize='small' />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      }
+                    )}
                 </TableBody>
               </Table>
             </Box>

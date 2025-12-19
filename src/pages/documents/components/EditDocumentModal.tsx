@@ -39,7 +39,7 @@ export default function EditDocumentModal({
     document_type: '',
     document_subtype: '',
     amount: '',
-    line_item: '',
+    expense_category: '',
 
     document_date: '',
     payment_date: ''
@@ -52,7 +52,7 @@ export default function EditDocumentModal({
         document_category: document.document_category || '',
         document_type: document.document_type || '',
         document_subtype: document.document_subtype || '',
-        line_item: document.line_item || '',
+        expense_category: document.expense_category || '',
         amount: document.amount || '',
         document_date: document.document_date || '',
         payment_date: document.payment_date || document.document_date || ''
@@ -80,20 +80,20 @@ export default function EditDocumentModal({
         ? {
             document_type: '',
             document_subtype: '',
-            line_item: ''
+            expense_category: ''
           }
         : {}),
 
       ...(field === 'document_type'
         ? {
             document_subtype: '',
-            line_item: ''
+            expense_category: ''
           }
         : {}),
 
       ...(field === 'document_subtype'
         ? {
-            line_item: ''
+            expense_category: ''
           }
         : {})
     }))
@@ -195,8 +195,10 @@ export default function EditDocumentModal({
                 select
                 fullWidth
                 label='Line item'
-                value={formData.line_item}
-                onChange={(e) => handleChange('line_item', e.target.value)}
+                value={formData.expense_category}
+                onChange={(e) =>
+                  handleChange('expense_category', e.target.value)
+                }
                 disabled={!formData.document_subtype}
               >
                 {availableLineItems.map((item) => (

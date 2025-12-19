@@ -11,8 +11,17 @@ import {
   IconButton,
   CircularProgress
 } from '@mui/material'
+import { notify } from 'src/components/notistack/NotificationProvider'
+import apiClient from 'src/services/api-client'
+import { endpoints } from 'src/services/backendUrl'
+import {
+  fetchAndSaveFile,
+  getFileNameFromUrl
+} from 'src/utils/downloadFileUtils'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 interface DocumentItem {
+  document_id: string
   file_name: string
   document_s3_path: string
   size?: string
@@ -21,53 +30,44 @@ interface DocumentItem {
 interface DocumentDetailsModalProps {
   open: boolean
   onClose: () => void
-  /**
-   * Array of documents to render
-   */
   downloadableDocuments: DocumentItem[]
-  /**
-   * Optional hook to get a presigned URL for a given s3 path.
-   * If provided, it should return a fully-resolved URL (string).
-   * e.g. async (s3Path) => { const r = await fetch(`/api/presign?path=${encodeURIComponent(s3Path)}`); return r.json().url; }
-   */
-  getPresignedUrl?: (s3Path: string) => Promise<string>
 }
 
 const DocumentDetailsModal: React.FC<DocumentDetailsModalProps> = React.memo(
-  ({ open, onClose, downloadableDocuments, getPresignedUrl }) => {
+  ({ open, onClose, downloadableDocuments }) => {
+    const { activePracticeId } = useActivePractice()
     const [downloadingIndex, setDownloadingIndex] = useState<number | null>(
       null
     )
-    const [error, setError] = useState<string | null>(null)
-
     const downloadFile = useCallback(
-      async (s3Path: string, fileName?: string, index?: number) => {
+      async (id: string, index: number) => {
+        setDownloadingIndex(index)
         try {
-          setError(null)
-          if (typeof index === 'number') setDownloadingIndex(index)
+          const resp = await apiClient.get(
+            endpoints.documents.downloaduploadedDocument(
+              activePracticeId ?? '',
+              id
+            )
+          )
 
-          let url: string | null = null
+          const fileUrl = resp?.data?.data
+          if (!fileUrl) {
+            notify.error('File not found.')
+            return
+          }
 
-          if (!url) url = s3Path
-
-          // Attempt download: create an anchor and click it. This will open in a new tab if the resource is cross-origin.
-          const a = document.createElement('a')
-          a.href = url
-          // only set download attribute for same-origin / direct file names (browsers may ignore cross-origin download attr)
-          if (fileName) a.download = fileName
-          a.target = '_blank'
-          a.rel = 'noopener noreferrer'
-          document.body.appendChild(a)
-          a.click()
-          a.remove()
-        } catch (err: any) {
-          console.error('download error', err)
-          setError('Failed to download file. Please try again.')
+          await fetchAndSaveFile(
+            fileUrl,
+            getFileNameFromUrl(fileUrl) || undefined
+          )
+        } catch (error) {
+          console.error('Download failed:', error)
+          notify.error('Something went wrong, please try again.')
         } finally {
           setDownloadingIndex(null)
         }
       },
-      [getPresignedUrl]
+      [activePracticeId]
     )
 
     return (
@@ -172,13 +172,7 @@ const DocumentDetailsModal: React.FC<DocumentDetailsModalProps> = React.memo(
 
                       <IconButton
                         aria-label='download document'
-                        onClick={() =>
-                          downloadFile(
-                            doc.document_s3_path,
-                            doc.file_name,
-                            index
-                          )
-                        }
+                        onClick={() => downloadFile(doc.document_id, index)}
                         size='small'
                       >
                         {downloadingIndex === index ? (
@@ -207,18 +201,7 @@ const DocumentDetailsModal: React.FC<DocumentDetailsModalProps> = React.memo(
                 textAlign='center'
                 py={4}
               >
-                No documents uploaded.
-              </Typography>
-            )}
-
-            {error && (
-              <Typography
-                variant='caption'
-                color='error'
-                textAlign='center'
-                mt={1}
-              >
-                {error}
+                No documents were found for the selected category.{' '}
               </Typography>
             )}
           </Box>
