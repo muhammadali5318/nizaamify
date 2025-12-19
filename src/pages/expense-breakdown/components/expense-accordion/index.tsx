@@ -140,6 +140,7 @@ export default function ReusableAccordion({
             data={expenseSubtypes}
             dateRange={dateRange}
             total={formatAmountWithCommas(total ?? '')}
+            title={title}
           />
         </Box>
       </Collapse>

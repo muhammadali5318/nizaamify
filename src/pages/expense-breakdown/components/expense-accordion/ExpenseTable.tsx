@@ -26,12 +26,14 @@ interface ExpenseBreakdownTableProps {
   data?: any
   dateRange?: RangeISO
   total?: any
+  title?: string
 }
 
 const ExpenseBreakdownTable = ({
   data,
   dateRange,
-  total
+  total,
+  title
 }: ExpenseBreakdownTableProps) => {
   const categories = data || []
 
@@ -130,7 +132,7 @@ const ExpenseBreakdownTable = ({
             whiteSpace: 'nowrap'
           }}
         >
-          Total Business Operations
+          Total {title}
         </Typography>
         <Typography variant={isSmDown ? 'h6' : 'h5'} fontWeight={700}>
           £{total}
