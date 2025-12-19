@@ -1,3 +1,4 @@
+import React, { useState } from 'react'
 import {
   Table,
   TableBody,
@@ -7,10 +8,11 @@ import {
   Collapse,
   Box,
   Typography,
-  Chip
+  Chip,
+  useTheme,
+  useMediaQuery
 } from '@mui/material'
 import { ArrowDropDown, ArrowDropUp } from '@mui/icons-material'
-import { useState } from 'react'
 import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined'
 import DocumentDetailsModal from '../document-details-modal'
 import apiClient from 'src/services/api-client'
@@ -26,19 +28,16 @@ interface ExpenseBreakdownTableProps {
   total?: any
 }
 
-const columnWidths = {
-  col1: '40px',
-  col2: '30%',
-  col3: '30%',
-  col4: '40%'
-}
-
 const ExpenseBreakdownTable = ({
   data,
   dateRange,
   total
 }: ExpenseBreakdownTableProps) => {
   const categories = data || []
+
+  // theme & breakpoint helpers used to adapt spacing/font sizes on small screens
+  const theme = useTheme()
+  const isSmDown = useMediaQuery(theme.breakpoints.down('sm'))
 
   return (
     <Box sx={{ overflowX: 'auto' }}>
@@ -49,26 +48,23 @@ const ExpenseBreakdownTable = ({
           borderCollapse: 'separate',
           borderSpacing: '0 6px',
           marginTop: '-6px',
-          '& th': {
-            border: 'none'
-          },
-          '& td': {
-            border: 'none'
-          }
+          '& th': { border: 'none' },
+          '& td': { border: 'none' }
         }}
       >
-        {/* Remove TableHead completely */}
         <TableBody>
-          {/* MAIN HEADER - now styled exactly like other card rows */}
+          {/* MAIN HEADER */}
           <TableRow
             sx={{
               background: '#fff',
               borderRadius: '12px',
               '& > td': {
-                padding: '12px 16px',
+                padding: isSmDown ? '8px 10px' : '12px 16px',
                 border: 'none',
                 fontWeight: 600,
-                fontSize: '14px',
+                fontSize: isSmDown ? '13px' : '14px',
+                whiteSpace: 'normal',
+                wordBreak: 'break-word',
                 '&:first-of-type': {
                   borderTopLeftRadius: '12px',
                   borderBottomLeftRadius: '12px'
@@ -80,19 +76,23 @@ const ExpenseBreakdownTable = ({
               }
             }}
           >
-            <TableCell sx={{ width: columnWidths.col1 }} />
-            <TableCell sx={{ width: columnWidths.col2 }}>
-              {' '}
-              <Typography variant='subtitle2' fontWeight={500}>
+            <TableCell
+              sx={{
+                width: isSmDown ? '36px' : '40px',
+                padding: '0px !important'
+              }}
+            />
+            <TableCell sx={{ width: { xs: '50%', sm: '30%' } }}>
+              <Typography variant='subtitle2' fontWeight={500} noWrap={false}>
                 Subcategory
               </Typography>
             </TableCell>
-            <TableCell sx={{ width: columnWidths.col3 }} align='left'>
+            <TableCell sx={{ width: { xs: '30%', sm: '30%' } }} align='left'>
               <Typography variant='subtitle2' fontWeight={500}>
                 Amount
               </Typography>
             </TableCell>
-            <TableCell sx={{ width: columnWidths.col4 }} align='left'>
+            <TableCell sx={{ width: { xs: '20%', sm: '40%' } }} align='left'>
               <Typography variant='subtitle2' fontWeight={500}>
                 Effecting Documents
               </Typography>
@@ -100,28 +100,39 @@ const ExpenseBreakdownTable = ({
           </TableRow>
 
           {/* PARENT ROWS */}
-          {categories.map((type: any) => {
-            return (
-              <ExpandableRow
-                key={type.expense_type}
-                row={type}
-                childCategories={type}
-                dateRange={dateRange}
-              />
-            )
-          })}
+          {categories.map((type: any) => (
+            <ExpandableRow
+              key={type.expense_type}
+              row={type}
+              childCategories={type}
+              dateRange={dateRange}
+            />
+          ))}
         </TableBody>
       </Table>
+
+      {/* TOTAL SECTION - responsive stacking on small screens */}
       <Box
         display={'flex'}
-        padding={'8px 0px'}
-        alignItems={'center'}
+        padding={isSmDown ? '8px 4px' : '8px 0px'}
+        alignItems={isSmDown ? 'flex-start' : 'center'}
         alignSelf={'stretch'}
+        gap={isSmDown ? 1 : 2}
+        flexDirection={isSmDown ? 'column' : 'row'}
       >
-        <Typography width={'423px'} variant='subtitle1' fontWeight={700}>
+        <Typography
+          width={isSmDown ? '100%' : '423px'}
+          variant='subtitle1'
+          fontWeight={700}
+          sx={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}
+        >
           Total Business Operations
         </Typography>
-        <Typography variant='h5' fontWeight={700}>
+        <Typography variant={isSmDown ? 'h6' : 'h5'} fontWeight={700}>
           £{total}
         </Typography>
       </Box>
@@ -148,21 +159,31 @@ const ExpandableRow = ({
   const [open, setOpen] = useState(false)
   const { activePracticeId } = useActivePractice()
   const [openDocumentDetails, setOpenDocumentDetails] = useState<boolean>(false)
-  const [downloadableDocuments, setDownloadableDocuments] = useState()
+  const [downloadableDocuments, setDownloadableDocuments] = useState<any>()
+  const theme = useTheme()
+  const isSmDown = useMediaQuery(theme.breakpoints.down('sm'))
+
   const handleDocumentDetails = async (type: string) => {
-    const response = await apiClient.get(
-      endpoints.documents.expenseBreakdownDocuments(activePracticeId ?? ''),
-      {
-        params: {
-          start_date: toApiDate(dateRange.start),
-          end_date: toApiDate(dateRange.end),
-          sub_cat: type
+    try {
+      const response = await apiClient.get(
+        endpoints.documents.expenseBreakdownDocuments(activePracticeId ?? ''),
+        {
+          params: {
+            start_date: toApiDate(dateRange?.start),
+            end_date: toApiDate(dateRange?.end),
+            sub_cat: type
+          }
         }
-      }
-    )
-    setDownloadableDocuments(response?.data?.data)
-    setOpenDocumentDetails(true)
+      )
+      setDownloadableDocuments(response?.data?.data)
+      setOpenDocumentDetails(true)
+    } catch {
+      // swallow - keep behavior same
+      setDownloadableDocuments(undefined)
+      setOpenDocumentDetails(true)
+    }
   }
+
   return (
     <>
       {/* PARENT ROW */}
@@ -172,7 +193,7 @@ const ExpandableRow = ({
           display: 'table-row',
           marginBottom: open ? '0px' : '6px',
           '& > td': {
-            padding: '12px 16px',
+            padding: isSmDown ? '8px 10px' : '12px 16px',
             '&:first-of-type': {
               borderTopLeftRadius: '12px',
               borderBottomLeftRadius: '12px'
@@ -180,19 +201,27 @@ const ExpandableRow = ({
             '&:last-of-type': {
               borderTopRightRadius: '12px',
               borderBottomRightRadius: '12px'
-            }
+            },
+            whiteSpace: 'normal',
+            wordBreak: 'break-word'
           },
           position: 'relative',
           overflow: 'hidden'
         }}
       >
         {/* col 1 */}
-        <TableCell sx={{ width: columnWidths.col1, padding: '0px !important' }}>
+        <TableCell
+          sx={{ width: isSmDown ? '36px' : '40px', padding: '0px !important' }}
+        >
           {childCategories?.expense_sub_categories?.length > 0 && (
             <IconButton
               aria-label='expand row'
-              size='small'
+              size={isSmDown ? 'small' : 'small'}
               onClick={() => setOpen(!open)}
+              sx={{
+                transform: open ? 'rotate(0deg)' : 'rotate(0deg)',
+                padding: isSmDown ? '4px' : undefined
+              }}
             >
               {open ? <ArrowDropUp /> : <ArrowDropDown />}
             </IconButton>
@@ -200,14 +229,23 @@ const ExpandableRow = ({
         </TableCell>
 
         {/* col 2 */}
-        <TableCell sx={{ width: columnWidths.col2 }} component='th'>
-          <Box display={'flex'} gap={'10px'}>
-            <Typography variant='subtitle2' fontWeight={500}>
+        <TableCell sx={{ width: { xs: '50%', sm: '30%' } }} component='th'>
+          <Box
+            display={'flex'}
+            gap={'10px'}
+            alignItems={'center'}
+            flexWrap='wrap'
+          >
+            <Typography
+              variant='subtitle2'
+              fontWeight={500}
+              sx={{ fontSize: isSmDown ? '13px' : '14px' }}
+            >
               {row?.expense_subtype}
             </Typography>
             {childCategories?.expense_sub_categories?.length > 0 && (
               <Chip
-                label={'5 subcategories'}
+                label={`${childCategories?.expense_sub_categories?.length} subcategories`}
                 size='small'
                 sx={{
                   border: '1px solid #BEDBFF',
@@ -221,19 +259,23 @@ const ExpandableRow = ({
         </TableCell>
 
         {/* col 3 */}
-        <TableCell sx={{ width: columnWidths.col3 }} align='left'>
-          <Typography variant='subtitle2' fontWeight={500}>
+        <TableCell sx={{ width: { xs: '30%', sm: '30%' } }} align='left'>
+          <Typography
+            variant='subtitle2'
+            fontWeight={500}
+            sx={{ fontSize: isSmDown ? '13px' : '14px' }}
+          >
             £{formatAmountWithCommas(row?.total_amount)}
           </Typography>
         </TableCell>
 
         {/* col 4 */}
-        <TableCell sx={{ width: columnWidths.col4 }} align='left'>
+        <TableCell sx={{ width: { xs: '20%', sm: '40%' } }} align='left'>
           <IconButton
-            size='small'
+            size={isSmDown ? 'small' : 'small'}
             aria-label='View Expense details'
-            // onClick={() => setOpenDocumentDetails(true)}
             onClick={() => handleDocumentDetails(row?.expense_subtype)}
+            sx={{ padding: isSmDown ? '6px' : undefined }}
           >
             <RemoveRedEyeOutlinedIcon fontSize='small' />
           </IconButton>
@@ -248,7 +290,7 @@ const ExpandableRow = ({
               sx={{
                 background: '#FFFFFF',
                 marginTop: '-6px',
-                padding: '10px 10px 10px 10px',
+                padding: isSmDown ? '8px 8px' : '10px',
                 margin: '-15px 0px 0px 0px',
                 borderBottomLeftRadius: '12px',
                 borderBottomRightRadius: '12px',
@@ -271,10 +313,12 @@ const ExpandableRow = ({
                       background: '#F0F0F0',
                       borderRadius: '12px',
                       '& > td': {
-                        padding: '7px 16px',
+                        padding: isSmDown ? '6px 10px' : '7px 16px',
                         border: 'none',
                         fontWeight: 600,
-                        fontSize: '14px',
+                        fontSize: isSmDown ? '13px' : '14px',
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word',
                         '&:first-of-type': {
                           borderTopLeftRadius: '12px',
                           borderBottomLeftRadius: '12px'
@@ -286,18 +330,18 @@ const ExpandableRow = ({
                       }
                     }}
                   >
-                    <TableCell sx={{ width: columnWidths.col1 }} />
-                    <TableCell sx={{ width: columnWidths.col2 }}>
+                    <TableCell sx={{ width: isSmDown ? '36px' : '40px' }} />
+                    <TableCell sx={{ width: { xs: '50%', sm: '30%' } }}>
                       <Typography variant='subtitle2' fontWeight={500}>
                         Link items
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{ width: columnWidths.col3 }}>
+                    <TableCell sx={{ width: { xs: '30%', sm: '30%' } }}>
                       <Typography variant='subtitle2' fontWeight={500}>
                         Amount
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{ width: columnWidths.col4 }}>
+                    <TableCell sx={{ width: { xs: '20%', sm: '40%' } }}>
                       <Typography variant='subtitle2' fontWeight={500}>
                         Effecting Documents
                       </Typography>
@@ -307,7 +351,7 @@ const ExpandableRow = ({
                   {/* CHILD DATA ROWS */}
                   {childCategories?.expense_sub_categories?.map(
                     (cat: any, idx: number) => {
-                      const [key, value] = Object.entries(cat)[0]
+                      const [key, value] = Object.entries(cat)[0] || []
 
                       return (
                         <TableRow
@@ -316,8 +360,10 @@ const ExpandableRow = ({
                             background: '#F0F0F0',
                             borderRadius: '12px',
                             '& > td': {
-                              padding: '12px 16px',
+                              padding: isSmDown ? '8px 10px' : '12px 16px',
                               border: 'none',
+                              whiteSpace: 'normal',
+                              wordBreak: 'break-word',
                               '&:first-of-type': {
                                 borderTopLeftRadius: '12px',
                                 borderBottomLeftRadius: '12px'
@@ -331,30 +377,40 @@ const ExpandableRow = ({
                         >
                           <TableCell
                             sx={{
-                              width: columnWidths.col1,
+                              width: isSmDown ? '36px' : '40px',
                               padding: '0px !important'
                             }}
                           >
-                            <IconButton size='small' disabled />
+                            <IconButton
+                              size='small'
+                              disabled
+                              sx={{ padding: isSmDown ? '4px' : undefined }}
+                            />
                           </TableCell>
                           <TableCell
-                            sx={{ width: columnWidths.col2, fontWeight: 500 }}
+                            sx={{
+                              width: { xs: '50%', sm: '30%' },
+                              fontWeight: 500
+                            }}
                           >
                             {key}
                           </TableCell>
                           <TableCell
-                            sx={{ width: columnWidths.col3, fontWeight: 500 }}
+                            sx={{
+                              width: { xs: '30%', sm: '30%' },
+                              fontWeight: 500
+                            }}
                           >
                             £{formatAmountWithCommas(value)}
                           </TableCell>
-                          <TableCell sx={{ width: columnWidths.col4 }}>
+                          <TableCell sx={{ width: { xs: '20%', sm: '40%' } }}>
                             <IconButton
-                              size='small'
+                              size={isSmDown ? 'small' : 'small'}
                               aria-label='View Expense details'
-                              // onClick={() => setOpenDocumentDetails(true)}
                               onClick={() => {
                                 handleDocumentDetails(key)
                               }}
+                              sx={{ padding: isSmDown ? '6px' : undefined }}
                             >
                               <RemoveRedEyeOutlinedIcon fontSize='small' />
                             </IconButton>
@@ -369,6 +425,7 @@ const ExpandableRow = ({
           </Collapse>
         </TableCell>
       </TableRow>
+
       <DocumentDetailsModal
         open={openDocumentDetails}
         onClose={() => setOpenDocumentDetails(false)}

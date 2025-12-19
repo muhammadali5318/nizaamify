@@ -1,4 +1,4 @@
-import { Box } from '@mui/material'
+import { Box, CircularProgress } from '@mui/material'
 import styles from './expenseBreakdown.module.scss'
 import ExpensePageHeader from './components/expense-header/ExpensePageHeader'
 import ExpensesGrandTotal from './components/expense-header'
@@ -19,7 +19,7 @@ const ExpenseBreakdown = () => {
     end: dayjs().endOf('month').toISOString()
   })
 
-  const { data } = useFetchExpenseBreakdown({
+  const { data, isPending } = useFetchExpenseBreakdown({
     enabled: !!accessToken,
     startDate: dateRange.start,
     endDate: dateRange.end
@@ -29,25 +29,42 @@ const ExpenseBreakdown = () => {
     <Box className={styles.expenseBreakdownRoot} width='100%'>
       {/* Pass date state down */}
       <ExpensePageHeader dateRange={dateRange} onDateChange={setDateRange} />
-
-      <ExpensesGrandTotal total={formatAmountWithCommas(data?.total) ?? 0} />
-
-      {data?.categories?.map((category, idx) => {
-        const expenseType = data?.expense_type.find(
-          (expense) => expense.expense_type === category?.parent_category
-        )
-
-        return (
-          <ReusableAccordion
-            key={idx}
-            title={category?.parent_category}
-            dateRange={dateRange}
-            total={category?.amount}
-            chips={[`${expenseType?.expense_subtypes?.length} subcategories`]}
-            expenseSubtypes={expenseType?.expense_subtypes}
+      {isPending ? (
+        <Box
+          width={'100%'}
+          display='flex'
+          alignItems='center'
+          justifyContent='center'
+          minHeight='20vh'
+        >
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          <ExpensesGrandTotal
+            total={formatAmountWithCommas(data?.total) ?? 0}
           />
-        )
-      })}
+
+          {data?.categories?.map((category, idx) => {
+            const expenseType = data?.expense_type.find(
+              (expense) => expense.expense_type === category?.parent_category
+            )
+
+            return (
+              <ReusableAccordion
+                key={idx}
+                title={category?.parent_category}
+                dateRange={dateRange}
+                total={category?.amount}
+                chips={[
+                  `${expenseType?.expense_subtypes?.length} subcategories`
+                ]}
+                expenseSubtypes={expenseType?.expense_subtypes}
+              />
+            )
+          })}
+        </>
+      )}
     </Box>
   )
 }
