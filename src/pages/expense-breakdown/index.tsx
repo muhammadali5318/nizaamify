@@ -3,29 +3,51 @@ import styles from './expenseBreakdown.module.scss'
 import ExpensePageHeader from './components/expense-header/ExpensePageHeader'
 import ExpensesGrandTotal from './components/expense-header'
 import ReusableAccordion from './components/expense-accordion'
-// First dummy dataset - General Practice Expenses
+import { useFetchExpenseBreakdown } from './hooks/useFetchExpenseBreakdown'
+import { useAuth } from 'src/context/AuthProvider'
+import dayjs from 'dayjs'
+import { RangeISO } from 'src/components/date-range-selector'
+import { useState } from 'react'
+import { formatAmountWithCommas } from 'src/utils/stringUtils'
 
 const ExpenseBreakdown = () => {
-  return (
-    <Box className={styles.expenseBreakdownRoot} width={'100%'}>
-      <ExpensePageHeader />
-      <ExpensesGrandTotal />
-      <ReusableAccordion
-        title='Business Operations'
-        chips={['15 subcategories']}
-        total={500}
-      />
-      <ReusableAccordion
-        title='Business Operations'
-        chips={['15 subcategories']}
-        total={500}
-      />
+  const { accessToken } = useAuth()
 
-      <ReusableAccordion
-        title='Business Operations'
-        chips={['15 subcategories']}
-        total={1000}
-      />
+  // ✅ Date state lives here
+  const [dateRange, setDateRange] = useState<RangeISO>({
+    start: dayjs().startOf('year').toISOString(),
+    end: dayjs().endOf('month').toISOString()
+  })
+
+  const { data } = useFetchExpenseBreakdown({
+    enabled: !!accessToken,
+    startDate: dateRange.start,
+    endDate: dateRange.end
+  })
+
+  return (
+    <Box className={styles.expenseBreakdownRoot} width='100%'>
+      {/* Pass date state down */}
+      <ExpensePageHeader dateRange={dateRange} onDateChange={setDateRange} />
+
+      <ExpensesGrandTotal total={formatAmountWithCommas(data?.total) ?? 0} />
+
+      {data?.categories?.map((category, idx) => {
+        const expenseType = data?.expense_type.find(
+          (expense) => expense.expense_type === category?.parent_category
+        )
+
+        return (
+          <ReusableAccordion
+            key={idx}
+            title={category?.parent_category}
+            dateRange={dateRange}
+            total={category?.amount}
+            chips={[`${expenseType?.expense_subtypes?.length} subcategories`]}
+            expenseSubtypes={expenseType?.expense_subtypes}
+          />
+        )
+      })}
     </Box>
   )
 }

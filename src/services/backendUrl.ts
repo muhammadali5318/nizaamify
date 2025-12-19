@@ -73,6 +73,10 @@ export const endpoints = {
     uploadedByFilterList: (id: string) =>
       `/${API_BASE_DOCUMENTS}/practices/${id}/documents/filters/`,
     updateDocumentDate: (id: string, documentId: string) =>
-      `/${API_BASE_DOCUMENTS}/practices/${id}/documents/${documentId}/post-date/`
+      `/${API_BASE_DOCUMENTS}/practices/${id}/documents/${documentId}/post-date/`,
+    expenseBreakdown: (practiceId: string) =>
+      `/${API_BASE_DOCUMENTS}/practices/${practiceId}/expense-breakdown-detail/`,
+    expenseBreakdownDocuments: (practiceId: string) =>
+      `/${API_BASE_DOCUMENTS}/practices/${practiceId}/expense-breakdown-documents/`
   }
 }

@@ -11,71 +11,25 @@ import {
 import { ArrowDropDown, ArrowDropUp } from '@mui/icons-material'
 
 import ExpenseBreakdownTable from './ExpenseTable'
-
-const dummyData1 = {
-  current: {
-    expense_types: [
-      { expense_type: 'Staff Costs', share_of_total_percent: '58.40' },
-      { expense_type: 'Premises', share_of_total_percent: '12.80' },
-      { expense_type: 'Medical Supplies', share_of_total_percent: '8.20' },
-      {
-        expense_type: 'Administrative Expenses',
-        share_of_total_percent: '10.60'
-      },
-      { expense_type: 'Tax Documents', share_of_total_percent: '0.00' }
-    ],
-    categories: [
-      {
-        expense_category: 'Salaries',
-        parent_category: 'Staff Costs',
-        share_of_total_percent: '45.00'
-      },
-      {
-        expense_category: 'National Insurance',
-        parent_category: 'Staff Costs',
-        share_of_total_percent: '8.20'
-      },
-      {
-        expense_category: 'Pension Contributions',
-        parent_category: 'Staff Costs',
-        share_of_total_percent: '5.20'
-      },
-      {
-        expense_category: 'Rent',
-        parent_category: 'Premises',
-        share_of_total_percent: '9.50'
-      },
-      {
-        expense_category: 'Utilities',
-        parent_category: 'Premises',
-        share_of_total_percent: '3.30'
-      },
-      {
-        expense_category: 'Drugs',
-        parent_category: 'Medical Supplies',
-        share_of_total_percent: '5.10'
-      },
-      {
-        expense_category: 'Dressings',
-        parent_category: 'Medical Supplies',
-        share_of_total_percent: '3.10'
-      }
-    ]
-  }
-}
+import { RangeISO } from 'src/components/date-range-selector'
+import { formatAmountWithCommas } from 'src/utils/stringUtils'
 
 interface ReusableAccordionProps {
   title: string
+  dateRange: RangeISO
   chips?: string[]
   total?: number | null
   defaultExpanded?: boolean
+  expenseSubtypes?: any
 }
 
 export default function ReusableAccordion({
   title,
   chips = [],
   total = null,
-  defaultExpanded = false
+  defaultExpanded = false,
+  expenseSubtypes,
+  dateRange
 }: ReusableAccordionProps) {
   const [open, setOpen] = useState(defaultExpanded)
 
@@ -94,10 +48,10 @@ export default function ReusableAccordion({
       <Box
         sx={{
           display: 'flex',
-          alignItems: { xs: 'flex-start', sm: 'center' }, // Better alignment on mobile
+          alignItems: { xs: 'flex-start', sm: 'center' },
           justifyContent: 'space-between',
-          padding: { xs: '12px 16px', sm: '8px 16px' }, // More touch-friendly padding on mobile
-          flexDirection: { xs: 'column', sm: 'row' }, // Stack vertically on mobile
+          padding: { xs: '12px 16px', sm: '8px 16px' },
+          flexDirection: { xs: 'column', sm: 'row' },
           gap: { xs: 1, sm: 0 },
           background: 'var(--grey-100)'
         }}
@@ -174,7 +128,7 @@ export default function ReusableAccordion({
               mt: { xs: 0.5, sm: 0 }
             }}
           >
-            £{total}
+            £{formatAmountWithCommas(total)}
           </Typography>
         )}
       </Box>
@@ -182,7 +136,11 @@ export default function ReusableAccordion({
       {/* Collapsible Content */}
       <Collapse in={open} timeout='auto' unmountOnExit>
         <Box sx={{ px: { xs: 2, sm: 2 }, pb: 2 }}>
-          <ExpenseBreakdownTable data={dummyData1} />
+          <ExpenseBreakdownTable
+            data={expenseSubtypes}
+            dateRange={dateRange}
+            total={formatAmountWithCommas(total ?? '')}
+          />
         </Box>
       </Collapse>
     </Box>

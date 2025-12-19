@@ -13,9 +13,17 @@ import { ArrowDropDown, ArrowDropUp } from '@mui/icons-material'
 import { useState } from 'react'
 import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined'
 import DocumentDetailsModal from '../document-details-modal'
+import apiClient from 'src/services/api-client'
+import { endpoints } from 'src/services/backendUrl'
+import { useActivePractice } from 'src/hooks/useActivePractice'
+import { RangeISO } from 'src/components/date-range-selector'
+import { toApiDate } from '../../hooks/useFetchExpenseBreakdown'
+import { formatAmountWithCommas } from 'src/utils/stringUtils'
 
 interface ExpenseBreakdownTableProps {
   data?: any
+  dateRange?: RangeISO
+  total?: any
 }
 
 const columnWidths = {
@@ -25,15 +33,12 @@ const columnWidths = {
   col4: '40%'
 }
 
-const ExpenseBreakdownTable = ({ data }: ExpenseBreakdownTableProps) => {
-  const expenseTypes = data?.current?.expense_types || []
-  const categories = data?.current?.categories || []
-
-  const getChildCategories = (parentName: string) =>
-    categories.filter(
-      (cat: any) =>
-        cat.parent_category?.toLowerCase() === parentName.toLowerCase()
-    )
+const ExpenseBreakdownTable = ({
+  data,
+  dateRange,
+  total
+}: ExpenseBreakdownTableProps) => {
+  const categories = data || []
 
   return (
     <Box sx={{ overflowX: 'auto' }}>
@@ -95,13 +100,13 @@ const ExpenseBreakdownTable = ({ data }: ExpenseBreakdownTableProps) => {
           </TableRow>
 
           {/* PARENT ROWS */}
-          {expenseTypes.map((type: any) => {
-            const children = getChildCategories(type.expense_type)
+          {categories.map((type: any) => {
             return (
               <ExpandableRow
                 key={type.expense_type}
                 row={type}
-                childCategories={children}
+                childCategories={type}
+                dateRange={dateRange}
               />
             )
           })}
@@ -117,7 +122,7 @@ const ExpenseBreakdownTable = ({ data }: ExpenseBreakdownTableProps) => {
           Total Business Operations
         </Typography>
         <Typography variant='h5' fontWeight={700}>
-          £18,000
+          £{total}
         </Typography>
       </Box>
     </Box>
@@ -132,12 +137,32 @@ export default ExpenseBreakdownTable
 interface ExpandableRowProps {
   row: any
   childCategories: any[]
+  dateRange: RangeISO
 }
 
-const ExpandableRow = ({ row, childCategories }: ExpandableRowProps) => {
+const ExpandableRow = ({
+  row,
+  childCategories,
+  dateRange
+}: ExpandableRowProps) => {
   const [open, setOpen] = useState(false)
+  const { activePracticeId } = useActivePractice()
   const [openDocumentDetails, setOpenDocumentDetails] = useState<boolean>(false)
-
+  const [downloadableDocuments, setDownloadableDocuments] = useState()
+  const handleDocumentDetails = async (type: string) => {
+    const response = await apiClient.get(
+      endpoints.documents.expenseBreakdownDocuments(activePracticeId ?? ''),
+      {
+        params: {
+          start_date: toApiDate(dateRange.start),
+          end_date: toApiDate(dateRange.end),
+          sub_cat: type
+        }
+      }
+    )
+    setDownloadableDocuments(response?.data?.data)
+    setOpenDocumentDetails(true)
+  }
   return (
     <>
       {/* PARENT ROW */}
@@ -163,7 +188,7 @@ const ExpandableRow = ({ row, childCategories }: ExpandableRowProps) => {
       >
         {/* col 1 */}
         <TableCell sx={{ width: columnWidths.col1, padding: '0px !important' }}>
-          {childCategories.length > 0 && (
+          {childCategories?.expense_sub_categories?.length > 0 && (
             <IconButton
               aria-label='expand row'
               size='small'
@@ -178,9 +203,9 @@ const ExpandableRow = ({ row, childCategories }: ExpandableRowProps) => {
         <TableCell sx={{ width: columnWidths.col2 }} component='th'>
           <Box display={'flex'} gap={'10px'}>
             <Typography variant='subtitle2' fontWeight={500}>
-              {row.expense_type}
+              {row?.expense_subtype}
             </Typography>
-            {childCategories.length > 0 && (
+            {childCategories?.expense_sub_categories?.length > 0 && (
               <Chip
                 label={'5 subcategories'}
                 size='small'
@@ -198,7 +223,7 @@ const ExpandableRow = ({ row, childCategories }: ExpandableRowProps) => {
         {/* col 3 */}
         <TableCell sx={{ width: columnWidths.col3 }} align='left'>
           <Typography variant='subtitle2' fontWeight={500}>
-            {parseFloat(row.share_of_total_percent).toFixed(2)}%
+            £{formatAmountWithCommas(row?.total_amount)}
           </Typography>
         </TableCell>
 
@@ -207,7 +232,8 @@ const ExpandableRow = ({ row, childCategories }: ExpandableRowProps) => {
           <IconButton
             size='small'
             aria-label='View Expense details'
-            onClick={() => setOpenDocumentDetails(true)}
+            // onClick={() => setOpenDocumentDetails(true)}
+            onClick={() => handleDocumentDetails(row?.expense_subtype)}
           >
             <RemoveRedEyeOutlinedIcon fontSize='small' />
           </IconButton>
@@ -279,55 +305,64 @@ const ExpandableRow = ({ row, childCategories }: ExpandableRowProps) => {
                   </TableRow>
 
                   {/* CHILD DATA ROWS */}
-                  {childCategories.map((cat: any, idx: number) => (
-                    <TableRow
-                      key={idx}
-                      sx={{
-                        background: '#F0F0F0',
-                        borderRadius: '12px',
-                        '& > td': {
-                          padding: '12px 16px',
-                          border: 'none',
-                          '&:first-of-type': {
-                            borderTopLeftRadius: '12px',
-                            borderBottomLeftRadius: '12px'
-                          },
-                          '&:last-of-type': {
-                            borderTopRightRadius: '12px',
-                            borderBottomRightRadius: '12px'
-                          }
-                        }
-                      }}
-                    >
-                      <TableCell
-                        sx={{
-                          width: columnWidths.col1,
-                          padding: '0px !important'
-                        }}
-                      >
-                        <IconButton size='small' disabled />
-                      </TableCell>
-                      <TableCell
-                        sx={{ width: columnWidths.col2, fontWeight: 500 }}
-                      >
-                        {cat.expense_category}
-                      </TableCell>
-                      <TableCell
-                        sx={{ width: columnWidths.col3, fontWeight: 500 }}
-                      >
-                        {parseFloat(cat.share_of_total_percent).toFixed(2)}%
-                      </TableCell>
-                      <TableCell sx={{ width: columnWidths.col4 }}>
-                        <IconButton
-                          size='small'
-                          aria-label='View Expense details'
-                          onClick={() => setOpenDocumentDetails(true)}
+                  {childCategories?.expense_sub_categories?.map(
+                    (cat: any, idx: number) => {
+                      const [key, value] = Object.entries(cat)[0]
+
+                      return (
+                        <TableRow
+                          key={idx}
+                          sx={{
+                            background: '#F0F0F0',
+                            borderRadius: '12px',
+                            '& > td': {
+                              padding: '12px 16px',
+                              border: 'none',
+                              '&:first-of-type': {
+                                borderTopLeftRadius: '12px',
+                                borderBottomLeftRadius: '12px'
+                              },
+                              '&:last-of-type': {
+                                borderTopRightRadius: '12px',
+                                borderBottomRightRadius: '12px'
+                              }
+                            }
+                          }}
                         >
-                          <RemoveRedEyeOutlinedIcon fontSize='small' />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                          <TableCell
+                            sx={{
+                              width: columnWidths.col1,
+                              padding: '0px !important'
+                            }}
+                          >
+                            <IconButton size='small' disabled />
+                          </TableCell>
+                          <TableCell
+                            sx={{ width: columnWidths.col2, fontWeight: 500 }}
+                          >
+                            {key}
+                          </TableCell>
+                          <TableCell
+                            sx={{ width: columnWidths.col3, fontWeight: 500 }}
+                          >
+                            £{formatAmountWithCommas(value)}
+                          </TableCell>
+                          <TableCell sx={{ width: columnWidths.col4 }}>
+                            <IconButton
+                              size='small'
+                              aria-label='View Expense details'
+                              // onClick={() => setOpenDocumentDetails(true)}
+                              onClick={() => {
+                                handleDocumentDetails(key)
+                              }}
+                            >
+                              <RemoveRedEyeOutlinedIcon fontSize='small' />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    }
+                  )}
                 </TableBody>
               </Table>
             </Box>
@@ -337,6 +372,7 @@ const ExpandableRow = ({ row, childCategories }: ExpandableRowProps) => {
       <DocumentDetailsModal
         open={openDocumentDetails}
         onClose={() => setOpenDocumentDetails(false)}
+        downloadableDocuments={downloadableDocuments}
       />
     </>
   )

@@ -46,3 +46,18 @@ export const getTextAfterDelimiter = (text: string): string => {
   const parts = text.split('-')
   return parts[1]?.trim() || ''
 }
+
+export const formatAmountWithCommas = (amount: number | string): string => {
+  if (amount === null || amount === undefined || amount === '') {
+    return '0'
+  }
+
+  const num = typeof amount === 'string' ? Number(amount) : amount
+
+  if (isNaN(num)) return '0'
+
+  return num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}

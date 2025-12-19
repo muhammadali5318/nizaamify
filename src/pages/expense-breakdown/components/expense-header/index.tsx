@@ -1,6 +1,10 @@
 import { Box, Typography } from '@mui/material'
 
-const ExpensesGrandTotal = () => {
+interface ExpensesGrandTotalProps {
+  total: number | string
+}
+
+const ExpensesGrandTotal = ({ total }: ExpensesGrandTotalProps) => {
   return (
     <Box
       sx={{
@@ -54,7 +58,7 @@ const ExpensesGrandTotal = () => {
           Total Monthly Expenses:
         </Typography>
         <Typography variant='h5' fontWeight={700}>
-          £36,000
+          £{total ?? '-'}
         </Typography>
       </Box>
     </Box>
