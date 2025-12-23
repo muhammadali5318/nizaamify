@@ -216,7 +216,7 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
         <TableCell
           sx={{ width: isSmDown ? '36px' : '40px', padding: '0px !important' }}
         >
-          {childCategories?.expense_sub_categories?.length > 0 && (
+          {childCategories?.expense_sub_categories?.length > 0 ? (
             <IconButton
               aria-label='expand row'
               size={isSmDown ? 'small' : 'small'}
@@ -228,6 +228,12 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
             >
               {open ? <ArrowDropUp /> : <ArrowDropDown />}
             </IconButton>
+          ) : (
+            <IconButton
+              sx={{ width: '34px' }}
+              aria-label='expand row'
+              disabled={true}
+            ></IconButton>
           )}
         </TableCell>
 
