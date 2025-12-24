@@ -51,7 +51,7 @@ const categories = [
       'Marketing',
       'Subscriptions',
       'Compliance',
-      'Legal / Accounting',
+      'Legal/Accounting',
       'IT',
       'Communications',
       'Finance Fees',

@@ -60,12 +60,12 @@ export const documentMapping: Record<string, Record<string, string[]>> = {
       'Agency/Service Fees',
       'Website & Digital Assets',
       'Offline Marketing',
-      'Other – Marketing'
+      'Other - Marketing'
     ],
-    Subscriptions: ['PMS', 'AI tools', 'Other – Subscriptions'],
+    Subscriptions: ['PMS', 'AI tools', 'Other - Subscriptions'],
     Compliance: ['Compliance'],
-    'Legal / Accounting': ['Accountant/Bookkeeping', 'Legal Fees'],
-    IT: ['IT support contracts', 'Hardware', 'Cloud storage', 'Other – IT'],
+    'Legal/Accounting': ['Accountant/Bookkeeping', 'Legal Fees'],
+    IT: ['IT support contracts', 'Hardware', 'Cloud storage', 'Other - IT'],
     Communications: ['Communications'],
     'Finance Fees': ['Finance Fees'],
     'Miscellaneous Ops': ['Miscellaneous Ops']
