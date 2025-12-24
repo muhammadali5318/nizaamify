@@ -7,7 +7,7 @@ import staffIcon from '../../../../public/assets/staff-icon.svg'
 import labIcon from '../../../../public/assets/dental-icon.svg'
 import operationsIcon from '../../../../public/assets/business-ops-icon.svg'
 import premisesIcon from '../../../../public/assets/premises-icon.svg'
-import taxIcon from '../../../../public/assets/tax-icon.svg'
+// import taxIcon from '../../../../public/assets/tax-icon.svg'
 import { useSelector } from 'react-redux'
 import { RootState } from 'src/store/store'
 import clinicianCostIcon from '../../../assets/clinician-cost-icon.svg'
@@ -28,56 +28,63 @@ const categories = [
     title: 'Staff Costs',
     color: '#ff8c00',
     icon: staffIcon,
-    examples: ['PAYE payslips', 'Staff Training', 'Locum invoices']
+    examples: [
+      'PAYE',
+      'Locum/Agency Fees ',
+      'Staff training & CPD',
+      'Recruitment costs',
+      'HR services',
+      'Other'
+    ]
   },
   {
     title: 'Lab Fees ',
     color: '#0284c7',
     icon: labIcon,
-    examples: ['Dental lab invoices ']
+    examples: ['Lab Fees']
   },
   {
     title: 'Business Operations',
     color: '#9333ea',
     icon: operationsIcon,
     examples: [
-      'Marketing invoices ',
-      'Software subscriptions ',
-      'Legal or accountancy fees ',
-      'Professional indemnity certificates ',
-      'CQC/GDC-related fees '
-      // 'CQC/GDC-related fees',
-      // 'Card Merchant Charges',
-      // 'Software subscriptions',
-      // 'Legal or accountancy fees',
-      // 'Professional indemnity certificates',
-      // 'Compliance-related invoices or documentation'
+      'Marketing',
+      'Subscriptions',
+      'Compliance',
+      'Legal / Accounting',
+      'IT',
+      'Communications',
+      'Finance Fees',
+      'Miscellaneous Ops'
     ]
   },
   {
-    title: 'Premises & Equipment',
+    title: 'Premises',
     color: '#0284c7',
     icon: premisesIcon,
     examples: [
-      'Cleaning',
-      'Utility Bills',
-      'Lease/rent documents',
-      'Business rates invoices',
-      'Repairs or building maintenance bills',
-      'Equipment purchases or leasing agreements'
+      'Lease/Mortgage Payments ',
+      'Business Rates',
+      'Utilities',
+      'Premises Insurance',
+      'Repairs/Maintenance (building)',
+      'Cleaning Services',
+      'Security & Alarm Contracts',
+      'Waste disposal',
+      'Other'
     ]
   },
-  {
-    title: 'Tax Documents ',
-    color: '#0284c7',
-    icon: taxIcon,
-    examples: [
-      'VAT returns',
-      'HMRC communications',
-      'Corporation tax statements',
-      'Accountant summaries or filings'
-    ]
-  },
+  // {
+  //   title: 'Tax Documents ',
+  //   color: '#0284c7',
+  //   icon: taxIcon,
+  //   examples: [
+  //     'VAT returns',
+  //     'HMRC communications',
+  //     'Corporation tax statements',
+  //     'Accountant summaries or filings'
+  //   ]
+  // },
   {
     title: 'Clinician Costs',
     color: '#0284c7',
@@ -85,10 +92,10 @@ const categories = [
     examples: ['Associate invoices', 'Hygienist/Therapist invoices']
   },
   {
-    title: 'Materials',
+    title: 'Materials & Equipment',
     color: '#0284c7',
     icon: materialsIcon,
-    examples: ['Supplier invoices', 'Manufacturer receipts']
+    examples: ['Materials', 'Equipment']
   }
 ]
 
