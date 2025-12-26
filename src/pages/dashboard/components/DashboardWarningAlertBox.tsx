@@ -25,7 +25,9 @@ const DashboardWarningAlertBox = ({
   } = useActivePractice()
   const { isUserNominated, isUserOwnerOrDirector, isUserManager } =
     useUserDetails()
-  const { data } = useCheckBankConnectionHealth(!!accessToken)
+  const shouldFetch = Boolean(accessToken) && isUserOwnerOrDirector === true
+
+  const { data } = useCheckBankConnectionHealth(shouldFetch)
 
   if (renderDetail === 'bankAlert') {
     return (

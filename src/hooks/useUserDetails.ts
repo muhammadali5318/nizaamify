@@ -38,6 +38,8 @@ export interface UseUserDetailsResult {
   isUserNominated: boolean
   isUserManager: boolean
   isUserOwner: boolean
+  isUser: boolean
+  isUserManageOrSimpleUser: boolean
   isUserDirector: boolean
   isUserOwnerOrDirector: boolean
   isOwnerOrDirectorInAnyPractice: boolean
@@ -76,10 +78,12 @@ export function useUserDetails(): UseUserDetailsResult {
   const isUserManager =
     user?.user_role?.toLowerCase().includes('manager') ?? false
   const isUserOwner = user?.user_role?.toLowerCase().includes('owner') ?? false
+  const isUser = user?.user_role?.toLowerCase().includes('user') ?? false
   const isUserDirector =
     user?.user_role?.toLowerCase().includes('director') ?? false
 
   const isUserOwnerOrDirector = isUserOwner || isUserDirector
+  const isUserManageOrSimpleUser = isUser || isUserManager
 
   return {
     userId,
@@ -97,6 +101,8 @@ export function useUserDetails(): UseUserDetailsResult {
     isUserNominated,
     isUserManager,
     isUserOwner,
+    isUser,
+    isUserManageOrSimpleUser,
     isUserDirector,
     isUserOwnerOrDirector,
     isOwnerOrDirectorInAnyPractice

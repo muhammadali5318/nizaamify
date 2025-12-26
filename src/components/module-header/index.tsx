@@ -1,31 +1,63 @@
 import React from 'react'
-import { Box, Stack, Typography } from '@mui/material'
+import {
+  Box,
+  Stack,
+  Typography,
+  TypographyProps,
+  SxProps,
+  Theme
+} from '@mui/material'
 
-interface ModuleHeaderProps {
-  /** Path or URL to custom SVG or image (e.g., /assets/logo.svg) */
+export interface ModuleHeaderProps {
   avatarSrc: string
-  /** Main heading text */
   heading: string
-  /** Subheading text (optional) */
   subheading?: string
-  /** Avatar size in pixels (optional, default = 48) */
   avatarSize?: number
+  headingVariant?: TypographyProps['variant']
+  subheadingVariant?: TypographyProps['variant']
+  variant?: TypographyProps['variant']
+  imgAlt?: string
+  gap?: number
+  sx?: SxProps<Theme>
 }
 
 const ModuleHeader: React.FC<ModuleHeaderProps> = ({
   avatarSrc,
   heading,
-  subheading
+  subheading,
+  avatarSize = 48,
+  headingVariant = 'h6',
+  subheadingVariant = 'body1',
+  variant,
+  imgAlt,
+  sx,
+  gap = 0.5
 }) => {
+  const resolvedHeadingVariant: TypographyProps['variant'] = (variant ??
+    headingVariant) as TypographyProps['variant']
+
   return (
-    <Box display='flex' alignItems='center' gap={2}>
-      <img src={avatarSrc} alt={heading} />
-      <Stack spacing={0.5}>
-        <Typography variant='h6' fontWeight={700}>
+    <Box display='flex' alignItems='center' gap={2} sx={sx}>
+      <Box
+        component='img'
+        src={avatarSrc}
+        alt={imgAlt ?? heading}
+        sx={{
+          width: avatarSize,
+          height: avatarSize,
+          objectFit: 'cover',
+          borderRadius: 1,
+          flexShrink: 0
+        }}
+      />
+
+      <Stack spacing={gap}>
+        <Typography variant={resolvedHeadingVariant} fontWeight={700}>
           {heading}
         </Typography>
+
         {subheading && (
-          <Typography variant='body1' color='text.secondary'>
+          <Typography variant={subheadingVariant} color='text.secondary'>
             {subheading}
           </Typography>
         )}

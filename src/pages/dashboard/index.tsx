@@ -4,13 +4,21 @@ import DashboardWarningAlertBox from './components/DashboardWarningAlertBox'
 import { useCheckBankConnectionHealth } from 'src/hooks/useCheckBankConnectionHealth'
 import { useAuth } from 'src/context/AuthProvider'
 import dayjs from 'dayjs'
+import useUserDetails from 'src/hooks/useUserDetails'
+import SubmitFeedback from './components/submit-feedback'
+import TraningModule from './components/monai-training-module'
+import Stats from './components/stats'
+import Welcome from './components/welcome'
 
 const Dashboard = () => {
   const { accessToken } = useAuth()
-  const { data } = useCheckBankConnectionHealth(!!accessToken)
+  const { isUserManageOrSimpleUser, isUserOwnerOrDirector } = useUserDetails()
+  const shouldFetch = Boolean(accessToken) && isUserOwnerOrDirector === true
+
+  const { data } = useCheckBankConnectionHealth(shouldFetch)
   const daysLeft = data?.days_left
   return (
-    <Stack spacing={2} p={3}>
+    <Stack spacing={2} p={{ xs: 1.5, sm: 2, md: 3 }}>
       <DashboardWarningAlertBox title='Needs attention' />
       {daysLeft !== undefined && daysLeft <= 15 && daysLeft > 0 && (
         <DashboardWarningAlertBox
@@ -21,7 +29,11 @@ const Dashboard = () => {
         />
       )}
 
-      <MainDashboard />
+      {isUserOwnerOrDirector && <MainDashboard />}
+      {isUserManageOrSimpleUser && <Welcome />}
+      {isUserManageOrSimpleUser && <Stats />}
+      <SubmitFeedback />
+      <TraningModule />
     </Stack>
   )
 }
