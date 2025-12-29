@@ -31,6 +31,7 @@ const ExpenseBreakdown = lazy(() => import('src/pages/expense-breakdown'))
 const Billing = lazy(() => import('src/pages/billing'))
 const Settings = lazy(() => import('src/pages/settings'))
 const HelpAndSupport = lazy(() => import('src/pages/HelpAndSupport'))
+const AuditLogs = lazy(() => import('src/pages/audit-logs'))
 const NominationFlow = lazy(
   () => import('src/pages/practice-onboarding/NominationFlow')
 )
@@ -197,6 +198,14 @@ export function Router() {
             element: (
               <FeatureProtectedRoute moduleId='help-support'>
                 <HelpAndSupport />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.auditLogs,
+            element: (
+              <FeatureProtectedRoute moduleId='audit-logs'>
+                <AuditLogs />
               </FeatureProtectedRoute>
             )
           }

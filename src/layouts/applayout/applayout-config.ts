@@ -65,6 +65,13 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         activeIcon: 'active-billing.svg',
         inactiveIcon: 'inactive-billing.svg',
         moduleId: 'billing'
+      },
+      {
+        text: 'Audit logs',
+        to: paths.auditLogs,
+        activeIcon: 'active-billing.svg',
+        inactiveIcon: 'inactive-billing.svg',
+        moduleId: 'audit-logs'
       }
     ]
   },

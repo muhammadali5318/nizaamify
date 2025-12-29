@@ -1,5 +1,3 @@
-// src/components/documents-list/FilterBar.tsx
-import styles from './FilterBar.module.scss'
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import {
   Box,
@@ -129,7 +127,7 @@ const FilterBar: React.FC<{
 
   return (
     <Box
-      className={styles.filterContainer}
+      className={'filterContainer'}
       display='flex'
       gap={2}
       flexWrap='wrap'

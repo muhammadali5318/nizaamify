@@ -17,6 +17,7 @@ export const paths = {
   practiceSettings: '/practice-settings',
   billing: '/billing',
   settings: '/settings',
+  auditLogs: '/audit-logs',
   bankIntegrator: '/bank-integrator',
   helpAndSupport: '/help-and-support',
   auth1: {
