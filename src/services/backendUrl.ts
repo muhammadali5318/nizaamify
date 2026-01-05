@@ -1,6 +1,7 @@
 export const API_BASE = 'user-workstation/v1'
 export const API_BASE_DOCUMENTS = 'docs/v1'
 export const API_BASE_BANK_INTEGRATOR = 'banking/v1'
+export const API_BASE_AUDIT = 'audit/v1'
 
 export const endpoints = {
   practiceOnboarding: {
@@ -32,6 +33,10 @@ export const endpoints = {
       `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/accounts/`,
     reconsentConfirm: (practiceId: string) =>
       `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/reconsent/confirm/`
+  },
+  audit: {
+    appAuditLogs: (practiceId: string) =>
+      `${API_BASE_AUDIT}/${practiceId}/audit-logs/`
   },
   signup: {
     requestPracticeAssociation: `${API_BASE}/users/signup/access-requests/`,
