@@ -19,12 +19,13 @@ import {
   getFileNameFromUrl
 } from 'src/utils/downloadFileUtils'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import { bytesToReadableSize } from 'src/utils/bytesToMB'
 
 interface DocumentItem {
   document_id: string
   file_name: string
   document_s3_path: string
-  size?: string
+  file_size: number
 }
 
 interface DocumentDetailsModalProps {
@@ -158,7 +159,7 @@ const DocumentDetailsModal: React.FC<DocumentDetailsModalProps> = React.memo(
                         fontWeight={700}
                         sx={{ whiteSpace: 'nowrap' }}
                       >
-                        {doc.size ?? ''}
+                        {bytesToReadableSize(doc?.file_size) ?? ''}
                       </Typography>
 
                       <Divider
