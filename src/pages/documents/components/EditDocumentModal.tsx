@@ -100,10 +100,16 @@ export default function EditDocumentModal({
   }
 
   const handleUpdate = () => {
+    const updates: Record<string, any> = { ...formData }
+
+    if (updates.document_category === 'Revenue') {
+      delete updates.expense_category
+    }
+
     dispatch(
       updateDocumentFields({
         document_id: document.document_id,
-        updates: formData
+        updates
       })
     )
     onClose()
