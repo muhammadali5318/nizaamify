@@ -96,7 +96,7 @@ const ExpenseBreakdownTable: React.FC<ExpenseBreakdownTableProps> = ({
             </TableCell>
             <TableCell sx={{ width: { xs: '20%', sm: '40%' } }} align='left'>
               <Typography variant='subtitle2' fontWeight={500}>
-                Effecting Documents
+                Source Documents
               </Typography>
             </TableCell>
           </TableRow>
@@ -342,7 +342,7 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
                     <TableCell sx={{ width: isSmDown ? '36px' : '40px' }} />
                     <TableCell sx={{ width: { xs: '50%', sm: '30%' } }}>
                       <Typography variant='subtitle2' fontWeight={500}>
-                        Link items
+                        Line Item
                       </Typography>
                     </TableCell>
                     <TableCell sx={{ width: { xs: '30%', sm: '30%' } }}>
@@ -352,7 +352,7 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
                     </TableCell>
                     <TableCell sx={{ width: { xs: '20%', sm: '40%' } }}>
                       <Typography variant='subtitle2' fontWeight={500}>
-                        Effecting Documents
+                        Source Documents
                       </Typography>
                     </TableCell>
                   </TableRow>
