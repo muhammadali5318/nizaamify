@@ -37,7 +37,7 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         text: 'Expenses',
         to: paths.expense,
         activeIcon: 'active-wallet.svg',
-        inactiveIcon: 'inactive-document.svg',
+        inactiveIcon: 'expense-inactive.svg',
         moduleId: 'expenses'
       }
     ]
@@ -69,8 +69,8 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
       {
         text: 'Audit logs',
         to: paths.auditLogs,
-        activeIcon: 'active-billing.svg',
-        inactiveIcon: 'inactive-billing.svg',
+        activeIcon: 'audit-active.svg',
+        inactiveIcon: 'audit-inactive.svg',
         moduleId: 'audit-logs'
       }
     ]
