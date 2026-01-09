@@ -67,7 +67,14 @@ export const useAuditLogsColumns = () => {
         sortable: false,
         renderCell: (params: GridCellParams) => {
           return (
-            <Typography variant='body2'>
+            <Typography
+              variant='body2'
+              sx={{
+                whiteSpace: 'normal',
+                wordBreak: 'break-word',
+                lineHeight: 1.4
+              }}
+            >
               {params?.row?.event_description || '-'}
             </Typography>
           )

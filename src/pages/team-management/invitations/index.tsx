@@ -112,8 +112,8 @@ const SentInvitations: React.FC = () => {
       <TeamManagementContentWrapper
         imageSrc='/assets/bg-black-clock-icon.svg'
         imageAlt='sent invitation icons'
-        title='Sent Invitations'
-        subtitle='Manage invitations that have been sent to users'
+        title='Sent Invitations/Pending Requests'
+        subtitle='View and manage sent invitations and pending requests.'
       >
         <Box
           sx={{
