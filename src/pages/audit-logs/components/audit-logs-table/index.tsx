@@ -97,7 +97,7 @@ const AuditLogsTable = ({
             pageSizeOptions={[5, 10, 25, { value: -1, label: 'All' }]}
             disableColumnMenu
             disableColumnResize
-            rowHeight={56}
+            getRowHeight={() => 'auto'}
             hideFooter
             sortingMode='server'
             sortModel={sortModel}
