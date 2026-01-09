@@ -234,11 +234,17 @@ export default function ProcessingCompletedList() {
                       {dayjs(doc.document_date).format('DD-MM-YYYY') || '—'}
                     </strong>
                     &nbsp; | &nbsp; Document category:{' '}
-                    <strong>{doc.document_category || '—'}</strong> &nbsp; |
-                    &nbsp; Document type:{' '}
-                    <strong>{doc.document_type || '—'}</strong> &nbsp; | &nbsp;
-                    Document subtype:{' '}
+                    <strong>{doc.document_category || '—'}</strong>
+                    &nbsp; | &nbsp; Document type:{' '}
+                    <strong>{doc.document_type || '—'}</strong>
+                    &nbsp; | &nbsp; Document subtype:{' '}
                     <strong>{doc.document_subtype || '—'}</strong>
+                    {doc.document_category !== 'Revenue' && (
+                      <>
+                        &nbsp; | &nbsp; Line item:{' '}
+                        <strong>{doc.expense_category || '—'}</strong>
+                      </>
+                    )}
                   </Typography>
 
                   <Divider sx={{ mt: '5px' }} />
