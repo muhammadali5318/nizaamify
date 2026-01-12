@@ -21,6 +21,7 @@ import AuditLogsTable from '../audit-logs-table'
 import { useFetchAuditLogsList } from '../../hooks/useFetchAuditLogsList'
 import { useFetchSortedPaginatedData } from 'src/hooks/useFetchSortedData.'
 import CloseIcon from '@mui/icons-material/Close'
+import { useFetchLogsCategory } from '../../hooks/useFetchLogsCategory'
 
 /* =======================
    Types
@@ -48,19 +49,6 @@ const ACTION_TYPE_OPTIONS: Option[] = [
   { value: 'UPDATED', label: 'Updated' },
   { value: 'DELETED', label: 'Deleted' },
   { value: 'UPSERT', label: 'Upsert' }
-]
-
-const LOGS_CATEGORY_OPTIONS: Option[] = [
-  { value: 'Sign Up', label: 'Sign Up' },
-  { value: 'Login', label: 'Login' },
-  { value: 'Logout', label: 'Logout' },
-  { value: 'Pratice Onboarding', label: 'Pratice Onboarding' },
-  { value: 'Subscriptions - Billing', label: 'Subscriptions - Billing' },
-  { value: 'KPI Configurations', label: 'KPI Configurations' },
-  { value: 'Manual Entries', label: 'Manual Entries' },
-  { value: 'Upload Document', label: 'Upload Document' },
-  { value: 'Practice Profile', label: 'Practice Profile' },
-  { value: 'Practice Settings', label: 'Practice Settings' }
 ]
 
 const FIELD_FLEX_SX = {
@@ -103,6 +91,7 @@ const AuditLogsContent: React.FC = () => {
 
   /* ---------- date range ---------- */
   const [range, setRange] = useState<RangeISO>({ start: null, end: null })
+  const { data: LOGS_CATEGORY_OPTIONS } = useFetchLogsCategory(!!accessToken)
 
   const onClearFilters = () => {
     // Reset react-hook-form fields
@@ -269,10 +258,10 @@ const AuditLogsContent: React.FC = () => {
                     <MenuItem value=''>
                       <em>All</em>
                     </MenuItem>
-                    {LOGS_CATEGORY_OPTIONS.map((o) => (
-                      <MenuItem key={o.value} value={o.value}>
+                    {LOGS_CATEGORY_OPTIONS?.map((o: any) => (
+                      <MenuItem key={o.key} value={o.value}>
                         <Checkbox checked={selected.includes(o.value)} />
-                        <ListItemText primary={o.label} />
+                        <ListItemText primary={o.value} />
                       </MenuItem>
                     ))}
                   </Select>
