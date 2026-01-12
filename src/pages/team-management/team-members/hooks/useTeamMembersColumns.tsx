@@ -29,7 +29,7 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
         field: 'member',
         headerName: 'Members',
         minWidth: 250,
-        flex: 1,
+        flex: 2,
         sortable: false,
         renderCell: (params: GridCellParams) => (
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
