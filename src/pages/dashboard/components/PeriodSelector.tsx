@@ -23,7 +23,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
         padding: '3px',
         backgroundColor: '#fff',
         width: 'fit-content',
-        height: 46
+        height: 56
       }}
     >
       {options.map((option) => {
@@ -35,22 +35,24 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
             sx={{
               cursor: 'pointer',
               px: 2.5,
-              py: 0.8,
+              py: 1.3,
               borderRadius: '12px',
-              height: 36,
+              height: 44,
               backgroundColor: isActive ? '#000' : 'transparent',
               transition: 'all 0.2s ease-in-out',
               '&:hover': {
                 backgroundColor: isActive ? '#000' : '#f5f5f5'
-              }
+              },
+              flexDirection: { xs: 'column', sm: 'column', md: 'row' }
             }}
           >
             <Typography
               variant='body2'
               sx={{
-                fontSize: '14px',
+                fontSize: '16px',
                 fontWeight: 500,
-                color: isActive ? '#fff' : '#000'
+                color: isActive ? '#fff' : '#000',
+                textWrap: 'nowrap'
               }}
             >
               {option}

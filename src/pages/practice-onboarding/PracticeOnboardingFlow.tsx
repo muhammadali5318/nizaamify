@@ -275,7 +275,7 @@ const PracticeOnboardingFlow: React.FC = () => {
           </Box>
         ) : activeStep === 5 ? (
           <Box className={styles.completedContainer}>
-            <Congratulations message='You have completed onboarding now access the full system' />
+            <Congratulations message='You have now completed onboarding and can access the full system.' />
           </Box>
         ) : (
           <>

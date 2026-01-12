@@ -18,7 +18,6 @@ import ArchivePractice from './ArchivePracticeModal'
 import { VerifyIdentityStep } from '../../../components/idetity-verification/VerifyIdentityStep'
 import { GetUserReason } from 'src/components/get-user-reason'
 import ConfirmationSuccessDialog from 'src/components/team-management/InvitationSuccessDialog'
-import { AllPracticesDataObject } from 'src/layouts/applayout/components/PracticeSelector'
 import { toTitleCase } from 'src/utils/stringUtils'
 import dayjs from 'dayjs'
 import { useActivePractice } from 'src/hooks/useActivePractice'
@@ -31,6 +30,11 @@ import { clearAll } from 'src/store/slices/processedBatchDataSlice'
 import { clearFiles } from 'src/store/slices/uploadSlice'
 import { clearPresignData } from 'src/store/slices/presignedSlice'
 import { clearProcessing } from 'src/store/slices/processingSlice'
+import { AllPracticesDataObject } from 'src/store/slices/activePracticeSlice'
+import {
+  setConnectionId,
+  setStatus
+} from 'src/store/slices/bankConnectionSlice'
 
 interface PracticeDetailsCardProps {
   status?: 'active' | 'inactive' | 'archived'
@@ -141,6 +145,9 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
     dispatch(clearProcessing())
     dispatch(clearFiles())
     dispatch(clearPresignData())
+    localStorage.removeItem('bank_connection_id')
+    dispatch(setStatus(null))
+    dispatch(setConnectionId(null))
     notify.success('Switched to ' + practice?.practice_name)
   }, [practice, setActiveById, allPractices, dispatch])
 
@@ -273,18 +280,38 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
 
       <Divider sx={{ width: '100%', borderColor: 'var(--grey-200)' }} />
 
-      <Stack spacing='10px'>
-        <InfoRow icon='/assets/suit-case-checked.svg'>-</InfoRow>
-        <Box className={styles.detailsContainer}>
-          <Typography
-            className='font-style--italic'
-            variant='body1'
-            color='var(--color-primary-black)'
-          >
-            Next billing: <strong> -</strong>
-          </Typography>
-        </Box>
-      </Stack>
+      {(practice?.user_role === 'COMPANY DIRECTOR' ||
+        practice?.user_role === 'PRACTICE OWNER') && (
+        <Stack spacing='10px'>
+          <InfoRow icon='/assets/suit-case-checked.svg'>
+            {practice?.subscription_details?.card_last_four_digits ? (
+              <>
+                {practice?.subscription_details?.card_brand} ••••{' '}
+                {practice?.subscription_details?.card_last_four_digits}
+              </>
+            ) : (
+              '-'
+            )}
+          </InfoRow>
+
+          <Box className={styles.detailsContainer}>
+            <Typography
+              className='font-style--italic'
+              variant='body1'
+              color='var(--color-primary-black)'
+            >
+              Next billing:{' '}
+              <strong>
+                {practice?.subscription_details?.next_billing_date
+                  ? dayjs(
+                      practice.subscription_details.next_billing_date
+                    ).format('DD/MM/YYYY')
+                  : '-'}
+              </strong>
+            </Typography>
+          </Box>
+        </Stack>
+      )}
 
       {status === 'archived' ? (
         <Box className={styles.detailsCardActionContainer}>

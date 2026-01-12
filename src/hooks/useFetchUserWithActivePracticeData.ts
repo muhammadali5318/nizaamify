@@ -6,6 +6,7 @@ import { endpoints } from 'src/services/backendUrl'
 import { getUserId } from 'src/utils/helper'
 import { useDispatch } from 'react-redux'
 import {
+  setHasOwnerOrDirector,
   setMergedPermissionsByCategory,
   setUserDetailsInActivePractice
 } from 'src/store/slices/userDetailsInActivePracticeSlice'
@@ -30,6 +31,12 @@ export const useFetchUserWithActivePracticeData = (enabled: boolean) => {
       )
 
       const practices = data?.data?.active_practices ?? []
+      const hasOwnerOrDirector = practices.some(
+        (p: { user_role: string }) =>
+          p.user_role === 'PRACTICE OWNER' || p.user_role === 'COMPANY DIRECTOR'
+      )
+      dispatch(setHasOwnerOrDirector(hasOwnerOrDirector))
+
       const activePracticeObj =
         practices.find((p: any) => p.practice_id === practiceIdFromKey) ?? null
 

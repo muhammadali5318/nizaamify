@@ -1,0 +1,60 @@
+.statsRoot {
+  display: flex;
+  flex-wrap: wrap;            /* allow wrapping */
+  padding: 6px;
+  align-items: center;
+  gap: 12px;
+  border-radius: 20px;
+  border: 1px solid var(--grey-100, #f5f5f5);
+}
+
+/* desktop / default: let cards grow but keep sane min width */
+.statsCardRoot {
+  display: flex;
+  height: 58px;
+  padding: 10px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex: 1 1 220px;            /* grow, shrink, basis */
+  min-width: 220px;           /* prevents cards from getting too narrow */
+  border-radius: 20px;
+  background-clip: padding-box;
+}
+
+/* small tweaks for the left area if you have an icon + title */
+.statsCardRoot .left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* responsive: at <=768px, each card goes full width and stacks */
+@media (max-width: 768px) {
+  .statsRoot {
+    gap: 12px;
+    align-items: stretch;     /* stretch children full width if desired */
+  }
+
+  .statsCardRoot {
+    flex: 1 1 100%;
+    width: 100%;
+    height: auto;             /* allow the card to grow vertically */
+    padding: 12px;
+  }
+
+  /* slightly smaller typography/icon sizes on smaller screens */
+  .statsCardRoot img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .statsCardRoot h4,
+  .statsCardRoot .value {
+    font-size: 1.25rem;       /* adjust numeric size if using custom elements */
+  }
+
+  .statsCardRoot .title {
+    font-size: 0.875rem;
+  }
+}

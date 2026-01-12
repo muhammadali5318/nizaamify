@@ -3,8 +3,10 @@ export const paths = {
   root: '/',
   dashboard: '/dashboard',
   practiceOnboarding: '/practice-onboarding',
+  agreements: '/agreements',
   practiceOnboardingStepper: '/practice-onboarding/stepper',
   documents: '/documents',
+  expense: '/expense-breakdown',
   reports: '/reports',
   benchmarks: '/benchmarks',
   teamManagement: {
@@ -15,6 +17,8 @@ export const paths = {
   practiceSettings: '/practice-settings',
   billing: '/billing',
   settings: '/settings',
+  auditLogs: '/audit-logs',
+  bankIntegrator: '/bank-integrator',
   helpAndSupport: '/help-and-support',
   auth1: {
     login: '/login'

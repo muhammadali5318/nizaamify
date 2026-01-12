@@ -14,7 +14,7 @@ export const tabsData: {
   },
   {
     key: 1,
-    label: 'Sent Invitations',
+    label: 'Sent Invitations/Pending Requests',
     activeIcon: '/assets/active-history-icon.svg',
     inactiveIcon: '/assets/history-icon.svg'
   },

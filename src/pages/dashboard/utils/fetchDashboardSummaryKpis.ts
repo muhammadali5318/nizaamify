@@ -36,9 +36,9 @@ interface DashboardKpiResponse {
  */
 export const fetchDashboardSummaryKpis = async (
   practiceId: string,
-  token: string,
-  start_date: string,
-  end_date: string
+  month?: number | null,
+  year?: number,
+  granularity?: 'month' | 'quarter' | 'year'
 ): Promise<DashboardKpiResponse['data']> => {
   try {
     if (!practiceId) throw new Error('Practice ID not found.')
@@ -46,8 +46,7 @@ export const fetchDashboardSummaryKpis = async (
     const response = await apiClient.get<DashboardKpiResponse>(
       `/docs/v1/practices/${practiceId}/dashboard/summary-kpis`,
       {
-        params: { start_date, end_date },
-        headers: { Authorization: `Bearer ${token}` }
+        params: { month, granularity, year }
       }
     )
 

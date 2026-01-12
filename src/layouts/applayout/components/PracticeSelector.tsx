@@ -15,7 +15,6 @@ import {
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import styles from '../AppLayout.module.scss'
-import { toTitleCase } from 'src/utils/stringUtils'
 import { useAuth } from 'src/context/AuthProvider'
 import { useState, useEffect, useRef } from 'react'
 import AddPracticeModal from 'src/pages/practice-settings/components/AddPracticeModal'
@@ -23,30 +22,22 @@ import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import { useDispatch } from 'react-redux'
 import { setMergedPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
-import { ALL_PERMISSIONS } from 'src/const'
+import { ALL_PERMISSIONS, PRACTICE_TYPE } from 'src/const'
 import { deepEqual } from 'src/utils/objectsUtils'
 import { notify } from 'src/components/notistack/NotificationProvider'
 import { clearAll } from 'src/store/slices/processedBatchDataSlice'
 import { clearPresignData } from 'src/store/slices/presignedSlice'
 import { clearFiles } from 'src/store/slices/uploadSlice'
-import { CONFIG } from 'src/config-global'
+import { AllPracticesDataObject } from 'src/store/slices/activePracticeSlice'
 import { clearProcessing } from 'src/store/slices/processingSlice'
-
-export type AllPracticesDataObject = {
-  id: string
-  practice_name: string
-  email?: string | null
-  practice_type?: string
-  address?: string | null
-  contact_number?: string | null
-  premises_ownership?: string
-  accounting_basis?: string
-  created_at?: string
-  onboarding_status?: string
-}
+import useUserDetails from 'src/hooks/useUserDetails'
+import {
+  setConnectionId,
+  setStatus
+} from 'src/store/slices/bankConnectionSlice'
 
 export default function PracticeSelector() {
-  const readOnlySelect = CONFIG.envName === 'dev' ? false : true
+  const { isOwnerOrDirectorInAnyPractice } = useUserDetails()
   const { accessToken } = useAuth()
   const dispatch = useDispatch()
   const { data: rawPractices } = useFetchAllPracticesData(!!accessToken)
@@ -153,7 +144,6 @@ export default function PracticeSelector() {
           }}
           MenuProps={{ disablePortal: false }}
           onChange={(e) => {
-            if (readOnlySelect) return
             const selected =
               practices.find((p) => p.id === e.target.value) || null
             dispatch(setMergedPermissionsByCategory(ALL_PERMISSIONS))
@@ -161,6 +151,9 @@ export default function PracticeSelector() {
             dispatch(clearProcessing())
             dispatch(clearFiles())
             dispatch(clearPresignData())
+            localStorage.removeItem('bank_connection_id')
+            dispatch(setStatus(null))
+            dispatch(setConnectionId(null))
             setSelectedPractice(selected)
             setActiveById(selected?.id ?? '', practices)
             notify.success('Switched to ' + selected?.practice_name)
@@ -206,7 +199,8 @@ export default function PracticeSelector() {
                   maxWidth: { xs: '140px', sm: '240px' },
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
-                  textOverflow: 'ellipsis'
+                  textOverflow: 'ellipsis',
+                  paddingRight: '1px'
                 }}
                 color={
                   selectedPractice?.onboarding_status !== 'COMPLETED'
@@ -218,7 +212,8 @@ export default function PracticeSelector() {
               >
                 {selectedPractice?.onboarding_status !== 'COMPLETED'
                   ? 'Pending onboarding'
-                  : toTitleCase(selectedPractice?.practice_type ?? '')}
+                  : selectedPractice?.practice_type &&
+                    PRACTICE_TYPE[selectedPractice.practice_type]}
               </Typography>
             </Stack>
           )}
@@ -269,9 +264,9 @@ export default function PracticeSelector() {
             </MenuItem>
           )}
 
-          {!readOnlySelect && <Divider />}
+          {isOwnerOrDirectorInAnyPractice && <Divider />}
 
-          {!readOnlySelect && (
+          {isOwnerOrDirectorInAnyPractice && (
             <MenuItem sx={{ padding: '0px 10px' }}>
               <Box
                 onMouseDown={(e) => e.stopPropagation()}

@@ -106,16 +106,16 @@ const InvitedUserOnboarding = () => {
 
     const payload = {
       token: token,
-      first_name: left.firstName ?? left.first_name ?? '',
-      last_name: left.lastName ?? left.last_name ?? '',
+      first_name: left.firstName ?? '',
+      last_name: left.lastName ?? '',
       contact_number: left.phone,
       new_password: right.password ?? '',
       confirm_password: right.confirmPassword ?? '',
-      is_terms_of_service_accepted: (left.terms ?? right.terms) === true,
-      is_privacy_policy_accepted: (left.privacy ?? right.privacy) === true,
-      is_financial_disclaimer_acknowledged:
-        (left.disclaimer ?? right.disclaimer) === true,
-      is_gdpr_consent_given: (left.gdpr ?? right.gdpr) === true
+      is_terms_of_service_accepted: left.terms,
+      is_privacy_policy_accepted: left.privacy,
+      is_financial_disclaimer_acknowledged: left.disclaimer,
+      is_dpa_consent_accepted: left?.cookiePolicy,
+      is_cookie_consent_accepted: left?.dataProcessingAgreement
     }
 
     try {

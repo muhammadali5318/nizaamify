@@ -142,7 +142,7 @@ const AddPracticeModal: React.FC<AddPracticeDialogProps> = ({
         reset()
         onClose()
         notify.success('practice has been created successfully')
-      } catch (error) {
+      } catch (error: any) {
         notify.error(error?.error?.non_field_errors?.[0])
       }
     },

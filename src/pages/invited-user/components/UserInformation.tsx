@@ -39,8 +39,11 @@ const UserInformationSchema = z.object({
   disclaimer: z.boolean().refine((val) => val === true, {
     message: 'You must accept Disclaimer'
   }),
-  gdpr: z.boolean().refine((val) => val === true, {
-    message: 'You must accept GDPR'
+  dataProcessingAgreement: z.boolean().refine((val) => val === true, {
+    message: 'You must consent to GDPR'
+  }),
+  cookiePolicy: z.boolean().refine((val) => val === true, {
+    message: 'You must consent to GDPR'
   })
 })
 
@@ -77,7 +80,8 @@ const UserInformation: React.FC<UserInformationProps> = ({
       terms: false,
       privacy: false,
       disclaimer: false,
-      gdpr: false
+      dataProcessingAgreement: false,
+      cookiePolicy: false
     },
     mode: 'onChange',
     reValidateMode: 'onChange'
@@ -94,7 +98,8 @@ const UserInformation: React.FC<UserInformationProps> = ({
     'terms',
     'privacy',
     'disclaimer',
-    'gdpr'
+    'dataProcessingAgreement',
+    'cookiePolicy'
   ])
 
   const allChecked = Boolean(terms && privacy && disclaimer && gdpr)

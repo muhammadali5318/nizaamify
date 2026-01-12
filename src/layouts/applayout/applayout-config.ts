@@ -34,18 +34,11 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         moduleId: 'documents'
       },
       {
-        text: 'Reports',
-        to: paths.reports,
-        activeIcon: 'active-reports.svg',
-        inactiveIcon: 'inactive-reports.svg',
-        moduleId: 'reports'
-      },
-      {
-        text: 'Benchmarks',
-        to: paths.benchmarks,
-        activeIcon: 'active-benchmarks.svg',
-        inactiveIcon: 'inactive-benchmarks.svg',
-        moduleId: 'benchmarks'
+        text: 'Expenses',
+        to: paths.expense,
+        activeIcon: 'active-wallet.svg',
+        inactiveIcon: 'expense-inactive.svg',
+        moduleId: 'expenses'
       }
     ]
   },
@@ -65,6 +58,20 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         activeIcon: 'active-practice-management.svg',
         inactiveIcon: 'inactive-practice-management.svg',
         moduleId: 'practice-settings'
+      },
+      {
+        text: 'Subscription & Billing',
+        to: paths.billing,
+        activeIcon: 'active-billing.svg',
+        inactiveIcon: 'inactive-billing.svg',
+        moduleId: 'billing'
+      },
+      {
+        text: 'Audit logs',
+        to: paths.auditLogs,
+        activeIcon: 'audit-active.svg',
+        inactiveIcon: 'audit-inactive.svg',
+        moduleId: 'audit-logs'
       }
     ]
   },
@@ -72,18 +79,18 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
     title: 'Account',
     items: [
       {
-        text: 'Billing',
-        to: paths.billing,
-        activeIcon: 'active-billing.svg',
-        inactiveIcon: 'inactive-billing.svg',
-        moduleId: 'billing'
-      },
-      {
         text: 'Settings',
         to: paths.settings,
         activeIcon: 'active-settings.svg',
         inactiveIcon: 'inactive-settings.svg',
         moduleId: 'settings'
+      },
+      {
+        text: 'Bank Integrator',
+        to: paths.bankIntegrator,
+        activeIcon: 'bank-active.svg',
+        inactiveIcon: 'bank-inactive.svg',
+        moduleId: 'bank-integrator'
       }
     ]
   },

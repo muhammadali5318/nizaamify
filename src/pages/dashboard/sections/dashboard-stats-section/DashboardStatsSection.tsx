@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Box, Stack } from '@mui/material'
-import { useAuth } from 'src/context/AuthProvider'
 import StatsCard from '../../components/DashboardStatsCard'
 import { fetchDashboardSummaryKpis } from '../../utils/fetchDashboardSummaryKpis'
 import { useActivePractice } from 'src/hooks/useActivePractice'
@@ -13,16 +12,16 @@ import ebidtaIcon from '../../../../assets/ebita.svg'
 import practiceValueIcon from '../../../../assets/value.svg'
 
 interface DashboardStatsSectionProps {
-  selectedPeriod: string
-  startDate: string
-  endDate: string
+  month?: number | null
+  year?: number
+  granularity?: 'month' | 'quarter' | 'year'
 }
 
 const DashboardStatsSection = ({
-  startDate,
-  endDate
+  month,
+  year,
+  granularity
 }: DashboardStatsSectionProps) => {
-  const { accessToken } = useAuth()
   const { activePracticeId } = useActivePractice()
   const [kpiData, setKpiData] = useState<any>(null)
   const [loading, setLoading] = useState(false)
@@ -30,13 +29,13 @@ const DashboardStatsSection = ({
   useEffect(() => {
     const loadData = async () => {
       try {
-        if (activePracticeId && accessToken) {
+        if (activePracticeId) {
           setLoading(true)
           const data = await fetchDashboardSummaryKpis(
             activePracticeId,
-            accessToken,
-            startDate,
-            endDate
+            month,
+            year,
+            granularity
           )
           setKpiData(data)
         }
@@ -48,7 +47,7 @@ const DashboardStatsSection = ({
     }
 
     loadData()
-  }, [activePracticeId, accessToken, startDate, endDate])
+  }, [activePracticeId, month, year, granularity])
 
   if (!kpiData) return null
 
@@ -66,7 +65,7 @@ const DashboardStatsSection = ({
       subtitle: '(This period)',
       value: safeValue(kpiData.revenue, '£'),
       trend: safeTrend(kpiData.revenue_change_percent),
-      icon: <img src={revenueIcon} alt='revenue' />,
+      icon: <img src={costIcon} alt='cost' />,
       type: 'revenue'
     },
     {
@@ -74,7 +73,7 @@ const DashboardStatsSection = ({
       subtitle: '(This period)',
       value: safeValue(kpiData.costs, '£'),
       trend: safeTrend(kpiData.costs_change_percent),
-      icon: <img src={costIcon} alt='cost' />,
+      icon: <img src={revenueIcon} alt='revenue' />,
       type: 'cost'
     },
     {
@@ -90,12 +89,21 @@ const DashboardStatsSection = ({
     {
       title: 'EBITDA',
       value: safeValue(kpiData.ebidta, '£'),
-      icon: <img src={ebidtaIcon} alt='ebidta' />
+      icon: <img src={ebidtaIcon} alt='ebidta' />,
+      showInfoIcon: true,
+      infoTooltip:
+        'Guide values only. Based on the data you supplied. The more accurate and complete the data you upload, the more accurate the guide values. Always seek professional advice before acting.'
     },
     {
       title: 'Practice Value',
-      value: safeValue(kpiData.practice_value, '£'),
-      icon: <img src={practiceValueIcon} alt='practice value' />
+      value:
+        kpiData.practice_value >= 0
+          ? safeValue(kpiData.practice_value, '£')
+          : 'N/A',
+      icon: <img src={practiceValueIcon} alt='practice value' />,
+      showInfoIcon: true,
+      infoTooltip:
+        'Guide values only. Based on the data you supplied. The more accurate and complete the data you upload, the more accurate the guide values. Always seek professional advice before acting.'
     }
   ]
 

@@ -1,4 +1,3 @@
-// PracticeSettings.tsx
 import React, { useState } from 'react'
 import { Box, Button, Stack } from '@mui/material'
 import styles from './practiceSettings.module.scss'
@@ -6,17 +5,33 @@ import PageHeader from 'src/components/page-header'
 import PracticeDetailsCard from './components'
 import { useAuth } from 'src/context/AuthProvider'
 import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
-import { AllPracticesDataObject } from 'src/layouts/applayout/components/PracticeSelector'
+import { AllPracticesDataObject } from 'src/store/slices/activePracticeSlice'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import AddPracticeModal from './components/AddPracticeModal'
 import useUserDetails from 'src/hooks/useUserDetails'
+import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
 
 const PracticeSettings: React.FC = () => {
-  const { isUserOwnerOrDirector } = useUserDetails()
+  const { isOwnerOrDirectorInAnyPractice } = useUserDetails()
   const { activePracticeId } = useActivePractice()
   const { accessToken } = useAuth()
   const { data: practicesList } = useFetchAllPracticesData(!!accessToken)
+  const { data: userDetailsInPractice } =
+    useFetchUserWithActivePracticeData(!!accessToken)
   const [isAddOpen, setIsAddOpen] = useState(false)
+
+  const userPracticeMap = Object.fromEntries(
+    userDetailsInPractice?.active_practices?.map((p: any) => [
+      p.practice_id,
+      p.user_role
+    ]) || []
+  )
+
+  const updatedPracticeList =
+    practicesList?.map((p: AllPracticesDataObject) => ({
+      ...p,
+      user_role: userPracticeMap[p.id] || null
+    })) || []
 
   const handleOpen = () => setIsAddOpen(true)
   const handleClose = () => setIsAddOpen(false)
@@ -24,17 +39,16 @@ const PracticeSettings: React.FC = () => {
   return (
     <Stack className={styles.practiceSettingsRoot}>
       <Box className={styles.practiceSettingsHeader}>
-        <Box>
-          <PageHeader
-            title={'Practice Settings'}
-            description={'Manage all your dental practices in one place'}
-            logo='/assets/team-management.svg'
-            isDividerVisible={false}
-          />
-        </Box>
+        <PageHeader
+          title='Practice Settings'
+          description='Manage all your dental practices in one place'
+          logo='/assets/team-management.svg'
+          isDividerVisible={false}
+        />
 
-        {isUserOwnerOrDirector && (
+        {isOwnerOrDirectorInAnyPractice && (
           <Button
+            className={styles.noWrapButton}
             variant='contained'
             startIcon={
               <img src='/assets/practice-management.svg' alt='practice icon' />
@@ -46,8 +60,9 @@ const PracticeSettings: React.FC = () => {
         )}
       </Box>
 
+      {/* Practice cards */}
       <Box className={styles.practiceDetailsWrapper}>
-        {practicesList?.map((practice: AllPracticesDataObject) => (
+        {updatedPracticeList.map((practice: AllPracticesDataObject) => (
           <PracticeDetailsCard
             key={practice.id}
             status={practice.id === activePracticeId ? 'active' : 'inactive'}

@@ -1,68 +1,125 @@
-import { FilterState } from '../components/documents-list/FilterBar.'
+import { FilterState } from '../components/documents-list/FilterBar'
+
+/* -------------------------------------------------------------------------- */
+/*                             DOCUMENT MAPPING                               */
+/* -------------------------------------------------------------------------- */
+
+export const documentMapping: Record<string, Record<string, string[]>> = {
+  /* --------------------------- Income & Revenue ---------------------------- */
+  'Income & Revenue': {
+    'Practice management reports': [],
+    'Bank statements': [],
+    'Capitation scheme statements': [],
+    'Subletting or rental income evidence': []
+  },
+
+  /* ------------------------------ Staff Costs ------------------------------- */
+  'Staff Costs': {
+    PAYE: ['Staff Cost'],
+    'Locum/Agency Fees': ['Locum Agency Fees'],
+    'Staff training & CPD': ['Staff Training'],
+    'Recruitment costs': ['Recruitment Cost'],
+    'HR services': ['HR Services'],
+    Other: ['Staff Cost']
+  },
+
+  /* ---------------------------- Clinician Costs ----------------------------- */
+  'Clinician Costs': {
+    'Dentist Pay': ['Dentist Pay'],
+    'Hyg/Therapy Pay': ['Hyg/Therapist Pay']
+  },
+
+  /* ------------------------- Materials & Equipment -------------------------- */
+  'Materials & Equipment': {
+    Materials: ['Materials'],
+    Equipment: [
+      'Equipment purchases',
+      'Equipment leasing',
+      'Equipment repairs/servicing'
+    ]
+  },
+
+  /* -------------------------------- Lab Fees -------------------------------- */
+  'Lab Fees': {
+    'Lab Fees': ['Lab Fees']
+  },
+
+  /* -------------------------------- Premises -------------------------------- */
+  Premises: {
+    'Lease/Mortgage Payments': ['Lease/Mortgage Payments'],
+    'Business Rates': ['Business Rates'],
+    Utilities: ['Utilities'],
+    'Premises Insurance': ['Premises Insurance'],
+    'Repairs/Maintenance (building)': ['Repairs/Maintenance (building)'],
+    'Cleaning Services': ['Cleaning Services'],
+    'Security & Alarm Contracts': ['Security & Alarm Contracts'],
+    'Waste disposal': ['Waste disposal'],
+    Other: ['Premises']
+  },
+
+  /* --------------------------- Business Operations --------------------------- */
+  'Business Operations': {
+    Marketing: [
+      'Paid Advertising',
+      'Agency/Service Fees',
+      'Website & Digital Assets',
+      'Offline Marketing',
+      'Other - Marketing'
+    ],
+    Subscriptions: ['PMS', 'AI tools', 'Other - Subscriptions'],
+    Compliance: ['Compliance'],
+    'Legal/Accounting': ['Accountant/Bookkeeping', 'Legal Fees'],
+    IT: ['IT support contracts', 'Hardware', 'Cloud storage', 'Other - IT'],
+    Communications: ['Communications'],
+    'Finance Fees': ['Finance Fees'],
+    'Miscellaneous Ops': ['Miscellaneous Ops']
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                         DOCUMENT CATEGORY CARDS                             */
+/* -------------------------------------------------------------------------- */
 
 export const documentCategories = [
   {
     title: 'Income & revenue',
-    examples: [
-      'Practice management reports (e.g., Dentally, EXACT rep)',
-      'Bank statements',
-      'Capitation scheme statements (e.g., Practice Plan)',
-      'Subletting or rental income evidence'
-    ],
+    examples: Object.keys(documentMapping['Income & Revenue']),
     icon: 'income.svg'
   },
   {
     title: 'Staff costs',
-    examples: [
-      'PAYE payslips',
-      'Associate invoices',
-      'Hygienist/Therapist invoices',
-      'Locum invoices (dentist, therapist, nurse)'
-    ],
+    examples: Object.keys(documentMapping['Staff Costs']),
+    icon: 'staff.svg'
+  },
+  {
+    title: 'Clinician costs',
+    examples: Object.keys(documentMapping['Clinician Costs']),
     icon: 'staff.svg'
   },
   {
     title: 'Dental labs & materials',
     examples: [
-      'Dental lab invoices',
-      'Supplier invoices (consumables, materials)',
-      'Manufacturer receipts'
+      ...Object.keys(documentMapping['Lab Fees']),
+      ...Object.keys(documentMapping['Materials & Equipment'])
     ],
     icon: 'dental.svg'
   },
   {
     title: 'Business operations',
-    examples: [
-      'Marketing invoices',
-      'Software subscriptions',
-      'Legal/accountancy fees',
-      'Professional indemnity certificates'
-    ],
+    examples: Object.keys(documentMapping['Business Operations']),
     icon: 'business.svg'
   },
   {
     title: 'Premises & equipment',
-    examples: [
-      'Lease/rent documents',
-      'Utilities bills',
-      'Repairs or maintenance bills',
-      'Equipment purchases/leasing'
-    ],
+    examples: Object.keys(documentMapping.Premises),
     icon: 'premises.svg'
-  },
-  {
-    title: 'Tax documents',
-    examples: [
-      'Corporation tax statements',
-      'VAT returns',
-      'HMRC communications',
-      'Accountant summaries or filings'
-    ],
-    icon: 'tax.svg'
   }
 ]
 
-// documents-tab-config
+/* -------------------------------------------------------------------------- */
+/*                              DOCUMENT TABS                                 */
+/* -------------------------------------------------------------------------- */
+
 export const documentsTabsData = [
   {
     key: 0,
@@ -85,58 +142,42 @@ export const documentsTabsData = [
   }
 ]
 
+/* -------------------------------------------------------------------------- */
+/*                           CATEGORY OPTIONS                                  */
+/* -------------------------------------------------------------------------- */
+
 export const CATEGORY_OPTIONS = [
   { value: 'Revenue', label: 'Income & revenue' },
   { value: 'Expense', label: 'Expense' },
   { value: 'Unknown', label: 'Unknown' }
 ]
 
-export const DOCUMENT_SUBTYPE_MAP: Record<string, string[]> = {
-  'Income & Revenue': [
-    'Bank statements',
-    'Practice management reports',
-    'Capitation scheme statements',
-    'Subletting or rental income evidence'
-  ],
-  'Staff Costs': ['PAYE payslips', 'Staff Training', 'Locum invoices'],
-  'Clinician Costs': ['Associate invoices', 'Hygienist/Therapist invoices'],
-  Materials: ['Supplier invoices', 'Manufacturer receipts'],
-  'Lab Fees': ['Dental lab invoices'],
-  'Premises & Equipment': [
-    'Cleaning',
-    'Utility Bills',
-    'Lease/rent documents',
-    'Business rates invoices',
-    'Repairs or building maintenance bills',
-    'Equipment purchases or leasing agreements'
-  ],
-  'Business Operations': [
-    'IT',
-    'Bank Charges',
-    'Clinical Waste',
-    'Marketing invoices',
-    'Printing and Postage',
-    'CQC/GDC-related fees',
-    'Card Merchant Charges',
-    'Software subscriptions',
-    'Legal or accountancy fees',
-    'Professional indemnity certificates',
-    'Compliance-related invoices or documentation'
-  ],
-  'Tax Documents': [
-    'VAT returns',
-    'HMRC communications',
-    'Corporation tax statements',
-    'Accountant summaries or filings'
-  ]
-}
+/* -------------------------------------------------------------------------- */
+/*                       TYPE / SUBTYPE / SUBCATEGORY                          */
+/* -------------------------------------------------------------------------- */
 
-export const DOCUMENT_TYPE_OPTIONS = Object.keys(DOCUMENT_SUBTYPE_MAP).map(
-  (k) => ({
-    value: k,
-    label: k
-  })
-)
+/* Level 1 */
+export const getDocumentTypes = (): string[] => Object.keys(documentMapping)
+
+/* Level 2 */
+export const getDocumentSubtypes = (type: string): string[] =>
+  documentMapping[type] ? Object.keys(documentMapping[type]) : []
+
+/* Level 3 */
+export const getExpenseSubcategories = (
+  type: string,
+  subtype: string
+): string[] => documentMapping[type]?.[subtype] ?? []
+
+/* Dropdown Options */
+export const DOCUMENT_TYPE_OPTIONS = getDocumentTypes().map((t) => ({
+  value: t,
+  label: t
+}))
+
+/* -------------------------------------------------------------------------- */
+/*                                 FILTERS                                    */
+/* -------------------------------------------------------------------------- */
 
 export const defaultFinancialDocumentsListFilters: FilterState = {
   searchKey: '',
@@ -147,7 +188,23 @@ export const defaultFinancialDocumentsListFilters: FilterState = {
   docSubtype: []
 }
 
+/* -------------------------------------------------------------------------- */
+/*                              BREADCRUMBS                                   */
+/* -------------------------------------------------------------------------- */
+
 export const documentsModuleBreadCrumbs = [
   { label: 'Documents', to: '/documents' },
   { label: 'Doc upload' }
 ]
+
+/* -------------------------------------------------------------------------- */
+/*                       CATEGORY → TYPE FILTERING                             */
+/* -------------------------------------------------------------------------- */
+
+export const CATEGORY_TYPE_MAP: Record<string, string[]> = {
+  Revenue: ['Income & Revenue'],
+  Expense: Object.keys(documentMapping).filter(
+    (type) => type !== 'Income & Revenue'
+  ),
+  Unknown: Object.keys(documentMapping)
+}

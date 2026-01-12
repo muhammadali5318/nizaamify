@@ -8,7 +8,7 @@ import { useActivePractice } from './useActivePractice'
 
 export function useFeatureFlags(userContext: UserContext) {
   const permissionsByCategory = useSelector(selectPermissionsByCategory)
-  const { isOnboardingCompleted } = useActivePractice()
+  const { isPracticeSubscribedAndOnboardingIsCompleted } = useActivePractice()
   const modulePermissions = useMemo(() => {
     const permissions: ModulePermission[] = []
 
@@ -58,7 +58,10 @@ export function useFeatureFlags(userContext: UserContext) {
 
           if (
             rule &&
-            !FeatureFlagService.evaluateRule(ruleId, isOnboardingCompleted)
+            !FeatureFlagService.evaluateRule(
+              ruleId,
+              isPracticeSubscribedAndOnboardingIsCompleted
+            )
           ) {
             isEnabled = false
             disabledReason = moduleConfig.disabledMessage || rule.description
@@ -75,7 +78,11 @@ export function useFeatureFlags(userContext: UserContext) {
     })
 
     return permissions
-  }, [userContext, permissionsByCategory, isOnboardingCompleted])
+  }, [
+    userContext,
+    permissionsByCategory,
+    isPracticeSubscribedAndOnboardingIsCompleted
+  ])
 
   const isModuleEnabled = (moduleId: ModuleId): boolean => {
     const permission = modulePermissions.find((p) => p.moduleId === moduleId)

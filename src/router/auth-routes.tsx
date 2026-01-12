@@ -8,6 +8,7 @@ const AuthPages = {
   Login: lazy(() => import('src/auth/Login')),
   Logout: lazy(() => import('src/auth/Logout')),
   Signup: lazy(() => import('src/pages/signup')),
+  AgreementContent: lazy(() => import('src/components/agreements-content')),
   InvitedUserOnboarding: lazy(() => import('src/pages/invited-user')),
   EmailVerification: lazy(
     () => import('src/pages/signup/components/EmailVerification')
@@ -69,6 +70,14 @@ export const authRoutes = [
         )
       },
       {
+        path: 'subscription-failed',
+        element: (
+          <AuthLayout>
+            <AuthPages.EmailVerification />
+          </AuthLayout>
+        )
+      },
+      {
         path: 'invite-user',
         element: (
           <AuthLayout>
@@ -81,6 +90,14 @@ export const authRoutes = [
         element: (
           <AuthLayout>
             <AuthPages.InvitedUserOnboarding />
+          </AuthLayout>
+        )
+      },
+      {
+        path: 'signup/agreements',
+        element: (
+          <AuthLayout>
+            <AuthPages.AgreementContent />
           </AuthLayout>
         )
       }

@@ -29,7 +29,6 @@ const DocumentsPage: React.FC = () => {
     !!canViewDocuments
   )
 
-  const practiceName = data?.practice_name || 'Your'
   const location = useLocation()
   const isSubRoute = location.pathname === '/documents/manual-entry'
 
@@ -95,17 +94,8 @@ const DocumentsPage: React.FC = () => {
                   <ErrorOutlineIcon />
                 </Box>
                 <Typography variant='body2' fontSize={{ xs: 13, md: 15 }}>
-                  <strong>{practiceName}</strong> practice’s current{' '}
-                  <b>accounting basis</b> is set to{' '}
-                  <span
-                    style={{
-                      color: '#01579B',
-                      fontWeight: 'bold'
-                    }}
-                  >
-                    {accountingBasis} mode.
-                  </span>{' '}
-                  You can change this mode anytime in
+                  Your accounting method is set to {accountingBasis}. You can
+                  change this in{' '}
                   <Link
                     component='button'
                     onClick={handleNavigateToSettings}
@@ -113,9 +103,7 @@ const DocumentsPage: React.FC = () => {
                       color: '#01579B',
                       fontWeight: 'bold',
                       textDecoration: 'underline',
-                      cursor: 'pointer',
-                      marginLeft: '4px',
-                      marginBottom: '3px'
+                      cursor: 'pointer'
                     }}
                   >
                     Settings
@@ -159,7 +147,17 @@ const DocumentsPage: React.FC = () => {
             />
           </Box>
 
-          <Box /* tabs wrapper props */>
+          <Box
+            sx={{
+              width: {
+                xs: '100%',
+                sm: '94%',
+                md: '94%',
+                lg: '97%',
+                xl: '97%'
+              }
+            }}
+          >
             <ReusableTabs tabs={tabs} initialTab={documentsTabsData[0].key} />
           </Box>
         </>

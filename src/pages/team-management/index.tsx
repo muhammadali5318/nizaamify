@@ -2,7 +2,7 @@
 import React, { useCallback, useState } from 'react'
 import { Box } from '@mui/material'
 import styles from './teamManagement.module.scss'
-import ModuleHeader from 'src/components/moduleHeader'
+import ModuleHeader from 'src/components/module-header'
 import StatsCard from 'src/components/team-management/StatsCard'
 import useTeamManagementTabs from './hooks/useTeamManagementTabs'
 import { ReusableTabs } from 'src/components/tabs'

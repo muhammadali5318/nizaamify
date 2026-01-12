@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Card, CardContent, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import DocumentCategoryCard from '../components/DocumentCategoryCard'
 import styles from '../documents.module.scss'
 import incomeIcon from '../../../../public/assets/income-icon.svg'
@@ -7,13 +7,14 @@ import staffIcon from '../../../../public/assets/staff-icon.svg'
 import labIcon from '../../../../public/assets/dental-icon.svg'
 import operationsIcon from '../../../../public/assets/business-ops-icon.svg'
 import premisesIcon from '../../../../public/assets/premises-icon.svg'
-import taxIcon from '../../../../public/assets/tax-icon.svg'
+// import taxIcon from '../../../../public/assets/tax-icon.svg'
 import { useSelector } from 'react-redux'
 import { RootState } from 'src/store/store'
-import historyIcon from '../../../assets/history-Icon-blue.svg'
+import clinicianCostIcon from '../../../assets/clinician-cost-icon.svg'
+import materialsIcon from '../../../assets/material-icon.svg'
 const categories = [
   {
-    title: 'Income & revenue',
+    title: 'Income & Revenue',
     color: '#007bff',
     icon: incomeIcon,
     examples: [
@@ -24,70 +25,77 @@ const categories = [
     ]
   },
   {
-    title: 'Staff costs',
+    title: 'Staff Costs',
     color: '#ff8c00',
     icon: staffIcon,
-    examples: ['PAYE payslips', 'Staff Training', 'Locum invoices']
+    examples: [
+      'PAYE',
+      'Locum/Agency Fees ',
+      'Staff training & CPD',
+      'Recruitment costs',
+      'HR services',
+      'Other'
+    ]
   },
   {
     title: 'Lab Fees ',
     color: '#0284c7',
     icon: labIcon,
-    examples: ['Dental lab invoices ']
+    examples: ['Lab Fees']
   },
   {
-    title: 'Business operations',
+    title: 'Business Operations',
     color: '#9333ea',
     icon: operationsIcon,
     examples: [
+      'Marketing',
+      'Subscriptions',
+      'Compliance',
+      'Legal/Accounting',
       'IT',
-      'Bank Charges',
-      'Clinical Waste',
-      'Marketing invoices',
-      'Printing and Postage',
-      'CQC/GDC-related fees',
-      'Card Merchant Charges',
-      'Software subscriptions',
-      'Legal or accountancy fees',
-      'Professional indemnity certificates',
-      'Compliance-related invoices or documentation'
+      'Communications',
+      'Finance Fees',
+      'Miscellaneous Ops'
     ]
   },
   {
-    title: 'Premises & equipment',
+    title: 'Premises',
     color: '#0284c7',
     icon: premisesIcon,
     examples: [
-      'Cleaning',
-      'Utility Bills',
-      'Lease/rent documents',
-      'Business rates invoices',
-      'Repairs or building maintenance bills',
-      'Equipment purchases or leasing agreements'
+      'Lease/Mortgage Payments ',
+      'Business Rates',
+      'Utilities',
+      'Premises Insurance',
+      'Repairs/Maintenance (building)',
+      'Cleaning Services',
+      'Security & Alarm Contracts',
+      'Waste disposal',
+      'Other'
     ]
   },
-  {
-    title: 'Tax documents ',
-    color: '#0284c7',
-    icon: taxIcon,
-    examples: [
-      'VAT returns',
-      'HMRC communications',
-      'Corporation tax statements',
-      'Accountant summaries or filings'
-    ]
-  },
+  // {
+  //   title: 'Tax Documents ',
+  //   color: '#0284c7',
+  //   icon: taxIcon,
+  //   examples: [
+  //     'VAT returns',
+  //     'HMRC communications',
+  //     'Corporation tax statements',
+  //     'Accountant summaries or filings'
+  //   ]
+  // },
   {
     title: 'Clinician Costs',
     color: '#0284c7',
-    icon: historyIcon,
+    icon: clinicianCostIcon,
     examples: ['Associate invoices', 'Hygienist/Therapist invoices']
   },
   {
-    title: 'Materials',
+    title: 'Materials & Equipment',
     color: '#0284c7',
-    icon: historyIcon,
-    examples: ['Supplier invoices', 'Manufacturer receipts']
+    icon: materialsIcon,
+    examples: ['Materials', 'Equipment']
   }
 ]
 
@@ -106,76 +114,6 @@ const UploadCategories: React.FC = () => {
           <Typography variant='h6' mb={2} mt={2}>
             Document Categories & Examples
           </Typography>
-          <Box
-            className={styles.practiceInfoBox}
-            sx={{
-              display: 'flex',
-              gap: 2,
-              mb: 3,
-              flexWrap: 'wrap'
-            }}
-          >
-            <Card
-              sx={{
-                flex: 1,
-                minWidth: '300px',
-                backgroundColor: '#F2F9FD'
-              }}
-            >
-              <CardContent>
-                <Typography
-                  variant='subtitle1'
-                  fontWeight='bold'
-                  gutterBottom
-                  color='#01579B'
-                >
-                  SQUAT and PRIVATE PRACTICE
-                </Typography>
-                <Box component='ul' sx={{ pl: 3, m: 0 }}>
-                  <li>
-                    <Typography variant='body2'>
-                      If they are accrual basis: allocated payments report (or
-                      equivalent report depending on the software they use)
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant='body2'>
-                      Cash basis: Income from bank statement
-                    </Typography>
-                  </li>
-                </Box>
-              </CardContent>
-            </Card>
-
-            <Card
-              sx={{ flex: 1, minWidth: '300px', backgroundColor: '#F2F9FD' }}
-            >
-              <CardContent>
-                <Typography
-                  variant='subtitle1'
-                  fontWeight='bold'
-                  gutterBottom
-                  color='#01579B'
-                >
-                  NHS and MIXED
-                </Typography>
-                <Box component='ul' sx={{ pl: 3, m: 0 }}>
-                  <li>
-                    <Typography variant='body2'>
-                      If they are accrual basis: allocated payments report (or
-                      equivalent report depending on the software they use) +
-                      NHS compass statement
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant='body2'>
-                      Cash basis: Income from bank statement
-                    </Typography>
-                  </li>
-                </Box>
-              </CardContent>
-            </Card>
-          </Box>
           <Box className={styles.categoriesGrid}>
             {categories.map((cat, idx) => (
               <DocumentCategoryCard

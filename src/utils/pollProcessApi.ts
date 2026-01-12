@@ -16,7 +16,7 @@ export const pollBatchStatusUntilComplete = async (
   filename: string,
   userId: string,
   practiceId: string,
-  maxAttempts: number = 120,
+  maxAttempts: number = 550,
   pollInterval: number = 3000
 ) => {
   try {
@@ -109,6 +109,7 @@ export const pollBatchStatusUntilComplete = async (
                 document_subtype: doc.document_subtype,
                 document_category: doc.document_category,
                 document_date: doc.document_date,
+                expense_category: doc.expense_category,
                 amount: doc.amount,
                 error_message: doc.error_message,
                 status_url: doc.status_url?.replace(/^http:\/\//i, 'https://')

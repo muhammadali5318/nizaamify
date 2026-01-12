@@ -1,7 +1,17 @@
 import { Box, Divider, Stack, Typography } from '@mui/material'
 import styles from './Footer.module.scss'
+import { paths } from 'src/paths'
+import { useAuth } from 'src/context/AuthProvider'
 
 const Footer = () => {
+  const { accessToken } = useAuth()
+  const PRIVACY_PATH = accessToken
+    ? `${paths.agreements}?doc=privacy`
+    : '/auth/signup/agreements?doc=privacy'
+  const TERMS_PATH = accessToken
+    ? `${paths.agreements}?doc=terms`
+    : '/auth/signup/agreements?doc=terms'
+
   return (
     <Box
       className={styles.footerRoot}
@@ -20,9 +30,12 @@ const Footer = () => {
         sx={{ width: { xs: '100%', sm: 'auto' } }}
       >
         <Typography
+          onClick={() => window.open(PRIVACY_PATH, '_blank')}
           variant='subtitle2'
           color='var(--color-text-secondary)'
-          sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+          sx={{
+            fontSize: { xs: '0.75rem', sm: '0.875rem', cursor: 'pointer' }
+          }}
         >
           Privacy Policy
         </Typography>
@@ -40,9 +53,13 @@ const Footer = () => {
         />
 
         <Typography
+          onClick={() => window.open(TERMS_PATH, '_blank')}
           variant='subtitle2'
           color='var(--color-text-secondary)'
-          sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+          sx={{
+            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+            cursor: 'pointer'
+          }}
         >
           Terms & Conditions
         </Typography>

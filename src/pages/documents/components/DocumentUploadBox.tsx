@@ -13,7 +13,7 @@ interface FileUploadBoxProps {
   /** Max number of files that can be uploaded at once */
   maxFiles?: number
   /** Called when files are selected or dropped */
-  onFilesSelected: (files: FileList) => void
+  onFilesSelected: (files: FileList | File[] | any) => void
   /** Optional: Current uploaded file count */
   fileCount?: number
   /** Optional: Total completed file count */
@@ -36,7 +36,6 @@ const FileUploadBox: React.FC<FileUploadBoxProps> = ({
   maxFiles = 5,
   onFilesSelected,
   fileCount = 0,
-
   isProcessingComplete,
   completedView,
   uploadIcon,
@@ -49,6 +48,7 @@ const FileUploadBox: React.FC<FileUploadBoxProps> = ({
     e.preventDefault()
     e.stopPropagation()
     setIsDragging(true)
+    if (limitReached) return
   }
 
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {

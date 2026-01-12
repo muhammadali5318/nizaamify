@@ -11,7 +11,8 @@ import EmailVerificationStatus from './EmailVerificationStatus'
 import { sendVerificationEmail } from 'src/services/auth/emailVerification'
 import HavingTrouble from 'src/components/contact-support/HavingTrouble'
 import ContactSupport from 'src/components/contact-support'
-import { CONFIG } from 'src/config-global'
+import { paths } from 'src/paths'
+import { useAuth } from 'src/context/AuthProvider'
 
 type VerificationStatus =
   | 'expired'
@@ -21,11 +22,14 @@ type VerificationStatus =
   | 'emailNotVerified'
   | 'requestThrottled'
   | 'accountDeactivated'
+  | 'unauthorized'
   | 'subscribed'
+  | 'subscriptionFailed'
 
 const EmailVerification: React.FC = () => {
   const location = useLocation()
   const navigate = useNavigate()
+  const accessToken = useAuth()
 
   const [status, setStatus] = useState<VerificationStatus | 'loading'>(
     'loading'
@@ -50,6 +54,7 @@ const EmailVerification: React.FC = () => {
     const rawToken = searchParams.get('token')
     const rawAuth0Id = searchParams.get('auth0Id')
     const accountDeactivated = !!searchParams.get('accountDeactivated')
+    const unauthorized = !!searchParams.get('unauthorized')
     const emailVerified = !!searchParams.get('emailVerified')
     const sessionId = !!searchParams.get('session_id')
 
@@ -62,10 +67,18 @@ const EmailVerification: React.FC = () => {
       setStatus('emailNotVerified')
     } else if (accountDeactivated) {
       setStatus('accountDeactivated')
+    } else if (unauthorized) {
+      setStatus('unauthorized')
     } else if (emailVerified) {
       setStatus('congrats')
     } else if (sessionId) {
       setStatus('subscribed')
+    } else if (location.pathname === '/auth/subscription-failed') {
+      if (accessToken) {
+        navigate(paths.billing)
+      } else {
+        setStatus('subscriptionFailed')
+      }
     }
   }, [location.search])
 
@@ -93,13 +106,9 @@ const EmailVerification: React.FC = () => {
           response.data.message === 'Email has been verified successfully!'
         ) {
           if (!cancelled) {
-            if (CONFIG.envName === 'dev') {
-              navigate(
-                `/auth/signup?step=7&practiceId=${practiceId}&email=${email}`
-              )
-            } else {
-              setStatus('congrats')
-            }
+            navigate(
+              `/auth/signup?step=7&practiceId=${practiceId}&email=${email}`
+            )
           }
           return
         }
@@ -372,6 +381,42 @@ const EmailVerification: React.FC = () => {
               </Typography>
             </>
           </EmailVerificationStatus>
+        ) : status === 'unauthorized' ? (
+          <EmailVerificationStatus
+            iconSrc='/assets/danger.svg'
+            iconAlt='Request throttled'
+            buttonText='Close'
+            onButtonClick={() => navigate('/auth/login')}
+          >
+            <>
+              <Typography variant='h4' className='font-weight--700'>
+                Unauthorized Access
+              </Typography>
+              <Typography variant='subtitle1' color='textSecondary'>
+                It appears that you do not have permission to access the Monai
+                platform. <ContactSupport />
+              </Typography>
+            </>
+          </EmailVerificationStatus>
+        ) : status === 'subscriptionFailed' ? (
+          <EmailVerificationStatus
+            iconSrc='/assets/danger.svg'
+            iconAlt='Request throttled'
+            buttonText='Go to sign in'
+            onButtonClick={() => navigate('/auth/login')}
+          >
+            <>
+              <Typography variant='h4' className='font-weight--700'>
+                Oops! Subscription Failed
+              </Typography>
+              <Typography variant='subtitle1' color='textSecondary'>
+                Something went wrong, but you can still log in.
+              </Typography>
+              <Typography variant='subtitle1' color='textSecondary'>
+                Once logged in, you can easily choose a plan from the app.
+              </Typography>
+            </>
+          </EmailVerificationStatus>
         ) : status === 'congrats' ? (
           <Congratulations
             title='Account created successfully'
@@ -381,6 +426,9 @@ const EmailVerification: React.FC = () => {
           <Congratulations
             title='Congratulation!'
             message='Your subscription plan has been subscribed!'
+            onContinue={() =>
+              navigate(accessToken ? paths.billing : '/auth/login')
+            }
           />
         ) : null}
       </Box>

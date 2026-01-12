@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Box, Card, CardContent, Typography } from '@mui/material'
 import {
   BarChart,
@@ -9,56 +10,90 @@ import {
   ResponsiveContainer
 } from 'recharts'
 import revenueIcon from '../../../assets/revenue-cost-icon.svg'
+import { getRevenueCostTrend } from '../utils/getRevenueVsCostTrend'
 
-const data = [
-  { name: 'Jan', Revenue: 95000, Cost: 60000 },
-  { name: 'Feb', Revenue: 87000, Cost: 65000 },
-  { name: 'Mar', Revenue: 102000, Cost: 72000 },
-  { name: 'Apr', Revenue: 98000, Cost: 70000 },
-  { name: 'May', Revenue: 105000, Cost: 75000 },
-  { name: 'Jun', Revenue: 92000, Cost: 68000 }
-]
+const RevenueVsCostChart = ({
+  practiceId,
+  granularity,
+  year,
+  month
+}: {
+  practiceId: any
+  granularity: string
+  year: number
+  month: any
+}) => {
+  const [chartData, setChartData] = useState([])
 
-const RevenueVsCostChart = () => (
-  <Card sx={{ backgroundColor: '#FAFAFA', width: '100%' }}>
-    <CardContent>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'flex-start',
-          alignItems: 'start',
-          gap: 1,
-          mb: 1
-        }}
-      >
-        <img src={revenueIcon} alt='Revenue vs Cost' />
-        <Typography variant='h6' mb={1}>
-          Revenue vs Cost
-        </Typography>
-      </Box>
-      <ResponsiveContainer width='100%' height={250}>
-        <BarChart data={data}>
-          <XAxis dataKey='name' />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar
-            dataKey='Revenue'
-            fill='#0288D1'
-            radius={[12, 12, 0, 0]}
-            barSize={12.5}
-          />
-          <Bar
-            dataKey='Cost'
-            fill='#E0E0E0'
-            radius={[12, 12, 0, 0]}
-            barSize={12.5}
-          />
-        </BarChart>
-      </ResponsiveContainer>
-    </CardContent>
-  </Card>
-)
+  useEffect(() => {
+    if (!practiceId) return
+
+    const fetchData = async () => {
+      try {
+        const response = await getRevenueCostTrend({
+          practiceId,
+          granularity: granularity,
+          year: year,
+          month: month
+        })
+
+        const formatted = response.series.map((item: any) => ({
+          name: item.label,
+          Revenue: Number(item.revenue),
+          Cost: Number(item.costs)
+        }))
+
+        setChartData(formatted)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    fetchData()
+  }, [practiceId, granularity, month, year])
+
+  return (
+    <Card sx={{ backgroundColor: '#FAFAFA', width: '100%' }}>
+      <CardContent>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'flex-start',
+            alignItems: 'start',
+            gap: 1,
+            mb: 1
+          }}
+        >
+          <img src={revenueIcon} alt='Revenue vs Cost' />
+          <Typography variant='h6' mb={1}>
+            Revenue vs Cost
+          </Typography>
+        </Box>
+
+        <ResponsiveContainer width='100%' height={250}>
+          <BarChart data={chartData}>
+            <XAxis dataKey='name' />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar
+              dataKey='Revenue'
+              fill='#0288D1'
+              radius={[12, 12, 0, 0]}
+              barSize={12.5}
+            />
+            <Bar
+              dataKey='Cost'
+              fill='#b0b0b0'
+              radius={[12, 12, 0, 0]}
+              barSize={12.5}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  )
+}
 
 export default RevenueVsCostChart

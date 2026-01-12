@@ -12,22 +12,24 @@ import ErrorBoundary from 'src/components/common/error-boundary'
 import { SplashScreen } from 'src/components/common/SplashScreen'
 
 import ManualEntryPage from 'src/pages/documents/manual-entry/ManualEntryPage'
-import { CONFIG } from 'src/config-global'
-import Placeholder from 'src/components/common/Placeholder'
 
 // lazy pages
 const Dashboard = lazy(() => import('src/pages/dashboard'))
 const Documents = lazy(() => import('src/pages/documents'))
 const Reports = lazy(() => import('src/pages/reports'))
+const AgreementContent = lazy(() => import('src/components/agreements-content'))
 const Benchmarks = lazy(() => import('src/pages/benchmarks'))
 const TeamManagement = lazy(() => import('src/pages/team-management'))
 const MemberRolesAndPermission = lazy(
   () => import('src/pages/team-management/specific-team-member')
 )
 const PracticeSettings = lazy(() => import('src/pages/practice-settings'))
+const BankIntegrator = lazy(() => import('src/pages/bank-integrator'))
+const ExpenseBreakdown = lazy(() => import('src/pages/expense-breakdown'))
 const Billing = lazy(() => import('src/pages/billing'))
 const Settings = lazy(() => import('src/pages/settings'))
 const HelpAndSupport = lazy(() => import('src/pages/HelpAndSupport'))
+const AuditLogs = lazy(() => import('src/pages/audit-logs'))
 const NominationFlow = lazy(
   () => import('src/pages/practice-onboarding/NominationFlow')
 )
@@ -52,6 +54,14 @@ export function Router() {
       { path: paths.root, element: <RedirectComponent /> },
 
       // practice onboarding routes (can be outside layout)
+      {
+        path: paths.agreements,
+        element: (
+          <ProtectedRoute>
+            <AgreementContent />
+          </ProtectedRoute>
+        )
+      },
       {
         path: paths.practiceOnboarding,
         element: (
@@ -140,20 +150,33 @@ export function Router() {
           },
           {
             path: paths.practiceSettings,
-            element:
-              CONFIG.envName !== 'dev' ? (
-                <Placeholder title={'Practice Settings'} />
-              ) : (
-                <FeatureProtectedRoute moduleId='practice-settings'>
-                  <PracticeSettings />
-                </FeatureProtectedRoute>
-              )
+            element: (
+              <FeatureProtectedRoute moduleId='practice-settings'>
+                <PracticeSettings />
+              </FeatureProtectedRoute>
+            )
           },
           {
             path: paths.billing,
             element: (
               <FeatureProtectedRoute moduleId='billing'>
                 <Billing />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.bankIntegrator,
+            element: (
+              <FeatureProtectedRoute moduleId='bank-integrator'>
+                <BankIntegrator />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.expense,
+            element: (
+              <FeatureProtectedRoute moduleId='expenses'>
+                <ExpenseBreakdown />
               </FeatureProtectedRoute>
             )
           },
@@ -170,6 +193,14 @@ export function Router() {
             element: (
               <FeatureProtectedRoute moduleId='help-support'>
                 <HelpAndSupport />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.auditLogs,
+            element: (
+              <FeatureProtectedRoute moduleId='audit-logs'>
+                <AuditLogs />
               </FeatureProtectedRoute>
             )
           }

@@ -29,6 +29,10 @@ export default function useAuthErrorRedirect(): string | null {
         {
           match: 'your account has been deactivated',
           path: '/auth/verify-email'
+        },
+        {
+          match: 'unauthorized',
+          path: '/auth/verify-email'
         }
       ]
 
@@ -37,11 +41,12 @@ export default function useAuthErrorRedirect(): string | null {
           if (errorDesc.includes(e.match)) {
             // extract auth0 id from the decoded description.
             let auth0Id: string | null = null
-
             // First, look for the auth0|<id> pattern
             const auth0Match = decoded.match(/auth0\|([A-Za-z0-9_-]+)/i)
             if (auth0Match && auth0Match[1]) {
               auth0Id = auth0Match[1]
+            } else if (e.match === 'unauthorized') {
+              return `${window.location.origin}${e.path}?unauthorized=${true}`
             } else {
               // Fallback: take the substring after the first colon
               const colonIndex = decoded.indexOf(':')

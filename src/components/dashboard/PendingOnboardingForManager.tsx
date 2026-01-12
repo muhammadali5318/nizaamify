@@ -1,26 +1,23 @@
-import { Box, Button, Typography } from '@mui/material'
-import styles from './PendingOnboardingBanner.module.scss'
+// src/components/dashboard/PendingOnboardingForManager.tsx
+import React from 'react'
+import { Button } from '@mui/material'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
+import WarningBanner from './WarningBanner'
 
-const PendingOnboardingForManager = () => {
+const PendingOnboardingForManager: React.FC = () => {
   const navigate = useNavigate()
 
   return (
-    <Box className={styles.pendingOnboardingBannerRoot}>
-      <Box className={styles.pendingOnboardingBannerHeader}>
-        <img
-          className='icon-dimension--32'
-          src='/assets/warning.svg'
-          alt='warning icon'
-        />
-        <Typography variant='subtitle1' color='var(--color-warning-dark)'>
+    <WarningBanner
+      message={
+        <>
           <span className='font-weight--700'> Practice onboarding </span> You
           have been nominated by the Practice Owner to complete the practice
           onboarding process.
-        </Typography>
-      </Box>
-      <Box className={styles.pendingOnboardingBannerAction}>
+        </>
+      }
+      actions={
         <Button
           variant='contained'
           color='warning'
@@ -29,8 +26,8 @@ const PendingOnboardingForManager = () => {
         >
           Complete onboarding
         </Button>
-      </Box>
-    </Box>
+      }
+    />
   )
 }
 

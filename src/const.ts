@@ -19,12 +19,13 @@ export const OWNER_ROLES = [
 
 export type AccountingBasisType = StepFiveFormValues['accountingBasis']
 
-interface AccountingBasisInfo {
+export interface AccountingBasisInfo {
   value: AccountingBasisType
   iconPath: string
   header: string
   description: string
-  bullets: string[]
+  pros: string[]
+  cons: string[]
   alertText: string
   testId: string
 }
@@ -34,13 +35,20 @@ export const CASH_BASIS_INFO: AccountingBasisInfo = {
   iconPath: 'coin-pound.svg',
   header: 'Cash basis',
   description:
-    'Income and expenses are recorded when cash actually moves, that is, when you receive or make payments. Ideal for smaller or newer practices that want to track real-time cash flow and keep things simple.',
-  bullets: [
-    'A real-time view of your actual cash position',
-    'Easier reconciliation with bank statements',
-    'Simpler tax reporting and bookkeeping',
-    'AI processing based on paid invoices only'
+    'Income and expenses are recorded when cash actually moves — when you receive or make payments. Ideal for smaller or newer practices that want simple real-time cash tracking.',
+
+  pros: [
+    'Can be easier to understand',
+    'Matches cash in the bank',
+    'Good for basic cash-flow visibility'
   ],
+
+  cons: [
+    'Can distort monthly profit',
+    'Harder to benchmark against other practices',
+    'Big bills or late payments cause misleading swings'
+  ],
+
   alertText:
     'Your practice records revenue only when payment is received and expenses only when bills are paid.',
   testId: 'radio-card-cash'
@@ -52,12 +60,19 @@ export const ACCRUAL_BASIS_INFO: AccountingBasisInfo = {
   header: 'Accrual basis',
   description:
     'Income and expenses are recorded when they’re earned or incurred, even if the payment hasn’t been made yet. Ideal for established practices that want deeper financial insights and long-term performance tracking.',
-  bullets: [
-    'A full picture of expected income and liabilities',
-    'Advanced trend analysis and AI forecasting',
-    'Benchmarking accuracy aligned with NHS and Monai averages',
-    'AI processing for both paid and unpaid invoices'
+
+  pros: [
+    'More accurate profit and KPI tracking',
+    'Matches industry benchmarks for comparison',
+    'Better for planning, valuations, and decision-making'
   ],
+
+  cons: [
+    'Slightly more complex to understand',
+    'Requires cleaner bookkeeping',
+    'Doesn’t always match what’s in the bank'
+  ],
+
   alertText:
     'Your practice tracks invoices and bills at the time they’re issued, not when cash is received or paid.',
   testId: 'radio-card-accrual'
@@ -329,3 +344,10 @@ export const ALL_PERMISSIONS = {
     }
   ]
 }
+
+export const PRACTICE_TYPE = {
+  'NHS-DOMINANT': 'Predominantly NHS',
+  PRIVATE: 'Private',
+  MIXED: 'Mixed',
+  SQUAT: 'Squat'
+} as const

@@ -27,7 +27,6 @@ const errorCallback = (error: {
         break
       case 404:
         console.error('Resource not found.')
-        notify.error('Resource not found.')
         break
       case 500:
         console.error('Internal Server error')

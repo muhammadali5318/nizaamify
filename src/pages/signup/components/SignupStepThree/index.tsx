@@ -50,7 +50,8 @@ const SignupStepThree: React.FC<Props> = ({
       terms: formData.terms,
       privacy: formData.privacy,
       disclaimer: formData.disclaimer,
-      gdpr: formData.gdpr
+      dataProcessingAgreement: formData.dataProcessingAgreement,
+      cookiePolicy: formData.cookiePolicy
     }
   })
 
@@ -58,7 +59,8 @@ const SignupStepThree: React.FC<Props> = ({
     'terms',
     'privacy',
     'disclaimer',
-    'gdpr'
+    'dataProcessingAgreement',
+    'cookiePolicy'
   ])
 
   const allChecked = Boolean(terms && privacy && disclaimer && gdpr)
@@ -70,7 +72,8 @@ const SignupStepThree: React.FC<Props> = ({
       terms: formData.terms,
       privacy: formData.privacy,
       disclaimer: formData.disclaimer,
-      gdpr: formData.gdpr
+      dataProcessingAgreement: formData.dataProcessingAgreement,
+      cookiePolicy: formData.cookiePolicy
     })
   }, [formData, reset])
 
@@ -94,7 +97,8 @@ const SignupStepThree: React.FC<Props> = ({
       terms: data.terms,
       privacy: data.privacy,
       disclaimer: data.disclaimer,
-      gdpr: data.gdpr
+      dataProcessingAgreement: data.dataProcessingAgreement,
+      cookiePolicy: data.cookiePolicy
     }
 
     setFormData(patch)
@@ -134,14 +138,14 @@ const SignupStepThree: React.FC<Props> = ({
   // --- add this above the return (inside the component) ---
   const handleBackAndSave = () => {
     const values = getValues()
-
     const patch = {
       password: values.password ?? '',
       confirmPassword: values.confirmPassword ?? '',
       terms: Boolean(values.terms),
       privacy: Boolean(values.privacy),
       disclaimer: Boolean(values.disclaimer),
-      gdpr: Boolean(values.gdpr)
+      dataProcessingAgreement: Boolean(values.dataProcessingAgreement),
+      cookiePolicy: Boolean(values.cookiePolicy)
     }
 
     setFormData(patch)

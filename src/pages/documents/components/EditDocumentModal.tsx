@@ -14,9 +14,10 @@ import { useDispatch } from 'react-redux'
 import { updateDocumentFields } from '../../../store/slices/processedBatchDataSlice'
 import { notify } from '../../../components/notistack/NotificationProvider'
 import {
-  getDocumentTypes,
   getDocumentSubtypes,
-  category
+  category,
+  getFilteredDocumentTypes,
+  getExpenseSubcategories
 } from '../../../utils/documentMapping'
 
 interface EditDocumentModalProps {
@@ -38,18 +39,20 @@ export default function EditDocumentModal({
     document_type: '',
     document_subtype: '',
     amount: '',
+    expense_category: '',
+
     document_date: '',
     payment_date: ''
   })
 
   const [availableSubtypes, setAvailableSubtypes] = useState<string[]>([])
-
   useEffect(() => {
     if (document) {
       setFormData({
         document_category: document.document_category || '',
         document_type: document.document_type || '',
         document_subtype: document.document_subtype || '',
+        expense_category: document.expense_category || '',
         amount: document.amount || '',
         document_date: document.document_date || '',
         payment_date: document.payment_date || document.document_date || ''
@@ -61,20 +64,52 @@ export default function EditDocumentModal({
     const subtypes = getDocumentSubtypes(formData.document_type)
     setAvailableSubtypes(subtypes)
   }, [formData.document_type])
-
+  const availableLineItems =
+    formData.document_type && formData.document_subtype
+      ? getExpenseSubcategories(
+          formData.document_type,
+          formData.document_subtype
+        )
+      : []
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
-      ...(field === 'document_type' ? { document_subtype: '' } : {})
+
+      ...(field === 'document_category'
+        ? {
+            document_type: '',
+            document_subtype: '',
+            expense_category: ''
+          }
+        : {}),
+
+      ...(field === 'document_type'
+        ? {
+            document_subtype: '',
+            expense_category: ''
+          }
+        : {}),
+
+      ...(field === 'document_subtype'
+        ? {
+            expense_category: ''
+          }
+        : {})
     }))
   }
 
   const handleUpdate = () => {
+    const updates: Record<string, any> = { ...formData }
+
+    if (updates.document_category === 'Revenue') {
+      delete updates.expense_category
+    }
+
     dispatch(
       updateDocumentFields({
         document_id: document.document_id,
-        updates: formData
+        updates
       })
     )
     onClose()
@@ -83,7 +118,7 @@ export default function EditDocumentModal({
 
   if (!document) return null
 
-  const documentTypes = getDocumentTypes()
+  const documentTypes = getFilteredDocumentTypes(formData.document_category)
   const documentCategories = Object.values(category)
   const isCategoryDisabled = formData.document_subtype === 'Bank statements'
 
@@ -161,6 +196,24 @@ export default function EditDocumentModal({
                 </MenuItem>
               ))}
             </TextField>
+            {formData.document_type !== 'Income & Revenue' && (
+              <TextField
+                select
+                fullWidth
+                label='Line item'
+                value={formData.expense_category}
+                onChange={(e) =>
+                  handleChange('expense_category', e.target.value)
+                }
+                disabled={!formData.document_subtype}
+              >
+                {availableLineItems.map((item) => (
+                  <MenuItem key={item} value={item}>
+                    {item}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
 
             <TextField
               fullWidth

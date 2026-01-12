@@ -5,15 +5,17 @@ import { useNavigate } from 'react-router'
 type CongratulationsProps = {
   title?: string
   message: string
+  onContinue?: () => void
 }
 
 const Congratulations: React.FC<CongratulationsProps> = ({
+  title = 'Congratulations!',
   message,
-  title = 'Congratulations!'
+  onContinue
 }) => {
   const navigate = useNavigate()
 
-  const handleContinue = () => {
+  const handleDefaultContinue = () => {
     navigate('/auth/login')
   }
 
@@ -65,7 +67,7 @@ const Congratulations: React.FC<CongratulationsProps> = ({
           size='large'
           variant='contained'
           className={styles.continueBtn}
-          onClick={handleContinue}
+          onClick={onContinue ?? handleDefaultContinue}
           sx={{
             width: { xs: '100%', md: '210px' }
           }}

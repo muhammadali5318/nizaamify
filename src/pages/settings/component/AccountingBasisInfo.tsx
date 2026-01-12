@@ -12,25 +12,16 @@ import {
 } from '@mui/material'
 import { StepFiveFormValues } from 'src/schema-validations/practice-onboarding/stepFive'
 import styles from './AccountingBasisInfo.module.scss'
+import { AccountingBasisInfo } from 'src/const'
 
 export type AccountingBasisType = StepFiveFormValues['accountingBasis']
-
-export interface AccountingBasisInfo {
-  value: AccountingBasisType
-  iconPath: string
-  header: string
-  description: string
-  bullets: string[]
-  alertText: string
-  testId: string
-}
 
 type Props = {
   data: AccountingBasisInfo
 }
 
 const AccountingBasisCard: React.FC<Props> = ({ data }) => {
-  const { header, description, bullets, alertText, testId } = data
+  const { header, description, pros, cons, alertText, testId } = data
 
   return (
     <Card
@@ -49,11 +40,45 @@ const AccountingBasisCard: React.FC<Props> = ({ data }) => {
 
         <Box>
           <Typography variant='h6' fontWeight={700}>
-            You’ll get:
+            Pros
           </Typography>
 
           <List sx={{ padding: 0 }}>
-            {bullets.map((b, i) => (
+            {pros.map((b, i) => (
+              <ListItem
+                key={i}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  py: 0.5,
+                  px: 0,
+                  gap: '14px'
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 28, pt: '2px' }}>
+                  <img
+                    src={'/assets/ticket-icon-black.svg'}
+                    alt='tick'
+                    style={{ width: 20, height: 20, display: 'block' }}
+                  />
+                </ListItemIcon>
+                <ListItemText
+                  primary={b}
+                  primaryTypographyProps={{
+                    variant: 'body1',
+                    component: 'div'
+                  }}
+                />
+              </ListItem>
+            ))}
+          </List>
+
+          <Typography variant='h6' fontWeight={700}>
+            Cons
+          </Typography>
+
+          <List sx={{ padding: 0 }}>
+            {cons.map((b, i) => (
               <ListItem
                 key={i}
                 sx={{

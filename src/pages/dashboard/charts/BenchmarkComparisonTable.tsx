@@ -28,72 +28,67 @@ const ExpandableBenchmarkTable = ({ data }: ExpandableBenchmarkTableProps) => {
     activePracticeData?.activePractice?.practice_type || 'Predom. NHS'
 
   const expenseTypes = data?.current?.expense_types || []
-  const categories = data?.current?.categories || []
-
-  const getChildCategories = (parentName: string) =>
-    categories.filter(
-      (cat: any) =>
-        cat.parent_category?.toLowerCase() === parentName.toLowerCase()
-    )
 
   return (
-    <Card
-      sx={{
-        backgroundColor: theme.palette.background.paper,
-        boxShadow: 3,
-        borderRadius: 3,
-        overflow: 'hidden'
-      }}
-    >
-      <CardContent sx={{ p: 0 }}>
-        <Box sx={{ overflowX: 'auto' }}>
-          <Table
-            size='small'
-            sx={{
-              minWidth: 650,
-              '& th': {
-                fontWeight: 700,
-                fontSize: { xs: '0.8rem', sm: '0.9rem' },
-                backgroundColor: '#f9fafb'
-              },
-              '& td': {
-                fontSize: { xs: '0.8rem', sm: '0.9rem' }
-              }
-            }}
-          >
-            <TableHead sx={{ backgroundColor: '#F5F5F5' }}>
-              <TableRow>
-                <TableCell />
-                <TableCell sx={{ pt: 2 }}>Category</TableCell>
-                <TableCell sx={{ pt: 2 }} align='left'>
-                  Your practice value
-                </TableCell>
-                <TableCell sx={{ pt: 2 }} align='left'>
-                  UK Avg (NHS)
-                </TableCell>
-                <TableCell sx={{ pt: 2 }} align='left'>
-                  Monai benchmarking
-                </TableCell>
-              </TableRow>
-            </TableHead>
+    <Box>
+      <Card
+        sx={{
+          backgroundColor: theme.palette.background.paper,
+          boxShadow: 3,
+          borderRadius: 3,
+          overflow: 'hidden'
+        }}
+      >
+        <CardContent sx={{ p: 0 }}>
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table
+              size='small'
+              sx={{
+                '& th': {
+                  fontWeight: 700,
+                  fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                  backgroundColor: '#f9fafb'
+                },
+                '& td': {
+                  fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                }
+              }}
+            >
+              <TableHead sx={{ backgroundColor: '#F5F5F5' }}>
+                <TableRow>
+                  <TableCell />
+                  <TableCell sx={{ pt: 2 }}>Category</TableCell>
+                  <TableCell sx={{ pt: 2 }} align='left'>
+                    Your practice value
+                  </TableCell>
+                  <TableCell sx={{ pt: 2 }} align='left'>
+                    UK Avg (NHS)
+                  </TableCell>
+                  <TableCell sx={{ pt: 2 }} align='left'>
+                    Monai benchmarking
+                  </TableCell>
+                </TableRow>
+              </TableHead>
 
-            <TableBody>
-              {expenseTypes.map((type: any) => {
-                const children = getChildCategories(type.expense_type)
-                return (
-                  <ExpandableRow
-                    key={type.expense_type}
-                    row={type}
-                    childCategories={children}
-                    activePracticeType={activePracticeType}
-                  />
-                )
-              })}
-            </TableBody>
-          </Table>
-        </Box>
-      </CardContent>
-    </Card>
+              <TableBody>
+                {expenseTypes.map((type: any) => {
+                  if (type.expense_type !== 'Tax Documents') {
+                    return (
+                      <ExpandableRow
+                        key={type.expense_type}
+                        row={type}
+                        childSubtypes={type.expense_subtypes || []}
+                        activePracticeType={activePracticeType}
+                      />
+                    )
+                  }
+                })}
+              </TableBody>
+            </Table>
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
   )
 }
 
@@ -104,17 +99,25 @@ export default ExpandableBenchmarkTable
 // ----------------------------------------------------------
 interface ExpandableRowProps {
   row: any
-  childCategories: any[]
+  childSubtypes: any[]
   activePracticeType: string
 }
 
 const ExpandableRow = ({
   row,
-  childCategories,
+  childSubtypes,
   activePracticeType
 }: ExpandableRowProps) => {
   const [open, setOpen] = useState(false)
+  const formatAmountWithPercent = (amount: string, percent: string) => {
+    const formattedAmount = Number(amount).toLocaleString('en-GB', {
+      style: 'currency',
+      currency: 'GBP',
+      minimumFractionDigits: 2
+    })
 
+    return `${formattedAmount} (${Number(percent).toFixed(2)}%)`
+  }
   return (
     <>
       {/* Parent Row */}
@@ -125,7 +128,7 @@ const ExpandableRow = ({
         }}
       >
         <TableCell sx={{ width: '20px' }}>
-          {childCategories.length > 0 && (
+          {childSubtypes.length > 0 && (
             <IconButton
               aria-label='expand row'
               size='small'
@@ -139,7 +142,7 @@ const ExpandableRow = ({
           <Typography fontWeight={600}>{row.expense_type}</Typography>
         </TableCell>
         <TableCell align='left'>
-          {parseFloat(row.share_of_total_percent).toFixed(2)}%
+          {formatAmountWithPercent(row.amount, row.share_of_total_percent)}
         </TableCell>
         <TableCell align='left'>
           {getUKAvgValue(row.expense_type, activePracticeType)}
@@ -148,11 +151,11 @@ const ExpandableRow = ({
       </TableRow>
 
       {/* Expanded Section with Header + Child Rows */}
-      {childCategories.length > 0 && (
+      {childSubtypes.length > 0 && (
         <TableRow>
           <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
             <Collapse in={open} timeout='auto' unmountOnExit>
-              <Box sx={{ m: 1 }}>
+              <Box sx={{ m: 1, overflowX: 'auto' }}>
                 <Typography
                   variant='subtitle2'
                   sx={{
@@ -184,7 +187,7 @@ const ExpandableRow = ({
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {childCategories.map((cat: any, idx: number) => (
+                    {childSubtypes.map((sub: any, idx: number) => (
                       <TableRow
                         key={idx}
                         sx={{
@@ -193,18 +196,21 @@ const ExpandableRow = ({
                       >
                         <TableCell />
                         <TableCell component='th' scope='row'>
-                          {cat.expense_category}
+                          {sub.expense_subtype}
                         </TableCell>
 
                         <TableCell align='right'>
-                          {parseFloat(cat.share_of_total_percent).toFixed(2)}%
+                          {/* No percent in subtype → show amount or 0% */}
+                          {parseFloat(sub.amount || '0').toFixed(2)}
                         </TableCell>
+
                         <TableCell align='right'>
                           {getUKAvgValue(
-                            cat.expense_category,
+                            sub.expense_subtype,
                             activePracticeType
                           )}
                         </TableCell>
+
                         <TableCell align='right'>-</TableCell>
                       </TableRow>
                     ))}

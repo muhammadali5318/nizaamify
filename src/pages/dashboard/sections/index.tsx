@@ -1,5 +1,5 @@
-import { Box, CircularProgress, Typography } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { Box, CircularProgress, Typography, Button } from '@mui/material'
+import { useEffect, useState, useRef } from 'react'
 import dayjs from 'dayjs'
 
 import DashboardStatsSection from './dashboard-stats-section/DashboardStatsSection'
@@ -11,32 +11,41 @@ import BenchmarkComparisonTable from '../charts/BenchmarkComparisonTable'
 import ExpenseAnalysisCard from '../insights/ExpenseAnalysisCard'
 import AISummaryCard from '../insights/AISummaryCard'
 import PeriodSelector from '../components/PeriodSelector'
-
+import downlaodBtn from '../../../assets/document-download-black.svg'
 import expenseIcon from '../../../assets/expense-icon.svg'
 import benchmarkIcon from '../../../assets/benchmark-comp-icon.svg'
 import aiIcon from '../../../assets/ai-icon.svg'
 
 import { getExpenseData } from '../../../services/apis/expense'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+
+import { downloadDashboardPDF } from '../utils/downloadPdf'
 
 const MainDashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('Current month')
   const [expenseData, setExpenseData] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const { activePracticeId } = useActivePractice()
+  const [selectedMonth, setSelectedMonth] = useState(dayjs())
+
+  const dashboardRef = useRef<any>(null)
 
   const getDateRange = (label: string) => {
     const endDate = dayjs()
     let startDate
     let granularity: 'month' | 'quarter' | 'year'
     let month: number | null = null
-    const year = endDate.year()
+    let year = endDate.year()
+    const targetDate = selectedMonth ?? endDate
 
     switch (label) {
       case 'Current month':
         startDate = endDate.startOf('month')
         granularity = 'month'
-        month = endDate.month() + 1
+        month = targetDate.month() + 1
+        year = targetDate.year()
         break
 
       case '3-month view':
@@ -46,7 +55,7 @@ const MainDashboard = () => {
         break
 
       case 'Yearly':
-        startDate = endDate.subtract(0, 'month').startOf('year')
+        startDate = endDate.startOf('year')
         granularity = 'year'
         month = null
         break
@@ -58,18 +67,16 @@ const MainDashboard = () => {
     }
 
     return {
-      start_date: startDate.format('YYYY-MM-DD'),
-      end_date: endDate.format('YYYY-MM-DD'),
+      start_date: startDate.format('DD-MM-YYYY'),
+      end_date: endDate.format('DD-MM-YYYY'),
       granularity,
       month,
       year
     }
   }
 
-  const { start_date, end_date, granularity, month, year } =
-    getDateRange(selectedPeriod)
+  const { granularity, month, year } = getDateRange(selectedPeriod)
 
-  // Fetch expense data
   useEffect(() => {
     const fetchExpenseData = async () => {
       if (!activePracticeId) {
@@ -96,132 +103,214 @@ const MainDashboard = () => {
   }, [selectedPeriod, granularity, month, year, activePracticeId])
 
   return (
-    <Box display='flex' flexDirection='column' gap={2}>
-      {/* Header + Period Selector */}
+    <Box display='flex' flexDirection='column' gap={2} sx={{ width: '100%' }}>
+      {/* HEADER */}
       <Box
         mb={1}
         sx={{
           display: 'flex',
-          flexDirection: 'row',
+          flexDirection: { xs: 'column', sm: 'row' },
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: { xs: 'start', sm: 'center' },
+          gap: 1
         }}
       >
         <Typography variant='h6' fontWeight={600}>
           Practice Financial Overview
         </Typography>
 
-        <PeriodSelector
-          options={['Current month', '3-month view', 'Yearly']}
-          selected={selectedPeriod}
-          onSelect={setSelectedPeriod}
-        />
+        <Box
+          mb={1}
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'start', sm: 'center' },
+            gap: 1
+          }}
+        >
+          <Box>
+            {selectedPeriod === 'Current month' && (
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  views={['year', 'month']}
+                  label='Select Month'
+                  value={selectedMonth}
+                  onChange={(newValue: any) => {
+                    setSelectedMonth(newValue)
+                    setSelectedPeriod('Current month')
+                  }}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      sx: {
+                        '& .MuiPickersInputBase-root': { borderRadius: '12px' },
+                        size: 'small'
+                      }
+                    }
+                  }}
+                />
+              </LocalizationProvider>
+            )}
+          </Box>
+
+          <PeriodSelector
+            options={['Current month', '3-month view', 'Yearly']}
+            selected={selectedPeriod}
+            onSelect={setSelectedPeriod}
+          />
+
+          <Button
+            variant='contained'
+            startIcon={<img src={downlaodBtn} alt='Download' />}
+            sx={{
+              borderRadius: '10px',
+              height: 55,
+              backgroundColor: '#fff',
+              color: '#000',
+              border: '1px solid #E0E0E0',
+              boxShadow: 'none'
+            }}
+            onClick={() =>
+              downloadDashboardPDF(dashboardRef, 'Financial-Dashboard')
+            }
+          >
+            Download PDF
+          </Button>
+        </Box>
       </Box>
+      <Box ref={dashboardRef}>
+        {/* KPI CARDS */}
+        <DashboardStatsSection
+          granularity={granularity}
+          month={month}
+          year={year}
+        />
 
-      {/* 1. KPI Cards */}
-      <DashboardStatsSection
-        selectedPeriod={selectedPeriod}
-        startDate={start_date}
-        endDate={end_date}
-      />
+        {/* EXPENSE SECTION */}
+        <Box
+          sx={{
+            backgroundColor: '#fafafa',
+            borderRadius: '12px',
+            p: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <img src={expenseIcon} alt='Expense' />
+            <Typography variant='h6'>Expense Breakdown & Trends</Typography>
+          </Box>
 
-      {/* 2. Revenue & Profit Charts */}
-
-      {/* 3. Expense Breakdown & Trends */}
-      <Box
-        display='flex'
-        flexDirection='column'
-        gap={2}
-        sx={{ backgroundColor: '#fafafa', borderRadius: '12px', p: 2 }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <img src={expenseIcon} alt='Expense' />
-          <Typography variant='h6' mb={1}>
-            Expense Breakdown & Trends
-          </Typography>
+          {loading ? (
+            <CircularProgress
+              size={28}
+              sx={{ alignSelf: 'center', color: '#000' }}
+            />
+          ) : (
+            <Box
+              display='flex'
+              flexDirection={{ xs: 'column', md: 'row' }}
+              gap={2}
+              sx={{ width: '100%' }}
+            >
+              <Box flex={1} sx={{ minHeight: 250 }}>
+                <ExpenseBreakdownChart
+                  data={expenseData}
+                  granularity={granularity}
+                  month={month}
+                  year={year}
+                />
+              </Box>
+            </Box>
+          )}
         </Box>
 
-        {loading ? (
-          <CircularProgress
-            size={28}
-            thickness={4}
-            sx={{ color: '#000', alignSelf: 'center' }}
-          />
-        ) : (
+        {/* EXPENSE TREND */}
+        <Box display='flex' flexDirection={{ xs: 'column', md: 'row' }} gap={2}>
+          <Box flex={1} sx={{ minHeight: 280 }}>
+            <ExpenseTrendChart
+              data={expenseData}
+              granularity={granularity}
+              month={month}
+              year={year}
+            />
+          </Box>
+        </Box>
+
+        {/* BENCHMARK TABLE */}
+        <Box
+          sx={{
+            backgroundColor: '#fafafa',
+            borderRadius: '12px',
+            p: 2,
+            width: '100%',
+            overflowX: 'auto'
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <img src={benchmarkIcon} alt='Benchmark' />
+            <Typography variant='h6'>Benchmark Comparison</Typography>
+          </Box>
+
+          <BenchmarkComparisonTable data={expenseData} />
+        </Box>
+
+        {/* REVENUE VS PROFIT SECTION */}
+        <Box
+          display='flex'
+          flexDirection={{ xs: 'column', md: 'row' }}
+          gap={2}
+          sx={{ width: '100%' }}
+        >
+          <Box flex={1} sx={{ minHeight: 280 }}>
+            <RevenueVsCostChart
+              granularity={granularity}
+              month={month}
+              year={year}
+              practiceId={activePracticeId}
+            />
+          </Box>
+
+          <Box flex={1} sx={{ minHeight: 280 }}>
+            <ProfitMarginTrendChart
+              granularity={granularity}
+              month={month}
+              year={year}
+              practiceId={activePracticeId}
+            />
+          </Box>
+        </Box>
+
+        {/* AI INSIGHTS */}
+        <Box
+          sx={{
+            backgroundColor: '#FAFAFA',
+            p: 2,
+            borderRadius: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <img src={aiIcon} alt='AI Insights' />
+            <Typography variant='h6'>AI-Driven Insights</Typography>
+          </Box>
+
           <Box
             display='flex'
             flexDirection={{ xs: 'column', md: 'row' }}
             gap={2}
+            sx={{ width: '100%' }}
           >
             <Box flex={1}>
-              <ExpenseBreakdownChart
-                data={expenseData}
-                granularity={granularity}
-                month={month}
-                year={year}
-              />
+              <ExpenseAnalysisCard />
             </Box>
-          </Box>
-        )}
-      </Box>
 
-      {/* 4. Benchmark Table */}
-
-      <Box display='flex' flexDirection={{ xs: 'column', md: 'row' }} gap={2}>
-        <Box flex={1.3}>
-          <ExpenseTrendChart
-            data={expenseData}
-            granularity={granularity}
-            month={month}
-            year={year}
-          />
-        </Box>
-      </Box>
-
-      <Box
-        mt={1}
-        sx={{ backgroundColor: '#fafafa', borderRadius: '12px', p: 2 }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <img src={benchmarkIcon} alt='Benchmark' />
-          <Typography variant='h6' mb={1}>
-            Benchmark Comparison (as % of Revenue)
-          </Typography>
-        </Box>
-        <BenchmarkComparisonTable data={expenseData} />
-      </Box>
-      <Box
-        display='flex'
-        flexDirection={{ xs: 'column', md: 'row' }}
-        gap={{ xs: 2, md: 0 }}
-        sx={{ backgroundColor: '#fff', borderRadius: '12px', width: '100%' }}
-      >
-        <Box flex={1.4} mr={2}>
-          <RevenueVsCostChart />
-        </Box>
-        <Box flex={1}>
-          <ProfitMarginTrendChart />
-        </Box>
-      </Box>
-      {/* 5. AI Insights */}
-      <Box
-        display='flex'
-        flexDirection='column'
-        gap={2}
-        sx={{ backgroundColor: '#FAFAFA', p: 2, borderRadius: '12px' }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <img src={aiIcon} alt='AI Insights' />
-          <Typography variant='h6' mb={1}>
-            AI-Driven Insights
-          </Typography>
-        </Box>
-        <Box display='flex' flexDirection={{ xs: 'column', md: 'row' }} gap={2}>
-          <Box flex={1}>
-            <ExpenseAnalysisCard />
-          </Box>
-          <Box flex={1}>
-            <AISummaryCard />
+            <Box flex={1}>
+              <AISummaryCard />
+            </Box>
           </Box>
         </Box>
       </Box>

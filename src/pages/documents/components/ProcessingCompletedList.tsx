@@ -122,7 +122,7 @@ export default function ProcessingCompletedList() {
         </Button>
       </Box>
 
-      <NotificationBanner content='Make sure to review the extracted data before approving them. These data will be used in calculating financial records of your practice.' />
+      <NotificationBanner content='Please ensure you review the extracted data before approving them. The data will be used to produce financial records for your practice.' />
 
       {allDocuments.map((doc) => (
         <Card
@@ -234,11 +234,17 @@ export default function ProcessingCompletedList() {
                       {dayjs(doc.document_date).format('DD-MM-YYYY') || '—'}
                     </strong>
                     &nbsp; | &nbsp; Document category:{' '}
-                    <strong>{doc.document_category || '—'}</strong> &nbsp; |
-                    &nbsp; Document type:{' '}
-                    <strong>{doc.document_type || '—'}</strong> &nbsp; | &nbsp;
-                    Document subtype:{' '}
+                    <strong>{doc.document_category || '—'}</strong>
+                    &nbsp; | &nbsp; Document type:{' '}
+                    <strong>{doc.document_type || '—'}</strong>
+                    &nbsp; | &nbsp; Document subtype:{' '}
                     <strong>{doc.document_subtype || '—'}</strong>
+                    {doc.document_category !== 'Revenue' && (
+                      <>
+                        &nbsp; | &nbsp; Line item:{' '}
+                        <strong>{doc.expense_category || '—'}</strong>
+                      </>
+                    )}
                   </Typography>
 
                   <Divider sx={{ mt: '5px' }} />

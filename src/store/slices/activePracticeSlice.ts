@@ -10,7 +10,18 @@ export type AllPracticesDataObject = {
   premises_ownership?: string
   accounting_basis?: string
   created_at?: string
-  onboarding_status?: string
+  onboarding_status: string
+  subscription_details: {
+    is_subscribed: boolean
+    subscription_plan_name: string
+    subscription_plan_amount?: number
+    next_billing_date?: string
+    card_brand?: string
+    card_last_four_digits?: string
+    card_expiry_month?: number
+    card_expiry_year?: number
+  }
+  user_role?: string
 }
 
 type ActivePracticeState = AllPracticesDataObject | null

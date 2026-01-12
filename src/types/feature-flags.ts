@@ -18,6 +18,9 @@ export type ModuleId =
   | 'settings'
   | 'help-support'
   | 'nomination-flow'
+  | 'bank-integrator'
+  | 'expenses'
+  | 'audit-logs'
 
 export type FeatureRuleId = string
 
