@@ -11,7 +11,6 @@ import EmailVerificationStatus from './EmailVerificationStatus'
 import { sendVerificationEmail } from 'src/services/auth/emailVerification'
 import HavingTrouble from 'src/components/contact-support/HavingTrouble'
 import ContactSupport from 'src/components/contact-support'
-import { CONFIG } from 'src/config-global'
 import { paths } from 'src/paths'
 import { useAuth } from 'src/context/AuthProvider'
 
@@ -107,13 +106,9 @@ const EmailVerification: React.FC = () => {
           response.data.message === 'Email has been verified successfully!'
         ) {
           if (!cancelled) {
-            if (CONFIG.envName === 'dev') {
-              navigate(
-                `/auth/signup?step=7&practiceId=${practiceId}&email=${email}`
-              )
-            } else {
-              setStatus('congrats')
-            }
+            navigate(
+              `/auth/signup?step=7&practiceId=${practiceId}&email=${email}`
+            )
           }
           return
         }

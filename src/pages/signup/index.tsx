@@ -7,10 +7,7 @@ import AdaptiveStepper from 'src/components/common/AdaptiveStepper'
 import SignupStepOne from './components/SignupStepOne'
 import SignupStepTwo from './components/SignupStepTwo'
 import SignupStepThree from './components/SignupStepThree'
-import {
-  generatePayloadForSignUp,
-  steps as defaultSteps
-} from './signUp-config'
+import { generatePayloadForSignUp, steps } from './signUp-config'
 import SendVerificationEmail from './components/SendVerificationEmail'
 import RegistrationHeader from 'src/components/registration-wrapper/RegistrationHeader'
 import { SignupFormDataSet, SetFormDataSet } from './types'
@@ -20,7 +17,6 @@ import { sendVerificationEmail } from 'src/services/auth/emailVerification'
 import RequestPracticeAssociation from './components/RequestPracticeAssociation/RequestPracticeAssociation'
 import { useSearchParams } from 'react-router'
 import SignupStepFour from './components/SignupStepFour'
-import { CONFIG } from 'src/config-global'
 
 const initialFormData: SignupFormDataSet = {
   firstName: '',
@@ -56,8 +52,6 @@ export type AssociationPayload = {
 }
 
 const SignUp: React.FC = () => {
-  const steps =
-    CONFIG.envName === 'dev' ? defaultSteps : defaultSteps.slice(0, -1)
   const [searchParams] = useSearchParams()
   const step = Number(searchParams.get('step') ?? 0)
 

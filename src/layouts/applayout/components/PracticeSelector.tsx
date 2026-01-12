@@ -28,7 +28,6 @@ import { notify } from 'src/components/notistack/NotificationProvider'
 import { clearAll } from 'src/store/slices/processedBatchDataSlice'
 import { clearPresignData } from 'src/store/slices/presignedSlice'
 import { clearFiles } from 'src/store/slices/uploadSlice'
-import { CONFIG } from 'src/config-global'
 import { AllPracticesDataObject } from 'src/store/slices/activePracticeSlice'
 import { clearProcessing } from 'src/store/slices/processingSlice'
 import useUserDetails from 'src/hooks/useUserDetails'
@@ -39,7 +38,6 @@ import {
 
 export default function PracticeSelector() {
   const { isOwnerOrDirectorInAnyPractice } = useUserDetails()
-  const readOnlySelect = CONFIG.envName === 'dev' ? false : true
   const { accessToken } = useAuth()
   const dispatch = useDispatch()
   const { data: rawPractices } = useFetchAllPracticesData(!!accessToken)
@@ -146,7 +144,6 @@ export default function PracticeSelector() {
           }}
           MenuProps={{ disablePortal: false }}
           onChange={(e) => {
-            if (readOnlySelect) return
             const selected =
               practices.find((p) => p.id === e.target.value) || null
             dispatch(setMergedPermissionsByCategory(ALL_PERMISSIONS))
@@ -267,9 +264,9 @@ export default function PracticeSelector() {
             </MenuItem>
           )}
 
-          {!readOnlySelect && isOwnerOrDirectorInAnyPractice && <Divider />}
+          {isOwnerOrDirectorInAnyPractice && <Divider />}
 
-          {!readOnlySelect && isOwnerOrDirectorInAnyPractice && (
+          {isOwnerOrDirectorInAnyPractice && (
             <MenuItem sx={{ padding: '0px 10px' }}>
               <Box
                 onMouseDown={(e) => e.stopPropagation()}

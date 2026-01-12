@@ -12,8 +12,6 @@ import ErrorBoundary from 'src/components/common/error-boundary'
 import { SplashScreen } from 'src/components/common/SplashScreen'
 
 import ManualEntryPage from 'src/pages/documents/manual-entry/ManualEntryPage'
-import { CONFIG } from 'src/config-global'
-import Placeholder from 'src/components/common/Placeholder'
 
 // lazy pages
 const Dashboard = lazy(() => import('src/pages/dashboard'))
@@ -152,14 +150,11 @@ export function Router() {
           },
           {
             path: paths.practiceSettings,
-            element:
-              CONFIG.envName !== 'dev' ? (
-                <Placeholder title={'Practice Settings'} />
-              ) : (
-                <FeatureProtectedRoute moduleId='practice-settings'>
-                  <PracticeSettings />
-                </FeatureProtectedRoute>
-              )
+            element: (
+              <FeatureProtectedRoute moduleId='practice-settings'>
+                <PracticeSettings />
+              </FeatureProtectedRoute>
+            )
           },
           {
             path: paths.billing,
