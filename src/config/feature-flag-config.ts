@@ -68,6 +68,10 @@ const modules: ModuleConfig[] = [
   {
     id: 'nomination-flow',
     name: 'nomination flow'
+  },
+  {
+    id: 'non-pandl',
+    name: 'non PandL'
   }
 ]
 

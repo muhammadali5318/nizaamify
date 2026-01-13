@@ -21,6 +21,7 @@ export type ModuleId =
   | 'bank-integrator'
   | 'expenses'
   | 'audit-logs'
+  | 'non-pandl'
 
 export type FeatureRuleId = string
 

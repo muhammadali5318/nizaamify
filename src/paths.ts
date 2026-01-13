@@ -7,6 +7,7 @@ export const paths = {
   practiceOnboardingStepper: '/practice-onboarding/stepper',
   documents: '/documents',
   expense: '/expense-breakdown',
+  nonPandL: '/non-pl-items',
   reports: '/reports',
   benchmarks: '/benchmarks',
   teamManagement: {

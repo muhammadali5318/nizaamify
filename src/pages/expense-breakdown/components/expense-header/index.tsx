@@ -2,9 +2,10 @@ import { Box, Typography } from '@mui/material'
 
 interface ExpensesGrandTotalProps {
   total: number | string
+  label?: string | any
 }
 
-const ExpensesGrandTotal = ({ total }: ExpensesGrandTotalProps) => {
+const ExpensesGrandTotal = ({ total, label }: ExpensesGrandTotalProps) => {
   return (
     <Box
       sx={{
@@ -55,7 +56,7 @@ const ExpensesGrandTotal = ({ total }: ExpensesGrandTotalProps) => {
 
       <Box display={'flex'} alignItems={'center'} gap={'10px'}>
         <Typography variant='subtitle2' color='#4A5565'>
-          Total Monthly Expenses:
+          {label || 'Total Monthly Expenses:'}
         </Typography>
         <Typography variant='h5' fontWeight={700}>
           £{total ?? '-'}
