@@ -51,21 +51,21 @@ const ACTION_TYPE_OPTIONS: Option[] = [
   { value: 'UPSERT', label: 'Upsert' }
 ]
 
-const FIELD_FLEX_SX = {
-  flex: {
-    xs: '0 0 100%', // mobile - 1 per row
-    sm: '0 0 48%', // small screen - 2 per row
-    md: '0 0 calc(33.333% - 16px)', // medium screen - 3 per row
-    lg: '0 0 357px' // large screen - original width
-  },
-  width: {
-    xs: '100%',
-    sm: '48%',
-    md: 'calc(33.333% - 16px)',
-    lg: '357px'
-  },
-  minWidth: 0 // allows shrinking
-} as const
+// const FIELD_FLEX_SX = {
+//   flex: {
+//     xs: '0 0 100%', // mobile - 1 per row
+//     sm: '0 0 48%', // small screen - 2 per row
+//     md: '0 0 calc(33.333% - 16px)', // medium screen - 3 per row
+//     lg: '0 0 357px' // large screen - original width
+//   },
+//   width: {
+//     xs: '100%',
+//     sm: '48%',
+//     md: 'calc(33.333% - 16px)',
+//     lg: '357px'
+//   },
+//   minWidth: 0 // allows shrinking
+// } as const
 
 /* =======================
    Helpers
@@ -174,164 +174,164 @@ const AuditLogsContent: React.FC = () => {
 
   return (
     <Box className={styles.contentRoot}>
-      <Box p={'0px 16px 16px 16px'}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'stretch',
-            gap: 2
-          }}
-        >
-          {/* Search */}
+      {/* <Box className={styles.filterContainer}> */}
+      <Box
+        className={'filterContainer'}
+        display='flex'
+        gap={2}
+        flexWrap='wrap'
+        alignItems='center'
+      >
+        {/* Search */}
+        <Controller
+          name='value'
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label='Search by user name'
+              // sx={FIELD_FLEX_SX}
+              error={!!errors.value}
+            />
+          )}
+        />
+
+        {/* Role */}
+        <FormControl>
+          <InputLabel id='role-label'>Role</InputLabel>
           <Controller
-            name='value'
+            name='role'
             control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label='Search by user name'
-                sx={FIELD_FLEX_SX}
-                error={!!errors.value}
-              />
-            )}
+            render={({ field }) => {
+              const selected = Array.isArray(field.value) ? field.value : []
+
+              const handleChange = (event: any) => {
+                const value = event.target.value
+                if (value.includes('')) field.onChange([])
+                else field.onChange(value)
+              }
+
+              return (
+                <Select
+                  multiple
+                  value={selected}
+                  onChange={handleChange}
+                  input={<OutlinedInput label='Role' />}
+                  renderValue={() =>
+                    selected.length
+                      ? joinLabels(USER_ROLES as any, selected)
+                      : 'All'
+                  }
+                >
+                  <MenuItem value=''>
+                    <em>All</em>
+                  </MenuItem>
+                  {USER_ROLES.map((o) => (
+                    <MenuItem key={o.value} value={o.value}>
+                      <Checkbox checked={selected.includes(o.value)} />
+                      <ListItemText primary={o.label} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              )
+            }}
           />
+        </FormControl>
 
-          {/* Role */}
-          <FormControl sx={FIELD_FLEX_SX}>
-            <InputLabel id='role-label'>Role</InputLabel>
-            <Controller
-              name='role'
-              control={control}
-              render={({ field }) => {
-                const selected = Array.isArray(field.value) ? field.value : []
+        {/* Logs category */}
+        <FormControl>
+          <InputLabel id='logs-category-label'>Logs category</InputLabel>
+          <Controller
+            name='logsCategory'
+            control={control}
+            render={({ field }) => {
+              const selected = Array.isArray(field.value) ? field.value : []
 
-                const handleChange = (event: any) => {
-                  const value = event.target.value
-                  if (value.includes('')) field.onChange([])
-                  else field.onChange(value)
-                }
+              const handleChange = (event: any) => {
+                const value = event.target.value
+                if (value.includes('')) field.onChange([])
+                else field.onChange(value)
+              }
 
-                return (
-                  <Select
-                    multiple
-                    value={selected}
-                    onChange={handleChange}
-                    input={<OutlinedInput label='Role' />}
-                    renderValue={() =>
-                      selected.length
-                        ? joinLabels(USER_ROLES as any, selected)
-                        : 'All'
-                    }
-                  >
-                    <MenuItem value=''>
-                      <em>All</em>
+              return (
+                <Select
+                  multiple
+                  value={selected}
+                  onChange={handleChange}
+                  input={<OutlinedInput label='Logs category' />}
+                  renderValue={() =>
+                    selected.length
+                      ? joinLabels(LOGS_CATEGORY_OPTIONS, selected)
+                      : 'All'
+                  }
+                >
+                  <MenuItem value=''>
+                    <em>All</em>
+                  </MenuItem>
+                  {LOGS_CATEGORY_OPTIONS?.map((o: any) => (
+                    <MenuItem key={o.key} value={o.value}>
+                      <Checkbox checked={selected.includes(o.value)} />
+                      <ListItemText primary={o.value} />
                     </MenuItem>
-                    {USER_ROLES.map((o) => (
-                      <MenuItem key={o.value} value={o.value}>
-                        <Checkbox checked={selected.includes(o.value)} />
-                        <ListItemText primary={o.label} />
-                      </MenuItem>
-                    ))}
-                  </Select>
-                )
-              }}
-            />
-          </FormControl>
+                  ))}
+                </Select>
+              )
+            }}
+          />
+        </FormControl>
 
-          {/* Logs category */}
-          <FormControl sx={FIELD_FLEX_SX}>
-            <InputLabel id='logs-category-label'>Logs category</InputLabel>
-            <Controller
-              name='logsCategory'
-              control={control}
-              render={({ field }) => {
-                const selected = Array.isArray(field.value) ? field.value : []
+        {/* Action type */}
+        <FormControl>
+          <InputLabel id='action-type-label'>Action type</InputLabel>
+          <Controller
+            name='actionType'
+            control={control}
+            render={({ field }) => {
+              const selected = Array.isArray(field.value) ? field.value : []
 
-                const handleChange = (event: any) => {
-                  const value = event.target.value
-                  if (value.includes('')) field.onChange([])
-                  else field.onChange(value)
-                }
+              const handleChange = (event: any) => {
+                const value = event.target.value
+                if (value.includes('')) field.onChange([])
+                else field.onChange(value)
+              }
 
-                return (
-                  <Select
-                    multiple
-                    value={selected}
-                    onChange={handleChange}
-                    input={<OutlinedInput label='Logs category' />}
-                    renderValue={() =>
-                      selected.length
-                        ? joinLabels(LOGS_CATEGORY_OPTIONS, selected)
-                        : 'All'
-                    }
-                  >
-                    <MenuItem value=''>
-                      <em>All</em>
+              return (
+                <Select
+                  multiple
+                  value={selected}
+                  onChange={handleChange}
+                  input={<OutlinedInput label='Action type' />}
+                  renderValue={() =>
+                    selected.length
+                      ? joinLabels(ACTION_TYPE_OPTIONS, selected)
+                      : 'All'
+                  }
+                >
+                  <MenuItem value=''>
+                    <em>All</em>
+                  </MenuItem>
+                  {ACTION_TYPE_OPTIONS.map((o) => (
+                    <MenuItem key={o.value} value={o.value}>
+                      <Checkbox checked={selected.includes(o.value)} />
+                      <ListItemText primary={o.label} />
                     </MenuItem>
-                    {LOGS_CATEGORY_OPTIONS?.map((o: any) => (
-                      <MenuItem key={o.key} value={o.value}>
-                        <Checkbox checked={selected.includes(o.value)} />
-                        <ListItemText primary={o.value} />
-                      </MenuItem>
-                    ))}
-                  </Select>
-                )
-              }}
-            />
-          </FormControl>
+                  ))}
+                </Select>
+              )
+            }}
+          />
+        </FormControl>
 
-          {/* Action type */}
-          <FormControl sx={FIELD_FLEX_SX}>
-            <InputLabel id='action-type-label'>Action type</InputLabel>
-            <Controller
-              name='actionType'
-              control={control}
-              render={({ field }) => {
-                const selected = Array.isArray(field.value) ? field.value : []
-
-                const handleChange = (event: any) => {
-                  const value = event.target.value
-                  if (value.includes('')) field.onChange([])
-                  else field.onChange(value)
-                }
-
-                return (
-                  <Select
-                    multiple
-                    value={selected}
-                    onChange={handleChange}
-                    input={<OutlinedInput label='Action type' />}
-                    renderValue={() =>
-                      selected.length
-                        ? joinLabels(ACTION_TYPE_OPTIONS, selected)
-                        : 'All'
-                    }
-                  >
-                    <MenuItem value=''>
-                      <em>All</em>
-                    </MenuItem>
-                    {ACTION_TYPE_OPTIONS.map((o) => (
-                      <MenuItem key={o.value} value={o.value}>
-                        <Checkbox checked={selected.includes(o.value)} />
-                        <ListItemText primary={o.label} />
-                      </MenuItem>
-                    ))}
-                  </Select>
-                )
-              }}
-            />
-          </FormControl>
-
-          {/* Date range */}
-          <Box sx={FIELD_FLEX_SX}>
-            <DateRangeSelector
-              value={range}
-              onChange={setRange}
-              label='Select date range'
-              // placeholder='DD/MM/YYYY - DD/MM/YYYY'
-            />
-          </Box>
+        {/* Date range */}
+        <Box>
+          <DateRangeSelector
+            value={range}
+            onChange={setRange}
+            label='Select date range'
+            // placeholder='DD/MM/YYYY - DD/MM/YYYY'
+          />
+        </Box>
+        <Box>
           <Button
             startIcon={<CloseIcon />}
             variant='text'
@@ -341,6 +341,7 @@ const AuditLogsContent: React.FC = () => {
           </Button>
         </Box>
       </Box>
+      {/* </Box> */}
 
       {/* Table */}
       <AuditLogsTable

@@ -3,7 +3,6 @@
 import PracticeInformation from './component/PracticeInformation'
 import ProfileInformation from './component/ProfileInformation'
 import Security from './component/Security'
-import SubscriptionBilling from './component/SubscriptionBilling'
 import { UserApiProfile, MenuItem, UserProfileForm } from './type'
 
 export const SETTINGS_MENU: MenuItem[] = [
@@ -23,14 +22,6 @@ export const SETTINGS_MENU: MenuItem[] = [
     description: 'Update your practice details and settings.',
     logo: '/assets/practice-settings.svg',
     component: PracticeInformation
-  },
-  {
-    id: 'billing',
-    label: 'Subscription/Billing',
-    title: 'Subscription & Billing',
-    description: 'Plan, invoices, payment methods.',
-    logo: '/assets/logo-billing.svg',
-    component: SubscriptionBilling
   },
   {
     id: 'security',
