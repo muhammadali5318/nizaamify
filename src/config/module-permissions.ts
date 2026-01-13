@@ -67,7 +67,8 @@ export const MODULE_PERMISSION_MAP: Record<string, string | string[]> = {
   'practice-settings': 'Practice Management',
   billing: ['Subscriptions & Billing', 'Payments'],
   settings: 'User & Account Management',
-  'help-support': 'Feedback & Support'
+  'help-support': 'Feedback & Support',
+  'bank-integrator': ['Integrations & Finance', 'Integrations & finance']
 }
 
 export const evaluateIsModuleEnabled = (

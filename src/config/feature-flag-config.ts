@@ -68,6 +68,11 @@ const modules: ModuleConfig[] = [
   {
     id: 'nomination-flow',
     name: 'nomination flow'
+  },
+  {
+    id: 'bank-integrator',
+    name: 'Bank Integrator',
+    isEnabled: evaluateIsModuleEnabled
   }
 ]
 
