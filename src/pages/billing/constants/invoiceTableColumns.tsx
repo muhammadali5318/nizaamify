@@ -1,5 +1,7 @@
 import { GridColDef } from '@mui/x-data-grid'
 import downloadImg from '../../../assets/document-download.svg'
+import { Typography } from '@mui/material'
+import { toTitleCase } from 'src/utils/stringUtils'
 export const invoiceColumns: GridColDef[] = [
   {
     field: 'number',
@@ -27,7 +29,10 @@ export const invoiceColumns: GridColDef[] = [
   {
     field: 'status',
     headerName: 'Status',
-    minWidth: 120
+    minWidth: 120,
+    renderCell: (params) => (
+      <Typography variant='body2'>{toTitleCase(params?.value)}</Typography>
+    )
   },
   {
     field: 'pdf_url',
