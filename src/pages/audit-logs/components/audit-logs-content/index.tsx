@@ -52,8 +52,19 @@ const ACTION_TYPE_OPTIONS: Option[] = [
 ]
 
 const FIELD_FLEX_SX = {
-  flex: { xs: '0 0 100%', sm: '0 0 357px' },
-  width: { xs: '100%', sm: '357px' }
+  flex: {
+    xs: '0 0 100%', // mobile - 1 per row
+    sm: '0 0 48%', // small screen - 2 per row
+    md: '0 0 calc(33.333% - 16px)', // medium screen - 3 per row
+    lg: '0 0 357px' // large screen - original width
+  },
+  width: {
+    xs: '100%',
+    sm: '48%',
+    md: 'calc(33.333% - 16px)',
+    lg: '357px'
+  },
+  minWidth: 0 // allows shrinking
 } as const
 
 /* =======================
