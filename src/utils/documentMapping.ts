@@ -13,7 +13,7 @@ export const documentMapping: Record<string, Record<string, string[]>> = {
     'Locum/Agency Fees': ['Locum Agency Fees'],
     'Staff training & CPD': ['Staff Training'],
     'Recruitment costs': ['Recruitment Cost'],
-    'HR services': ['HR Services'],
+    'HR Services': ['HR Services'],
     Other: ['Staff Cost']
   },
 
@@ -69,6 +69,24 @@ export const documentMapping: Record<string, Record<string, string[]>> = {
     Communications: ['Communications'],
     'Finance Fees': ['Finance Fees'],
     'Miscellaneous Ops': ['Miscellaneous Ops']
+  },
+
+  'Owner, Tax & Capital Movement': {
+    'Owner Pay & Withdrawals': [
+      'Owner Salary',
+      'Dividend Pay',
+      'Drawings',
+      'Directors Loan - Repayment',
+      'Other (owner pay & withdrawals)'
+    ],
+    Taxes: ['Corporation Tax', 'Dividend Tax', 'Other (taxes)'],
+
+    'Financing & Capital': [
+      'Capital Introduced by Owner',
+      'Directors Loan',
+      'Intercompany Loan',
+      'Other (financing & capital)'
+    ]
   }
 }
 

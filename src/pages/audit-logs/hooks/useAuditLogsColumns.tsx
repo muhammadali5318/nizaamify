@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { GridColDef, GridCellParams } from '@mui/x-data-grid'
-import { Box, Typography } from '@mui/material'
+import { Box, Tooltip, Typography } from '@mui/material'
 import { toTitleCase } from 'src/utils/stringUtils'
 
 export const useAuditLogsColumns = () => {
@@ -22,18 +22,56 @@ export const useAuditLogsColumns = () => {
         minWidth: 250,
         flex: 1,
         sortable: true,
-        renderCell: (params: GridCellParams) => (
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <Typography variant='body2'>
-                {params?.row?.actor_name || '-'}
-              </Typography>
-              <Typography variant='body2' sx={{ lineHeight: 1 }}>
-                {params?.row?.actor_email || '-'}
-              </Typography>
+        renderCell: (params: GridCellParams) => {
+          const name = params?.row?.actor_name || '-'
+          const email = params?.row?.actor_email || '-'
+
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+                width: '100%',
+                minWidth: 0 // 🔑 critical for ellipsis
+              }}
+            >
+              <Tooltip placement='top' title={name} arrow>
+                <Typography
+                  variant='body2'
+                  sx={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: {
+                      xs: 'normal',
+                      sm: 'nowrap'
+                    }
+                  }}
+                >
+                  {name}
+                </Typography>
+              </Tooltip>
+
+              <Tooltip placement='top' title={email} arrow>
+                <Typography
+                  variant='body2'
+                  sx={{
+                    lineHeight: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    paddingBottom: 0.5,
+                    whiteSpace: {
+                      xs: 'normal',
+                      sm: 'nowrap'
+                    }
+                  }}
+                >
+                  {email}
+                </Typography>
+              </Tooltip>
             </Box>
-          </Box>
-        )
+          )
+        }
       },
       {
         field: 'role',

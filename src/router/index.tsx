@@ -12,6 +12,7 @@ import ErrorBoundary from 'src/components/common/error-boundary'
 import { SplashScreen } from 'src/components/common/SplashScreen'
 
 import ManualEntryPage from 'src/pages/documents/manual-entry/ManualEntryPage'
+import MonaiAgent from 'src/pages/monai-agent/index'
 
 // lazy pages
 const Dashboard = lazy(() => import('src/pages/dashboard'))
@@ -179,6 +180,22 @@ export function Router() {
             element: (
               <FeatureProtectedRoute moduleId='expenses'>
                 <ExpenseBreakdown />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.nonPandL,
+            element: (
+              <FeatureProtectedRoute moduleId='non-pandl'>
+                <NonPLItems />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.monaiAgent,
+            element: (
+              <FeatureProtectedRoute moduleId='monai-agent'>
+                <MonaiAgent />
               </FeatureProtectedRoute>
             )
           },

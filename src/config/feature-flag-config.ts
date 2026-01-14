@@ -72,6 +72,10 @@ const modules: ModuleConfig[] = [
   {
     id: 'non-pandl',
     name: 'non PandL'
+  },
+  {
+    id: 'monai-agent',
+    name: 'monai agent'
   }
 ]
 
