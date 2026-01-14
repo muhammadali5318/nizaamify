@@ -6,9 +6,18 @@ import DateRangeSelector, { RangeISO } from 'src/components/date-range-selector'
 type Props = {
   dateRange: RangeISO
   onDateChange: (range: RangeISO) => void
+  heading?: string | any
+  avatarSrc?: string | any
+  subheading?: string | any
 }
 
-const ExpensePageHeader = ({ dateRange, onDateChange }: Props) => {
+const ExpensePageHeader = ({
+  avatarSrc,
+  heading,
+  dateRange,
+  onDateChange,
+  subheading
+}: Props) => {
   return (
     <Box
       sx={{
@@ -26,9 +35,9 @@ const ExpensePageHeader = ({ dateRange, onDateChange }: Props) => {
       }}
     >
       <ModuleHeader
-        avatarSrc='/assets/wallet-bg-green.svg'
-        heading='Expense Breakdown'
-        subheading='Detailed view of all expense categories and subcategories'
+        avatarSrc={avatarSrc}
+        heading={heading}
+        subheading={subheading}
       />
 
       <Box sx={{ width: { xs: '100%', sm: '280px' } }}>

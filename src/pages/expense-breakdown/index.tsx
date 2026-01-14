@@ -28,7 +28,13 @@ const ExpenseBreakdown = () => {
   return (
     <Box className={styles.expenseBreakdownRoot} width='100%'>
       {/* Pass date state down */}
-      <ExpensePageHeader dateRange={dateRange} onDateChange={setDateRange} />
+      <ExpensePageHeader
+        heading='Expense Breakdown'
+        dateRange={dateRange}
+        onDateChange={setDateRange}
+        avatarSrc='/assets/wallet-bg-green.svg'
+        subheading='Detailed view of all expense categories and subcategories'
+      />
       {isPending ? (
         <Box
           width={'100%'}
@@ -42,12 +48,14 @@ const ExpenseBreakdown = () => {
       ) : (
         <>
           <ExpensesGrandTotal
+            label='Total Monthly Expenses:'
             total={formatAmountWithCommas(data?.total) ?? 0}
           />
 
-          {data?.categories?.map((category, idx) => {
+          {data?.categories?.map((category: any, idx: number) => {
             const expenseType = data?.expense_type.find(
-              (expense) => expense.expense_type === category?.parent_category
+              (expense: any) =>
+                expense.expense_type === category?.parent_category
             )
 
             return (

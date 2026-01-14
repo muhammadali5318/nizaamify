@@ -29,6 +29,7 @@ import { useEffect, useRef } from 'react'
 export default function AppLayout() {
   const location = useLocation()
 
+  const isMonaiAgentRoute = location.pathname.startsWith('/monai-agent')
   const permissionsByCategory = useSelector(selectPermissionsByCategory)
   const { isPracticeSubscribedAndOnboardingIsCompleted } = useActivePractice()
 
@@ -316,6 +317,17 @@ export default function AppLayout() {
                         }}
                         sx={{
                           minHeight: 44,
+                          border:
+                            isActive && isMonaiAgentRoute
+                              ? '2px solid transparent'
+                              : 'none',
+                          background:
+                            isActive && isMonaiAgentRoute
+                              ? `
+      linear-gradient(var(--grey-100), var(--grey-100)) padding-box,
+      linear-gradient(90deg, #000000, #C27961, #FFEA00, #00FF04,#00B2FF,#9D00FF,#FF0080) border-box
+    `
+                              : '#F5F5F5',
                           margin: '0 auto',
                           justifyContent: showLabels ? 'initial' : 'center',
                           width: showLabels ? 'auto' : '56px',

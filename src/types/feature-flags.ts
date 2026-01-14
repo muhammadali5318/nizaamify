@@ -21,6 +21,8 @@ export type ModuleId =
   | 'bank-integrator'
   | 'expenses'
   | 'audit-logs'
+  | 'non-pandl'
+  | 'monai-agent'
 
 export type FeatureRuleId = string
 
