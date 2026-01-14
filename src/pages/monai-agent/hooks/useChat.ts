@@ -43,7 +43,7 @@ export const useChat = () => {
       'This is a simulated response from the Monai Agent. It streams the response character by character to mimic real-time typing effect. Enjoy using the Monai Agent!'
 
     for (let i = 0; i < fakeResponse.length; i++) {
-      await new Promise((r) => setTimeout(r, 20))
+      await new Promise((resolve) => setTimeout(resolve, 20))
 
       setMessages((prev) =>
         prev.map((msg) =>
