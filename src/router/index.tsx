@@ -13,6 +13,8 @@ import { SplashScreen } from 'src/components/common/SplashScreen'
 
 import ManualEntryPage from 'src/pages/documents/manual-entry/ManualEntryPage'
 import MonaiAgent from 'src/pages/monai-agent/index'
+import Placeholder from 'src/components/common/Placeholder'
+import { CONFIG } from 'src/config-global'
 
 // lazy pages
 const Dashboard = lazy(() => import('src/pages/dashboard'))
@@ -185,11 +187,14 @@ export function Router() {
           },
           {
             path: paths.nonPandL,
-            element: (
-              <FeatureProtectedRoute moduleId='non-pandl'>
-                <NonPLItems />
-              </FeatureProtectedRoute>
-            )
+            element:
+              CONFIG.envName !== 'dev' ? (
+                <Placeholder title={'Non P&L Items'} />
+              ) : (
+                <FeatureProtectedRoute moduleId='non-pandl'>
+                  <NonPLItems />
+                </FeatureProtectedRoute>
+              )
           },
           {
             path: paths.monaiAgent,

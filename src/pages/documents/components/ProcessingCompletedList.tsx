@@ -248,7 +248,6 @@ export default function ProcessingCompletedList() {
                       </>
                     )}
                   </Typography>
-                  {doc.document_category}
                   <Divider sx={{ mt: '5px' }} />
 
                   <Typography
