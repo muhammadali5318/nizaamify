@@ -102,7 +102,10 @@ export default function EditDocumentModal({
   const handleUpdate = () => {
     const updates: Record<string, any> = { ...formData }
 
-    if (updates.document_category === 'Revenue') {
+    if (
+      updates.document_category === 'Revenue' ||
+      updates.document_category === 'Unknown'
+    ) {
       delete updates.expense_category
     }
 

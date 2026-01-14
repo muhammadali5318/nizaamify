@@ -239,14 +239,16 @@ export default function ProcessingCompletedList() {
                     <strong>{doc.document_type || '—'}</strong>
                     &nbsp; | &nbsp; Document subtype:{' '}
                     <strong>{doc.document_subtype || '—'}</strong>
-                    {doc.document_category !== 'Revenue' && (
+                    {!['Revenue', 'Unknown'].includes(
+                      doc.document_category
+                    ) && (
                       <>
                         &nbsp; | &nbsp; Line item:{' '}
                         <strong>{doc.expense_category || '—'}</strong>
                       </>
                     )}
                   </Typography>
-
+                  {doc.document_category}
                   <Divider sx={{ mt: '5px' }} />
 
                   <Typography
