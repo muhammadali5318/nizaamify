@@ -70,9 +70,12 @@ const modules: ModuleConfig[] = [
     name: 'nomination flow'
   },
   {
-    id: 'bank-integrator',
-    name: 'Bank Integrator',
-    isEnabled: evaluateIsModuleEnabled
+    id: 'non-pandl',
+    name: 'non PandL'
+  },
+  {
+    id: 'monai-agent',
+    name: 'monai agent'
   }
 ]
 

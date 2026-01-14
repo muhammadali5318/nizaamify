@@ -7,6 +7,8 @@ export const paths = {
   practiceOnboardingStepper: '/practice-onboarding/stepper',
   documents: '/documents',
   expense: '/expense-breakdown',
+  nonPandL: '/non-pl-items',
+  monaiAgent: '/monai-agent',
   reports: '/reports',
   benchmarks: '/benchmarks',
   teamManagement: {

@@ -12,8 +12,11 @@ const PendingOnboardingForManager: React.FC = () => {
     <WarningBanner
       message={
         <>
-          <span className='font-weight--700'> Practice onboarding </span> You
-          have been nominated by the Practice Owner to complete the practice
+          <span className='font-weight--700'>
+            {' '}
+            Pending Practice onboarding{' '}
+          </span>{' '}
+          You have been nominated by the Practice Owner to complete the practice
           onboarding process.
         </>
       }

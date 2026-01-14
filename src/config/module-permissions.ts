@@ -11,7 +11,7 @@ export type PermissionItem = {
   is_active: boolean | null
 }
 
-type PermissionsMap = Record<
+export type PermissionsMap = Record<
   string,
   Array<{ name: string; key: string; is_active: boolean | null }>
 >
@@ -68,7 +68,7 @@ export const MODULE_PERMISSION_MAP: Record<string, string | string[]> = {
   billing: ['Subscriptions & Billing', 'Payments'],
   settings: 'User & Account Management',
   'help-support': 'Feedback & Support',
-  'bank-integrator': ['Integrations & Finance', 'Integrations & finance']
+  'non-pandl': 'non PandL'
 }
 
 export const evaluateIsModuleEnabled = (

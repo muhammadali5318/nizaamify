@@ -23,8 +23,12 @@ const DashboardWarningAlertBox = ({
     isActivePracticeSubscribed,
     isPracticeSubscribedAndOnboardingIsCompleted
   } = useActivePractice()
-  const { isUserNominated, isUserOwnerOrDirector, isUserManager } =
-    useUserDetails()
+  const {
+    isUserNominated,
+    isUserOwnerOrDirector,
+    isUserManager,
+    isUserManageOrSimpleUser
+  } = useUserDetails()
   const shouldFetch = Boolean(accessToken) && isUserOwnerOrDirector === true
 
   const { data } = useCheckBankConnectionHealth(shouldFetch)
@@ -49,9 +53,15 @@ const DashboardWarningAlertBox = ({
     )
   }
 
-  if (isPracticeSubscribedAndOnboardingIsCompleted || !isUserOwnerOrDirector) {
-    return
-  }
+  const shouldRenderForCompletedOnboardnig =
+    isUserManageOrSimpleUser && isOnboardingCompleted
+
+  const shouldRenderWarning =
+    !isPracticeSubscribedAndOnboardingIsCompleted &&
+    (isUserOwnerOrDirector || isUserNominated)
+
+  if (shouldRenderForCompletedOnboardnig) return null
+  if (!shouldRenderWarning) return null
 
   return (
     <WarningAlertWrapper title={title}>
