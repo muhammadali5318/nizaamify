@@ -3,6 +3,42 @@ import { Box, Tabs } from '@mui/material'
 import CenteredTab from './CenteredTab'
 import TabPanel from './TabPanel'
 
+const warningSX = {
+  display: 'flex',
+  width: '22px',
+  height: '22px',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  borderRadius: '33px',
+  border: '0.917px solid var(--warning-main, #EF6C00)',
+  background: 'var(--warning-main, #EF6C00)',
+  color: 'var(--warning-contrast, #FFF)',
+  fontFamily: 'Roboto',
+  fontSize: '11px',
+  fontWeight: 700,
+  lineHeight: '166%',
+  letterSpacing: '0.367px'
+}
+
+const divisibleSX = {
+  display: 'flex',
+  px: '8px',
+  pt: 0.4,
+  justifyContent: 'center',
+  alignItems: 'center',
+  gap: '3.5px',
+  borderRadius: '6.75px',
+  backgroundColor: '#E0E0E0',
+  color: 'rgba(0, 0, 0, 0.87)',
+  textAlign: 'center',
+  fontFamily: 'Roboto',
+  fontSize: '12px',
+  fontWeight: 400,
+  lineHeight: '166%',
+  letterSpacing: '0.4px'
+}
+
 export type TabKey = number | string
 
 export type ReusableTabItem = {
@@ -12,6 +48,7 @@ export type ReusableTabItem = {
   inactiveIcon?: string
   content: React.ReactNode
   count?: number
+  countTotal?: number | null
 }
 
 interface ReusableTabsProps {
@@ -92,26 +129,8 @@ const ReusableTabs: React.FC<ReusableTabsProps> = ({
                 {t.label}
 
                 {t.count ? (
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      width: '22px',
-                      height: '22px',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      borderRadius: '33px',
-                      border: '0.917px solid var(--warning-main, #EF6C00)',
-                      background: 'var(--warning-main, #EF6C00)',
-                      color: 'var(--warning-contrast, #FFF)',
-                      fontFamily: 'Roboto',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      lineHeight: '166%', // 18.26px
-                      letterSpacing: '0.367px'
-                    }}
-                  >
-                    {t.count}
+                  <Box sx={t?.countTotal ? divisibleSX : warningSX}>
+                    {t.countTotal ? `${t.count}/${t.countTotal}` : t.count}
                   </Box>
                 ) : null}
               </Box>

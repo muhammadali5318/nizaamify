@@ -144,6 +144,11 @@ select {
   height: 24px;
 }
 
+.icon-dimension--36 {
+  width: 36px;
+  height: 36px;
+}
+
 .icon-dimension--272 {
   width: 272px;
   height: 272px;
@@ -210,5 +215,24 @@ select {
       width: 100%;
       min-width: unset;
     }
+  }
+}
+
+.statsCardRoot {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  align-self: stretch;
+
+  @media (max-width: 768px) {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
   }
 }

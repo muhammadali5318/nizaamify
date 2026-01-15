@@ -9,7 +9,7 @@ import {
 import styles from './requireConsent.module.scss'
 import { ChevronLeft } from '@mui/icons-material'
 import RenderUlList from 'src/components/render-ul-list'
-import { Step } from '../..'
+import { Step } from '../../BankIntegrator'
 import { useSelector } from 'react-redux'
 import { selectSelectedInstitution } from 'src/store/slices/selectedInstitution'
 import { paths } from 'src/paths'

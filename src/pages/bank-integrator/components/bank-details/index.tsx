@@ -11,7 +11,7 @@ import {
 import styles from './selectBank.module.scss'
 import { StatusChip } from 'src/pages/team-management/team-members/components/TeamMembers'
 import AccountCard from './AccountCard'
-import { Step } from '../..'
+import { Step } from '../../BankIntegrator'
 import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
 import { useActivePractice } from 'src/hooks/useActivePractice'
