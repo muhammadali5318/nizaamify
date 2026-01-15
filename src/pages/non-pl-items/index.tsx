@@ -1,4 +1,4 @@
-import { Box } from '@mui/material'
+import { Box, CircularProgress } from '@mui/material'
 import styles from './nonPLItemsBreakdown.module.scss'
 import ExpensePageHeader from '../expense-breakdown/components/expense-header/ExpensePageHeader'
 import ExpensesGrandTotal from '../expense-breakdown/components/expense-header'
@@ -7,19 +7,35 @@ import { useState } from 'react'
 import dayjs from 'dayjs'
 import { RangeISO } from 'src/components/date-range-selector'
 import { formatAmountWithCommas } from 'src/utils/stringUtils'
-import { dummyNonPLData } from './dummyNonPLData'
-
+import { useFetchNonPLBreakdown } from 'src/hooks/useFetchNonPLBreakdown'
+import { useActivePractice } from 'src/hooks/useActivePractice'
+import { mapExpenseSubtypes } from './types'
 const NonPLItemsBreakdown = () => {
+  const { activePracticeId } = useActivePractice()
+
   const [dateRange, setDateRange] = useState<RangeISO>({
     start: dayjs().startOf('month').toISOString(),
     end: dayjs().endOf('month').toISOString()
   })
 
-  const data = dummyNonPLData
+  const { data, loading } = useFetchNonPLBreakdown({
+    practiceId: activePracticeId!,
+    startDate: dayjs(dateRange.start).format('YYYY-MM-DD'),
+    endDate: dayjs(dateRange.end).format('YYYY-MM-DD')
+  })
+
+  if (loading) {
+    return (
+      <Box display='flex' justifyContent='center' mt={4}>
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  if (!data) return null
 
   return (
     <Box className={styles.nonPLItemsBreakdownRoot} width='100%'>
-      {/* Header with date selector */}
       <ExpensePageHeader
         heading='Non P&L Items Breakdown'
         dateRange={dateRange}
@@ -28,16 +44,14 @@ const NonPLItemsBreakdown = () => {
         subheading='Detailed view of all Non P&L items categories and subcategories'
       />
 
-      {/* Grand total */}
       <ExpensesGrandTotal
         total={formatAmountWithCommas(data.total)}
         label='Total Monthly Non P&L Items Expenses:'
       />
 
-      {/* Categories */}
-      {dummyNonPLData.categories.map((category, idx) => {
-        const nonPLType = dummyNonPLData.non_pl_type.find(
-          (item) => item.non_pl_type === category.parent_category
+      {data.categories.map((category, idx) => {
+        const expenseType = data.expense_type.find(
+          (item) => item.expense_type === category.parent_category
         )
 
         return (
@@ -46,17 +60,10 @@ const NonPLItemsBreakdown = () => {
             title={category.parent_category}
             dateRange={dateRange}
             total={category.amount}
-            chips={[`${nonPLType?.non_pl_subtypes?.length ?? 0} subcategories`]}
-            expenseSubtypes={
-              nonPLType?.non_pl_subtypes?.map((subtype) => ({
-                name: subtype.name,
-                amount: subtype.amount,
-                line_items: subtype.line_items.map((item) => ({
-                  name: item.name,
-                  amount: item.amount
-                }))
-              })) ?? []
-            }
+            chips={[
+              `${expenseType?.expense_subtypes?.length ?? 0} subcategories`
+            ]}
+            expenseSubtypes={mapExpenseSubtypes(expenseType)}
           />
         )
       })}
