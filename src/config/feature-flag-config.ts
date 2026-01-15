@@ -76,6 +76,11 @@ const modules: ModuleConfig[] = [
   {
     id: 'monai-agent',
     name: 'monai agent'
+  },
+  {
+    id: 'bank-integrator',
+    name: 'Bank Integrator',
+    isEnabled: evaluateIsModuleEnabled
   }
 ]
 

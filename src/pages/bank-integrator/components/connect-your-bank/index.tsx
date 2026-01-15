@@ -1,6 +1,6 @@
 import { Box, Button, Stack, Typography } from '@mui/material'
 import styles from './connectBank.module.scss'
-import { Step } from '../..'
+import { Step } from '../../BankIntegrator'
 
 interface ConnectYourBankProps {
   goToStep: (step: Step) => void

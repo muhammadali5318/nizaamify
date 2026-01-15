@@ -68,7 +68,8 @@ export const MODULE_PERMISSION_MAP: Record<string, string | string[]> = {
   billing: ['Subscriptions & Billing', 'Payments'],
   settings: 'User & Account Management',
   'help-support': 'Feedback & Support',
-  'non-pandl': 'non PandL'
+  'non-pandl': 'non PandL',
+  'bank-integrator': ['Integrations & Finance', 'Integrations & finance']
 }
 
 export const evaluateIsModuleEnabled = (

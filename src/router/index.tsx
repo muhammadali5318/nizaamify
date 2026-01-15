@@ -15,6 +15,7 @@ import ManualEntryPage from 'src/pages/documents/manual-entry/ManualEntryPage'
 import MonaiAgent from 'src/pages/monai-agent/index'
 import Placeholder from 'src/components/common/Placeholder'
 import { CONFIG } from 'src/config-global'
+import BankingAggregator from 'src/pages/bank-integrator'
 
 // lazy pages
 const Dashboard = lazy(() => import('src/pages/dashboard'))
@@ -27,7 +28,7 @@ const MemberRolesAndPermission = lazy(
   () => import('src/pages/team-management/specific-team-member')
 )
 const PracticeSettings = lazy(() => import('src/pages/practice-settings'))
-const BankIntegrator = lazy(() => import('src/pages/bank-integrator'))
+// const BankIntegrator = lazy(() => import('src/pages/bank-integrator/index'))
 const ExpenseBreakdown = lazy(() => import('src/pages/expense-breakdown'))
 const NonPLItems = lazy(() => import('src/pages/non-pl-items'))
 
@@ -173,7 +174,7 @@ export function Router() {
             path: paths.bankIntegrator,
             element: (
               <FeatureProtectedRoute moduleId='bank-integrator'>
-                <BankIntegrator />
+                <BankingAggregator />
               </FeatureProtectedRoute>
             )
           },
@@ -198,19 +199,14 @@ export function Router() {
           },
           {
             path: paths.monaiAgent,
-            element: (
-              <FeatureProtectedRoute moduleId='monai-agent'>
-                <MonaiAgent />
-              </FeatureProtectedRoute>
-            )
-          },
-          {
-            path: paths.nonPandL,
-            element: (
-              <FeatureProtectedRoute moduleId='non-pandl'>
-                <NonPLItems />
-              </FeatureProtectedRoute>
-            )
+            element:
+              CONFIG.envName !== 'dev' ? (
+                <Placeholder title={'Monai chat agent'} />
+              ) : (
+                <FeatureProtectedRoute moduleId='monai-agent'>
+                  <MonaiAgent />
+                </FeatureProtectedRoute>
+              )
           },
           {
             path: paths.settings,

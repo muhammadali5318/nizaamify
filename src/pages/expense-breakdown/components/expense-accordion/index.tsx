@@ -18,7 +18,7 @@ interface ReusableAccordionProps {
   title: string
   dateRange: RangeISO
   chips?: string[]
-  total?: number | null
+  total?: any
   defaultExpanded?: boolean
   expenseSubtypes?: any
 }

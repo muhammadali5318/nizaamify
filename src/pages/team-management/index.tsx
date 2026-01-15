@@ -36,7 +36,7 @@ const TeamManagement: React.FC = () => {
       />
 
       <Box
-        className={styles.statsCardRoot}
+        className='statsCardRoot'
         sx={{
           justifyContent: { xs: 'center', sm: 'center', md: 'flex-start' }
         }}
