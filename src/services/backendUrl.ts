@@ -48,6 +48,8 @@ export const endpoints = {
     checkoutUrl: `${API_BASE}/users/signup/subscription/`
   },
   userInvitation: (id: string) => `${API_BASE}/practices/${id}/invite/`,
+  dashboardStatsForManager: (id: string) =>
+    `${API_BASE_DOCUMENTS}/practices/${id}/dashboard-document-counts/`,
   currentPractice: (id: string) => `${API_BASE}/practices/${id}/`,
   listAllPractices: (userId: string) =>
     `${API_BASE}/users/${userId}/practices/`,
