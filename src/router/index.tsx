@@ -198,19 +198,14 @@ export function Router() {
           },
           {
             path: paths.monaiAgent,
-            element: (
-              <FeatureProtectedRoute moduleId='monai-agent'>
-                <MonaiAgent />
-              </FeatureProtectedRoute>
-            )
-          },
-          {
-            path: paths.nonPandL,
-            element: (
-              <FeatureProtectedRoute moduleId='non-pandl'>
-                <NonPLItems />
-              </FeatureProtectedRoute>
-            )
+            element:
+              CONFIG.envName !== 'dev' ? (
+                <Placeholder title={'Monai chat agent'} />
+              ) : (
+                <FeatureProtectedRoute moduleId='monai-agent'>
+                  <MonaiAgent />
+                </FeatureProtectedRoute>
+              )
           },
           {
             path: paths.settings,
