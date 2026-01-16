@@ -46,14 +46,14 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         activeIcon: 'pl-Icon-active.svg',
         inactiveIcon: 'pl-Icon-inactive.svg',
         moduleId: 'non-pandl'
-      },
-      {
-        text: 'monai Agent',
-        to: paths.monaiAgent,
-        activeIcon: 'agent-active.svg',
-        inactiveIcon: 'agent-inactive.svg',
-        moduleId: 'monai-agent'
       }
+      // {
+      //   text: 'monai Agent',
+      //   to: paths.monaiAgent,
+      //   activeIcon: 'agent-active.svg',
+      //   inactiveIcon: 'agent-inactive.svg',
+      //   moduleId: 'monai-agent'
+      // }
     ]
   },
   {
