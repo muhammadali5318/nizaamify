@@ -191,14 +191,11 @@ export function Router() {
           },
           {
             path: paths.nonPandL,
-            element:
-              CONFIG.envName !== 'dev' ? (
-                <Placeholder title={'Non P&L Items'} />
-              ) : (
-                <FeatureProtectedRoute moduleId='non-pandl'>
-                  <NonPLItems />
-                </FeatureProtectedRoute>
-              )
+            element: (
+              <FeatureProtectedRoute moduleId='non-pandl'>
+                <NonPLItems />
+              </FeatureProtectedRoute>
+            )
           },
           {
             path: paths.monaiAgent,
