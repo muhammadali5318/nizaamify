@@ -172,11 +172,14 @@ export function Router() {
           },
           {
             path: paths.bankIntegrator,
-            element: (
-              <FeatureProtectedRoute moduleId='bank-integrator'>
-                <BankingAggregator />
-              </FeatureProtectedRoute>
-            )
+            element:
+              CONFIG.envName !== 'dev' ? (
+                <Placeholder title={'Bank Aggregator'} />
+              ) : (
+                <FeatureProtectedRoute moduleId='bank-integrator'>
+                  <BankingAggregator />
+                </FeatureProtectedRoute>
+              )
           },
           {
             path: paths.expense,
