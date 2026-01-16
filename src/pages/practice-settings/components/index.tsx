@@ -7,12 +7,12 @@ import {
   Stack,
   Typography,
   SxProps,
-  Theme,
-  IconButton,
-  Menu
+  Theme
+  // IconButton,
+  // Menu
 } from '@mui/material'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
+// import MoreVertIcon from '@mui/icons-material/MoreVert'
 import styles from './PracticeDetailsCard.module.scss'
 import ArchivePractice from './ArchivePracticeModal'
 import { VerifyIdentityStep } from '../../../components/idetity-verification/VerifyIdentityStep'
@@ -52,16 +52,16 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
   const [isArchiveOpen, setIsArchiveOpen] = useState(false)
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
 
-  const openArchive = useCallback(() => setIsArchiveOpen(true), [])
+  // const openArchive = useCallback(() => setIsArchiveOpen(true), [])
   const closeArchive = useCallback(() => setIsArchiveOpen(false), [])
   const closeSuccessDialog = useCallback(() => setSuccessDialogOpen(false), [])
 
   // three-dots dropdown
-  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
-  const isMenuOpen = Boolean(menuAnchorEl)
-  const openMenu = (e: React.MouseEvent<HTMLElement>) =>
-    setMenuAnchorEl(e.currentTarget)
-  const closeMenu = () => setMenuAnchorEl(null)
+  // const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
+  // const isMenuOpen = Boolean(menuAnchorEl)
+  // const openMenu = (e: React.MouseEvent<HTMLElement>) =>
+  // setMenuAnchorEl(e.currentTarget)
+  // const closeMenu = () => setMenuAnchorEl(null)
 
   // active chip styles
   const activeChipSx = useMemo<SxProps<Theme>>(
@@ -205,7 +205,7 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
                 <StatusChip sx={{ display: { xs: 'none', sm: 'flex' } }} />
 
                 {/* three dots */}
-                <IconButton
+                {/* <IconButton
                   aria-label='more actions'
                   onClick={openMenu}
                   size='small'
@@ -214,9 +214,9 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
                   }}
                 >
                   <MoreVertIcon />
-                </IconButton>
+                </IconButton> */}
 
-                <Menu
+                {/* <Menu
                   anchorEl={menuAnchorEl}
                   open={isMenuOpen}
                   onClose={closeMenu}
@@ -240,7 +240,7 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
                       Archive practice
                     </Button>
                   </Box>
-                </Menu>
+                </Menu> */}
               </Box>
             </Box>
 
