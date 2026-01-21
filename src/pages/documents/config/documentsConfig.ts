@@ -61,7 +61,7 @@ export const documentMapping: Record<string, Record<string, string[]>> = {
   'Business Operations': {
     Marketing: [
       'Paid Advertising (SM)',
-      'Print Advertising (SE)',
+      'Paid Advertising (SE)',
       'Agency/Service Fees',
       'Website & Digital Assets',
       'Offline Marketing',
