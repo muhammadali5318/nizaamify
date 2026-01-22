@@ -227,10 +227,7 @@ export function evaluateModuleStateWithReason(
       continue
     }
 
-    const ruleOk = FeatureFlagService.evaluateRule(
-      ruleId,
-      context
-    )
+    const ruleOk = FeatureFlagService.evaluateRule(ruleId, context)
 
     if (ruleOk) {
       // Rule passed → check module-level isEnabled (if provided).
