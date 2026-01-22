@@ -15,6 +15,8 @@ import {
   Divider,
   Button
 } from '@mui/material'
+import { CONFIG } from 'src/config-global'
+
 import { ArrowDropDown } from '@mui/icons-material'
 import { useForm, Controller, Resolver, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -690,45 +692,47 @@ const PracticeInformation = () => {
 
         <Divider />
 
-        <Stack spacing={2}>
-          <Typography variant='h6' className='font-weight--700'>
-            Accounting settings
-          </Typography>
+        {CONFIG.envName === 'dev' && (
+          <Stack spacing={2}>
+            <Typography variant='h6' className='font-weight--700'>
+              Accounting settings
+            </Typography>
 
-          <FormControl fullWidth error={!!errors.accountingBasis}>
-            <InputLabel id='accounting-basis-label'>
-              Accounting basis
-            </InputLabel>
-            <Controller
-              name='accountingBasis'
-              control={control}
-              render={({ field }) => (
-                <Select
-                  required
-                  {...field}
-                  labelId='accounting-basis-label'
-                  label='Accounting basis *'
-                  value={field.value ?? ''}
-                  onChange={(e) => field.onChange(e.target.value)}
-                >
-                  <MenuItem value='CASH'>Cash basis</MenuItem>
-                  <MenuItem value='ACCRUAL'>Accrual basis</MenuItem>
-                </Select>
-              )}
-            />
-            <FormHelperText>
-              {errors.accountingBasis?.message as React.ReactNode}
-            </FormHelperText>
-          </FormControl>
+            <FormControl fullWidth error={!!errors.accountingBasis}>
+              <InputLabel id='accounting-basis-label'>
+                Accounting basis
+              </InputLabel>
+              <Controller
+                name='accountingBasis'
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    required
+                    {...field}
+                    labelId='accounting-basis-label'
+                    label='Accounting basis *'
+                    value={field.value ?? ''}
+                    onChange={(e) => field.onChange(e.target.value)}
+                  >
+                    <MenuItem value='CASH'>Cash basis</MenuItem>
+                    <MenuItem value='ACCRUAL'>Accrual basis</MenuItem>
+                  </Select>
+                )}
+              />
+              <FormHelperText>
+                {errors.accountingBasis?.message as React.ReactNode}
+              </FormHelperText>
+            </FormControl>
 
-          {accountingBasis === 'CASH' && (
-            <AccountingBasisCard data={CASH_BASIS_INFO} />
-          )}
+            {accountingBasis === 'CASH' && (
+              <AccountingBasisCard data={CASH_BASIS_INFO} />
+            )}
 
-          {accountingBasis === 'ACCRUAL' && (
-            <AccountingBasisCard data={ACCRUAL_BASIS_INFO} />
-          )}
-        </Stack>
+            {accountingBasis === 'ACCRUAL' && (
+              <AccountingBasisCard data={ACCRUAL_BASIS_INFO} />
+            )}
+          </Stack>
+        )}
 
         <Box>
           <Button

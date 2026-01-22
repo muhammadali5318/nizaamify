@@ -20,7 +20,7 @@ const DashboardWarningAlertBox = ({
   const { accessToken } = useAuth()
   const {
     isOnboardingCompleted,
-    isActivePracticeSubscribed,
+    // isActivePracticeSubscribed,
     isPracticeSubscribedAndOnboardingIsCompleted
   } = useActivePractice()
   const {
@@ -32,6 +32,7 @@ const DashboardWarningAlertBox = ({
   const shouldFetch = Boolean(accessToken) && isUserOwnerOrDirector === true
 
   const { data } = useCheckBankConnectionHealth(shouldFetch)
+  if (isOnboardingCompleted) return null
 
   if (renderDetail === 'bankAlert') {
     return (
@@ -71,7 +72,7 @@ const DashboardWarningAlertBox = ({
       {!isOnboardingCompleted && isUserNominated && isUserManager && (
         <PendingOnboardingForManager />
       )}
-      {!isActivePracticeSubscribed && isUserOwnerOrDirector && (
+      {/* {!isActivePracticeSubscribed && isUserOwnerOrDirector && (
         <PendingSubscription
           message={
             <>
@@ -82,7 +83,7 @@ const DashboardWarningAlertBox = ({
           actionLabel='Choose plan'
           actionPath={paths.billing}
         />
-      )}
+      )} */}
     </WarningAlertWrapper>
   )
 }

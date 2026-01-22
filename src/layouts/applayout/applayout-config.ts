@@ -2,7 +2,7 @@ import { styled } from '@mui/material/styles'
 import MuiDrawer from '@mui/material/Drawer'
 import { paths } from 'src/paths'
 
-import { ModuleId } from '../../types/feature-flags'
+import { ModuleId, UserContext } from '../../types/feature-flags'
 import { featureFlagConfig } from 'src/config/feature-flag-config'
 import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
 import { FeatureFlagService } from 'src/services/FeatureFlagService'
@@ -184,7 +184,7 @@ type ModuleRenderState = 'hidden' | 'disabled' | 'enabled'
 export function evaluateModuleStateWithReason(
   moduleId: string,
   permissions: Record<string, any>,
-  isOnboardingCompleted: boolean
+  context: UserContext
 ): { state: ModuleRenderState; reason?: string } {
   const moduleConfig = featureFlagConfig.modules.find(
     (m) => m.id === (moduleId as any)
@@ -229,7 +229,7 @@ export function evaluateModuleStateWithReason(
 
     const ruleOk = FeatureFlagService.evaluateRule(
       ruleId,
-      isOnboardingCompleted
+      context
     )
 
     if (ruleOk) {
