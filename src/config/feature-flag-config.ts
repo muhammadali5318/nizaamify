@@ -11,7 +11,18 @@ const rules: FeatureRule[] = [
   {
     id: FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
     description: 'Practice onboarding has been completed',
-    evaluate: (context) => !!context
+    evaluate: (context) => {
+      if (typeof context === 'boolean') return context
+      return !!context?.onboardingCompleted
+    }
+  },
+  {
+    id: FEATURE_RULE_IDS.SUBSCRIPTION_ACTIVE,
+    description: 'Practice has an active subscription',
+    evaluate: (context) => {
+      if (typeof context === 'boolean') return context
+      return !!context?.subscriptionActive
+    }
   }
 ]
 
@@ -25,20 +36,26 @@ const modules: ModuleConfig[] = [
   {
     id: 'documents',
     name: 'Documents',
-    isEnabled: evaluateIsModuleEnabled
-    // requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
+    isEnabled: evaluateIsModuleEnabled,
+    requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
   },
   {
     id: 'reports',
     name: 'Reports',
     isEnabled: evaluateIsModuleEnabled,
-    requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
+    requiredRules: [
+      FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
+      FEATURE_RULE_IDS.SUBSCRIPTION_ACTIVE
+    ]
   },
   {
     id: 'benchmarks',
     name: 'Benchmarks',
     isEnabled: evaluateIsModuleEnabled,
-    requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
+    requiredRules: [
+      FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
+      FEATURE_RULE_IDS.SUBSCRIPTION_ACTIVE
+    ]
   },
   {
     id: 'team-management',
