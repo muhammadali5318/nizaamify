@@ -32,6 +32,7 @@ const DashboardWarningAlertBox = ({
   const shouldFetch = Boolean(accessToken) && isUserOwnerOrDirector === true
 
   const { data } = useCheckBankConnectionHealth(shouldFetch)
+  if (isOnboardingCompleted) return null
 
   if (renderDetail === 'bankAlert') {
     return (
