@@ -25,6 +25,7 @@ import { useSelector } from 'react-redux'
 import { selectPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import { useEffect, useRef } from 'react'
+import { useUserDetailsInActivePractice } from 'src/hooks/useUserDetailsInActivePractice'
 
 export default function AppLayout() {
   const location = useLocation()
@@ -149,9 +150,11 @@ export default function AppLayout() {
   }, [location.pathname])
 
   const renderDrawerContent = (showLabels: boolean) => {
+    const { userDetails } = useUserDetailsInActivePractice()
     const featureContext = {
       onboardingCompleted: isOnboardingCompleted,
-      subscriptionActive: isActivePracticeSubscribed
+      subscriptionActive: isActivePracticeSubscribed,
+      role: userDetails?.user_role
     }
 
     return (
