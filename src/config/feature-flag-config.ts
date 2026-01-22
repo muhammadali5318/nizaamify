@@ -23,6 +23,15 @@ const rules: FeatureRule[] = [
       if (typeof context === 'boolean') return context
       return !!context?.subscriptionActive
     }
+  },
+  {
+    id: FEATURE_RULE_IDS.IS_OWNER_OR_DIRECTOR,
+    description: 'User is a Practice Owner or Company Director',
+    evaluate: (context) => {
+      if (typeof context === 'boolean') return context
+      const role = context?.role
+      return role === 'PRACTICE OWNER' || role === 'COMPANY DIRECTOR'
+    }
   }
 ]
 
@@ -88,11 +97,13 @@ const modules: ModuleConfig[] = [
   },
   {
     id: 'non-pandl',
-    name: 'non PandL'
+    name: 'non PandL',
+    requiredRules: [FEATURE_RULE_IDS.IS_OWNER_OR_DIRECTOR]
   },
   {
     id: 'expenses',
-    name: 'Expenses'
+    name: 'Expenses',
+    requiredRules: [FEATURE_RULE_IDS.IS_OWNER_OR_DIRECTOR]
   },
   {
     id: 'monai-agent',

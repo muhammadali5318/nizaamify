@@ -256,6 +256,8 @@ export function evaluateModuleStateWithReason(
       // Rule failed → disable the module (don't hide)
       if (ruleId === FEATURE_RULE_IDS.ONBOARDING_COMPLETED) {
         reason = 'Complete onboarding to access this module'
+      } else if (ruleId === FEATURE_RULE_IDS.IS_OWNER_OR_DIRECTOR) {
+        return { state: 'hidden', reason: 'Unauthorized role' }
       } else {
         reason =
           moduleConfig.disabledMessage ||

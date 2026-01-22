@@ -5,11 +5,14 @@ import { FeatureFlagService } from '../services/FeatureFlagService'
 import { useSelector } from 'react-redux'
 import { selectPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
 import { useActivePractice } from './useActivePractice'
+import { useUserDetailsInActivePractice } from './useUserDetailsInActivePractice'
 
 export function useFeatureFlags(userContext: UserContext) {
   const permissionsByCategory = useSelector(selectPermissionsByCategory)
   const { isOnboardingCompleted, isActivePracticeSubscribed } =
     useActivePractice()
+  const { userDetails } = useUserDetailsInActivePractice()
+  const userRole = userDetails?.user_role
   const modulePermissions = useMemo(() => {
     const permissions: ModulePermission[] = []
 
@@ -56,7 +59,8 @@ export function useFeatureFlags(userContext: UserContext) {
       if (isEnabled && moduleConfig.requiredRules?.length) {
         const featureContext: UserContext = {
           onboardingCompleted: isOnboardingCompleted,
-          subscriptionActive: isActivePracticeSubscribed
+          subscriptionActive: isActivePracticeSubscribed,
+          role: userRole
         }
 
         for (const ruleId of moduleConfig.requiredRules) {

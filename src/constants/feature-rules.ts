@@ -1,6 +1,7 @@
 export const FEATURE_RULE_IDS = {
   ONBOARDING_COMPLETED: 'onboarding-completed',
-  SUBSCRIPTION_ACTIVE: 'subscription-active'
+  SUBSCRIPTION_ACTIVE: 'subscription-active',
+  IS_OWNER_OR_DIRECTOR: 'is-owner-or-director'
 } as const
 
 export type FeatureRuleId =
