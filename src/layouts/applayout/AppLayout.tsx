@@ -31,10 +31,8 @@ export default function AppLayout() {
 
   const isMonaiAgentRoute = location.pathname.startsWith('/monai-agent')
   const permissionsByCategory = useSelector(selectPermissionsByCategory)
-  const {
-    isOnboardingCompleted,
-    isActivePracticeSubscribed
-  } = useActivePractice()
+  const { isOnboardingCompleted, isActivePracticeSubscribed } =
+    useActivePractice()
 
   const isMobile = useMediaQuery('(max-width:768px)')
   const isCollapsedBreakpoint = useMediaQuery('(max-width:1024px)')
@@ -158,36 +156,36 @@ export default function AppLayout() {
 
     return (
       <Stack spacing={2}>
-      {/* Sidebar Header */}
-      <Box
-        className={styles.toolbarHeader}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: showLabels ? 'space-between' : 'center'
-        }}
-      >
-        {showLabels && <img src='/assets/monai-logo.svg' alt='monai icon' />}
-        <IconButton
-          onClick={isMobile ? handleMobileToggle : toggleDrawer}
-          className={styles.toggleBtn}
-          sx={{ p: '0px 16px' }}
+        {/* Sidebar Header */}
+        <Box
+          className={styles.toolbarHeader}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: showLabels ? 'space-between' : 'center'
+          }}
         >
-          <img
-            src={`/assets/${
-              showLabels
-                ? 'layout-navbar-collapse.svg'
-                : 'layout-navbar-expand.svg'
-            }`}
-            alt='collapse icon'
-          />
-        </IconButton>
-      </Box>
+          {showLabels && <img src='/assets/monai-logo.svg' alt='monai icon' />}
+          <IconButton
+            onClick={isMobile ? handleMobileToggle : toggleDrawer}
+            className={styles.toggleBtn}
+            sx={{ p: '0px 16px' }}
+          >
+            <img
+              src={`/assets/${
+                showLabels
+                  ? 'layout-navbar-collapse.svg'
+                  : 'layout-navbar-expand.svg'
+              }`}
+              alt='collapse icon'
+            />
+          </IconButton>
+        </Box>
 
-      {/* Practice Selector */}
-      <PracticeSelector />
-      {/* Menu Sections */}
-      {menuSections?.map((section) => {
+        {/* Practice Selector */}
+        <PracticeSelector />
+        {/* Menu Sections */}
+        {menuSections?.map((section) => {
           const hasVisibleItem = section.items.some((item) => {
             const { state } = evaluateModuleStateWithReason(
               item.moduleId,
@@ -233,11 +231,80 @@ export default function AppLayout() {
                     featureContext
                   )
 
-                if (state === 'hidden') return null
+                  if (state === 'hidden') return null
 
-                const showTooltip = !showLabels
+                  const showTooltip = !showLabels
 
-                if (state === 'disabled') {
+                  if (state === 'disabled') {
+                    return (
+                      <ListItem
+                        key={item.text}
+                        disablePadding
+                        sx={{ display: 'block' }}
+                      >
+                        <Tooltip
+                          title={
+                            showTooltip
+                              ? reason || `${item.text} is disabled`
+                              : reason || `${item.text} is disabled`
+                          }
+                          placement='right'
+                          arrow
+                        >
+                          <ListItemButton
+                            component={'div'}
+                            selected={false}
+                            disabled
+                            sx={{
+                              minHeight: 44,
+                              margin: '0 auto',
+                              justifyContent: showLabels ? 'initial' : 'center',
+                              width: showLabels ? 'auto' : '56px',
+                              borderRadius: '12px',
+                              transition: 'background-color 0.2s ease',
+                              opacity: 0.5,
+                              cursor: 'not-allowed',
+                              '&.Mui-selected': {
+                                backgroundColor: 'var(--grey-300)'
+                              },
+                              '&.Mui-disabled': { opacity: 0.5 }
+                            }}
+                          >
+                            <ListItemIcon
+                              sx={{
+                                minWidth: 0,
+                                mr: showLabels ? 2 : 0,
+                                justifyContent: 'center',
+                                opacity: 0.5
+                              }}
+                            >
+                              <img
+                                src={`/assets/${isActive ? item.activeIcon : item.inactiveIcon}`}
+                                alt={`${item.text} icon`}
+                                style={{
+                                  width: 24,
+                                  height: 24,
+                                  display: 'block',
+                                  filter: 'grayscale(100%)'
+                                }}
+                              />
+                            </ListItemIcon>
+                            {showLabels && (
+                              <ListItemText>
+                                <Typography
+                                  variant='subtitle2'
+                                  color={'var(--color-primary-light)'}
+                                >
+                                  {item.text}
+                                </Typography>
+                              </ListItemText>
+                            )}
+                          </ListItemButton>
+                        </Tooltip>
+                      </ListItem>
+                    )
+                  }
+
                   return (
                     <ListItem
                       key={item.text}
@@ -245,27 +312,38 @@ export default function AppLayout() {
                       sx={{ display: 'block' }}
                     >
                       <Tooltip
-                        title={
-                          showTooltip
-                            ? reason || `${item.text} is disabled`
-                            : reason || `${item.text} is disabled`
-                        }
+                        title={!showLabels ? item.text : ''}
                         placement='right'
                         arrow
                       >
                         <ListItemButton
-                          component={'div'}
-                          selected={false}
-                          disabled
+                          component={Link}
+                          to={item.to}
+                          selected={isActive}
+                          onClick={() => {
+                            setActiveItem(item)
+                            if (isMobile) setMobileOpen(false)
+                          }}
                           sx={{
                             minHeight: 44,
+                            border:
+                              isActive && isMonaiAgentRoute
+                                ? '2px solid transparent'
+                                : 'none',
+                            background:
+                              isActive && isMonaiAgentRoute
+                                ? `
+      linear-gradient(var(--grey-100), var(--grey-100)) padding-box,
+      linear-gradient(90deg, #000000, #C27961, #FFEA00, #00FF04,#00B2FF,#9D00FF,#FF0080) border-box
+    `
+                                : '#F5F5F5',
                             margin: '0 auto',
                             justifyContent: showLabels ? 'initial' : 'center',
                             width: showLabels ? 'auto' : '56px',
                             borderRadius: '12px',
                             transition: 'background-color 0.2s ease',
-                            opacity: 0.5,
-                            cursor: 'not-allowed',
+                            opacity: 1,
+                            cursor: 'pointer',
                             '&.Mui-selected': {
                               backgroundColor: 'var(--grey-300)'
                             },
@@ -277,7 +355,7 @@ export default function AppLayout() {
                               minWidth: 0,
                               mr: showLabels ? 2 : 0,
                               justifyContent: 'center',
-                              opacity: 0.5
+                              opacity: 1
                             }}
                           >
                             <img
@@ -286,8 +364,7 @@ export default function AppLayout() {
                               style={{
                                 width: 24,
                                 height: 24,
-                                display: 'block',
-                                filter: 'grayscale(100%)'
+                                display: 'block'
                               }}
                             />
                           </ListItemIcon>
@@ -295,7 +372,11 @@ export default function AppLayout() {
                             <ListItemText>
                               <Typography
                                 variant='subtitle2'
-                                color={'var(--color-primary-light)'}
+                                color={
+                                  isActive
+                                    ? 'var(--color-primary-black)'
+                                    : 'var(--color-primary-light)'
+                                }
                               >
                                 {item.text}
                               </Typography>
@@ -305,89 +386,10 @@ export default function AppLayout() {
                       </Tooltip>
                     </ListItem>
                   )
-                }
-
-                return (
-                  <ListItem
-                    key={item.text}
-                    disablePadding
-                    sx={{ display: 'block' }}
-                  >
-                    <Tooltip
-                      title={!showLabels ? item.text : ''}
-                      placement='right'
-                      arrow
-                    >
-                      <ListItemButton
-                        component={Link}
-                        to={item.to}
-                        selected={isActive}
-                        onClick={() => {
-                          setActiveItem(item)
-                          if (isMobile) setMobileOpen(false)
-                        }}
-                        sx={{
-                          minHeight: 44,
-                          border:
-                            isActive && isMonaiAgentRoute
-                              ? '2px solid transparent'
-                              : 'none',
-                          background:
-                            isActive && isMonaiAgentRoute
-                              ? `
-      linear-gradient(var(--grey-100), var(--grey-100)) padding-box,
-      linear-gradient(90deg, #000000, #C27961, #FFEA00, #00FF04,#00B2FF,#9D00FF,#FF0080) border-box
-    `
-                              : '#F5F5F5',
-                          margin: '0 auto',
-                          justifyContent: showLabels ? 'initial' : 'center',
-                          width: showLabels ? 'auto' : '56px',
-                          borderRadius: '12px',
-                          transition: 'background-color 0.2s ease',
-                          opacity: 1,
-                          cursor: 'pointer',
-                          '&.Mui-selected': {
-                            backgroundColor: 'var(--grey-300)'
-                          },
-                          '&.Mui-disabled': { opacity: 0.5 }
-                        }}
-                      >
-                        <ListItemIcon
-                          sx={{
-                            minWidth: 0,
-                            mr: showLabels ? 2 : 0,
-                            justifyContent: 'center',
-                            opacity: 1
-                          }}
-                        >
-                          <img
-                            src={`/assets/${isActive ? item.activeIcon : item.inactiveIcon}`}
-                            alt={`${item.text} icon`}
-                            style={{ width: 24, height: 24, display: 'block' }}
-                          />
-                        </ListItemIcon>
-                        {showLabels && (
-                          <ListItemText>
-                            <Typography
-                              variant='subtitle2'
-                              color={
-                                isActive
-                                  ? 'var(--color-primary-black)'
-                                  : 'var(--color-primary-light)'
-                              }
-                            >
-                              {item.text}
-                            </Typography>
-                          </ListItemText>
-                        )}
-                      </ListItemButton>
-                    </Tooltip>
-                  </ListItem>
-                )
-              })}
-            </Box>
-          </List>
-        )
+                })}
+              </Box>
+            </List>
+          )
         })}
       </Stack>
     )

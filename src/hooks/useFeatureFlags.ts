@@ -8,10 +8,8 @@ import { useActivePractice } from './useActivePractice'
 
 export function useFeatureFlags(userContext: UserContext) {
   const permissionsByCategory = useSelector(selectPermissionsByCategory)
-  const {
-    isOnboardingCompleted,
-    isActivePracticeSubscribed
-  } = useActivePractice()
+  const { isOnboardingCompleted, isActivePracticeSubscribed } =
+    useActivePractice()
   const modulePermissions = useMemo(() => {
     const permissions: ModulePermission[] = []
 
