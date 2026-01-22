@@ -20,7 +20,7 @@ const DashboardWarningAlertBox = ({
   const { accessToken } = useAuth()
   const {
     isOnboardingCompleted,
-    isActivePracticeSubscribed,
+    // isActivePracticeSubscribed,
     isPracticeSubscribedAndOnboardingIsCompleted
   } = useActivePractice()
   const {
@@ -71,7 +71,7 @@ const DashboardWarningAlertBox = ({
       {!isOnboardingCompleted && isUserNominated && isUserManager && (
         <PendingOnboardingForManager />
       )}
-      {!isActivePracticeSubscribed && isUserOwnerOrDirector && (
+      {/* {!isActivePracticeSubscribed && isUserOwnerOrDirector && (
         <PendingSubscription
           message={
             <>
@@ -82,7 +82,7 @@ const DashboardWarningAlertBox = ({
           actionLabel='Choose plan'
           actionPath={paths.billing}
         />
-      )}
+      )} */}
     </WarningAlertWrapper>
   )
 }

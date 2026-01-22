@@ -25,8 +25,8 @@ const modules: ModuleConfig[] = [
   {
     id: 'documents',
     name: 'Documents',
-    isEnabled: evaluateIsModuleEnabled,
-    requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
+    isEnabled: evaluateIsModuleEnabled
+    // requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
   },
   {
     id: 'reports',
@@ -72,6 +72,10 @@ const modules: ModuleConfig[] = [
   {
     id: 'non-pandl',
     name: 'non PandL'
+  },
+  {
+    id: 'expenses',
+    name: 'Expenses'
   },
   {
     id: 'monai-agent',
