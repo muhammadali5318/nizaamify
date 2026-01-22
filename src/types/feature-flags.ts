@@ -2,6 +2,7 @@ import { PermissionsMap } from 'src/config/module-permissions'
 
 export interface UserContext {
   onboardingCompleted?: boolean
+  subscriptionActive?: boolean
   role?: string
   permissions?: unknown
   [key: string]: unknown

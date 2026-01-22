@@ -31,7 +31,10 @@ export default function AppLayout() {
 
   const isMonaiAgentRoute = location.pathname.startsWith('/monai-agent')
   const permissionsByCategory = useSelector(selectPermissionsByCategory)
-  const { isPracticeSubscribedAndOnboardingIsCompleted } = useActivePractice()
+  const {
+    isOnboardingCompleted,
+    isActivePracticeSubscribed
+  } = useActivePractice()
 
   const isMobile = useMediaQuery('(max-width:768px)')
   const isCollapsedBreakpoint = useMediaQuery('(max-width:1024px)')
@@ -147,8 +150,14 @@ export default function AppLayout() {
     // we want to run on each navigation
   }, [location.pathname])
 
-  const renderDrawerContent = (showLabels: boolean) => (
-    <Stack spacing={2}>
+  const renderDrawerContent = (showLabels: boolean) => {
+    const featureContext = {
+      onboardingCompleted: isOnboardingCompleted,
+      subscriptionActive: isActivePracticeSubscribed
+    }
+
+    return (
+      <Stack spacing={2}>
       {/* Sidebar Header */}
       <Box
         className={styles.toolbarHeader}
@@ -179,48 +188,50 @@ export default function AppLayout() {
       <PracticeSelector />
       {/* Menu Sections */}
       {menuSections?.map((section) => {
-        const hasVisibleItem = section.items.some((item) => {
-          const { state } = evaluateModuleStateWithReason(
-            item.moduleId,
-            permissionsByCategory || {},
-            isPracticeSubscribedAndOnboardingIsCompleted
-          )
-          return state !== 'hidden'
-        })
-        if (!hasVisibleItem) return null
+          const hasVisibleItem = section.items.some((item) => {
+            const { state } = evaluateModuleStateWithReason(
+              item.moduleId,
+              permissionsByCategory || {},
+              featureContext
+            )
+            return state !== 'hidden'
+          })
+          if (!hasVisibleItem) return null
 
-        return (
-          <List
-            key={section.title}
-            subheader={
-              <ListSubheader
-                sx={{
-                  bgcolor: 'transparent',
-                  fontWeight: 'bold',
-                  color: 'text.secondary',
-                  fontSize: '0.75rem',
-                  lineHeight: 2,
-                  textAlign: showLabels ? 'left' : 'center',
-                  padding: '0px'
-                }}
-              >
-                <Typography
-                  variant='subtitle2'
-                  color='var(--color-primary-light)'
+          return (
+            <List
+              key={section.title}
+              subheader={
+                <ListSubheader
+                  sx={{
+                    bgcolor: 'transparent',
+                    fontWeight: 'bold',
+                    color: 'text.secondary',
+                    fontSize: '0.75rem',
+                    lineHeight: 2,
+                    textAlign: showLabels ? 'left' : 'center',
+                    padding: '0px'
+                  }}
                 >
-                  {section.title}
-                </Typography>
-              </ListSubheader>
-            }
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              {section.items.map((item) => {
-                const isActive = location.pathname.startsWith(item.to)
-                const { state, reason } = evaluateModuleStateWithReason(
-                  item.moduleId,
-                  permissionsByCategory || {},
-                  isPracticeSubscribedAndOnboardingIsCompleted
-                )
+                  <Typography
+                    variant='subtitle2'
+                    color='var(--color-primary-light)'
+                  >
+                    {section.title}
+                  </Typography>
+                </ListSubheader>
+              }
+            >
+              <Box
+                sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}
+              >
+                {section.items.map((item) => {
+                  const isActive = location.pathname.startsWith(item.to)
+                  const { state, reason } = evaluateModuleStateWithReason(
+                    item.moduleId,
+                    permissionsByCategory || {},
+                    featureContext
+                  )
 
                 if (state === 'hidden') return null
 
@@ -377,9 +388,10 @@ export default function AppLayout() {
             </Box>
           </List>
         )
-      })}
-    </Stack>
-  )
+        })}
+      </Stack>
+    )
+  }
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
