@@ -55,7 +55,7 @@ export default function EditDocumentModal({
         expense_category: document.expense_category || '',
         amount: document.amount || '',
         document_date: document.document_date || '',
-        payment_date: document.payment_date || document.document_date || ''
+        payment_date: document.payment_date || ''
       })
     }
   }, [document])
@@ -234,15 +234,6 @@ export default function EditDocumentModal({
                 slotProps={{ inputLabel: { shrink: true } }}
                 value={formData.document_date}
                 onChange={(e) => handleChange('document_date', e.target.value)}
-              />
-
-              <TextField
-                fullWidth
-                label='Payment date'
-                type='date'
-                slotProps={{ inputLabel: { shrink: true } }}
-                value={formData.payment_date}
-                onChange={(e) => handleChange('payment_date', e.target.value)}
               />
             </Box>
           </Box>
