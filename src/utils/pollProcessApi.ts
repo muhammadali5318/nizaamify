@@ -10,6 +10,8 @@ import {
   removePollingJob
 } from '../store/slices/pollingJobSlice'
 
+const activeJobs = new Set<string>()
+
 export const pollBatchStatusUntilComplete = async (
   batchId: string,
   key: string,
@@ -19,6 +21,16 @@ export const pollBatchStatusUntilComplete = async (
   maxAttempts: number = 550,
   pollInterval: number = 3000
 ) => {
+  const jobId = `${batchId}-${key}`
+  if (activeJobs.has(jobId)) {
+    console.warn(
+      `Polling job already active for ${jobId}, skipping duplicate call.`
+    )
+    return
+  }
+
+  activeJobs.add(jobId)
+
   try {
     store.dispatch(
       addPollingJob({
@@ -155,5 +167,7 @@ export const pollBatchStatusUntilComplete = async (
 
     console.error(`Processing failed for ${filename}`)
     throw err
+  } finally {
+    activeJobs.delete(jobId)
   }
 }
