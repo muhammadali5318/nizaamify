@@ -46,14 +46,14 @@ import { getFileIcon } from 'src/utils/getFileIcon'
 import { useNavigate } from 'react-router'
 import { resetPresignResponse } from 'src/store/slices/manualEntryFilesSlice'
 interface ManualEntryFormData {
-  entryDate: string
+  entryDate: dayjs.Dayjs | null
+  paymentDate: dayjs.Dayjs | null
   category: string
   type: string
   subtype: string
   amount: string
   vendorName: string
   invoiceNumber: string
-  paymentDate: string
   description: string
   lineItem: string
 
@@ -62,7 +62,8 @@ interface ManualEntryFormData {
 
 const ManualEntryForm: React.FC = () => {
   const [formData, setFormData] = useState<ManualEntryFormData>({
-    entryDate: '',
+    entryDate: null,
+    paymentDate: null,
     category: '',
     type: '',
     subtype: '',
@@ -70,7 +71,6 @@ const ManualEntryForm: React.FC = () => {
     lineItem: '',
     vendorName: '',
     invoiceNumber: '',
-    paymentDate: '',
     description: '',
     attachments: []
   })
@@ -202,7 +202,10 @@ const ManualEntryForm: React.FC = () => {
       }))
 
       const payload = {
-        entry_date: formData.entryDate,
+        entry_date: formData.entryDate
+          ? formData.entryDate.format('DD/MM/YYYY')
+          : null,
+
         category: formData.category,
         type: formData.type,
         subtype: formData.subtype,
@@ -210,7 +213,9 @@ const ManualEntryForm: React.FC = () => {
         vendor_supplier_name: formData.vendorName,
         invoice_number: formData.invoiceNumber,
         description: formData.description,
-        payment_date: formData.paymentDate,
+        payment_date: formData.paymentDate
+          ? formData.paymentDate.format('DD/MM/YYYY')
+          : null,
         file_obj: fileObj
       }
 
@@ -222,7 +227,7 @@ const ManualEntryForm: React.FC = () => {
       notify.success(res.message || 'Manual entry saved successfully')
       navigate('/documents')
       setFormData({
-        entryDate: '',
+        entryDate: null,
         category: '',
         type: '',
         subtype: '',
@@ -230,7 +235,7 @@ const ManualEntryForm: React.FC = () => {
         lineItem: '',
         vendorName: '',
         invoiceNumber: '',
-        paymentDate: '',
+        paymentDate: null,
         description: '',
         attachments: []
       })
@@ -294,23 +299,9 @@ const ManualEntryForm: React.FC = () => {
             <DatePicker
               format='DD/MM/YYYY'
               label='Entry Date *'
-              value={formData.entryDate ? dayjs(formData.entryDate) : null}
-              onChange={(newValue) => {
-                if (newValue) {
-                  const formattedDate = newValue.format('DD/MM/YYYY')
-
-                  const today = dayjs().startOf('day')
-                  if (newValue.isAfter(today)) {
-                    notify.error('Future dates are not allowed.')
-                    return
-                  }
-
-                  setFormData((prev) => ({
-                    ...prev,
-                    entryDate: formattedDate
-                  }))
-                }
-              }}
+              disableFuture
+              value={formData.entryDate}
+              onChange={(v) => setFormData((p) => ({ ...p, entryDate: v }))}
               slotProps={{
                 textField: { fullWidth: true }
               }}
@@ -419,23 +410,9 @@ const ManualEntryForm: React.FC = () => {
             <DatePicker
               format='DD/MM/YYYY'
               label='Payment Date'
-              value={formData.paymentDate ? dayjs(formData.paymentDate) : null}
-              onChange={(newValue) => {
-                if (newValue) {
-                  const formattedDate = newValue.format('DD/MM/YYYY')
-
-                  const today = dayjs().startOf('day')
-                  if (newValue.isAfter(today)) {
-                    notify.error('Future dates are not allowed.')
-                    return
-                  }
-
-                  setFormData((prev) => ({
-                    ...prev,
-                    paymentDate: formattedDate
-                  }))
-                }
-              }}
+              disableFuture
+              value={formData.paymentDate}
+              onChange={(v) => setFormData((p) => ({ ...p, paymentDate: v }))}
               slotProps={{
                 textField: { fullWidth: true }
               }}
