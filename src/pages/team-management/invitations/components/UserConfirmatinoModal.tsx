@@ -78,9 +78,10 @@ const DEFAULTS: any = {
           benchmarking.
         </Typography>
         <Typography variant='subtitle1' color='text.primary'>
-          If you skip this step now, you’ll have{' '}
-          <strong> limited access</strong> to the platform until a plan is
-          selected.
+          If you skip this step now, you’ll always have the option to select a
+          plan later from your account settings.
+          {/* <strong> limited access</strong> to the platform until a plan is
+          selected. */}
         </Typography>
       </>
     )
