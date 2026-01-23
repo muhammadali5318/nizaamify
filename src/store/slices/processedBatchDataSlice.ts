@@ -43,14 +43,27 @@ const processedBatchSlice = createSlice({
       state,
       action: PayloadAction<BatchData>
     ) => {
-      const { batch_id } = action.payload
+      const { batch_id, documents } = action.payload
       const existing = state.batches[batch_id]
+
+      // Initialize or get existing originals
+      const updatedOriginals = [...(existing?.originalDocuments || [])]
+
+      // Only add to originals if not already present and document is not pending
+      documents.forEach((doc) => {
+        const isNotPending = doc.status?.toUpperCase() !== 'PENDING'
+        const alreadyOriginal = updatedOriginals.some(
+          (o) => o.document_id === doc.document_id
+        )
+
+        if (isNotPending && !alreadyOriginal) {
+          updatedOriginals.push(JSON.parse(JSON.stringify(doc)))
+        }
+      })
 
       state.batches[batch_id] = {
         ...action.payload,
-        originalDocuments:
-          existing?.originalDocuments ||
-          JSON.parse(JSON.stringify(action.payload.documents))
+        originalDocuments: updatedOriginals
       }
     },
 

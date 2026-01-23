@@ -55,12 +55,14 @@ export default function ProcessingCompletedList() {
   const handleApprove = async () => {
     try {
       setLoading(true)
-      const modifiedDocs = getModifiedDocuments(batches)
+      const allDocsPayload = getModifiedDocuments(batches)
       const firstBatchId = allDocuments[0]?.batch_id
 
-      const payloadDocs = modifiedDocs.length > 0 ? modifiedDocs : undefined
-
-      await approveDocuments(activePracticeId ?? '', firstBatchId, payloadDocs)
+      await approveDocuments(
+        activePracticeId ?? '',
+        firstBatchId,
+        allDocsPayload
+      )
       notify.success('Documents approved successfully!')
       await queryClient.invalidateQueries({
         queryKey: ['uploadedDocumentListApi'],
