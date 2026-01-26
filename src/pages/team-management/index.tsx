@@ -1,0 +1,66 @@
+// FILE: src/pages/TeamManagement.tsx
+import React, { useCallback, useState } from 'react'
+import { Box } from '@mui/material'
+import styles from './teamManagement.module.scss'
+import ModuleHeader from 'src/components/module-header'
+import StatsCard from 'src/components/team-management/StatsCard'
+import useTeamManagementTabs from './hooks/useTeamManagementTabs'
+import { ReusableTabs } from 'src/components/tabs'
+import { tabsData } from './team-management-config'
+import { useAuth } from 'src/context/AuthProvider'
+import { useInitialData } from 'src/hooks/useFetchInitialData'
+
+const TeamManagement: React.FC = () => {
+  const { accessToken } = useAuth()
+  const { data: practiceData } = useInitialData(!!accessToken)
+  const [teamCounts, setTeamCounts] = useState({
+    total_users: 0,
+    active_users: 0,
+    pending_invited_users: 0
+  })
+
+  const handleCountsUpdate = useCallback(
+    (counts: typeof teamCounts) => {
+      setTeamCounts(counts)
+    },
+    [setTeamCounts]
+  )
+
+  const tabs = useTeamManagementTabs(handleCountsUpdate)
+  return (
+    <Box className={styles.teamManagementRoot}>
+      <ModuleHeader
+        avatarSrc='/assets/team-management.svg'
+        heading={practiceData?.practice_name}
+        subheading='Manage your practice team members, roles, and permissions'
+      />
+
+      <Box
+        className='statsCardRoot'
+        sx={{
+          justifyContent: { xs: 'center', sm: 'center', md: 'flex-start' }
+        }}
+      >
+        <StatsCard
+          iconSrc='team-member.svg'
+          label='Team Members'
+          value={teamCounts?.total_users}
+        />
+        <StatsCard
+          iconSrc='active-member.svg'
+          label='Active Members'
+          value={teamCounts?.active_users}
+        />
+        <StatsCard
+          iconSrc='pending-member.svg'
+          label='Pending Invites'
+          value={teamCounts?.pending_invited_users}
+        />
+      </Box>
+
+      <ReusableTabs tabs={tabs} initialTab={tabsData[0].key} />
+    </Box>
+  )
+}
+
+export default TeamManagement

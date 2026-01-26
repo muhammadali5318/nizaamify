@@ -1,0 +1,26 @@
+.drs-simple {
+  .drs-btn {
+    text-transform: none;
+    justify-content: flex-start;
+    padding: 6px 10px;
+  }
+
+  .drs-label {
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0.6);
+    line-height: 1;
+  }
+
+  .drs-value {
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  .drs-paper {
+    border-radius: 8px;
+    min-width: 280px;
+    .MuiBox-root {
+      padding: 12px;
+    }
+  }
+}

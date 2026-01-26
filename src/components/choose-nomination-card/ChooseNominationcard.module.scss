@@ -1,0 +1,11 @@
+.chooseNominationCardRoot {
+    display: flex;
+width: 100%;
+padding: 16px 24px;
+align-items: center;
+gap: 16px;
+border-radius: 20px;
+border: 1px solid var(--primary-_states-outlinedBorder, rgba(0, 0, 0, 0.20));
+background: var(--primary-contrastText, #FFF);
+cursor: pointer;
+}

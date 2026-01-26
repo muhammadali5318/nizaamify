@@ -1,0 +1,24 @@
+.filterContainer {
+  display: flex;
+  padding: 16px;
+  align-items: center;
+  gap: 16px;
+
+.filterBody {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+    gap: 16px;
+    flex: 1 0 0;
+
+    .searchField {
+      min-width: 300px;
+      flex: 1 1 300px;
+    }
+
+    .filterDropdown {
+      min-width: 180px;
+      flex: 1 1 180px;
+    }
+  }
+}

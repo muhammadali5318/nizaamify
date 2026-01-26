@@ -1,0 +1,92 @@
+.formContainerInviteUser {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  padding: 32px;
+  gap: 16px;
+  border-radius: 24px;
+  border: 1px solid #f7f7f7;
+  background: #fff;
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+
+  .MuiFormControl-root,
+  .MuiTextField-root {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  & > .MuiBox-root[style*="display: grid"],
+  .formGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 1024px) {
+    width: 100%;
+    max-width: 730px;
+    padding: 28px;
+    gap: 14px;
+  }
+
+  @media (max-width: 600px) {
+    width: 100%;
+    max-width: 730px;
+    padding: 20px;
+    gap: 12px;
+
+    & > .MuiBox-root[style*="display: grid"],
+    .formGrid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    border-radius: 16px;
+  }
+
+  /* Very small phones */
+  @media (max-width: 420px) {
+    padding: 16px;
+    gap: 10px;
+
+    .MuiFormHelperText-root {
+      font-size: 0.85rem;
+    }
+  }
+}
+
+.createPasswordWidth {
+  width: 590px;
+  box-sizing: border-box;
+
+  @media (max-width: 1024px) {
+    width: 100%;
+    max-width: 590px;
+  }
+}
+
+.userInfoWidth {
+  width: 730px;
+  box-sizing: border-box;
+
+  @media (max-width: 1024px) {
+    width: 100%;
+    max-width: 730px;
+  }
+}
+
+/* Ensure the continue button and phone field behave */
+.MuiButton-root,
+.setPasswordBtn,
+.buttonFullWidth {
+  width: 100%;
+  max-width: 100%;
+}
+
+.phoneFieldContainer,
+.phoneFieldWrap { /* if your PhoneField renders a wrapper with these classes */
+  width: 100%;
+  box-sizing: border-box;
+}

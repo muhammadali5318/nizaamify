@@ -1,0 +1,165 @@
+image: node:20
+
+definitions:
+  caches:
+    node: ~/.npm 
+  steps: 
+    - step: &cloneScriptsRepo
+        name: Download Teams Notification Scripts
+        script:
+          - apt install git -y
+          - git clone git@bitbucket.org:31green/devops-scripts.git 
+        artifacts:
+          - devops-scripts/**
+        after-script:
+          - apt install git -y
+          - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
+          - chmod +x devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
+          - ./devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
+
+    - step: &trivyscan
+        name: Dependency Vulnerability Scan
+        image: aquasec/trivy:latest
+        script:
+          - trivy fs --scanners vuln --vuln-type library --severity CRITICAL,HIGH --format table --ignore-unfixed --include-dev-deps --exit-code 1 .
+        after-script:
+          - apk add git bash
+          - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
+          - chmod +x devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
+          - ./devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
+
+    - step: &npminstall
+        name: Install Dependencies
+        caches:
+          - node
+        script:
+          - npm install
+        artifacts:
+          - node_modules/**
+        after-script:
+          - apt install git -y
+          - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
+          - chmod +x devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
+          - ./devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
+
+    - step: &npmlint
+        name: Run Linter
+        script:
+          - npm run lint
+        after-script:
+          - apt install git -y
+          - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
+          - chmod +x devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
+          - ./devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
+
+    - step: &npmbuild
+        name: Build Application
+        script:
+          - ENV="${BITBUCKET_BRANCH}"
+          - |
+            if [[ "${ENV}" == "master" ]]; then
+              export VITE_AUTH0_DOMAIN=
+              export VITE_AUTH0_CLIENT_ID=
+              export VITE_AUTH0_AUDIENCE=
+              export VITE_API_URL=
+              export VITE_CALLBACK_URL=
+            elif [[ "${ENV}" == "dev" ]]; then
+              export VITE_AUTH0_DOMAIN=$DEV_VITE_AUTH0_DOMAIN
+              export VITE_AUTH0_CLIENT_ID=$DEV_VITE_AUTH0_CLIENT_ID
+              export VITE_AUTH0_AUDIENCE=$DEV_VITE_AUTH0_AUDIENCE
+              export VITE_API_URL=$DEV_VITE_API_URL
+              export VITE_AUTH0_CALLBACK_URL=$DEV_VITE_CALLBACK_URL
+            elif [[ "${ENV}" == "qa" ]]; then
+              export VITE_AUTH0_DOMAIN=$QA_VITE_AUTH0_DOMAIN
+              export VITE_AUTH0_CLIENT_ID=$QA_VITE_AUTH0_CLIENT_ID
+              export VITE_AUTH0_AUDIENCE=$QA_VITE_AUTH0_AUDIENCE
+              export VITE_API_URL=$QA_VITE_API_URL
+              export VITE_AUTH0_CALLBACK_URL=$QA_VITE_CALLBACK_URL
+            fi
+          - npm run build
+        artifacts:
+          - dist/**
+        after-script:
+          - apt install git -y
+          - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
+          - chmod +x devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
+          - ./devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
+
+    - step: &npmtest
+        name: Run Tests
+        script:
+          - npm test
+        after-script:
+          - apt install git -y
+          - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
+          - chmod +x devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
+          - ./devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
+
+    - step: &s3deploy
+        name: Deploy to S3
+        oidc: true
+        script:
+          - ENV="${BITBUCKET_BRANCH}"
+          - |
+            if [[ "${ENV}" == "master" ]]; then
+              export S3_BUCKET=
+              export CLOUDFRONT_ID=
+            elif [[ "${ENV}" == "dev" ]]; then
+              export S3_BUCKET=$DEV_S3_BUCKET
+              export CLOUDFRONT_ID=$DEV_CLOUDFRONT_ID
+            elif [[ "${ENV}" == "qa" ]]; then
+              export S3_BUCKET=$QA_S3_BUCKET
+              export CLOUDFRONT_ID=$QA_CLOUDFRONT_ID
+            fi
+          - echo $CLOUDFRONT_ID > cloudfront_id.txt
+          - pipe: atlassian/aws-s3-deploy:2.0.1
+            variables:
+              AWS_OIDC_ROLE_ARN: $MonAi_OIDC_ROLE_ARN
+              AWS_DEFAULT_REGION: $AWS_REGION
+              S3_BUCKET: $S3_BUCKET
+              LOCAL_PATH: 'dist'
+        artifacts:
+          - cloudfront_id.txt
+        after-script:
+          - apt install git -y
+          - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
+          - chmod +x devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
+          - ./devops-scripts/send-msteams-notifications/send-pipeline-failure-notification.sh
+
+    - step: &invalidate_cache
+        name: Invalidate CloudFront Cache
+        oidc: true
+        script:
+          - CLOUDFRONT_ID=$(cat cloudfront_id.txt)
+          - pipe: atlassian/aws-cloudfront-invalidate:0.11.0
+            variables:
+              AWS_OIDC_ROLE_ARN: $MonAi_OIDC_ROLE_ARN
+              AWS_DEFAULT_REGION: $AWS_REGION
+              DISTRIBUTION_ID: $CLOUDFRONT_ID
+              PATHS: '/*'
+        after-script:
+          - apt install git -y
+          - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
+          - chmod +x devops-scripts/send-msteams-notifications/send-pipeline-completion-notification.sh
+          - ./devops-scripts/send-msteams-notifications/send-pipeline-completion-notification.sh
+
+pipelines:
+  pull-requests:
+    "**":
+      - step: *npminstall
+      - step: *npmlint
+      - step: *npmtest
+      - step: *npmbuild
+  branches:
+    feature/*:
+      - step: *npminstall
+      - step: *npmlint
+      - step: *npmtest
+    '{dev,qa}':
+      - step: *cloneScriptsRepo
+      - step: *trivyscan
+      - step: *npminstall
+      - step: *npmlint
+      - step: *npmbuild
+      - step: *s3deploy
+      - step: *invalidate_cache

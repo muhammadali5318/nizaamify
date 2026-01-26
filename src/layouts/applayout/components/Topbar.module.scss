@@ -1,0 +1,51 @@
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  width: 100%;
+  background-color: var(--grey-100);
+
+  display: flex;
+  height: 72px;
+  padding: 16px 24px 16px 0;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.mobileTopbar {
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  width: 100%;
+  background-color: var(--grey-100);
+
+  display: flex;
+  height: 48px;
+  padding: 8px 16px;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  border-top: 1px solid var(--grey-200);
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.topbarTitleContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbarActionContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profileTitle {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: left;
+}

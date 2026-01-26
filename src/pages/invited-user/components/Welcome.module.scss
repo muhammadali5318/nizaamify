@@ -1,0 +1,69 @@
+.invitedUserOnboardingContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 700px;
+  padding: 48px 32px;
+  gap: 16px;
+  border-radius: 24px;
+  border: 1px solid #f7f7f7;
+  background: #fff;
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+
+  // Responsive adjustments
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 36px 24px;
+    gap: 14px;
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
+    padding: 28px 20px;
+    gap: 12px;
+    border-radius: 16px;
+
+    img {
+      width: 80px;
+      height: auto;
+    }
+  }
+
+  @media (max-width: 360px) {
+    padding: 20px 16px;
+    gap: 10px;
+  }
+}
+
+.setPasswordBtn {
+  width: 300px;
+
+  @media (max-width: 480px) {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+.invitedUserOnboardingInfo {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+
+  @media (max-width: 480px) {
+    gap: 8px;
+
+    h4, h5 {
+      font-size: 1.1rem;
+      line-height: 1.3;
+    }
+
+    p, .MuiTypography-subtitle1 {
+      font-size: 0.95rem;
+    }
+  }
+}

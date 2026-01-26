@@ -1,0 +1,50 @@
+.practiceAlreadyExistsRoot {
+  display: flex;
+  width: 100%;
+  max-width: 636px;
+  padding: 36px 48px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+  border-radius: 24px;
+  border: 1px solid #f7f7f7;
+  background: #fff;
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.1);
+  margin: 0 auto; // center horizontally
+
+  @media (max-width: 900px) {
+    padding: 28px 36px;
+    gap: 16px;
+  }
+
+  @media (max-width: 600px) {
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: none;
+    align-items: center;
+    text-align: center;
+
+    img {
+      width: 64px;
+      height: 64px;
+    }
+
+    button {
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 400px) {
+    padding: 16px;
+    gap: 12px;
+
+    .MuiTypography-h4 {
+      font-size: 1.25rem;
+    }
+
+    .MuiTypography-subtitle1 {
+      font-size: 0.85rem;
+    }
+  }
+}

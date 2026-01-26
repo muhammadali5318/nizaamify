@@ -1,0 +1,338 @@
+import { zodResolver } from '@hookform/resolvers/zod'
+import { ChevronLeft, ChevronRight } from '@mui/icons-material'
+import { LoadingButton } from '@mui/lab'
+import {
+  Box,
+  Stack,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  Select,
+  MenuItem,
+  Button,
+  Alert,
+  Typography
+} from '@mui/material'
+import React, { useEffect } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import FormHeader from '../FormHeader'
+import {
+  StepThreeSchema,
+  StepThreeFormValues as FormValues
+} from 'src/schema-validations/practice-onboarding/stepThree'
+import { useUpdateStepThree } from '../../hooks/useUpdateStepThree'
+import { useNavigate } from 'react-router'
+import { paths } from 'src/paths'
+import SaveAndExitDialogue from '../SaveAndExitDialogue/SaveAndExitDialogue'
+import { isEqual } from 'lodash'
+import { useActivePractice } from 'src/hooks/useActivePractice'
+
+type StepThreeProps = {
+  formData: FormValues
+  setFormData: (patch: Partial<FormValues>) => void
+  onBack?: () => void
+  onNext?: (patch?: Partial<FormValues>) => void
+  onSubmit?: (patch?: Partial<FormValues>) => void
+  activeStep: number
+  isSubmitting?: boolean
+  serverErrors?: Record<string, string>
+  onOpenNominate: () => void
+}
+
+const StepThree: React.FC<StepThreeProps> = ({
+  formData,
+  setFormData,
+  onBack,
+  onNext,
+  activeStep,
+  isSubmitting = false,
+  onOpenNominate
+}) => {
+  const { activePracticeId } = useActivePractice()
+  const navigate = useNavigate()
+
+  const updateStepThree = useUpdateStepThree(activePracticeId ?? '')
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors, isValid }
+  } = useForm<FormValues>({
+    resolver: zodResolver(StepThreeSchema),
+    mode: 'onChange',
+    defaultValues: {
+      practiceManagementSoftware: formData.practiceManagementSoftware,
+      accountingSoftware: formData.accountingSoftware,
+      useOfAccountantBookkeeper: formData.useOfAccountantBookkeeper
+    }
+  })
+
+  useEffect(() => {
+    reset({
+      practiceManagementSoftware: formData.practiceManagementSoftware,
+      accountingSoftware: formData.accountingSoftware,
+      useOfAccountantBookkeeper: formData.useOfAccountantBookkeeper
+    })
+  }, [formData, reset])
+
+  // local dialog state
+  const [openDialog, setOpenDialog] = React.useState(false)
+  const handleOpenDialog = () => setOpenDialog(true)
+  const handleCloseDialog = () => setOpenDialog(false)
+
+  const submit = (data: FormValues) => {
+    const newValues: FormValues = {
+      practiceManagementSoftware: data.practiceManagementSoftware,
+      accountingSoftware: data.accountingSoftware,
+      useOfAccountantBookkeeper: data.useOfAccountantBookkeeper
+    }
+
+    if (isEqual(newValues, formData)) {
+      onNext?.()
+      return
+    }
+
+    // update parent state immediately so UI reflects inputs
+    setFormData(newValues)
+
+    // build API payload (backend keys)
+    const payload = {
+      management_software: newValues.practiceManagementSoftware,
+      accounting_software: newValues.accountingSoftware,
+      accountant_bookkeeper_use: newValues.useOfAccountantBookkeeper
+    }
+
+    // call PATCH -> advance only on success
+    updateStepThree.mutate(payload, {
+      onSuccess: () => {
+        onNext?.(newValues)
+      },
+      onError: (err) => {
+        console.error('Step 3 save failed', err)
+      }
+    })
+  }
+
+  // Save & Exit handler: validate & save, then navigate to dashboard
+  // If validation fails, close modal and focus first errored field.
+  const handleSaveExit = () => {
+    const onValid = (data: FormValues) => {
+      const newValues: FormValues = {
+        practiceManagementSoftware: data.practiceManagementSoftware,
+        accountingSoftware: data.accountingSoftware,
+        useOfAccountantBookkeeper: data.useOfAccountantBookkeeper
+      }
+
+      // update parent state
+      setFormData(newValues)
+
+      const payload = {
+        management_software: newValues.practiceManagementSoftware,
+        accounting_software: newValues.accountingSoftware,
+        accountant_bookkeeper_use: newValues.useOfAccountantBookkeeper
+      }
+
+      updateStepThree.mutate(payload, {
+        onSuccess: () => {
+          navigate(paths.dashboard)
+        }
+      })
+    }
+
+    const onInvalid = () => {
+      navigate(paths.dashboard)
+      handleCloseDialog()
+    }
+
+    handleSubmit(onValid, onInvalid)()
+  }
+
+  const isSaving = updateStepThree?.status === 'pending'
+
+  return (
+    <Box>
+      <FormHeader activeStep={activeStep} />
+
+      <Box
+        component='form'
+        onSubmit={handleSubmit(submit)}
+        noValidate
+        sx={{ mt: 2 }}
+      >
+        <Stack spacing={2.5}>
+          {/* Practice management software */}
+          <FormControl fullWidth error={!!errors.practiceManagementSoftware}>
+            <InputLabel id='practice-management-software-label'>
+              Practice management software *
+            </InputLabel>
+            <Controller
+              name='practiceManagementSoftware'
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  labelId='practice-management-software-label'
+                  label='Practice management software *'
+                >
+                  <MenuItem value='EXACT'>EXACT</MenuItem>
+                  <MenuItem value='DENTALLY'>Dentally</MenuItem>
+                  <MenuItem value='R4'>R4</MenuItem>
+                  <MenuItem value='CARESTREAM'>careStream</MenuItem>
+                  <MenuItem value='OTHER'>Other</MenuItem>
+                </Select>
+              )}
+            />
+            <FormHelperText>
+              {errors.practiceManagementSoftware?.message as React.ReactNode}
+            </FormHelperText>
+          </FormControl>
+
+          {/* Accounting software */}
+          <FormControl fullWidth error={!!errors.accountingSoftware}>
+            <InputLabel id='accounting-software-label'>
+              Accounting software *
+            </InputLabel>
+            <Controller
+              name='accountingSoftware'
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  labelId='accounting-software-label'
+                  label='Accounting software *'
+                >
+                  <MenuItem value='XERO'>Xero</MenuItem>
+                  <MenuItem value='QUICKBOOKS'>QuickBooks</MenuItem>
+                  <MenuItem value='OTHER'>Other</MenuItem>
+                  <MenuItem value='NONE'>None</MenuItem>
+                </Select>
+              )}
+            />
+            <FormHelperText>
+              {errors.accountingSoftware?.message as React.ReactNode}
+            </FormHelperText>
+          </FormControl>
+
+          {/* Use of accountant/bookkeeper */}
+          <FormControl fullWidth error={!!errors.useOfAccountantBookkeeper}>
+            <InputLabel id='use-accountant-label'>
+              Use of accountant/bookkeeper *
+            </InputLabel>
+            <Controller
+              name='useOfAccountantBookkeeper'
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  labelId='use-accountant-label'
+                  label='Use of accountant/bookkeeper *'
+                >
+                  <MenuItem value='INTERNAL'>Internal</MenuItem>
+                  <MenuItem value='EXTERNAL'>External</MenuItem>
+                  <MenuItem value='NONE'>None</MenuItem>
+                </Select>
+              )}
+            />
+            <FormHelperText>
+              {errors.useOfAccountantBookkeeper?.message as React.ReactNode}
+            </FormHelperText>
+          </FormControl>
+
+          <Alert severity='info'>
+            <Typography
+              className='alert-info-text font-weight--500'
+              component='div'
+              sx={{ margin: 0 }}
+            >
+              Why do we need this information?
+            </Typography>
+            <Typography
+              className='alert-info-text'
+              component='div'
+              sx={{ margin: 0 }}
+            >
+              Understanding your current systems helps us provide better
+              integration options and more accurate financial insights tailored
+              to your practice’s setup.
+            </Typography>
+          </Alert>
+
+          <Stack
+            direction='row'
+            justifyContent='space-between'
+            alignItems='center'
+            sx={{
+              mt: 1,
+              flexWrap: { xs: 'wrap', sm: 'nowrap' },
+              gap: { xs: 1.5, sm: 0 },
+              '@media (max-width: 380px)': {
+                flexDirection: 'column',
+                alignItems: 'stretch',
+                gap: 1.5
+              }
+            }}
+          >
+            <Button
+              size='large'
+              variant='outlined'
+              color='primary'
+              onClick={handleOpenDialog}
+            >
+              Save & exit
+            </Button>
+
+            <Box
+              sx={{
+                '@media (max-width: 380px)': {
+                  display: 'flex',
+                  justifyContent: 'space-between'
+                }
+              }}
+            >
+              <Button
+                size='large'
+                variant='outlined'
+                color='primary'
+                onClick={onBack}
+                sx={{
+                  mr: '8px'
+                }}
+                startIcon={<ChevronLeft />}
+              >
+                Back
+              </Button>
+
+              <LoadingButton
+                type='submit'
+                size='large'
+                variant='contained'
+                color='primary'
+                loading={isSaving || isSubmitting}
+                disabled={!isValid}
+                endIcon={<ChevronRight />}
+              >
+                Next
+              </LoadingButton>
+            </Box>
+          </Stack>
+        </Stack>
+      </Box>
+
+      {/* Local Save & Exit dialog */}
+      <SaveAndExitDialogue
+        open={openDialog}
+        onClose={handleCloseDialog}
+        onOpenNominate={() => {
+          onOpenNominate()
+          handleCloseDialog()
+        }}
+        onConfirm={() => {
+          handleSaveExit()
+        }}
+        confirmLoading={isSaving}
+      />
+    </Box>
+  )
+}
+
+export default StepThree

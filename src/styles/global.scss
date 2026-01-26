@@ -1,0 +1,238 @@
+:root {
+  --color-text-primary: rgba(0, 0, 0, 0.8);
+  --color-text-secondary: rgba(0, 0, 0, 0.6);
+  --color-text-disabled: rgba(0, 0, 0, 0.38);
+
+  --color-primary-black: #000;
+  --color-primary-main: #231f20;
+  --color-primary-light: #4d4d4d;
+  --color-primary-dark: #1c191a;
+  --color-primary-contrast-text: #ffffff;
+
+  --color-secondary-main: #9c27b0;
+  --color-secondary-light: #ba68c8;
+  --color-secondary-dark: #7b1fa2;
+  --color-secondary-contrast: #ffffff;
+
+  --color-success-main: #2e7d32;
+  --color-success-light: #4caf50;
+  --color-success-dark: #1b5e20;
+  --color-success-contrast: #ffffff;
+
+  --color-info-main: #0288d1;
+  --color-info-light: #03a9f4;
+  --color-info-dark: #01579b;
+  --color-info-contrast: #ffffff;
+
+  --color-warning-main: #ef6c00;
+  --color-warning-light: #ff9800;
+  --color-warning-dark: #ef6c00;
+  --color-warning-contrast: #ffffff;
+
+  --color-error-main: #d32f2f;
+  --color-error-light: #ef5350;
+  --color-error-dark: #c62828;
+  --color-error-contrast: #ffffff;
+
+  --grey-100: #f5f5f5;
+  --grey-200: #eee;
+  --grey-300: #e0e0e0;
+  --grey-border: #f7f7f7;
+
+  --components-stepper-connector: #bdbdbd;
+  --_components-alert-info-color: #014361;
+  --primary-_states-outlinedBorder: rgba(0, 0, 0, 0.2);
+
+  --footer-height: 70px;
+}
+
+/* 1. Use border-box for all elements */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* 2. Reset margin + padding */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* 3. Define global font family */
+body {
+  font-family: 'Roboto';
+}
+
+/* 4. Make sure buttons, inputs, etc. inherit */
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+.font-weight--700 {
+  font-weight: 700 !important;
+}
+
+.font-weight--500 {
+  font-weight: 500 !important;
+}
+
+.font-weight--400 {
+  font-weight: 400 !important;
+}
+
+.font-style--italic {
+  font-style: italic;
+}
+
+.wrapper {
+  min-height: calc(100vh - var(--footer-height));
+}
+.footerRoot {
+  height: var(--footer-height);
+}
+
+.info-main {
+  color: var(--color-info-main);
+}
+
+.text-primary {
+  color: var(--color-text-primary);
+}
+
+.center-align-width--100 {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.width--100 {
+  width: 100%;
+}
+
+.text-underline {
+  text-decoration-line: underline;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.icon-dimension--88 {
+  width: 88px;
+  height: 88px;
+}
+
+.icon-dimension--64 {
+  width: 64px;
+  height: 64px;
+}
+
+.icon-dimension--32 {
+  width: 32px;
+  height: 32px;
+}
+
+.icon-dimension--24 {
+  width: 24px;
+  height: 24px;
+}
+
+.icon-dimension--36 {
+  width: 36px;
+  height: 36px;
+}
+
+.icon-dimension--272 {
+  width: 272px;
+  height: 272px;
+}
+
+.text-color--primary {
+  color: var(--color-text-primary);
+}
+
+.font-color--warning-dark {
+  color: var(--color-warning-dark);
+}
+
+.text-decoration--none {
+  text-decoration: none !important;
+}
+
+.text-decoration--underline {
+  text-decoration: underline !important;
+}
+
+.alert-info-container {
+  align-items: center;
+  margin-top: 8px;
+}
+
+.alert-info-text {
+  align-self: stretch;
+  color: var(--_components-alert-info-color);
+  font-feature-settings:
+    'liga' off,
+    'clig' off;
+  font-family: Roboto;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 150%; /* 24px */
+  letter-spacing: 0.15px;
+}
+
+.color-info--dark {
+  color: var(--color-info-dark);
+}
+
+.filterContainer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 16px;
+
+  > * {
+    flex: 1 1 310px;
+    min-width: 310px;
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: stretch;
+
+    > * {
+      flex: 1 1 100%;
+      width: 100%;
+      min-width: unset;
+    }
+  }
+}
+
+.statsCardRoot {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  align-self: stretch;
+
+  @media (max-width: 768px) {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+}

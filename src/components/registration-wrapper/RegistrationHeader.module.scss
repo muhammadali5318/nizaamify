@@ -1,0 +1,24 @@
+.logoContainer {
+  width: 100vw;
+  display: flex;
+  padding: 16px 48px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+
+  .logoSize {
+    width: 122.468px;
+    height: 42px;
+    flex-shrink: 0;
+    aspect-ratio: 122.47/42;
+  }
+}
+
+.headerContainer {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
