@@ -63,7 +63,7 @@ definitions:
               export VITE_AUTH0_CLIENT_ID=$PROD_VITE_AUTH0_CLIENT_ID
               export VITE_AUTH0_AUDIENCE=$PROD_VITE_AUTH0_AUDIENCE
               export VITE_API_URL=$PROD_VITE_API_URL
-              export VITE_CALLBACK_URL=$PROD_VITE_CALLBACK_URL
+              export VITE_AUTH0_CALLBACK_URL=$PROD_VITE_CALLBACK_URL
             elif [[ "${ENV}" == "dev" ]]; then
               export VITE_AUTH0_DOMAIN=$DEV_VITE_AUTH0_DOMAIN
               export VITE_AUTH0_CLIENT_ID=$DEV_VITE_AUTH0_CLIENT_ID
