@@ -1,7 +1,11 @@
-import Placeholder from 'src/components/common/Placeholder'
-
+import TrainingModule from '../dashboard/components/monai-training-module/index'
+import { Box } from '@mui/material'
 const HelpAndSupport = () => {
-  return <Placeholder title='Help and Support' />
+  return (
+    <Box sx={{ p: 1, ml: 1 }}>
+      <TrainingModule />
+    </Box>
+  )
 }
 
 export default HelpAndSupport

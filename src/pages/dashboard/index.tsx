@@ -6,7 +6,6 @@ import { useAuth } from 'src/context/AuthProvider'
 import dayjs from 'dayjs'
 import useUserDetails from 'src/hooks/useUserDetails'
 import SubmitFeedback from './components/submit-feedback'
-import TraningModule from './components/monai-training-module'
 import Stats from './components/stats'
 import Welcome from './components/welcome'
 
@@ -33,7 +32,6 @@ const Dashboard = () => {
       {isUserManageOrSimpleUser && <Welcome />}
       {isUserManageOrSimpleUser && <Stats />}
       <SubmitFeedback />
-      <TraningModule />
     </Stack>
   )
 }

@@ -43,13 +43,13 @@ type Option = {
    Constants
 ======================= */
 
-const ACTION_TYPE_OPTIONS: Option[] = [
-  { value: 'READ', label: 'Read' },
-  { value: 'CREATED', label: 'Created' },
-  { value: 'UPDATED', label: 'Updated' },
-  { value: 'DELETED', label: 'Deleted' },
-  { value: 'UPSERT', label: 'Upsert' }
-]
+// const ACTION_TYPE_OPTIONS: Option[] = [
+//   { value: 'READ', label: 'Read' },
+//   { value: 'CREATED', label: 'Created' },
+//   { value: 'UPDATED', label: 'Updated' },
+//   { value: 'DELETED', label: 'Deleted' },
+//   { value: 'UPSERT', label: 'Upsert' }
+// ]
 
 // const FIELD_FLEX_SX = {
 //   flex: {
@@ -281,7 +281,7 @@ const AuditLogsContent: React.FC = () => {
         </FormControl>
 
         {/* Action type */}
-        <FormControl>
+        {/* <FormControl>
           <InputLabel id='action-type-label'>Action type</InputLabel>
           <Controller
             name='actionType'
@@ -320,7 +320,7 @@ const AuditLogsContent: React.FC = () => {
               )
             }}
           />
-        </FormControl>
+        </FormControl> */}
 
         {/* Date range */}
         <Box>
