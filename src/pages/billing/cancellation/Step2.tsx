@@ -26,6 +26,7 @@ const reasons = [
 export const Step2 = ({ goBack, close }: any) => {
   const { activePractice } = useActivePractice()
   const practiceId = activePractice?.id
+  const endDate = activePractice?.subscription_details?.next_billing_date
   const { email } = useUserDetails()
   const currentUserEmail = email
   const queryClient = useQueryClient()
@@ -33,7 +34,16 @@ export const Step2 = ({ goBack, close }: any) => {
   const [selected, setSelected] = useState('')
   const [otherReason, setOtherReason] = useState('')
   const [loading, setLoading] = useState(false)
+  const formatDate = (date?: string) => {
+    if (!date) return ''
+    const d = new Date(date)
 
+    const day = String(d.getDate()).padStart(2, '0')
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const year = d.getFullYear()
+
+    return `${day}/${month}/${year}`
+  }
   const submitCancellation = async () => {
     const payload = {
       email: currentUserEmail,
@@ -89,7 +99,7 @@ export const Step2 = ({ goBack, close }: any) => {
         <ul>
           <li>
             Your access will remain active until{' '}
-            <strong>28/11/2025.</strong>{' '}
+            <strong>{formatDate(endDate)}</strong>{' '}
           </li>
           <li>You’ll continue to enjoy all paid features until that date.</li>
 
