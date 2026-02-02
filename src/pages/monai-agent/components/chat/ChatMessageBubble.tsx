@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material'
+import { Box, CircularProgress, Typography } from '@mui/material'
 import { ChatMessage } from '../../hooks/useChat'
 
 interface Props {
@@ -21,10 +21,12 @@ const ChatMessageBubble = ({ message }: Props) => {
         borderRadius={2}
         bgcolor={isUser ? 'primary.main' : 'grey.100'}
         color={isUser ? 'primary.contrastText' : 'text.primary'}
+        display={'flex'}
+        alignItems={'center'}
       >
+        {message.isStreaming && <CircularProgress size={20} />}
         <Typography variant='body2' whiteSpace='pre-wrap'>
           {message.content}
-          {message.isStreaming && '|'}
         </Typography>
       </Box>
     </Box>

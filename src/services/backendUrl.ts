@@ -1,5 +1,6 @@
 export const API_BASE = 'user-workstation/v1'
 export const API_BASE_DOCUMENTS = 'docs/v1'
+export const API_BASE_CHATBOT = 'chatbot/v1'
 export const API_BASE_BANK_INTEGRATOR = 'banking/v1'
 
 export const endpoints = {
@@ -32,6 +33,10 @@ export const endpoints = {
       `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/accounts/`,
     reconsentConfirm: (practiceId: string) =>
       `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/reconsent/confirm/`
+  },
+  chatBot: {
+    chat: (practiceId: string) =>
+      `${API_BASE_CHATBOT}/practices/${practiceId}/chat/`
   },
   audit: {
     appAuditLogs: (practiceId: string) =>

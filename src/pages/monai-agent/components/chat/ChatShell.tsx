@@ -22,6 +22,8 @@ const ChatShell = () => {
           <ChatHeader />
         </>
       ) : (
+        // <ChatHeader />
+
         <ChatMessages messages={messages} />
       )}
       <Box
@@ -37,6 +39,7 @@ const ChatShell = () => {
       >
         <ChatInput onSend={sendMessage} disabled={isSending} />
         {!hasMessages && <SuggestionGrid />}
+        {/* <SuggestionGrid /> */}
       </Box>
     </Box>
   )
