@@ -4,8 +4,18 @@ import Support from './Support'
 import FeedbackType from './FeedbackType'
 
 const SubmitFeedback = () => {
+  const isDisabled = true
+
   return (
-    <Box className={styles.submitFeedbackRoot}>
+    <Box
+      className={styles.submitFeedbackRoot}
+      sx={{
+        opacity: isDisabled ? 0.5 : 1,
+        pointerEvents: isDisabled ? 'none' : 'auto',
+        filter: isDisabled ? 'grayscale(1)' : 'none',
+        userSelect: isDisabled ? 'none' : 'auto'
+      }}
+    >
       <Support
         avatarSrc='/assets/feedback-icon.svg'
         heading='Submit Feedback'

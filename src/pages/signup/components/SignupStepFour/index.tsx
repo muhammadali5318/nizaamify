@@ -54,7 +54,7 @@ const SignupStepFour = () => {
           mode='dark'
           title='Professional plan'
           planType='PROFESSIONAL'
-          price={99}
+          price={199}
           buttonTitle='Get started now'
           priceSuffix='/ Month'
           description='Ideal for practices that need advanced insights and tools to manage finances effectively.'
@@ -75,6 +75,8 @@ const SignupStepFour = () => {
         alignItems={'center'}
       >
         <Button
+          variant='outlined'
+          size='large'
           onClick={() => {
             setModalMode('CHOOSE_PACKAGE_LATER')
             setIsModalOpen(true)

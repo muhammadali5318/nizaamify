@@ -1,33 +1,37 @@
-import { Box, CircularProgress } from '@mui/material'
+import { Box, CircularProgress, Typography } from '@mui/material'
+import { useState } from 'react'
+import dayjs from 'dayjs'
+
 import styles from './expenseBreakdown.module.scss'
 import ExpensePageHeader from './components/expense-header/ExpensePageHeader'
 import ExpensesGrandTotal from './components/expense-header'
 import ReusableAccordion from './components/expense-accordion'
+
 import { useFetchExpenseBreakdown } from './hooks/useFetchExpenseBreakdown'
 import { useAuth } from 'src/context/AuthProvider'
-import dayjs from 'dayjs'
 import { RangeISO } from 'src/components/date-range-selector'
-import { useState } from 'react'
 import { formatAmountWithCommas } from 'src/utils/stringUtils'
 
 const ExpenseBreakdown = () => {
   const { accessToken } = useAuth()
 
-  // ✅ Date state lives here
+  // Date range state
   const [dateRange, setDateRange] = useState<RangeISO>({
     start: dayjs().startOf('year').toISOString(),
     end: dayjs().endOf('month').toISOString()
   })
 
+  // Explicit date validity check (UX fix)
+  const hasValidDate = Boolean(dateRange?.start) && Boolean(dateRange?.end)
+
   const { data, isPending } = useFetchExpenseBreakdown({
-    enabled: !!accessToken,
+    enabled: !!accessToken && hasValidDate,
     startDate: dateRange.start,
     endDate: dateRange.end
   })
 
   return (
     <Box className={styles.expenseBreakdownRoot} width='100%'>
-      {/* Pass date state down */}
       <ExpensePageHeader
         heading='Expense Breakdown'
         dateRange={dateRange}
@@ -35,9 +39,27 @@ const ExpenseBreakdown = () => {
         avatarSrc='/assets/wallet-bg-green.svg'
         subheading='Detailed view of all expense categories and subcategories'
       />
-      {isPending ? (
+
+      {/* 🔹 No date selected */}
+      {!hasValidDate && (
         <Box
+          minHeight='20vh'
           width={'100%'}
+          display='flex'
+          alignItems='center'
+          justifyContent='center'
+          textAlign='center'
+        >
+          <Typography variant='body2' color='text.secondary'>
+            Select a date range to view expense breakdown.
+          </Typography>
+        </Box>
+      )}
+
+      {/* 🔹 Loading */}
+      {hasValidDate && isPending && (
+        <Box
+          width='100%'
           display='flex'
           alignItems='center'
           justifyContent='center'
@@ -45,7 +67,10 @@ const ExpenseBreakdown = () => {
         >
           <CircularProgress />
         </Box>
-      ) : (
+      )}
+
+      {/* 🔹 Data */}
+      {hasValidDate && !isPending && (
         <>
           <ExpensesGrandTotal
             label='Total Monthly Expenses:'
@@ -53,7 +78,7 @@ const ExpenseBreakdown = () => {
           />
 
           {data?.categories?.map((category: any, idx: number) => {
-            const expenseType = data?.expense_type.find(
+            const expenseType = data?.expense_type?.find(
               (expense: any) =>
                 expense.expense_type === category?.parent_category
             )
@@ -65,7 +90,7 @@ const ExpenseBreakdown = () => {
                 dateRange={dateRange}
                 total={category?.amount}
                 chips={[
-                  `${expenseType?.expense_subtypes?.length} subcategories`
+                  `${expenseType?.expense_subtypes?.length ?? 0} subcategories`
                 ]}
                 expenseSubtypes={expenseType?.expense_subtypes}
               />

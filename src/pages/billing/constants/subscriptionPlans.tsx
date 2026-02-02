@@ -44,7 +44,7 @@ export const getSubscribedPlan = (activePractice: any) => {
     icon: <img src={StarImg} alt='star' />,
     tickIcon: <img src={tickImg} alt='tick' />,
     title: 'Professional Plan',
-    price: '£99',
+    price: '£199',
     priceSuffix: '/Month',
     description:
       'Ideal for practices needing insights and tools to manage finances.',

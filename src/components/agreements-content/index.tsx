@@ -49,33 +49,112 @@ function buildSrcDoc(rawHtml: string) {
   if (!rawHtml)
     return '<!doctype html><html><body><p>No content</p></body></html>'
 
-  // small style to ensure the iframe body is the scroll surface and has consistent padding behavior
   const injectedStyles = `
     <style>
-      html, body { height: 100%; margin: 0; padding: 0; }
-      body { box-sizing: border-box; min-height: 100vh; overflow: auto; -webkit-overflow-scrolling: touch; padding: 16px; }
-      /* make sure embedded content like images/tables won't overflow horizontally */
+      html, body { height: auto; margin: 0; padding: 0; }
+      body { box-sizing: border-box; min-height: 100vh; overflow: visible; -webkit-overflow-scrolling: touch;
+             padding: 0 300px; /* large gutters live inside iframe doc */
+           }
       img, table { max-width: 100%; height: auto; }
+      /* responsive gutters */
+      @media (max-width: 1200px) { body { padding: 0 200px; } }
+      @media (max-width: 992px)  { body { padding: 0 120px; } }
+      @media (max-width: 768px)  { body { padding: 0 48px; } }
+      @media (max-width: 600px)  { body { padding: 0 16px; } }
     </style>
+  `
+
+  // script that posts height to parent and keeps observing changes
+  const injectedScript = `
+    <script>
+      (function () {
+        function computeHeight() {
+          try {
+            var doc = document.documentElement;
+            var body = document.body;
+            var h = Math.max(
+              doc.scrollHeight, body.scrollHeight,
+              doc.offsetHeight, body.offsetHeight,
+              doc.clientHeight
+            );
+            return h;
+          } catch (e) {
+            return null;
+          }
+        }
+
+        function postHeight() {
+          var h = computeHeight();
+          if (h !== null) {
+            // send the height to parent; parent will verify the source
+            window.parent.postMessage({ type: 'agreement-doc-height', height: h }, '*');
+          }
+        }
+
+        // post initial height after load (and after a short delay to allow layout)
+        function onReady() {
+          postHeight();
+          // for images that may load after DOMContentLoaded
+          Array.from(document.images || []).forEach(function(img) {
+            if (!img.complete) {
+              img.addEventListener('load', postHeight, { once: true });
+              img.addEventListener('error', postHeight, { once: true });
+            }
+          });
+        }
+
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+          setTimeout(onReady, 50);
+        } else {
+          window.addEventListener('DOMContentLoaded', function() { setTimeout(onReady, 50); });
+          window.addEventListener('load', function() { setTimeout(postHeight, 50); });
+        }
+
+        // ResizeObserver to detect layout changes (preferred)
+        try {
+          var ro = new ResizeObserver(function() { postHeight(); });
+          ro.observe(document.documentElement);
+          ro.observe(document.body);
+        } catch (e) {
+          // ResizeObserver may not exist in some environments; fallback below
+        }
+
+        // MutationObserver to detect DOM changes that change height
+        try {
+          var mo = new MutationObserver(function() { postHeight(); });
+          mo.observe(document.body, { childList: true, subtree: true, attributes: true, characterData: true });
+        } catch (e) {}
+
+        // As extra fallback, poll a few times (short-lived) for dynamic changes
+        var polls = 0;
+        var pollInterval = setInterval(function() {
+          postHeight();
+          polls++;
+          if (polls > 40) clearInterval(pollInterval); // stops after ~2s (40 * 50ms)
+        }, 50);
+
+        // also listen to window resize inside iframe
+        window.addEventListener('resize', postHeight);
+      })();
+    </script>
   `
 
   // Quick check for a <head> tag
   const headOpen = /<head[^>]*>/i.test(rawHtml)
   if (headOpen) {
-    // insert base, meta and our small style block
     return rawHtml.replace(
       /<head([^>]*)>/i,
-      `<head$1><base target="_blank"><meta name="viewport" content="width=device-width,initial-scale=1">${injectedStyles}`
+      `<head$1><base target="_blank"><meta name="viewport" content="width=device-width,initial-scale=1">${injectedStyles}${injectedScript}`
     )
   }
 
-  // If no head, wrap in a minimal doc — keep rawHtml as body content
   return `<!doctype html>
 <html>
 <head>
   <base target="_blank">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   ${injectedStyles}
+  ${injectedScript}
 </head>
 <body>
   ${rawHtml}
@@ -143,7 +222,7 @@ const AgreementContent: React.FC = () => {
           sx={{
             overflow: 'hidden', // parent won't scroll; iframe will
             bgcolor: 'background.paper',
-            p: 2,
+            py: 2,
             display: 'flex',
             flexDirection: 'column'
           }}

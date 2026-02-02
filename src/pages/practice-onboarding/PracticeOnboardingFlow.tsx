@@ -18,7 +18,6 @@ import {
   StepFourFormValues
 } from 'src/schema-validations/practice-onboarding'
 import { StepOne, StepTwo, StepThree, StepFour } from './components'
-import { useAuth0 } from '@auth0/auth0-react'
 import StepFive from './components/stepFive'
 import { StepFiveFormValues } from 'src/schema-validations/practice-onboarding/stepFive'
 import useUserDetails from 'src/hooks/useUserDetails'
@@ -65,7 +64,7 @@ const initialStepFive: StepFiveFormValues = {
 const PracticeOnboardingFlow: React.FC = () => {
   const { isUserOwnerOrDirector } = useUserDetails()
 
-  const { user } = useAuth0()
+  const { firstName } = useUserDetails()
   const { accessToken } = useAuth()
   const { data: practice, isLoading } = useInitialData(!!accessToken)
 
@@ -258,7 +257,7 @@ const PracticeOnboardingFlow: React.FC = () => {
             heading={
               <>
                 Welcome to Monai Tech{' '}
-                <span className='font-weight--700'>{user?.family_name}!</span>
+                <span className='font-weight--700'>{firstName}!</span>
               </>
             }
             subHeading='Let’s set up your practice profile to personalise your experience'

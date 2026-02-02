@@ -158,7 +158,7 @@ export default function EditDocumentModal({
             <TextField
               select
               fullWidth
-              label='Document category'
+              label='Category'
               value={formData.document_category}
               onChange={(e) =>
                 handleChange('document_category', e.target.value)
@@ -174,7 +174,7 @@ export default function EditDocumentModal({
             <TextField
               select
               fullWidth
-              label='Document type'
+              label='Document category'
               value={formData.document_type}
               onChange={(e) => handleChange('document_type', e.target.value)}
             >
@@ -188,7 +188,7 @@ export default function EditDocumentModal({
             <TextField
               select
               fullWidth
-              label='Document subtype'
+              label='Document subcategory'
               value={formData.document_subtype}
               onChange={(e) => handleChange('document_subtype', e.target.value)}
               disabled={!formData.document_type}

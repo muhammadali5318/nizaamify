@@ -290,7 +290,13 @@ const MainDashboard = () => {
             borderRadius: '12px',
             display: 'flex',
             flexDirection: 'column',
-            gap: 2
+            gap: 2,
+
+            // 🔒 disabled styles
+            opacity: 0.5,
+            pointerEvents: 'none',
+            filter: 'grayscale(1)',
+            userSelect: 'none'
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

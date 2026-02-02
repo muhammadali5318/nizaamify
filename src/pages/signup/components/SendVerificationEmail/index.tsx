@@ -107,12 +107,12 @@ const SendVerificationEmail: React.FC<Props> = ({ email, pracitceId }) => {
 
         <Box
           className={styles.emailVerificationRoot}
-          sx={{
-            width: { xs: '100%', sm: '100%', md: '636px' },
-            mx: 'auto',
-            px: { xs: 2, sm: 3, md: 6 },
-            py: { xs: 3, md: 4 }
-          }}
+          // sx={{
+          //   width: { xs: '100%', sm: '100%', md: '636px' },
+          //   mx: 'auto',
+          //   px: { xs: 2, sm: 3, md: 6 },
+          //   py: { xs: 3, md: 4 }
+          // }}
         >
           <Box className={styles.emailVerificationInfoContainer}>
             <Typography variant='h4' className='font-weight--700'>
@@ -175,7 +175,8 @@ const SendVerificationEmail: React.FC<Props> = ({ email, pracitceId }) => {
 
           <Box>
             <Typography variant='subtitle1' color='var(--color-text-secondary)'>
-              If you still haven’t received the email, please <ContactSupport />
+              If you still haven’t received the email, please{' '}
+              <ContactSupport email='hello@monai.tech' />
             </Typography>
           </Box>
         </Box>

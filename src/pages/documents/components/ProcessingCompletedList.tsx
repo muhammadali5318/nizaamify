@@ -235,11 +235,11 @@ export default function ProcessingCompletedList() {
                     <strong>
                       {dayjs(doc.document_date).format('DD-MM-YYYY') || '—'}
                     </strong>
-                    &nbsp; | &nbsp; Document category:{' '}
+                    &nbsp; | &nbsp; Category:{' '}
                     <strong>{doc.document_category || '—'}</strong>
-                    &nbsp; | &nbsp; Document type:{' '}
+                    &nbsp; | &nbsp; Document category:{' '}
                     <strong>{doc.document_type || '—'}</strong>
-                    &nbsp; | &nbsp; Document subtype:{' '}
+                    &nbsp; | &nbsp; Document subcategory:{' '}
                     <strong>{doc.document_subtype || '—'}</strong>
                     {!['Revenue', 'Unknown'].includes(
                       doc.document_category

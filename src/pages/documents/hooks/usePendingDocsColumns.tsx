@@ -61,7 +61,7 @@ export const usePendingDocsColumns = (
       },
       {
         field: 'document_type',
-        headerName: 'Type',
+        headerName: 'Category',
         minWidth: 140,
         flex: 1,
         sortable: true,
@@ -73,7 +73,7 @@ export const usePendingDocsColumns = (
       },
       {
         field: 'document_subtype',
-        headerName: 'Subtype',
+        headerName: 'Subcategory',
         minWidth: 130,
         flex: 1,
         sortable: true,
