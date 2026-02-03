@@ -213,6 +213,7 @@ const ManualEntryForm: React.FC = () => {
         vendor_supplier_name: formData.vendorName,
         invoice_number: formData.invoiceNumber,
         description: formData.description,
+        line_item: formData.lineItem,
         payment_date: formData.paymentDate
           ? formData.paymentDate.format('DD/MM/YYYY')
           : null,
