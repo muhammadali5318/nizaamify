@@ -7,7 +7,6 @@ import ConnectionSuccessful from './components/connection-successful'
 import BankDetails from './components/bank-details'
 import { useFetchAllInstitutionsData } from './hooks/useFetchInstitutions'
 import { useSearchParams } from 'react-router'
-import { useCheckBankConnectionHealth } from 'src/hooks/useCheckBankConnectionHealth'
 import { Box } from '@mui/material'
 
 export type Step =
@@ -29,7 +28,7 @@ const BankIntegrator = () => {
 
   const [currentStep, setCurrentStep] = useState<Step>('connect-bank')
 
-  const { data } = useCheckBankConnectionHealth(!!accessToken)
+  // const { data } = useCheckBankConnectionHealth(!!accessToken)
 
   const searchString = searchParams.toString()
   const hasError =
@@ -50,11 +49,11 @@ const BankIntegrator = () => {
 
     if (isConnectionSuccessful && connectionId) {
       setCurrentStep('success')
-    } else if (data?.has_connection && data?.days_left) {
-      setCurrentStep('bank-details')
     }
+    // else if (data?.has_connection && data?.days_left) {
+    //   setCurrentStep('bank-details')
+    // }
   }, [
-    data,
     isConnectionSuccessful,
     reconfirmConnection,
     connectionId,

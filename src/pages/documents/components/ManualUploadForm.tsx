@@ -331,11 +331,11 @@ const ManualEntryForm: React.FC = () => {
         {/* Row 2 */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <FormControl fullWidth>
-            <InputLabel>Category *</InputLabel>
+            <InputLabel>Document category *</InputLabel>
             <Select
               name='type'
               value={formData.type}
-              label='Category *'
+              label='Document category *'
               onChange={handleSelectChange}
             >
               {types.map((type) => (
@@ -346,11 +346,11 @@ const ManualEntryForm: React.FC = () => {
             </Select>
           </FormControl>
           <FormControl fullWidth disabled={!formData.type}>
-            <InputLabel>Subcategory *</InputLabel>
+            <InputLabel>Document subcategory *</InputLabel>
             <Select
               name='subtype'
               value={formData.subtype}
-              label='Subcategory *'
+              label='Document subcategory *'
               onChange={handleSelectChange}
             >
               {subtypes.map((subtype) => (
