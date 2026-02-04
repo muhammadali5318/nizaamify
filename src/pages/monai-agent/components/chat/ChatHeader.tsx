@@ -1,22 +1,25 @@
-import { Typography } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 
 const ChatHeader = () => {
   return (
-    <>
+    <Stack alignItems='center' spacing={2} px={2}>
       <img
         src='/assets/agent-heading-Icon.svg'
         alt='Monai Agent Logo'
-        style={{ width: 60, marginBottom: 16, marginTop: 12 }}
+        className='icon-dimension--48'
       />
-      <Typography variant='h4' fontWeight={600} gutterBottom>
-        Hello! How can I help you today?
-      </Typography>
 
-      <Typography variant='body2' color='text.secondary' align='center' mb={4}>
-        Ask me anything about your practice finances, patient metrics, or get
-        insights to grow your business.
-      </Typography>
-    </>
+      <Stack gap={0.5} maxWidth={500} width='100%'>
+        <Typography variant='h4' fontWeight={700} textAlign='center'>
+          Hello! How can I help you today?
+        </Typography>
+
+        <Typography variant='body2' color='text.secondary' textAlign='center'>
+          Ask me anything about your practice finances, patient metrics, or get
+          insights to grow your business.
+        </Typography>
+      </Stack>
+    </Stack>
   )
 }
 

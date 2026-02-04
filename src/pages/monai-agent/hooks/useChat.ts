@@ -1,3 +1,4 @@
+// src/hooks/useChat.ts
 import { useState, useCallback, useRef } from 'react'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import apiClient from 'src/services/api-client'
@@ -20,7 +21,6 @@ const THINKING_MESSAGES = [
 ]
 
 const THINKING_INTERVAL = 2000 // ms
-const SPINNER = '⏳ ' // can replace with ⏳ / 🔄 / ⏱️
 
 export const useChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -51,7 +51,7 @@ export const useChat = () => {
         msg.id === assistantMessageId
           ? {
               ...msg,
-              content: `${SPINNER}${THINKING_MESSAGES[0]}`,
+              content: THINKING_MESSAGES[0],
               isStreaming: true
             }
           : msg
@@ -67,7 +67,7 @@ export const useChat = () => {
           msg.id === assistantMessageId
             ? {
                 ...msg,
-                content: `${SPINNER}${THINKING_MESSAGES[index]}`,
+                content: THINKING_MESSAGES[index],
                 isStreaming: true
               }
             : msg
@@ -76,7 +76,48 @@ export const useChat = () => {
     }, THINKING_INTERVAL)
   }
 
-  /* ---------------- API ---------------- */
+  /* ---------------- load existing conversation ---------------- */
+
+  /**
+   * Load an array of messages from backend into the hook state.
+   * - `history` is the backend response: array of { id, role, content, created_at, ... }
+   * - `convId` is optional conversation identifier (we'll store it)
+   */
+  const loadConversationHistory = useCallback(
+    (history: any[] = [], convId?: string | null) => {
+      // cancel any running requests / timers
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = null
+      clearThinkingInterval()
+
+      // normalize & sort by created_at if available
+      const sorted = [...history].sort((a, b) => {
+        if (!a?.created_at || !b?.created_at) return 0
+        return (
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        )
+      })
+
+      const mapped: ChatMessage[] = sorted.map((h) => {
+        const roleStr = (h.role ?? '').toString().toLowerCase()
+        // support "User" / "Assistant" or 'user' / 'assistant'
+        const role: Role = roleStr.startsWith('user') ? 'user' : 'assistant'
+        return {
+          id: h.id ?? uuid(),
+          role,
+          content: h.content ?? '',
+          isStreaming: false
+        }
+      })
+
+      setMessages(mapped)
+      setConversationId(convId ?? null)
+      setIsSending(false)
+    },
+    []
+  )
+
+  /* ---------------- API: sendMessage (unchanged) ---------------- */
 
   const sendMessage = useCallback(
     async (input: string) => {
@@ -183,8 +224,6 @@ export const useChat = () => {
 
   const resetConversation = useCallback(() => {
     abortControllerRef.current?.abort()
-    abortControllerRef.current = null
-
     clearThinkingInterval()
 
     setMessages([])
@@ -197,6 +236,7 @@ export const useChat = () => {
     sendMessage,
     isSending,
     conversationId,
-    resetConversation
+    resetConversation,
+    loadConversationHistory // <-- expose it
   }
 }

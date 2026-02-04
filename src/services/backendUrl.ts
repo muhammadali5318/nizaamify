@@ -36,7 +36,11 @@ export const endpoints = {
   },
   chatBot: {
     chat: (practiceId: string) =>
-      `${API_BASE_CHATBOT}/practices/${practiceId}/chat/`
+      `${API_BASE_CHATBOT}/practices/${practiceId}/chat/`,
+    recentChats: (practiceId: string) =>
+      `${API_BASE_CHATBOT}/practices/${practiceId}/chat-sessions/`,
+    chatsHistory: (practiceId: string, conversationId: string) =>
+      `${API_BASE_CHATBOT}/practices/${practiceId}/chat-history/${conversationId}/`
   },
   audit: {
     appAuditLogs: (practiceId: string) =>

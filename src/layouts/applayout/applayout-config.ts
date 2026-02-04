@@ -49,7 +49,7 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         moduleId: 'non-pandl'
       },
       {
-        text: 'monai Agent',
+        text: 'Monai Agent',
         to: paths.monaiAgent,
         activeIcon: 'agent-active.svg',
         inactiveIcon: 'agent-inactive.svg',

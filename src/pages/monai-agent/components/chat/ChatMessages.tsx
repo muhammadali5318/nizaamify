@@ -11,16 +11,17 @@ const ChatMessages = ({ messages }: Props) => {
   const bottomRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
+    // Smooth scroll to bottom when new messages arrive
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   return (
-    <Box flex={1} width='100%' maxWidth={900} overflow='auto' px={2} py={3}>
+    <Box width='100%' maxWidth={900}>
       {messages.map((msg) => (
         <ChatMessageBubble key={msg.id} message={msg} />
       ))}
-
-      <div ref={bottomRef} />
+      {/* This empty div acts as a scroll anchor */}
+      <div ref={bottomRef} style={{ height: '1px' }} />
     </Box>
   )
 }

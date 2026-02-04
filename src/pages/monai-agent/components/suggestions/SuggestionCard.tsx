@@ -31,8 +31,8 @@ const SuggestionCard = ({ text, iconSrc, onClick }: Props) => {
           display: 'flex',
           alignItems: 'center',
           gap: 1.5,
-          px: 2,
-          py: 1.5
+          px: 1.5,
+          py: 1
         }}
       >
         {/* SVG Icon */}

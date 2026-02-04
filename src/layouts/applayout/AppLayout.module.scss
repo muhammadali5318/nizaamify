@@ -13,10 +13,18 @@
   background: white;
   height: calc(100% - 72px);
 
-   @media (max-width: 768px) {
+  // mobile
+  @media (max-width: 600px) {
+    height: calc(100% - 120px);
+    border-radius: 0;
+  }
+
+  // tablet
+  @media (max-width: 768px) {
     border-radius: 0;
   }
 }
+
 
 .toggleBtn {
   height: 42px;

@@ -26,6 +26,7 @@ const ChatMessageBubble = ({ message }: Props) => {
       >
         {message.isStreaming && <CircularProgress size={20} />}
         <Typography variant='body2' whiteSpace='pre-wrap'>
+          {' '}
           {message.content}
         </Typography>
       </Box>
