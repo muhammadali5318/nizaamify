@@ -1,16 +1,18 @@
+// src/services/apis/pollBatchStatusUntilComplete.ts
 import { triggerProcessAPI } from '../services/apis/triggerProcessAPI'
 import apiClient from '../services/api-client'
 import { store } from '../store/store'
 import { notify } from '../components/notistack/NotificationProvider'
 import { addOrUpdateProcessedBatchStatus } from '../store/slices/processedBatchDataSlice'
 import { addOrUpdateBatchStatus } from 'src/store/slices/processingSlice'
-
 import {
   addPollingJob,
   removePollingJob
 } from '../store/slices/pollingJobSlice'
+import { deleteBatchDocuments } from 'src/services/apis/deleteBatchDocuments'
 
 const activeJobs = new Set<string>()
+const DOC_TIMEOUT_MS = 5000
 
 export const pollBatchStatusUntilComplete = async (
   batchId: string,
@@ -22,27 +24,31 @@ export const pollBatchStatusUntilComplete = async (
   pollInterval: number = 3000
 ) => {
   const jobId = `${batchId}-${key}`
+
   if (activeJobs.has(jobId)) {
-    console.warn(
-      `Polling job already active for ${jobId}, skipping duplicate call.`
-    )
+    console.warn(`Polling job already active for ${jobId}`)
     return
   }
 
   activeJobs.add(jobId)
 
-  try {
-    store.dispatch(
-      addPollingJob({
-        batchId,
-        key,
-        filename,
-        userId,
-        practiceId,
-        startedAt: Date.now()
-      })
-    )
+  // Track which documents have already been deleted to avoid duplicate calls
+  const deletedTimedOutDocs = new Set<string>()
 
+  store.dispatch(
+    addPollingJob({
+      batchId,
+      key,
+      filename,
+      userId,
+      practiceId,
+      startedAt: Date.now()
+    })
+  )
+
+  const docFirstSeenAt: Record<string, number> = {}
+
+  try {
     const triggerRes = await triggerProcessAPI(
       batchId,
       key,
@@ -50,23 +56,21 @@ export const pollBatchStatusUntilComplete = async (
       userId,
       practiceId
     )
-
     const data = triggerRes?.data ?? triggerRes
     const document = data?.document
     if (!document) throw new Error('No document returned from process API')
 
-    const secureBatchStatusUrl =
+    const batchStatusUrl =
       data.batch_status_url?.replace(/^http:\/\//i, 'https://') ||
       data.batch_status_url
+    if (!batchStatusUrl) throw new Error('No batch_status_url found')
 
-    if (!secureBatchStatusUrl)
-      throw new Error('No batch_status_url found in process response')
-
+    // 🔵 Initial processing state
     store.dispatch(
       addOrUpdateBatchStatus({
         batch_id: data.batch_id,
         practice_id: document.practice_id,
-        batch_status_url: secureBatchStatusUrl,
+        batch_status_url: batchStatusUrl,
         documents: [
           {
             document_id: document.document_id,
@@ -78,96 +82,82 @@ export const pollBatchStatusUntilComplete = async (
       })
     )
 
-    const prevStatuses: Record<string, string> = {}
     let attempt = 0
 
     while (attempt < maxAttempts) {
       attempt++
 
-      try {
-        const batchRes = await apiClient.get(secureBatchStatusUrl)
-        const batchData = batchRes?.data?.data ?? batchRes?.data
+      const res = await apiClient.get(batchStatusUrl)
+      const batchData = res?.data?.data ?? res?.data
+      const now = Date.now()
 
-        if (!batchData?.documents?.length) {
-          console.warn(
-            `No documents found in batch response at attempt ${attempt}`
-          )
-          await new Promise((resolve) => setTimeout(resolve, pollInterval))
-          continue
+      // Track documents and calculate TIMED_OUT
+      let documents = batchData.documents.map((doc: any) => {
+        if (!docFirstSeenAt[doc.document_id])
+          docFirstSeenAt[doc.document_id] = now
+        const elapsed = now - docFirstSeenAt[doc.document_id]
+
+        if (doc.status === 'PENDING' && elapsed > DOC_TIMEOUT_MS) {
+          return { ...doc, ui_status: 'TIMED_OUT' }
         }
 
-        const changedDocs = batchData.documents.filter((doc: any) => {
-          const currentStatus = doc.status?.toUpperCase?.() ?? 'UNKNOWN'
-          const prevStatus = prevStatuses[doc.document_id]
-          prevStatuses[doc.document_id] = currentStatus
-          return currentStatus !== 'PENDING' && currentStatus !== prevStatus
-        })
+        return { ...doc, ui_status: doc.status }
+      })
 
-        if (changedDocs.length > 0) {
-          store.dispatch(
-            addOrUpdateProcessedBatchStatus({
-              batch_id: batchData.batch_id,
-              created_at: batchData.created_at,
-              total_files: batchData.total_files,
-              processed_success: batchData.processed_success,
-              processed_failed: batchData.processed_failed,
-              email_sent: batchData.email_sent,
-              callback_task_id: batchData.callback_task_id,
-              documents: batchData.documents.map((doc: any) => ({
-                document_id: doc.document_id,
-                file_name: doc.file_name,
-                status: doc.status,
-                document_type: doc.document_type,
-                document_subtype: doc.document_subtype,
-                document_category: doc.document_category,
-                document_date: doc.document_date,
-                expense_category: doc.expense_category,
-                amount: doc.amount,
-                error_message: doc.error_message,
-                status_url: doc.status_url?.replace(/^http:\/\//i, 'https://')
-              }))
-            })
+      // 🔴 Delete TIMED_OUT documents from backend
+      const timedOutIdsToDelete = documents
+        .filter(
+          (d: any) =>
+            d.ui_status === 'TIMED_OUT' &&
+            !deletedTimedOutDocs.has(d.document_id)
+        )
+        .map((d: any) => d.document_id)
+
+      if (timedOutIdsToDelete.length > 0) {
+        try {
+          await deleteBatchDocuments(practiceId, batchId, timedOutIdsToDelete)
+          timedOutIdsToDelete.forEach((id) => deletedTimedOutDocs.add(id))
+
+          // mark deleted locally so UI updates immediately
+          documents = documents.map((doc: any) =>
+            timedOutIdsToDelete.includes(doc.document_id)
+              ? { ...doc, status: 'DELETED', ui_status: 'DELETED' }
+              : doc
+          )
+        } catch (deleteErr) {
+          console.error('Failed to delete timed out documents:', deleteErr)
+          notify.error(
+            'Unable to remove stalled documents. You can retry or skip them manually.'
           )
         }
-
-        const allProcessed = batchData.documents.every(
-          (doc: any) => doc.status?.toUpperCase?.() !== 'PENDING'
-        )
-
-        if (allProcessed) {
-          store.dispatch(removePollingJob(batchId))
-          return batchData
-        }
-      } catch (batchErr) {
-        console.error(
-          `Error fetching batch status (attempt ${attempt}):`,
-          batchErr
-        )
-        console.error(
-          `Failed to fetch batch status for ${filename} (Attempt ${attempt})`
-        )
       }
 
-      await new Promise((resolve) => setTimeout(resolve, pollInterval))
+      // Update Redux state
+      store.dispatch(
+        addOrUpdateProcessedBatchStatus({ ...batchData, documents })
+      )
+
+      // Check if all done
+      const allDone = documents.every(
+        (d: any) => !['PENDING', 'TIMED_OUT'].includes(d.ui_status)
+      )
+      if (allDone) {
+        store.dispatch(removePollingJob(batchId))
+        return batchData
+      }
+
+      await new Promise((r) => setTimeout(r, pollInterval))
     }
 
     notify.error(
-      `Polling stopped for ${filename}: exceeded ${maxAttempts} attempts without completion`
+      `Processing stopped for ${filename}: exceeded maximum wait time`
     )
-
-    store.dispatch(removePollingJob(batchId))
-
-    throw new Error(
-      `Max polling attempts (${maxAttempts}) reached for ${filename}`
-    )
+    throw new Error('Polling timeout exceeded')
   } catch (err) {
-    console.error(`Error in pollBatchStatusUntilComplete for ${filename}:`, err)
-
-    store.dispatch(removePollingJob(batchId))
-
-    console.error(`Processing failed for ${filename}`)
+    console.error(`Polling failed for ${filename}`, err)
     throw err
   } finally {
     activeJobs.delete(jobId)
+    store.dispatch(removePollingJob(batchId))
   }
 }
