@@ -1,10 +1,11 @@
-/* eslint-disable no-console */
 // src/services/apis/pollBatchStatusUntilComplete.ts
 import { triggerProcessAPI } from '../services/apis/triggerProcessAPI'
 import apiClient from '../services/api-client'
 import { store } from '../store/store'
-import { notify } from '../components/notistack/NotificationProvider'
-import { addOrUpdateProcessedBatchStatus } from '../store/slices/processedBatchDataSlice'
+import {
+  addOrUpdateProcessedBatchStatus,
+  addDeletedDocsDueToTimeout
+} from '../store/slices/processedBatchDataSlice'
 import { addOrUpdateBatchStatus } from 'src/store/slices/processingSlice'
 import {
   addPollingJob,
@@ -13,7 +14,7 @@ import {
 import { deleteBatchDocuments } from 'src/services/apis/deleteBatchDocuments'
 
 const activeJobs = new Set<string>()
-const DOC_TIMEOUT_MS = 5000 // Total time allowed for polling before we force delete
+const DOC_TIMEOUT_MS = 2000
 
 export const pollBatchStatusUntilComplete = async (
   batchId: string,
@@ -25,12 +26,7 @@ export const pollBatchStatusUntilComplete = async (
   pollInterval: number = 3000
 ) => {
   const jobId = `${batchId}-${key}`
-
-  if (activeJobs.has(jobId)) {
-    console.warn(`Polling job already active for ${jobId}`)
-    return
-  }
-
+  if (activeJobs.has(jobId)) return
   activeJobs.add(jobId)
 
   store.dispatch(
@@ -61,7 +57,7 @@ export const pollBatchStatusUntilComplete = async (
       data.batch_status_url
     if (!batchStatusUrl) throw new Error('No batch_status_url found')
 
-    // Initial processing state sync
+    // Register initial processing state
     store.dispatch(
       addOrUpdateBatchStatus({
         batch_id: data.batch_id,
@@ -82,63 +78,47 @@ export const pollBatchStatusUntilComplete = async (
     let lastKnownBatchData: any = null
     let attempt = 0
 
-    // --- PHASE 1: ACTIVE POLLING ---
+    // --- PHASE 1: POLLING ---
     while (attempt < maxAttempts) {
       attempt++
       const res = await apiClient.get(batchStatusUrl)
       lastKnownBatchData = res?.data?.data ?? res?.data
 
-      const now = Date.now()
-      const elapsed = now - startTime
-
-      // Update Redux with current backend state
       store.dispatch(addOrUpdateProcessedBatchStatus(lastKnownBatchData))
 
-      // Check if everything finished naturally (SUCCESS or FAILED)
       const allFinished = lastKnownBatchData.documents.every(
         (doc: any) => doc.status !== 'PENDING'
       )
+      if (allFinished) return lastKnownBatchData
 
-      if (allFinished) {
-        return lastKnownBatchData
-      }
-
-      // Check if we have hit the global timeout for this batch
-      if (elapsed >= DOC_TIMEOUT_MS) {
-        console.log(
-          `Global timeout reached after ${elapsed}ms. Stopping polling for cleanup.`
-        )
-        break // Exit loop to move to Phase 2
-      }
+      if (Date.now() - startTime >= DOC_TIMEOUT_MS) break
 
       // eslint-disable-next-line promise/param-names
       await new Promise((r) => setTimeout(r, pollInterval))
     }
 
-    // --- PHASE 2: BULK DELETE STUCK DOCUMENTS ---
-    // Extract docs that are still 'PENDING'
-    const stuckDocIds = lastKnownBatchData.documents
-      .filter((doc: any) => doc.status === 'PENDING')
-      .map((doc: any) => doc.document_id)
+    // --- PHASE 2: BULK CLEANUP ---
+    const stuckDocs = lastKnownBatchData.documents.filter(
+      (doc: any) => doc.status === 'PENDING'
+    )
 
-    if (stuckDocIds.length > 0) {
+    if (stuckDocs.length > 0) {
+      // ✅ Dispatch the entire objects to the separate "Deleted" array
+      store.dispatch(addDeletedDocsDueToTimeout(stuckDocs))
+
       try {
+        const stuckDocIds = stuckDocs.map((doc: any) => doc.document_id)
         await deleteBatchDocuments(practiceId, batchId, stuckDocIds)
-        console.log(
-          `Successfully deleted ${stuckDocIds.length} stuck documents.`
-        )
-      } catch (deleteErr) {
-        console.error('Failed to delete stuck documents:', deleteErr)
-        notify.error('Cleanup failed. Some documents may still be processing.')
+      } catch (err) {
+        console.error('Cleanup API failed', err)
       }
     }
 
-    // --- PHASE 3: FINAL REFRESH ---
-    // Call the status API one last time to get the final clean state
+    // --- PHASE 3: FINAL SYNC ---
     const finalRes = await apiClient.get(batchStatusUrl)
     const finalData = finalRes?.data?.data ?? finalRes?.data
-
     store.dispatch(addOrUpdateProcessedBatchStatus(finalData))
+
     return finalData
   } catch (err) {
     console.error(`Polling failed for ${filename}`, err)

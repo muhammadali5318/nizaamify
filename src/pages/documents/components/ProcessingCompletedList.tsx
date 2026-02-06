@@ -29,6 +29,7 @@ import NotificationBanner from 'src/components/common/NotificationBanner'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import dayjs from 'dayjs'
 import { clearProcessing } from 'src/store/slices/processingSlice'
+import DeletedDocumentsList from './DeletedDocumentsList'
 export default function ProcessingCompletedList() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -38,6 +39,9 @@ export default function ProcessingCompletedList() {
   const [openModal, setOpenModal] = useState(false)
   const [successOpen, setSuccessOpen] = useState(false)
   const navigate = useNavigate()
+  const deletedDocs = useSelector(
+    (state: RootState) => state.processed.deletedDocumentsDueToTimeout
+  )
 
   const allDocuments = Object.values(batches).flatMap((batch: any) =>
     (batch.documents || []).map((doc: any) => ({
@@ -45,6 +49,8 @@ export default function ProcessingCompletedList() {
       batch_id: batch.batch_id
     }))
   )
+  const successfulDocs = allDocuments.filter((doc) => doc.status === 'SUCCESS')
+  const isTotalTimeout = successfulDocs.length === 0 && deletedDocs.length > 0
   const { activePracticeId } = useActivePractice()
 
   console.warn(allDocuments)
@@ -97,6 +103,12 @@ export default function ProcessingCompletedList() {
     dispatch(clearProcessing())
     setSuccessOpen(false)
   }
+
+  const handleRetry = () => {
+    dispatch(clearAll())
+    dispatch(clearFiles())
+    dispatch(clearProcessing())
+  }
   return (
     <Box
       sx={{
@@ -104,27 +116,31 @@ export default function ProcessingCompletedList() {
         minWidth: '19rem'
       }}
     >
-      <Box
-        display='flex'
-        flexDirection={{ xs: 'column', sm: 'row' }}
-        justifyContent='space-between'
-        alignItems={{ xs: 'flex-start', sm: 'center' }}
-        mb={2}
-      >
-        <Typography variant='h6' fontWeight='600'>
-          Processing completed
-        </Typography>
-        <Button
-          variant='contained'
-          color='success'
-          startIcon={<CheckCircleOutlineOutlinedIcon />}
-          onClick={() => setConfirmOpen(true)}
-        >
-          Approve and continue
-        </Button>
-      </Box>
+      {!isTotalTimeout && (
+        <>
+          <Box
+            display='flex'
+            flexDirection={{ xs: 'column', sm: 'row' }}
+            justifyContent='space-between'
+            alignItems={{ xs: 'flex-start', sm: 'center' }}
+            mb={2}
+          >
+            <Typography variant='h6' fontWeight='600'>
+              Processing completed
+            </Typography>
+            <Button
+              variant='contained'
+              color='success'
+              startIcon={<CheckCircleOutlineOutlinedIcon />}
+              onClick={() => setConfirmOpen(true)}
+            >
+              Approve and continue
+            </Button>
+          </Box>
 
-      <NotificationBanner content='Please ensure you review the extracted data before approving them. The data will be used to produce financial records for your practice.' />
+          <NotificationBanner content='Please ensure you review the extracted data before approving them. The data will be used to produce financial records for your practice.' />
+        </>
+      )}
 
       {allDocuments.map((doc) => (
         <Card
@@ -275,6 +291,12 @@ export default function ProcessingCompletedList() {
           </CardContent>
         </Card>
       ))}
+      {/* 3. Show partial timeout list at the bottom if some docs succeeded */}
+      <DeletedDocumentsList
+        deletedDocs={deletedDocs}
+        isTotalTimeout={isTotalTimeout}
+        onRetry={handleRetry}
+      />
       <EditDocumentModal
         open={openModal}
         onClose={() => setOpenModal(false)}

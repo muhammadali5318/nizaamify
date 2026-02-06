@@ -1,8 +1,7 @@
-// src/store/slices/processedBatchSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '../store'
 
-interface DocumentData {
+export interface DocumentData {
   document_id: string
   file_name: string
   status: string
@@ -11,6 +10,7 @@ interface DocumentData {
   document_category?: string
   document_date?: string
   amount?: string
+  expense_category?: string
   error_message?: string | null
   status_url?: string
 }
@@ -29,10 +29,13 @@ interface BatchData {
 
 interface ProcessedBatchState {
   batches: Record<string, BatchData>
+  // ✅ Separate variable for timed out docs
+  deletedDocumentsDueToTimeout: DocumentData[]
 }
 
 const initialState: ProcessedBatchState = {
-  batches: {}
+  batches: {},
+  deletedDocumentsDueToTimeout: []
 }
 
 const processedBatchSlice = createSlice({
@@ -46,16 +49,12 @@ const processedBatchSlice = createSlice({
       const { batch_id, documents } = action.payload
       const existing = state.batches[batch_id]
 
-      // Initialize or get existing originals
       const updatedOriginals = [...(existing?.originalDocuments || [])]
-
-      // Only add to originals if not already present and document is not pending
       documents.forEach((doc) => {
         const isNotPending = doc.status?.toUpperCase() !== 'PENDING'
         const alreadyOriginal = updatedOriginals.some(
           (o) => o.document_id === doc.document_id
         )
-
         if (isNotPending && !alreadyOriginal) {
           updatedOriginals.push(JSON.parse(JSON.stringify(doc)))
         }
@@ -65,6 +64,23 @@ const processedBatchSlice = createSlice({
         ...action.payload,
         originalDocuments: updatedOriginals
       }
+    },
+
+    // ✅ New Reducer to push all stuck docs into the separate array at once
+    addDeletedDocsDueToTimeout: (
+      state,
+      action: PayloadAction<DocumentData[]>
+    ) => {
+      const newDocs = action.payload.filter(
+        (newDoc) =>
+          !state.deletedDocumentsDueToTimeout.some(
+            (existing) => existing.document_id === newDoc.document_id
+          )
+      )
+      state.deletedDocumentsDueToTimeout = [
+        ...state.deletedDocumentsDueToTimeout,
+        ...newDocs
+      ]
     },
 
     updateDocumentFields: (
@@ -85,42 +101,28 @@ const processedBatchSlice = createSlice({
       }
     },
 
-    updateDocumentStatus: (
-      state,
-      action: PayloadAction<{
-        batch_id: string
-        document_id: string
-        status: string
-      }>
-    ) => {
-      const { batch_id, document_id, status } = action.payload
-      const batch = state.batches[batch_id]
-      if (batch) {
-        const doc = batch.documents.find((d) => d.document_id === document_id)
-        if (doc) doc.status = status
-      }
-    },
-
     removeBatch: (state, action: PayloadAction<string>) => {
       delete state.batches[action.payload]
     },
 
     clearAll: (state) => {
       state.batches = {}
+      // ✅ Resets the separate variable
+      state.deletedDocumentsDueToTimeout = []
     }
   }
 })
 
 export const {
   addOrUpdateProcessedBatchStatus,
+  addDeletedDocsDueToTimeout,
   updateDocumentFields,
-  updateDocumentStatus,
   removeBatch,
   clearAll
 } = processedBatchSlice.actions
 
 export const selectAllBatches = (state: RootState) => state.processed.batches
-export const selectBatchById = (batchId: string) => (state: RootState) =>
-  state.processed.batches[batchId]
+export const selectDeletedDocs = (state: RootState) =>
+  state.processed.deletedDocumentsDueToTimeout
 
 export default processedBatchSlice.reducer
