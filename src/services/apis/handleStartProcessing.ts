@@ -78,11 +78,11 @@ export const uploadFilesToS3 = async (
                   ]
                 })
               )
-            }
 
-            store.dispatch(updateStatus({ id: fileId, status: 'completed' }))
-            store.dispatch(moveToCompleted(fileId))
-            notify.success(`${filename} processed successfully`)
+              store.dispatch(updateStatus({ id: fileId, status: 'completed' }))
+              store.dispatch(moveToCompleted(fileId))
+              notify.success(`${filename} processed successfully`)
+            }
           } catch (processError) {
             console.error('Processing error:', processError)
             store.dispatch(updateStatus({ id: fileId, status: 'error' }))

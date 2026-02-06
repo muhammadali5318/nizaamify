@@ -1,16 +1,20 @@
+// src/services/apis/pollBatchStatusUntilComplete.ts
 import { triggerProcessAPI } from '../services/apis/triggerProcessAPI'
 import apiClient from '../services/api-client'
 import { store } from '../store/store'
-import { notify } from '../components/notistack/NotificationProvider'
-import { addOrUpdateProcessedBatchStatus } from '../store/slices/processedBatchDataSlice'
+import {
+  addOrUpdateProcessedBatchStatus,
+  addDeletedDocsDueToTimeout
+} from '../store/slices/processedBatchDataSlice'
 import { addOrUpdateBatchStatus } from 'src/store/slices/processingSlice'
-
 import {
   addPollingJob,
   removePollingJob
 } from '../store/slices/pollingJobSlice'
+import { deleteBatchDocuments } from 'src/services/apis/deleteBatchDocuments'
 
 const activeJobs = new Set<string>()
+const DOC_TIMEOUT_MS = 30000
 
 export const pollBatchStatusUntilComplete = async (
   batchId: string,
@@ -22,27 +26,21 @@ export const pollBatchStatusUntilComplete = async (
   pollInterval: number = 3000
 ) => {
   const jobId = `${batchId}-${key}`
-  if (activeJobs.has(jobId)) {
-    console.warn(
-      `Polling job already active for ${jobId}, skipping duplicate call.`
-    )
-    return
-  }
-
+  if (activeJobs.has(jobId)) return
   activeJobs.add(jobId)
 
-  try {
-    store.dispatch(
-      addPollingJob({
-        batchId,
-        key,
-        filename,
-        userId,
-        practiceId,
-        startedAt: Date.now()
-      })
-    )
+  store.dispatch(
+    addPollingJob({
+      batchId,
+      key,
+      filename,
+      userId,
+      practiceId,
+      startedAt: Date.now()
+    })
+  )
 
+  try {
     const triggerRes = await triggerProcessAPI(
       batchId,
       key,
@@ -50,23 +48,21 @@ export const pollBatchStatusUntilComplete = async (
       userId,
       practiceId
     )
-
     const data = triggerRes?.data ?? triggerRes
     const document = data?.document
     if (!document) throw new Error('No document returned from process API')
 
-    const secureBatchStatusUrl =
+    const batchStatusUrl =
       data.batch_status_url?.replace(/^http:\/\//i, 'https://') ||
       data.batch_status_url
+    if (!batchStatusUrl) throw new Error('No batch_status_url found')
 
-    if (!secureBatchStatusUrl)
-      throw new Error('No batch_status_url found in process response')
-
+    // Register initial processing state
     store.dispatch(
       addOrUpdateBatchStatus({
         batch_id: data.batch_id,
         practice_id: document.practice_id,
-        batch_status_url: secureBatchStatusUrl,
+        batch_status_url: batchStatusUrl,
         documents: [
           {
             document_id: document.document_id,
@@ -78,96 +74,57 @@ export const pollBatchStatusUntilComplete = async (
       })
     )
 
-    const prevStatuses: Record<string, string> = {}
+    const startTime = Date.now()
+    let lastKnownBatchData: any = null
     let attempt = 0
 
+    // --- PHASE 1: POLLING ---
     while (attempt < maxAttempts) {
       attempt++
+      const res = await apiClient.get(batchStatusUrl)
+      lastKnownBatchData = res?.data?.data ?? res?.data
 
-      try {
-        const batchRes = await apiClient.get(secureBatchStatusUrl)
-        const batchData = batchRes?.data?.data ?? batchRes?.data
+      store.dispatch(addOrUpdateProcessedBatchStatus(lastKnownBatchData))
 
-        if (!batchData?.documents?.length) {
-          console.warn(
-            `No documents found in batch response at attempt ${attempt}`
-          )
-          await new Promise((resolve) => setTimeout(resolve, pollInterval))
-          continue
-        }
+      const allFinished = lastKnownBatchData.documents.every(
+        (doc: any) => doc.status !== 'PENDING'
+      )
+      if (allFinished) return lastKnownBatchData
 
-        const changedDocs = batchData.documents.filter((doc: any) => {
-          const currentStatus = doc.status?.toUpperCase?.() ?? 'UNKNOWN'
-          const prevStatus = prevStatuses[doc.document_id]
-          prevStatuses[doc.document_id] = currentStatus
-          return currentStatus !== 'PENDING' && currentStatus !== prevStatus
-        })
+      if (Date.now() - startTime >= DOC_TIMEOUT_MS) break
 
-        if (changedDocs.length > 0) {
-          store.dispatch(
-            addOrUpdateProcessedBatchStatus({
-              batch_id: batchData.batch_id,
-              created_at: batchData.created_at,
-              total_files: batchData.total_files,
-              processed_success: batchData.processed_success,
-              processed_failed: batchData.processed_failed,
-              email_sent: batchData.email_sent,
-              callback_task_id: batchData.callback_task_id,
-              documents: batchData.documents.map((doc: any) => ({
-                document_id: doc.document_id,
-                file_name: doc.file_name,
-                status: doc.status,
-                document_type: doc.document_type,
-                document_subtype: doc.document_subtype,
-                document_category: doc.document_category,
-                document_date: doc.document_date,
-                expense_category: doc.expense_category,
-                amount: doc.amount,
-                error_message: doc.error_message,
-                status_url: doc.status_url?.replace(/^http:\/\//i, 'https://')
-              }))
-            })
-          )
-        }
-
-        const allProcessed = batchData.documents.every(
-          (doc: any) => doc.status?.toUpperCase?.() !== 'PENDING'
-        )
-
-        if (allProcessed) {
-          store.dispatch(removePollingJob(batchId))
-          return batchData
-        }
-      } catch (batchErr) {
-        console.error(
-          `Error fetching batch status (attempt ${attempt}):`,
-          batchErr
-        )
-        console.error(
-          `Failed to fetch batch status for ${filename} (Attempt ${attempt})`
-        )
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, pollInterval))
+      // eslint-disable-next-line promise/param-names
+      await new Promise((r) => setTimeout(r, pollInterval))
     }
 
-    notify.error(
-      `Polling stopped for ${filename}: exceeded ${maxAttempts} attempts without completion`
+    // --- PHASE 2: BULK CLEANUP ---
+    const stuckDocs = lastKnownBatchData.documents.filter(
+      (doc: any) => doc.status === 'PENDING'
     )
 
-    store.dispatch(removePollingJob(batchId))
+    if (stuckDocs.length > 0) {
+      // ✅ Dispatch the entire objects to the separate "Deleted" array
+      store.dispatch(addDeletedDocsDueToTimeout(stuckDocs))
 
-    throw new Error(
-      `Max polling attempts (${maxAttempts}) reached for ${filename}`
-    )
+      try {
+        const stuckDocIds = stuckDocs.map((doc: any) => doc.document_id)
+        await deleteBatchDocuments(practiceId, batchId, stuckDocIds)
+      } catch (err) {
+        console.error('Cleanup API failed', err)
+      }
+    }
+
+    // --- PHASE 3: FINAL SYNC ---
+    const finalRes = await apiClient.get(batchStatusUrl)
+    const finalData = finalRes?.data?.data ?? finalRes?.data
+    store.dispatch(addOrUpdateProcessedBatchStatus(finalData))
+
+    return finalData
   } catch (err) {
-    console.error(`Error in pollBatchStatusUntilComplete for ${filename}:`, err)
-
-    store.dispatch(removePollingJob(batchId))
-
-    console.error(`Processing failed for ${filename}`)
+    console.error(`Polling failed for ${filename}`, err)
     throw err
   } finally {
     activeJobs.delete(jobId)
+    store.dispatch(removePollingJob(batchId))
   }
 }
