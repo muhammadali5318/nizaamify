@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // src/services/apis/pollBatchStatusUntilComplete.ts
 import { triggerProcessAPI } from '../services/apis/triggerProcessAPI'
 import apiClient from '../services/api-client'
@@ -12,7 +13,7 @@ import {
 import { deleteBatchDocuments } from 'src/services/apis/deleteBatchDocuments'
 
 const activeJobs = new Set<string>()
-const DOC_TIMEOUT_MS = 5000
+const DOC_TIMEOUT_MS = 5000 // Total time allowed for polling before we force delete
 
 export const pollBatchStatusUntilComplete = async (
   batchId: string,
@@ -32,9 +33,6 @@ export const pollBatchStatusUntilComplete = async (
 
   activeJobs.add(jobId)
 
-  // Track which documents have already been deleted to avoid duplicate calls
-  const deletedTimedOutDocs = new Set<string>()
-
   store.dispatch(
     addPollingJob({
       batchId,
@@ -45,8 +43,6 @@ export const pollBatchStatusUntilComplete = async (
       startedAt: Date.now()
     })
   )
-
-  const docFirstSeenAt: Record<string, number> = {}
 
   try {
     const triggerRes = await triggerProcessAPI(
@@ -65,7 +61,7 @@ export const pollBatchStatusUntilComplete = async (
       data.batch_status_url
     if (!batchStatusUrl) throw new Error('No batch_status_url found')
 
-    // 🔵 Initial processing state
+    // Initial processing state sync
     store.dispatch(
       addOrUpdateBatchStatus({
         batch_id: data.batch_id,
@@ -82,77 +78,68 @@ export const pollBatchStatusUntilComplete = async (
       })
     )
 
+    const startTime = Date.now()
+    let lastKnownBatchData: any = null
     let attempt = 0
 
+    // --- PHASE 1: ACTIVE POLLING ---
     while (attempt < maxAttempts) {
       attempt++
-
       const res = await apiClient.get(batchStatusUrl)
-      const batchData = res?.data?.data ?? res?.data
+      lastKnownBatchData = res?.data?.data ?? res?.data
+
       const now = Date.now()
+      const elapsed = now - startTime
 
-      // Track documents and calculate TIMED_OUT
-      let documents = batchData.documents.map((doc: any) => {
-        if (!docFirstSeenAt[doc.document_id])
-          docFirstSeenAt[doc.document_id] = now
-        const elapsed = now - docFirstSeenAt[doc.document_id]
+      // Update Redux with current backend state
+      store.dispatch(addOrUpdateProcessedBatchStatus(lastKnownBatchData))
 
-        if (doc.status === 'PENDING' && elapsed > DOC_TIMEOUT_MS) {
-          return { ...doc, ui_status: 'TIMED_OUT' }
-        }
+      // Check if everything finished naturally (SUCCESS or FAILED)
+      const allFinished = lastKnownBatchData.documents.every(
+        (doc: any) => doc.status !== 'PENDING'
+      )
 
-        return { ...doc, ui_status: doc.status }
-      })
+      if (allFinished) {
+        return lastKnownBatchData
+      }
 
-      // 🔴 Delete TIMED_OUT documents from backend
-      const timedOutIdsToDelete = documents
-        .filter(
-          (d: any) =>
-            d.ui_status === 'TIMED_OUT' &&
-            !deletedTimedOutDocs.has(d.document_id)
+      // Check if we have hit the global timeout for this batch
+      if (elapsed >= DOC_TIMEOUT_MS) {
+        console.log(
+          `Global timeout reached after ${elapsed}ms. Stopping polling for cleanup.`
         )
-        .map((d: any) => d.document_id)
-
-      if (timedOutIdsToDelete.length > 0) {
-        try {
-          await deleteBatchDocuments(practiceId, batchId, timedOutIdsToDelete)
-          timedOutIdsToDelete.forEach((id) => deletedTimedOutDocs.add(id))
-
-          // mark deleted locally so UI updates immediately
-          documents = documents.map((doc: any) =>
-            timedOutIdsToDelete.includes(doc.document_id)
-              ? { ...doc, status: 'DELETED', ui_status: 'DELETED' }
-              : doc
-          )
-        } catch (deleteErr) {
-          console.error('Failed to delete timed out documents:', deleteErr)
-          notify.error(
-            'Unable to remove stalled documents. You can retry or skip them manually.'
-          )
-        }
+        break // Exit loop to move to Phase 2
       }
 
-      // Update Redux state
-      store.dispatch(
-        addOrUpdateProcessedBatchStatus({ ...batchData, documents })
-      )
-
-      // Check if all done
-      const allDone = documents.every(
-        (d: any) => !['PENDING', 'TIMED_OUT'].includes(d.ui_status)
-      )
-      if (allDone) {
-        store.dispatch(removePollingJob(batchId))
-        return batchData
-      }
-
+      // eslint-disable-next-line promise/param-names
       await new Promise((r) => setTimeout(r, pollInterval))
     }
 
-    notify.error(
-      `Processing stopped for ${filename}: exceeded maximum wait time`
-    )
-    throw new Error('Polling timeout exceeded')
+    // --- PHASE 2: BULK DELETE STUCK DOCUMENTS ---
+    // Extract docs that are still 'PENDING'
+    const stuckDocIds = lastKnownBatchData.documents
+      .filter((doc: any) => doc.status === 'PENDING')
+      .map((doc: any) => doc.document_id)
+
+    if (stuckDocIds.length > 0) {
+      try {
+        await deleteBatchDocuments(practiceId, batchId, stuckDocIds)
+        console.log(
+          `Successfully deleted ${stuckDocIds.length} stuck documents.`
+        )
+      } catch (deleteErr) {
+        console.error('Failed to delete stuck documents:', deleteErr)
+        notify.error('Cleanup failed. Some documents may still be processing.')
+      }
+    }
+
+    // --- PHASE 3: FINAL REFRESH ---
+    // Call the status API one last time to get the final clean state
+    const finalRes = await apiClient.get(batchStatusUrl)
+    const finalData = finalRes?.data?.data ?? finalRes?.data
+
+    store.dispatch(addOrUpdateProcessedBatchStatus(finalData))
+    return finalData
   } catch (err) {
     console.error(`Polling failed for ${filename}`, err)
     throw err
