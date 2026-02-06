@@ -47,7 +47,7 @@ const UploadDocuments = () => {
         <FileUploadBox
           title='Upload or drag and drop your financial documents'
           subtitle='You can upload unlimited files but only 5 in one go.'
-          fileInfoText='Maximum 10MB each — Supported: .CSV, .PDF, .PNG, .JPG'
+          fileInfoText='Maximum 10MB each — Supported: .CSV, .PDF, .PNG, .JPG, .DOC'
           maxFiles={5}
           fileCount={files?.length}
           isProcessingComplete={completedFiles?.length > 0 || hasBatches}

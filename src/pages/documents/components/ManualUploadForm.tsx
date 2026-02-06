@@ -442,7 +442,7 @@ const ManualEntryForm: React.FC = () => {
         <FileUploadBox
           title='Upload or drag and drop your supporting documents'
           subtitle='You can upload unlimited files but only 5 in one go.'
-          fileInfoText='Maximum 10MB each — Supported: .CSV, .PDF, .PNG, .JPG'
+          fileInfoText='Maximum 10MB each — Supported: .CSV, .PDF, .PNG, .JPG, .DOC'
           maxFiles={5}
           fileCount={manualEntryFiles.items.length + queue.length}
           isProcessingComplete={completedFiles.length > 0 && hasBatches}
