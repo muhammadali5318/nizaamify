@@ -15,7 +15,7 @@ export const getUKAvgValue = (
       'NHS-DOMINANT': '35–45%',
       'SQUAT/START-UP': '35–50%'
     },
-    Materials: {
+    'Materials & Equipment': {
       PRIVATE: '6.0–7.5%',
       MIXED: '5.5–6.5%',
       'NHS-DOMINANT': '4.5–5.5%',
@@ -27,7 +27,7 @@ export const getUKAvgValue = (
       'NHS-DOMINANT': '4.0–5.0%',
       'SQUAT/START-UP': '4–7%'
     },
-    'Premises & Equipment': {
+    Premises: {
       PRIVATE: '3.8–4.5%',
       MIXED: '3.8–4.2%',
       'NHS-DOMINANT': '3.6–4.0%',

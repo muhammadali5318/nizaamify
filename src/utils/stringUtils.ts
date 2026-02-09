@@ -101,3 +101,7 @@ export const formatChatDate = (isoDate?: string) => {
 
   return `${diffWeeks} weeks ago`
 }
+
+export const checkEmailEquality = (userEmail?: string, rowEmail?: string) => {
+  return userEmail?.toLowerCase() === rowEmail?.toLowerCase()
+}

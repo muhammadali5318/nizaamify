@@ -6,7 +6,7 @@ import {
   Stack,
   useMediaQuery
 } from '@mui/material'
-import { useLocation, useParams } from 'react-router'
+import { useParams } from 'react-router'
 import { useAuth0 } from '@auth0/auth0-react'
 
 import TeamManagementContentWrapper from '../components/TeamManagementContentWrapper'
@@ -31,15 +31,17 @@ import MemberInfoHeader from './components/MemberInfoHeader'
 import PageHeader from 'src/components/page-header'
 import { useHasPermission } from 'src/config/module-permissions'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import { useSelector } from 'react-redux'
+import { selectSelectedUser } from 'src/store/slices/team-management/selectedUserSlice'
+import { checkEmailEquality } from 'src/utils/stringUtils'
 
 const MemberRolesAndPermission: React.FC = () => {
   const { activePracticeId } = useActivePractice()
+  const selectedUser = useSelector(selectSelectedUser)
   const canUpdateMembersPermission = useHasPermission('user.update_profile')
   const canViewAndEditTeamMembers = useHasPermission('user.manage_users_roles')
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth0()
-  const location = useLocation()
-  const { email } = location.state || {}
 
   // Detect mobile screen
   const isMobile = useMediaQuery('(max-width:600px)')
@@ -148,15 +150,17 @@ const MemberRolesAndPermission: React.FC = () => {
                   isDividerVisible={false}
                 />
 
-                {!(email === user?.email) && canUpdateMembersPermission && (
-                  <PermissionsEditActions
-                    isEditing={isEditing}
-                    onEdit={handleEdit}
-                    onSave={handleSave}
-                    onCancel={handleCancel}
-                    canSave={canSave}
-                  />
-                )}
+                {!checkEmailEquality(selectedUser?.email, user?.email) &&
+                  canUpdateMembersPermission &&
+                  selectedUser?.user_role !== 'PRACTICE OWNER' && (
+                    <PermissionsEditActions
+                      isEditing={isEditing}
+                      onEdit={handleEdit}
+                      onSave={handleSave}
+                      onCancel={handleCancel}
+                      canSave={canSave}
+                    />
+                  )}
               </Box>
 
               <Stack spacing={2.5}>

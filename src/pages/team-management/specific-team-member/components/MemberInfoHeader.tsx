@@ -26,6 +26,7 @@ import { selectSelectedUser } from 'src/store/slices/team-management/selectedUse
 import { useSelector } from 'react-redux'
 import DeactivateUserModal from '../../components/DeactivateUserModal'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import { checkEmailEquality } from 'src/utils/stringUtils'
 
 const MemberInfoHeader = () => {
   const canViewAndEditTeamMembers = useHasPermission('user.manage_users_roles')
@@ -101,22 +102,85 @@ const MemberInfoHeader = () => {
       </Box>
 
       {/* Right Section */}
-      {!(selectedUser?.email === user?.email) && canViewAndEditTeamMembers && (
-        <>
-          {isMobile ? (
-            <>
-              <IconButton onClick={handleMenuOpen} aria-label='more'>
-                <MoreVertIcon />
-              </IconButton>
+      {!checkEmailEquality(user?.email, selectedUser?.email) &&
+        canViewAndEditTeamMembers &&
+        selectedUser?.user_role !== 'PRACTICE OWNER' && (
+          <>
+            {isMobile ? (
+              <>
+                <IconButton onClick={handleMenuOpen} aria-label='more'>
+                  <MoreVertIcon />
+                </IconButton>
 
-              <Menu
-                anchorEl={menuAnchorEl}
-                open={Boolean(menuAnchorEl)}
-                onClose={handleMenuClose}
-              >
-                <MenuItem onClick={handleMenuClose}>
+                <Menu
+                  anchorEl={menuAnchorEl}
+                  open={Boolean(menuAnchorEl)}
+                  onClose={handleMenuClose}
+                >
+                  <MenuItem onClick={handleMenuClose}>
+                    <Button
+                      fullWidth
+                      variant='contained'
+                      color={
+                        selectedUser?.has_other_active_practices
+                          ? 'warning'
+                          : 'error'
+                      }
+                      onClick={() => setOpenUnlinkUser(true)}
+                      startIcon={
+                        <img
+                          src='/assets/person-add-white.svg'
+                          alt='person icon'
+                          width={18}
+                          height={18}
+                        />
+                      }
+                    >
+                      {selectedUser?.has_other_active_practices
+                        ? 'Unlink user'
+                        : 'Deactivate user'}
+                    </Button>
+                  </MenuItem>
+
+                  <MenuItem onClick={handleMenuClose}>
+                    <Box
+                      display='flex'
+                      alignItems='center'
+                      gap={1}
+                      onClick={() => setIsUpdateMemberOpen(true)}
+                    >
+                      <ImgIcon src='/assets/swap-icon.svg' alt='swap' />
+                      <Typography noWrap>Update member role</Typography>
+                    </Box>
+                  </MenuItem>
+
+                  {!isOnboardingCompleted &&
+                    selectedUser?.user_role === 'PRACTICE MANAGER' && (
+                      <MenuItem onClick={handleNominate}>
+                        <Box display='flex' alignItems='center' gap={1}>
+                          <ImgIcon
+                            src={
+                              selectedUser?.is_nominated
+                                ? '/assets/green-flag.svg'
+                                : '/assets/blue-flag.svg'
+                            }
+                            alt='flag icon'
+                          />
+                          <Typography noWrap>
+                            {selectedUser?.is_nominated
+                              ? 'Already nominated'
+                              : 'Nominate Now'}
+                          </Typography>
+                        </Box>
+                      </MenuItem>
+                    )}
+                </Menu>
+              </>
+            ) : (
+              <>
+                <Box className={styles.memberActionsContainer}>
                   <Button
-                    fullWidth
+                    size='medium'
                     variant='contained'
                     color={
                       selectedUser?.has_other_active_practices
@@ -137,117 +201,56 @@ const MemberInfoHeader = () => {
                       ? 'Unlink user'
                       : 'Deactivate user'}
                   </Button>
-                </MenuItem>
 
-                <MenuItem onClick={handleMenuClose}>
-                  <Box
-                    display='flex'
-                    alignItems='center'
-                    gap={1}
-                    onClick={() => setIsUpdateMemberOpen(true)}
-                  >
-                    <ImgIcon src='/assets/swap-icon.svg' alt='swap' />
-                    <Typography noWrap>Update member role</Typography>
-                  </Box>
-                </MenuItem>
-
-                {!isOnboardingCompleted &&
-                  selectedUser?.user_role === 'PRACTICE MANAGER' && (
-                    <MenuItem onClick={handleNominate}>
-                      <Box display='flex' alignItems='center' gap={1}>
-                        <ImgIcon
-                          src={
-                            selectedUser?.is_nominated
-                              ? '/assets/green-flag.svg'
-                              : '/assets/blue-flag.svg'
-                          }
-                          alt='flag icon'
-                        />
-                        <Typography noWrap>
-                          {selectedUser?.is_nominated
-                            ? 'Already nominated'
-                            : 'Nominate Now'}
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                  )}
-              </Menu>
-            </>
-          ) : (
-            <>
-              <Box className={styles.memberActionsContainer}>
-                <Button
-                  size='medium'
-                  variant='contained'
-                  color={
-                    selectedUser?.has_other_active_practices
-                      ? 'warning'
-                      : 'error'
-                  }
-                  onClick={() => setOpenUnlinkUser(true)}
-                  startIcon={
-                    <img
-                      src='/assets/person-add-white.svg'
-                      alt='person icon'
-                      width={18}
-                      height={18}
-                    />
-                  }
-                >
-                  {selectedUser?.has_other_active_practices
-                    ? 'Unlink user'
-                    : 'Deactivate user'}
-                </Button>
-
-                <Tooltip placement='top' title='Update member role'>
-                  <Box
-                    component='span'
-                    sx={{
-                      display: 'inline-flex',
-                      verticalAlign: 'middle'
-                    }}
-                  >
-                    <IconButton
-                      size='small'
-                      onClick={() => setIsUpdateMemberOpen(true)}
-                      aria-label='swap member'
-                    >
-                      <SwapHorizIcon fontSize='small' />
-                    </IconButton>
-                  </Box>
-                </Tooltip>
-
-                {!isOnboardingCompleted &&
-                  selectedUser?.user_role === 'PRACTICE MANAGER' && (
-                    <Tooltip
-                      placement='top'
-                      title={
-                        selectedUser?.is_nominated
-                          ? 'Already nominated'
-                          : 'Nominate to complete onboarding'
-                      }
+                  <Tooltip placement='top' title='Update member role'>
+                    <Box
+                      component='span'
+                      sx={{
+                        display: 'inline-flex',
+                        verticalAlign: 'middle'
+                      }}
                     >
                       <IconButton
                         size='small'
-                        aria-label='Nomination flag'
-                        onClick={handleNominate}
+                        onClick={() => setIsUpdateMemberOpen(true)}
+                        aria-label='swap member'
                       >
-                        <ImgIcon
-                          src={
-                            selectedUser?.is_nominated
-                              ? '/assets/green-flag.svg'
-                              : '/assets/blue-flag.svg'
-                          }
-                          alt='flag icon'
-                        />
+                        <SwapHorizIcon fontSize='small' />
                       </IconButton>
-                    </Tooltip>
-                  )}
-              </Box>
-            </>
-          )}
-        </>
-      )}
+                    </Box>
+                  </Tooltip>
+
+                  {!isOnboardingCompleted &&
+                    selectedUser?.user_role === 'PRACTICE MANAGER' && (
+                      <Tooltip
+                        placement='top'
+                        title={
+                          selectedUser?.is_nominated
+                            ? 'Already nominated'
+                            : 'Nominate to complete onboarding'
+                        }
+                      >
+                        <IconButton
+                          size='small'
+                          aria-label='Nomination flag'
+                          onClick={handleNominate}
+                        >
+                          <ImgIcon
+                            src={
+                              selectedUser?.is_nominated
+                                ? '/assets/green-flag.svg'
+                                : '/assets/blue-flag.svg'
+                            }
+                            alt='flag icon'
+                          />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                </Box>
+              </>
+            )}
+          </>
+        )}
 
       {/* Nomination Dialog */}
       <NominatePracticeManagerTeamList

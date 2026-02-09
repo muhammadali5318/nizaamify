@@ -81,7 +81,7 @@ const ProfitMarginTrendChart = ({
         >
           <img src={profitIcon} alt='profit' />
           <Typography variant='h6' mb={1}>
-            Profit Margin Trend
+            Operating Profit Trend
           </Typography>
         </Box>
 

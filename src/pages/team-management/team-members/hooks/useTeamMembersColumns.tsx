@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { GridColDef, GridCellParams } from '@mui/x-data-grid'
 import { Box, Typography, IconButton, Tooltip } from '@mui/material'
 import { StatusChip, ImgIcon } from '../components/TeamMembers'
-import { toTitleCase } from 'src/utils/stringUtils'
+import { checkEmailEquality, toTitleCase } from 'src/utils/stringUtils'
 import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined'
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
 import { TeamMemberRow } from '..'
@@ -123,7 +123,8 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
                     size='small'
                     disabled={
                       params.row.user_practice_status !== 'ACTIVE' ||
-                      params?.row?.email === user?.email
+                      checkEmailEquality(user?.email, params?.row?.email) ||
+                      params?.row?.user_role === 'PRACTICE OWNER'
                     }
                     onClick={() =>
                       params?.row?.has_other_active_practices
@@ -136,11 +137,19 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
                       src={
                         params?.row?.has_other_active_practices
                           ? params.row.user_practice_status !== 'ACTIVE' ||
-                            params?.row?.email === user?.email
+                            checkEmailEquality(
+                              user?.email,
+                              params?.row?.email
+                            ) ||
+                            params?.row?.user_role === 'PRACTICE OWNER'
                             ? '/assets/inactive-unlink.svg'
                             : '/assets/active-unlink.svg'
                           : params.row.user_practice_status !== 'ACTIVE' ||
-                              params?.row?.email === user?.email
+                              checkEmailEquality(
+                                user?.email,
+                                params?.row?.email
+                              ) ||
+                              params?.row?.user_role === 'PRACTICE OWNER'
                             ? '/assets/inactive-trash.svg'
                             : '/assets/active-trash.svg'
                       }
@@ -162,7 +171,8 @@ export const useTeamMembersColumns = (handlers: Handlers = {}) => {
                     size='small'
                     disabled={
                       params?.row?.user_practice_status !== 'ACTIVE' ||
-                      params?.row?.email === user?.email
+                      checkEmailEquality(user?.email, params?.row?.email) ||
+                      params?.row?.user_role === 'PRACTICE OWNER'
                     }
                     onClick={() =>
                       onUpdateMember
