@@ -1,5 +1,5 @@
-import { Box, CircularProgress, Typography } from '@mui/material'
-import { useState } from 'react'
+import { Box, CircularProgress, Stack, Typography } from '@mui/material'
+import { useRef, useState } from 'react'
 import dayjs from 'dayjs'
 
 import styles from './expenseBreakdown.module.scss'
@@ -14,6 +14,7 @@ import { formatAmountWithCommas } from 'src/utils/stringUtils'
 
 const ExpenseBreakdown = () => {
   const { accessToken } = useAuth()
+  const [allExpanded, setAllExpanded] = useState(false)
 
   // Date range state
   const [dateRange, setDateRange] = useState<RangeISO>({
@@ -30,6 +31,8 @@ const ExpenseBreakdown = () => {
     endDate: dateRange.end
   })
 
+  const pageRef = useRef<HTMLDivElement>(null)
+
   return (
     <Box className={styles.expenseBreakdownRoot} width='100%'>
       <ExpensePageHeader
@@ -38,6 +41,10 @@ const ExpenseBreakdown = () => {
         onDateChange={setDateRange}
         avatarSrc='/assets/wallet-bg-green.svg'
         subheading='Detailed view of all expense categories and subcategories'
+        data={data}
+        allExpanded={allExpanded} // ✅ pass state
+        setAllExpanded={setAllExpanded}
+        pdfRef={pageRef}
       />
 
       {/* 🔹 No date selected */}
@@ -71,7 +78,7 @@ const ExpenseBreakdown = () => {
 
       {/* 🔹 Data */}
       {hasValidDate && !isPending && (
-        <>
+        <Stack spacing={2} ref={pageRef} width={'100%'}>
           <ExpensesGrandTotal
             label='Total Monthly Expenses:'
             total={formatAmountWithCommas(data?.total) ?? 0}
@@ -93,10 +100,11 @@ const ExpenseBreakdown = () => {
                   `${expenseType?.expense_subtypes?.length ?? 0} subcategories`
                 ]}
                 expenseSubtypes={expenseType?.expense_subtypes}
+                expanded={allExpanded}
               />
             )
           })}
-        </>
+        </Stack>
       )}
     </Box>
   )

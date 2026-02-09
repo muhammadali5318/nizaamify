@@ -42,6 +42,11 @@ const NonPLItemsBreakdown = () => {
         onDateChange={setDateRange}
         avatarSrc='/assets/non-pl-green-icon.svg'
         subheading='Detailed view of all Non P&L items categories and subcategories'
+        showDownloadBtn={false}
+        allExpanded={false}
+        setAllExpanded={function (): void {
+          throw new Error('Function not implemented.')
+        }}
       />
 
       <ExpensesGrandTotal

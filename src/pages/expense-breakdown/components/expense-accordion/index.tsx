@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import {
   Box,
@@ -21,6 +21,7 @@ interface ReusableAccordionProps {
   total?: any
   defaultExpanded?: boolean
   expenseSubtypes?: any
+  expanded?: boolean
 }
 
 export default function ReusableAccordion({
@@ -29,9 +30,16 @@ export default function ReusableAccordion({
   total = null,
   defaultExpanded = false,
   expenseSubtypes,
-  dateRange
+  dateRange,
+  expanded
 }: ReusableAccordionProps) {
   const [open, setOpen] = useState(defaultExpanded)
+
+  useEffect(() => {
+    if (typeof expanded === 'boolean') {
+      setOpen(expanded)
+    }
+  }, [expanded])
 
   return (
     <Box
@@ -141,6 +149,7 @@ export default function ReusableAccordion({
             dateRange={dateRange}
             total={formatAmountWithCommas(total ?? '')}
             title={title}
+            expanded={expanded}
           />
         </Box>
       </Collapse>

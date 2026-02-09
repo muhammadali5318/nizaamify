@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Table,
   TableBody,
@@ -27,13 +27,15 @@ interface ExpenseBreakdownTableProps {
   dateRange: RangeISO
   total?: any
   title?: string
+  expanded?: boolean
 }
 
 const ExpenseBreakdownTable: React.FC<ExpenseBreakdownTableProps> = ({
   data,
   dateRange,
   total,
-  title
+  title,
+  expanded
 }) => {
   const categories = data || []
 
@@ -108,6 +110,7 @@ const ExpenseBreakdownTable: React.FC<ExpenseBreakdownTableProps> = ({
               row={type}
               childCategories={type}
               dateRange={dateRange}
+              expanded={expanded}
             />
           ))}
         </TableBody>
@@ -151,12 +154,14 @@ interface ExpandableRowProps {
   row: any
   childCategories: any
   dateRange: RangeISO
+  expanded?: boolean
 }
 
 const ExpandableRow: React.FC<ExpandableRowProps> = ({
   row,
   childCategories,
-  dateRange
+  dateRange,
+  expanded
 }) => {
   const [open, setOpen] = useState(false)
   const { activePracticeId } = useActivePractice()
@@ -165,6 +170,20 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
     useState<any>(undefined)
   const theme = useTheme()
   const isSmDown = useMediaQuery(theme.breakpoints.down('sm'))
+
+  // Determine if there is subcategory data
+  const hasChildData =
+    Array.isArray(childCategories?.expense_sub_categories) &&
+    childCategories.expense_sub_categories.length > 0
+
+  // Handle auto-expand if expanded prop is provided
+  useEffect(() => {
+    if (typeof expanded === 'boolean') {
+      setOpen(expanded)
+    } else if (hasChildData) {
+      setOpen(false) // default closed if no prop
+    }
+  }, [expanded, hasChildData])
 
   const handleDocumentDetails = async (type: string) => {
     try {
@@ -181,7 +200,6 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
       setDownloadableDocuments(response?.data?.data)
       setOpenDocumentDetails(true)
     } catch {
-      // swallow - keep behavior same
       setDownloadableDocuments(undefined)
       setOpenDocumentDetails(true)
     }
@@ -216,7 +234,7 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
         <TableCell
           sx={{ width: isSmDown ? '36px' : '40px', padding: '0px !important' }}
         >
-          {childCategories?.expense_sub_categories?.length > 0 ? (
+          {hasChildData ? (
             <IconButton
               aria-label='expand row'
               size={isSmDown ? 'small' : 'small'}
@@ -252,7 +270,7 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
             >
               {row?.expense_subtype}
             </Typography>
-            {childCategories?.expense_sub_categories?.length > 0 && (
+            {hasChildData && (
               <Chip
                 label={`${childCategories?.expense_sub_categories?.length} subcategories`}
                 size='small'
@@ -292,76 +310,75 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
       </TableRow>
 
       {/* CHILD WRAPPER ROW */}
-      <TableRow>
-        <TableCell colSpan={4} sx={{ padding: 0, border: 'none' }}>
-          <Collapse in={open} timeout='auto' unmountOnExit>
-            <Box
-              sx={{
-                background: '#FFFFFF',
-                marginTop: '-6px',
-                padding: isSmDown ? '8px 8px' : '10px',
-                margin: '-15px 0px 0px 0px',
-                borderBottomLeftRadius: '12px',
-                borderBottomRightRadius: '12px',
-                overflow: 'hidden'
-              }}
-            >
-              <Table
-                size='small'
+      {hasChildData && (
+        <TableRow>
+          <TableCell colSpan={4} sx={{ padding: 0, border: 'none' }}>
+            <Collapse in={open} timeout='auto' unmountOnExit>
+              <Box
                 sx={{
-                  width: '100%',
-                  borderCollapse: 'separate',
-                  borderSpacing: '0 10px',
-                  marginTop: '-10px'
+                  background: '#FFFFFF',
+                  marginTop: '-6px',
+                  padding: isSmDown ? '8px 8px' : '10px',
+                  margin: '-15px 0px 0px 0px',
+                  borderBottomLeftRadius: '12px',
+                  borderBottomRightRadius: '12px',
+                  overflow: 'hidden'
                 }}
               >
-                <TableBody>
-                  {/* CHILD HEADER */}
-                  <TableRow
-                    sx={{
-                      background: '#F0F0F0',
-                      borderRadius: '12px',
-                      '& > td': {
-                        padding: isSmDown ? '6px 10px' : '7px 16px',
-                        border: 'none',
-                        fontWeight: 600,
-                        fontSize: isSmDown ? '13px' : '14px',
-                        whiteSpace: 'normal',
-                        wordBreak: 'break-word',
-                        '&:first-of-type': {
-                          borderTopLeftRadius: '12px',
-                          borderBottomLeftRadius: '12px'
-                        },
-                        '&:last-of-type': {
-                          borderTopRightRadius: '12px',
-                          borderBottomRightRadius: '12px'
+                <Table
+                  size='small'
+                  sx={{
+                    width: '100%',
+                    borderCollapse: 'separate',
+                    borderSpacing: '0 10px',
+                    marginTop: '-10px'
+                  }}
+                >
+                  <TableBody>
+                    {/* CHILD HEADER */}
+                    <TableRow
+                      sx={{
+                        background: '#F0F0F0',
+                        borderRadius: '12px',
+                        '& > td': {
+                          padding: isSmDown ? '6px 10px' : '7px 16px',
+                          border: 'none',
+                          fontWeight: 600,
+                          fontSize: isSmDown ? '13px' : '14px',
+                          whiteSpace: 'normal',
+                          wordBreak: 'break-word',
+                          '&:first-of-type': {
+                            borderTopLeftRadius: '12px',
+                            borderBottomLeftRadius: '12px'
+                          },
+                          '&:last-of-type': {
+                            borderTopRightRadius: '12px',
+                            borderBottomRightRadius: '12px'
+                          }
                         }
-                      }
-                    }}
-                  >
-                    <TableCell sx={{ width: isSmDown ? '36px' : '40px' }} />
-                    <TableCell sx={{ width: { xs: '50%', sm: '30%' } }}>
-                      <Typography variant='subtitle2' fontWeight={500}>
-                        Line Item
-                      </Typography>
-                    </TableCell>
-                    <TableCell sx={{ width: { xs: '30%', sm: '30%' } }}>
-                      <Typography variant='subtitle2' fontWeight={500}>
-                        Amount
-                      </Typography>
-                    </TableCell>
-                    <TableCell sx={{ width: { xs: '20%', sm: '40%' } }}>
-                      <Typography variant='subtitle2' fontWeight={500}>
-                        Source Documents
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
+                      }}
+                    >
+                      <TableCell sx={{ width: isSmDown ? '36px' : '40px' }} />
+                      <TableCell sx={{ width: { xs: '50%', sm: '30%' } }}>
+                        <Typography variant='subtitle2' fontWeight={500}>
+                          Line Item
+                        </Typography>
+                      </TableCell>
+                      <TableCell sx={{ width: { xs: '30%', sm: '30%' } }}>
+                        <Typography variant='subtitle2' fontWeight={500}>
+                          Amount
+                        </Typography>
+                      </TableCell>
+                      <TableCell sx={{ width: { xs: '20%', sm: '40%' } }}>
+                        <Typography variant='subtitle2' fontWeight={500}>
+                          Source Documents
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
 
-                  {/* CHILD DATA ROWS */}
-                  {Array.isArray(childCategories?.expense_sub_categories) &&
-                    childCategories.expense_sub_categories.map(
+                    {/* CHILD DATA ROWS */}
+                    {childCategories.expense_sub_categories.map(
                       (cat: any, idx: number) => {
-                        // safer handling of Object.entries(cat)[0]
                         const entry = Object.entries(cat)[0] as
                           | [string, any]
                           | undefined
@@ -434,12 +451,13 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
                         )
                       }
                     )}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
+                  </TableBody>
+                </Table>
+              </Box>
+            </Collapse>
+          </TableCell>
+        </TableRow>
+      )}
 
       <DocumentDetailsModal
         open={openDocumentDetails}
