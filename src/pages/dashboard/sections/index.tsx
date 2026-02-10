@@ -7,13 +7,12 @@ import RevenueVsCostChart from '../charts/RevenueVsCostChart'
 import ProfitMarginTrendChart from '../charts/ProfitMarginTrendChart'
 import ExpenseBreakdownChart from '../charts/ExpenseBreakdownChart'
 import ExpenseTrendChart from '../charts/ExpenseTrendChart'
-import BenchmarkComparisonTable from '../charts/BenchmarkComparisonTable'
+import ExpandableBenchmarkTable from '../charts/BenchmarkComparisonTable'
 import ExpenseAnalysisCard from '../insights/ExpenseAnalysisCard'
 import AISummaryCard from '../insights/AISummaryCard'
 import PeriodSelector from '../components/PeriodSelector'
 import downlaodBtn from '../../../assets/document-download-black.svg'
 import expenseIcon from '../../../assets/expense-icon.svg'
-import benchmarkIcon from '../../../assets/benchmark-comp-icon.svg'
 import aiIcon from '../../../assets/ai-icon.svg'
 
 import { getExpenseData } from '../../../services/apis/expense'
@@ -24,46 +23,62 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { downloadDashboardPDF } from '../utils/downloadPdf'
 
 const MainDashboard = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState('Current month')
+  // default to Last month
+  const [selectedPeriod, setSelectedPeriod] = useState('Last month')
   const [expenseData, setExpenseData] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const { activePracticeId } = useActivePractice()
-  const [selectedMonth, setSelectedMonth] = useState(dayjs())
+  // default selected month -> last month
+  const [selectedMonth, setSelectedMonth] = useState(
+    dayjs().subtract(1, 'month')
+  )
 
   const dashboardRef = useRef<any>(null)
 
   const getDateRange = (label: string) => {
-    const endDate = dayjs()
+    let endDate = dayjs()
     let startDate
     let granularity: 'month' | 'quarter' | 'year'
     let month: number | null = null
     let year = endDate.year()
-    const targetDate = selectedMonth ?? endDate
 
     switch (label) {
-      case 'Current month':
-        startDate = endDate.startOf('month')
+      case 'Last month': {
+        // prefer user-selected month, otherwise last month relative to today
+        const target = selectedMonth ?? dayjs().subtract(1, 'month')
+        startDate = target.startOf('month')
+        endDate = target.endOf('month')
         granularity = 'month'
-        month = targetDate.month() + 1
-        year = targetDate.year()
+        month = target.month() + 1
+        year = target.year()
         break
+      }
 
       case '3-month view':
+        endDate = dayjs()
         startDate = endDate.subtract(2, 'month').startOf('month')
         granularity = 'quarter'
         month = endDate.month() + 1
+        year = endDate.year()
         break
 
       case 'Yearly':
+        endDate = dayjs()
         startDate = endDate.startOf('year')
         granularity = 'year'
         month = null
+        year = endDate.year()
         break
 
-      default:
-        startDate = endDate.startOf('month')
+      default: {
+        // fallback to Last month semantics
+        const target = selectedMonth ?? dayjs().subtract(1, 'month')
+        startDate = target.startOf('month')
+        endDate = target.endOf('month')
         granularity = 'month'
-        month = endDate.month() + 1
+        month = target.month() + 1
+        year = target.year()
+      }
     }
 
     return {
@@ -129,7 +144,7 @@ const MainDashboard = () => {
           }}
         >
           <Box>
-            {selectedPeriod === 'Current month' && (
+            {selectedPeriod === 'Last month' && (
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   views={['year', 'month']}
@@ -137,7 +152,7 @@ const MainDashboard = () => {
                   value={selectedMonth}
                   onChange={(newValue: any) => {
                     setSelectedMonth(newValue)
-                    setSelectedPeriod('Current month')
+                    setSelectedPeriod('Last month')
                   }}
                   slotProps={{
                     textField: {
@@ -154,7 +169,7 @@ const MainDashboard = () => {
           </Box>
 
           <PeriodSelector
-            options={['Current month', '3-month view', 'Yearly']}
+            options={['Last month', '3-month view', 'Yearly']}
             selected={selectedPeriod}
             onSelect={setSelectedPeriod}
           />
@@ -239,22 +254,7 @@ const MainDashboard = () => {
         </Box>
 
         {/* BENCHMARK TABLE */}
-        <Box
-          sx={{
-            backgroundColor: '#fafafa',
-            borderRadius: '12px',
-            p: 2,
-            width: '100%',
-            overflowX: 'auto'
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-            <img src={benchmarkIcon} alt='Benchmark' />
-            <Typography variant='h6'>Benchmark Comparison</Typography>
-          </Box>
-
-          <BenchmarkComparisonTable data={expenseData} />
-        </Box>
+        <ExpandableBenchmarkTable data={expenseData} />
 
         {/* REVENUE VS PROFIT SECTION */}
         <Box

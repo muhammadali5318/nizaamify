@@ -1,6 +1,5 @@
 import {
   Card,
-  CardContent,
   Table,
   TableBody,
   TableCell,
@@ -10,13 +9,20 @@ import {
   Collapse,
   Box,
   Typography,
-  useTheme
+  useTheme,
+  Button,
+  Stack
 } from '@mui/material'
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material'
 import { useState } from 'react'
 import { getUKAvgValue } from '../utils/getUKAvgValue'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import benchmarkIcon from '../../../assets/benchmark-comp-icon.svg'
+import { downloadBenchmarkCsv } from '../utils/downloadBenchmarkCSV'
 
+/* ---------------------
+   Table component
+   --------------------- */
 interface ExpandableBenchmarkTableProps {
   data?: any
 }
@@ -30,7 +36,7 @@ const ExpandableBenchmarkTable = ({ data }: ExpandableBenchmarkTableProps) => {
   const expenseTypes = data?.current?.expense_types || []
 
   return (
-    <Box>
+    <Box my={2}>
       <Card
         sx={{
           backgroundColor: theme.palette.background.paper,
@@ -39,54 +45,81 @@ const ExpandableBenchmarkTable = ({ data }: ExpandableBenchmarkTableProps) => {
           overflow: 'hidden'
         }}
       >
-        <CardContent sx={{ p: 0 }}>
-          <Box sx={{ overflowX: 'auto' }}>
-            <Table
+        {/* <CardContent sx={{ p: 0 }}> */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            p: 2
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <img src={benchmarkIcon} alt='Benchmark' />
+            <Typography variant='h6'>Benchmark Comparison</Typography>
+          </Box>{' '}
+          <Stack direction='row' spacing={1}>
+            <Button
+              variant='outlined'
               size='small'
-              sx={{
-                '& th': {
-                  fontWeight: 700,
-                  fontSize: { xs: '0.8rem', sm: '0.9rem' },
-                  backgroundColor: '#f9fafb'
-                },
-                '& td': {
-                  fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                }
-              }}
+              onClick={() =>
+                downloadBenchmarkCsv(data, getUKAvgValue, activePracticeType, {
+                  filename: 'expense-benchmark.csv'
+                })
+              }
             >
-              <TableHead sx={{ backgroundColor: '#F5F5F5' }}>
-                <TableRow>
-                  <TableCell />
-                  <TableCell sx={{ pt: 2 }}>Category</TableCell>
-                  <TableCell sx={{ pt: 2 }} align='left'>
-                    Your practice value
-                  </TableCell>
-                  <TableCell sx={{ pt: 2 }} align='left'>
-                    UK Avg (NHS)
-                  </TableCell>
-                  <TableCell sx={{ pt: 2 }} align='left'>
-                    Monai benchmarking
-                  </TableCell>
-                </TableRow>
-              </TableHead>
+              Download CSV
+            </Button>
+          </Stack>
+        </Box>
 
-              <TableBody>
-                {expenseTypes.map((type: any) => {
-                  if (type.expense_type !== 'Tax Documents') {
-                    return (
-                      <ExpandableRow
-                        key={type.expense_type}
-                        row={type}
-                        childSubtypes={type.expense_subtypes || []}
-                        activePracticeType={activePracticeType}
-                      />
-                    )
-                  }
-                })}
-              </TableBody>
-            </Table>
-          </Box>
-        </CardContent>
+        <Box sx={{ overflowX: 'auto' }}>
+          <Table
+            size='small'
+            sx={{
+              '& th': {
+                fontWeight: 700,
+                fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                backgroundColor: '#f9fafb'
+              },
+              '& td': {
+                fontSize: { xs: '0.8rem', sm: '0.9rem' }
+              }
+            }}
+          >
+            <TableHead sx={{ backgroundColor: '#F5F5F5' }}>
+              <TableRow>
+                <TableCell />
+                <TableCell sx={{ pt: 2 }}>Category</TableCell>
+                <TableCell sx={{ pt: 2 }} align='left'>
+                  Your practice value
+                </TableCell>
+                <TableCell sx={{ pt: 2 }} align='left'>
+                  UK Avg (NHS)
+                </TableCell>
+                <TableCell sx={{ pt: 2 }} align='left'>
+                  Monai benchmarking
+                </TableCell>
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
+              {expenseTypes.map((type: any) => {
+                if (type.expense_type !== 'Tax Documents') {
+                  return (
+                    <ExpandableRow
+                      key={type.expense_type}
+                      row={type}
+                      childSubtypes={type.expense_subtypes || []}
+                      activePracticeType={activePracticeType}
+                    />
+                  )
+                }
+              })}
+            </TableBody>
+          </Table>
+        </Box>
+        {/* </CardContent> */}
       </Card>
     </Box>
   )
