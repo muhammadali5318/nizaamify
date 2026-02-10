@@ -107,8 +107,28 @@ const processedBatchSlice = createSlice({
 
     clearAll: (state) => {
       state.batches = {}
-      // ✅ Resets the separate variable
       state.deletedDocumentsDueToTimeout = []
+    },
+
+    removeDocumentsFromBatch: (
+      state,
+      action: PayloadAction<{ batchId: string; documentIds: string[] }>
+    ) => {
+      const { batchId, documentIds } = action.payload
+
+      const batch = state.batches[batchId]
+      if (!batch) return
+
+      batch.documents = batch.documents.filter(
+        (doc) => !documentIds.includes(doc.document_id)
+      )
+
+      // Optional: keep originalDocuments in sync
+      if (batch.originalDocuments) {
+        batch.originalDocuments = batch.originalDocuments.filter(
+          (doc) => !documentIds.includes(doc.document_id)
+        )
+      }
     }
   }
 })
@@ -118,6 +138,7 @@ export const {
   addDeletedDocsDueToTimeout,
   updateDocumentFields,
   removeBatch,
+  removeDocumentsFromBatch,
   clearAll
 } = processedBatchSlice.actions
 

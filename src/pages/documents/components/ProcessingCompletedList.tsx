@@ -5,7 +5,9 @@ import {
   CardContent,
   Button,
   Divider,
-  CircularProgress
+  CircularProgress,
+  IconButton,
+  Tooltip
 } from '@mui/material'
 import aiIcon from '../../../assets/sparkles.svg'
 import editIcon from '../../../assets/message-edit.svg'
@@ -20,8 +22,12 @@ import { approveDocuments } from 'src/services/apis/approveDocs'
 import { notify } from '../../../components/notistack/NotificationProvider'
 import ConfirmDialog from 'src/components/confirm-dialog/ConfirmDialog'
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined'
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
 import { getModifiedDocuments } from 'src/utils/getModifiedDocs'
-import { clearAll } from 'src/store/slices/processedBatchDataSlice'
+import {
+  clearAll,
+  removeDocumentsFromBatch
+} from 'src/store/slices/processedBatchDataSlice'
 import { clearFiles } from 'src/store/slices/uploadSlice'
 import { useNavigate } from 'react-router'
 import { queryClient } from 'src/utils/queryClient'
@@ -30,9 +36,12 @@ import { useActivePractice } from 'src/hooks/useActivePractice'
 import dayjs from 'dayjs'
 import { clearProcessing } from 'src/store/slices/processingSlice'
 import DeletedDocumentsList from './DeletedDocumentsList'
+import { deleteBatchDocuments } from 'src/services/apis/deleteBatchDocuments'
+
 export default function ProcessingCompletedList() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [deletingIds, setDeletingIds] = useState<string[]>([]) // <-- track deleting ids
   const dispatch = useDispatch()
   const batches = useSelector((state: RootState) => state.processed.batches)
   const [selectedDoc, setSelectedDoc] = useState<any>(null)
@@ -42,6 +51,7 @@ export default function ProcessingCompletedList() {
   const deletedDocs = useSelector(
     (state: RootState) => state.processed.deletedDocumentsDueToTimeout
   )
+  // const deletedDocsIds = deletedDocs?.map((doc) => doc.document_id)
 
   const allDocuments = Object.values(batches).flatMap((batch: any) =>
     (batch.documents || []).map((doc: any) => ({
@@ -49,6 +59,9 @@ export default function ProcessingCompletedList() {
       batch_id: batch.batch_id
     }))
   )
+  const areAllDocumentsProcessed =
+    allDocuments.length > 0 &&
+    allDocuments.every((doc) => doc.status !== 'PENDING')
   const successfulDocs = allDocuments.filter((doc) => doc.status === 'SUCCESS')
   const isTotalTimeout = successfulDocs.length === 0 && deletedDocs.length > 0
   const { activePracticeId } = useActivePractice()
@@ -77,6 +90,7 @@ export default function ProcessingCompletedList() {
       await queryClient.invalidateQueries({
         queryKey: ['docs', 'counts']
       })
+      await deleteBatchDocuments(activePracticeId ?? '', firstBatchId, [], [])
 
       setSuccessOpen(true)
     } catch (err: any) {
@@ -87,6 +101,55 @@ export default function ProcessingCompletedList() {
       setConfirmOpen(false)
     }
   }
+  const handleRetry = () => {
+    dispatch(clearAll())
+    dispatch(clearFiles())
+    dispatch(clearProcessing())
+  }
+  if (allDocuments.length === 0 && deletedDocs.length === 0) {
+    handleRetry()
+  }
+  // ---------- NEW: remove single document from batch ----------
+  const handleRemoveDocument = async (doc: any) => {
+    if (!activePracticeId) {
+      notify.error('No active practice selected')
+      return
+    }
+    const docId = doc.document_id
+    const batchId = doc.batch_id
+    if (!docId || !batchId) {
+      notify.error('Missing document or batch id')
+      return
+    }
+
+    try {
+      setDeletingIds((s) => [...s, docId])
+
+      // 1️⃣ Delete document
+      await deleteBatchDocuments(activePracticeId, batchId, [], [docId])
+      notify.success('Document removed from batch')
+
+      dispatch(
+        removeDocumentsFromBatch({
+          batchId,
+          documentIds: [docId]
+        })
+      )
+
+      await queryClient.invalidateQueries({
+        queryKey: ['uploadedDocumentListApi'],
+        exact: false
+      })
+      await queryClient.invalidateQueries({ queryKey: ['docs', 'counts'] })
+    } catch (err: any) {
+      console.error('Remove doc failed', err)
+      notify.error(err?.response?.data?.message || 'Failed to remove document')
+    } finally {
+      setDeletingIds((s) => s.filter((id) => id !== docId))
+    }
+  }
+  // ------------------------------------------------------------
+
   const handleGoToDashboard = () => {
     setSuccessOpen(false)
     dispatch(clearAll())
@@ -104,11 +167,6 @@ export default function ProcessingCompletedList() {
     setSuccessOpen(false)
   }
 
-  const handleRetry = () => {
-    dispatch(clearAll())
-    dispatch(clearFiles())
-    dispatch(clearProcessing())
-  }
   return (
     <Box
       sx={{
@@ -126,11 +184,15 @@ export default function ProcessingCompletedList() {
             mb={2}
           >
             <Typography variant='h6' fontWeight='600'>
-              Processing completed
+              {areAllDocumentsProcessed
+                ? 'Processing Complete'
+                : 'Processing in Progress'}
             </Typography>
+
             <Button
               variant='contained'
               color='success'
+              disabled={!areAllDocumentsProcessed}
               startIcon={<CheckCircleOutlineOutlinedIcon />}
               onClick={() => setConfirmOpen(true)}
             >
@@ -178,30 +240,54 @@ export default function ProcessingCompletedList() {
                   </Typography>
                 </Box>
               </Box>
-              <Button
-                sx={{
-                  background: '#fff',
-                  color: '#EF6C00',
-                  borderRadius: '12px',
-                  border: '1px solid #EF6C00',
-                  textTransform: 'none'
-                }}
-                startIcon={
-                  <img src={editIcon} alt='Processing' width={20} height={20} />
-                }
-                variant='outlined'
-                onClick={() => handleEdit(doc)}
-              >
-                Edit
-              </Button>
+              {areAllDocumentsProcessed && (
+                <Box display={'flex'} gap={1}>
+                  <Button
+                    sx={{
+                      background: '#fff',
+                      color: '#EF6C00',
+                      borderRadius: '12px',
+                      border: '1px solid #EF6C00',
+                      textTransform: 'none'
+                    }}
+                    startIcon={
+                      <img
+                        src={editIcon}
+                        alt='Processing'
+                        width={20}
+                        height={20}
+                      />
+                    }
+                    variant='outlined'
+                    onClick={() => handleEdit(doc)}
+                  >
+                    Edit
+                  </Button>
+
+                  <Tooltip title='Remove Document from batch' placement='top'>
+                    <IconButton
+                      onClick={() => handleRemoveDocument(doc)}
+                      disabled={deletingIds.includes(doc.document_id)}
+                      sx={{
+                        borderColor: 'error.main',
+                        color: 'error.main'
+                      }}
+                    >
+                      {deletingIds.includes(doc.document_id) ? (
+                        <CircularProgress size={16} />
+                      ) : (
+                        <CancelOutlinedIcon />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              )}
             </Box>
 
             <Divider sx={{ my: 2 }} />
 
             {/* AI Summary Section */}
-            {/* AI Summary Section */}
             {doc.status === 'PENDING' ? (
-              // 🔵 Show loader if pending
               <Box
                 sx={{
                   display: 'flex',
@@ -213,7 +299,6 @@ export default function ProcessingCompletedList() {
                 <CircularProgress />
               </Box>
             ) : (
-              // ✅ Show AI summary if SUCCESS
               <Box>
                 <Typography
                   variant='subtitle2'
@@ -291,7 +376,6 @@ export default function ProcessingCompletedList() {
           </CardContent>
         </Card>
       ))}
-      {/* 3. Show partial timeout list at the bottom if some docs succeeded */}
       <DeletedDocumentsList
         deletedDocs={deletedDocs}
         isTotalTimeout={isTotalTimeout}

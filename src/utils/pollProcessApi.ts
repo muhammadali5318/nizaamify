@@ -14,7 +14,7 @@ import {
 import { deleteBatchDocuments } from 'src/services/apis/deleteBatchDocuments'
 
 const activeJobs = new Set<string>()
-const DOC_TIMEOUT_MS = 30000
+const DOC_TIMEOUT_MS = 35000
 
 export const pollBatchStatusUntilComplete = async (
   batchId: string,
@@ -108,7 +108,7 @@ export const pollBatchStatusUntilComplete = async (
 
       try {
         const stuckDocIds = stuckDocs.map((doc: any) => doc.document_id)
-        await deleteBatchDocuments(practiceId, batchId, stuckDocIds)
+        await deleteBatchDocuments(practiceId, batchId, stuckDocIds, [])
       } catch (err) {
         console.error('Cleanup API failed', err)
       }

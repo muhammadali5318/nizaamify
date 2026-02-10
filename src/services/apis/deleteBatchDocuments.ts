@@ -4,15 +4,16 @@ import apiClient from '../api-client'
 export const deleteBatchDocuments = async (
   practiceId: string,
   batchId: string,
-  documentIds: string[]
+  documentIds: string[],
+  userDeletedDocmentIds: string[]
 ) => {
   if (!practiceId) throw new Error('practiceId required')
   if (!batchId) throw new Error('batchId required')
-  if (!Array.isArray(documentIds) || documentIds.length === 0) {
-    return null // nothing to do
-  }
 
-  const payload = { documents: documentIds }
+  const payload = {
+    documents: documentIds,
+    user_delete_documents: userDeletedDocmentIds
+  }
 
   try {
     const response = await apiClient.delete(
