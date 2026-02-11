@@ -198,10 +198,11 @@ const ExpensePageHeader = ({
           <Box
             sx={{
               '& .MuiInputBase-root': {
-                height: 40
+                height: 40,
+                width: 270
               },
               '& input': {
-                padding: '8px 12px'
+                padding: '8px 0px 8px 12px'
               }
             }}
           >

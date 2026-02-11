@@ -18,7 +18,7 @@ const ExpenseBreakdown = () => {
 
   // Date range state
   const [dateRange, setDateRange] = useState<RangeISO>({
-    start: dayjs().startOf('year').toISOString(),
+    start: dayjs().startOf('month').toISOString(),
     end: dayjs().endOf('month').toISOString()
   })
 

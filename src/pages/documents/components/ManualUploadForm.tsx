@@ -75,6 +75,7 @@ const ManualEntryForm: React.FC = () => {
     attachments: []
   })
   const { completedFiles } = useSelector((state: RootState) => state.uploads)
+  const [isSaving, setIsSaving] = useState(false)
   const batches = useSelector((state: RootState) => state.processed.batches)
   const hasBatches = Object.keys(batches || {}).length > 0
   const dispatch = useDispatch()
@@ -186,7 +187,11 @@ const ManualEntryForm: React.FC = () => {
     dispatch(resetPresignResponse())
   }
   const handleSubmit = async () => {
+    if (isSaving) return
+
     try {
+      setIsSaving(true)
+
       if (!activePracticeId) {
         notify.error('Practice ID missing')
         return
@@ -250,6 +255,10 @@ const ManualEntryForm: React.FC = () => {
       console.error(err)
 
       const backendErrors = err?.error
+      if (err?.message) {
+        notify.error(err?.message)
+        return
+      }
 
       const { parseApiErrors } = await import('src/utils/parseApiErrors')
       const messages = parseApiErrors(backendErrors)
@@ -258,6 +267,8 @@ const ManualEntryForm: React.FC = () => {
       } else {
         notify.error(err?.response?.data?.message || 'Failed to save entry')
       }
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -586,12 +597,13 @@ const ManualEntryForm: React.FC = () => {
           <Button
             variant='contained'
             onClick={handleSubmit}
+            disabled={isSaving}
             sx={{
               backgroundColor: '#000',
               '&:hover': { backgroundColor: '#333' }
             }}
           >
-            Save Entry
+            {isSaving ? 'Saving...' : 'Save Entry'}
           </Button>
         </Box>
       </Stack>
