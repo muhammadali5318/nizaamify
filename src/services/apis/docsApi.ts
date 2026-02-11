@@ -1,3 +1,4 @@
+import { notify } from 'src/components/notistack/NotificationProvider'
 import apiClient from '../api-client'
 
 export const presignDocuments = async (
@@ -5,18 +6,47 @@ export const presignDocuments = async (
   files: any[],
   org_id: string
 ) => {
-  const payload = {
-    user_id: userId,
-    files: files.map((file) => ({
-      filename: file.name,
-      content_type: file.type || 'application/octet-stream'
-    }))
+  try {
+    const payload = {
+      user_id: userId,
+      files: files.map((file) => ({
+        filename: file.name,
+        content_type: file.type || 'application/octet-stream'
+      }))
+    }
+
+    const response = await apiClient.post(
+      `/docs/v1/practices/${org_id}/presign/`,
+      payload
+    )
+
+    return response.data
+  } catch (error: any) {
+    console.error('Error presigning documents:', error)
+
+    const errorData = error
+
+    let message = 'Failed to presign documents'
+
+    if (errorData) {
+      // Handle nested validation errors like files -> 0 -> filename -> [msg]
+      if (errorData.files) {
+        const firstFileError = Object.values(errorData.files)[0] as any
+        const firstFieldError = firstFileError
+          ? Object.values(firstFileError)[0]
+          : null
+
+        if (Array.isArray(firstFieldError) && firstFieldError.length > 0) {
+          message = firstFieldError[0]
+        }
+      } else if (errorData.detail) {
+        message = errorData.detail
+      } else if (typeof errorData === 'string') {
+        message = errorData
+      }
+    }
+
+    notify.error(message)
+    throw new Error(message)
   }
-
-  const response = await apiClient.post(
-    `/docs/v1/practices/${org_id}/presign/`,
-    payload
-  )
-
-  return response.data
 }
