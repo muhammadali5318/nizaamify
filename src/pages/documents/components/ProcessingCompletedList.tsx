@@ -7,7 +7,8 @@ import {
   Divider,
   CircularProgress,
   IconButton,
-  Tooltip
+  Tooltip,
+  Stack
 } from '@mui/material'
 import aiIcon from '../../../assets/sparkles.svg'
 import editIcon from '../../../assets/message-edit.svg'
@@ -24,6 +25,8 @@ import ConfirmDialog from 'src/components/confirm-dialog/ConfirmDialog'
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined'
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
 import { getModifiedDocuments } from 'src/utils/getModifiedDocs'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+
 import {
   clearAll,
   removeDocumentsFromBatch
@@ -61,7 +64,10 @@ export default function ProcessingCompletedList() {
   )
   const areAllDocumentsProcessed =
     allDocuments?.length > 0 &&
-    allDocuments?.every((doc) => doc.status !== 'PENDING')
+    allDocuments.every(
+      (doc) => doc.status === 'SUCCESS' || doc.status === 'UNKNOWN'
+    )
+
   const successfulDocs = allDocuments?.filter((doc) => doc.status === 'SUCCESS')
   const isTotalTimeout = successfulDocs?.length === 0 && deletedDocs?.length > 0
   const { activePracticeId } = useActivePractice()
@@ -240,8 +246,8 @@ export default function ProcessingCompletedList() {
                   </Typography>
                 </Box>
               </Box>
-              {areAllDocumentsProcessed && (
-                <Box display={'flex'} gap={1}>
+              <Box display={'flex'} gap={1}>
+                {(doc.status === 'SUCCESS' || doc.status === 'PENDING') && (
                   <Button
                     sx={{
                       background: '#fff',
@@ -263,25 +269,25 @@ export default function ProcessingCompletedList() {
                   >
                     Edit
                   </Button>
+                )}
 
-                  <Tooltip title='Remove Document from batch' placement='top'>
-                    <IconButton
-                      onClick={() => handleRemoveDocument(doc)}
-                      disabled={deletingIds.includes(doc.document_id)}
-                      sx={{
-                        borderColor: 'error.main',
-                        color: 'error.main'
-                      }}
-                    >
-                      {deletingIds.includes(doc.document_id) ? (
-                        <CircularProgress size={16} />
-                      ) : (
-                        <CancelOutlinedIcon />
-                      )}
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-              )}
+                <Tooltip title='Remove Document from batch' placement='top'>
+                  <IconButton
+                    onClick={() => handleRemoveDocument(doc)}
+                    disabled={deletingIds.includes(doc.document_id)}
+                    sx={{
+                      borderColor: 'error.main',
+                      color: 'error.main'
+                    }}
+                  >
+                    {deletingIds.includes(doc.document_id) ? (
+                      <CircularProgress size={16} />
+                    ) : (
+                      <CancelOutlinedIcon />
+                    )}
+                  </IconButton>
+                </Tooltip>
+              </Box>
             </Box>
 
             <Divider sx={{ my: 2 }} />
@@ -298,7 +304,7 @@ export default function ProcessingCompletedList() {
               >
                 <CircularProgress />
               </Box>
-            ) : (
+            ) : doc.status === 'SUCCESS' || doc.status === 'UNKNOWN' ? (
               <Box>
                 <Typography
                   variant='subtitle2'
@@ -371,6 +377,40 @@ export default function ProcessingCompletedList() {
                     </strong>
                   </Typography>
                 </Box>
+              </Box>
+            ) : (
+              <Box
+                sx={{
+                  backgroundColor: '#FEF2F2',
+                  borderRadius: '8px',
+                  border: '1px solid #FCA5A5',
+                  p: 2,
+                  textAlign: 'left'
+                }}
+                role='alert'
+                aria-live='polite'
+              >
+                <Stack
+                  direction='row'
+                  spacing={2}
+                  alignItems='center'
+                  sx={{ mb: 1 }}
+                >
+                  <ErrorOutlineIcon sx={{ color: '#DC2626', fontSize: 22 }} />
+                  <Typography
+                    variant='subtitle2'
+                    sx={{ fontWeight: 700, color: '#DC2626' }}
+                  >
+                    Processing failed
+                  </Typography>
+                </Stack>
+
+                <Typography variant='body2' sx={{ color: '#7F1D1D', mb: 1 }}>
+                  This document could not be processed by the AI due to an
+                  error. To proceed with batch approval, please remove this
+                  document from the batch. Once removed, you can continue
+                  approving the remaining documents.
+                </Typography>
               </Box>
             )}
           </CardContent>

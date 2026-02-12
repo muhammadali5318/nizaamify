@@ -26,19 +26,12 @@ export const presignDocuments = async (
 
     const errorData = error
 
-    let message = 'Failed to presign documents'
-
+    let message = ''
     if (errorData) {
       // Handle nested validation errors like files -> 0 -> filename -> [msg]
       if (errorData.files) {
         const firstFileError = Object.values(errorData.files)[0] as any
-        const firstFieldError = firstFileError
-          ? Object.values(firstFileError)[0]
-          : null
-
-        if (Array.isArray(firstFieldError) && firstFieldError.length > 0) {
-          message = firstFieldError[0]
-        }
+        message = firstFileError
       } else if (errorData.detail) {
         message = errorData.detail
       } else if (typeof errorData === 'string') {

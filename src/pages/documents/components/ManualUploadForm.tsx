@@ -255,16 +255,16 @@ const ManualEntryForm: React.FC = () => {
       console.error(err)
 
       const backendErrors = err?.error
-      if (err?.message) {
-        notify.error(err?.message)
-        return
-      }
 
       const { parseApiErrors } = await import('src/utils/parseApiErrors')
       const messages = parseApiErrors(backendErrors)
       if (messages.length > 0) {
         notify.error(messages.join('\n'))
       } else {
+        if (err?.message) {
+          notify.error(err?.message)
+          return
+        }
         notify.error(err?.response?.data?.message || 'Failed to save entry')
       }
     } finally {
