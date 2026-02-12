@@ -63,7 +63,7 @@ export default function ProcessingCompletedList() {
     allDocuments?.length > 0 &&
     allDocuments?.every((doc) => doc.status !== 'PENDING')
   const successfulDocs = allDocuments?.filter((doc) => doc.status === 'SUCCESS')
-  const isTotalTimeout = successfulDocs.length === 0 && deletedDocs.length > 0
+  const isTotalTimeout = successfulDocs?.length === 0 && deletedDocs?.length > 0
   const { activePracticeId } = useActivePractice()
 
   console.warn(allDocuments)
