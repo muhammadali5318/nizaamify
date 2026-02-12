@@ -115,7 +115,7 @@ export const category = {
 export const getFilteredDocumentTypes = (category: string): string[] => {
   const allTypes = Object.keys(documentMapping)
 
-  if (category === 'Revenue') {
+  if (category === 'Revenue' || category === 'Unknown') {
     return ['Income & Revenue']
   }
 
