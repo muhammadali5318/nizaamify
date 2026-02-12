@@ -1,5 +1,6 @@
 import { Box, CircularProgress, Typography } from '@mui/material'
 import { ChatMessage } from '../../hooks/useChat'
+import MessageMarkdown from './MessageMarkdown'
 
 interface Props {
   message: ChatMessage
@@ -17,7 +18,6 @@ const ChatMessageBubble = ({ message }: Props) => {
       <Box
         maxWidth='75%'
         px={2}
-        py={1.5}
         borderRadius={2}
         bgcolor={isUser ? 'primary.main' : 'grey.100'}
         color={isUser ? 'primary.contrastText' : 'text.primary'}
@@ -26,8 +26,7 @@ const ChatMessageBubble = ({ message }: Props) => {
       >
         {message.isStreaming && <CircularProgress size={20} />}
         <Typography variant='body2' whiteSpace='pre-wrap'>
-          {' '}
-          {message.content}
+          <MessageMarkdown message={message?.content} />
         </Typography>
       </Box>
     </Box>

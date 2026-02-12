@@ -60,9 +60,9 @@ export default function ProcessingCompletedList() {
     }))
   )
   const areAllDocumentsProcessed =
-    allDocuments.length > 0 &&
-    allDocuments.every((doc) => doc.status !== 'PENDING')
-  const successfulDocs = allDocuments.filter((doc) => doc.status === 'SUCCESS')
+    allDocuments?.length > 0 &&
+    allDocuments?.every((doc) => doc.status !== 'PENDING')
+  const successfulDocs = allDocuments?.filter((doc) => doc.status === 'SUCCESS')
   const isTotalTimeout = successfulDocs.length === 0 && deletedDocs.length > 0
   const { activePracticeId } = useActivePractice()
 
@@ -75,7 +75,7 @@ export default function ProcessingCompletedList() {
     try {
       setLoading(true)
       const allDocsPayload = getModifiedDocuments(batches)
-      const firstBatchId = allDocuments[0]?.batch_id
+      const firstBatchId = allDocuments?.[0]?.batch_id
 
       await approveDocuments(
         activePracticeId ?? '',
@@ -106,7 +106,7 @@ export default function ProcessingCompletedList() {
     dispatch(clearFiles())
     dispatch(clearProcessing())
   }
-  if (allDocuments.length === 0 && deletedDocs.length === 0) {
+  if (allDocuments?.length === 0 && deletedDocs?.length === 0) {
     handleRetry()
   }
   // ---------- NEW: remove single document from batch ----------
@@ -204,7 +204,7 @@ export default function ProcessingCompletedList() {
         </>
       )}
 
-      {allDocuments.map((doc) => (
+      {allDocuments?.map((doc) => (
         <Card
           key={doc.document_id}
           sx={{
