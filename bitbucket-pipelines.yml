@@ -2,13 +2,14 @@ image: node:20
 
 definitions:
   caches:
-    node: ~/.npm 
-  steps: 
+    node: ~/.npm
+
+  steps:
     - step: &cloneScriptsRepo
         name: Download Teams Notification Scripts
         script:
           - apt install git -y
-          - git clone git@bitbucket.org:31green/devops-scripts.git 
+          - git clone git@bitbucket.org:31green/devops-scripts.git
         artifacts:
           - devops-scripts/**
         after-script:
@@ -57,12 +58,12 @@ definitions:
         script:
           - ENV="${BITBUCKET_BRANCH}"
           - |
-            if [[ "${ENV}" == "master" ]]; then
-              export VITE_AUTH0_DOMAIN=
-              export VITE_AUTH0_CLIENT_ID=
-              export VITE_AUTH0_AUDIENCE=
-              export VITE_API_URL=
-              export VITE_CALLBACK_URL=
+            if [[ "${ENV}" == "main" ]]; then
+              export VITE_AUTH0_DOMAIN=$PROD_VITE_AUTH0_DOMAIN
+              export VITE_AUTH0_CLIENT_ID=$PROD_VITE_AUTH0_CLIENT_ID
+              export VITE_AUTH0_AUDIENCE=$PROD_VITE_AUTH0_AUDIENCE
+              export VITE_API_URL=$PROD_VITE_API_URL
+              export VITE_AUTH0_CALLBACK_URL=$PROD_VITE_CALLBACK_URL
             elif [[ "${ENV}" == "dev" ]]; then
               export VITE_AUTH0_DOMAIN=$DEV_VITE_AUTH0_DOMAIN
               export VITE_AUTH0_CLIENT_ID=$DEV_VITE_AUTH0_CLIENT_ID
@@ -100,10 +101,19 @@ definitions:
         oidc: true
         script:
           - ENV="${BITBUCKET_BRANCH}"
+
+          # Select correct OIDC role: main -> Monai PROD AWS account, others -> existing role
           - |
-            if [[ "${ENV}" == "master" ]]; then
-              export S3_BUCKET=
-              export CLOUDFRONT_ID=
+            if [[ "${ENV}" == "main" ]]; then
+              export OIDC_ROLE_ARN=$PROD_MONAI_OIDC_ROLE_ARN
+            else
+              export OIDC_ROLE_ARN=$MonAi_OIDC_ROLE_ARN
+            fi
+
+          - |
+            if [[ "${ENV}" == "main" ]]; then
+              export S3_BUCKET=$PROD_S3_BUCKET
+              export CLOUDFRONT_ID=$PROD_CLOUDFRONT_ID
             elif [[ "${ENV}" == "dev" ]]; then
               export S3_BUCKET=$DEV_S3_BUCKET
               export CLOUDFRONT_ID=$DEV_CLOUDFRONT_ID
@@ -111,13 +121,15 @@ definitions:
               export S3_BUCKET=$QA_S3_BUCKET
               export CLOUDFRONT_ID=$QA_CLOUDFRONT_ID
             fi
+
           - echo $CLOUDFRONT_ID > cloudfront_id.txt
+
           - pipe: atlassian/aws-s3-deploy:2.0.1
             variables:
-              AWS_OIDC_ROLE_ARN: $MonAi_OIDC_ROLE_ARN
+              AWS_OIDC_ROLE_ARN: $OIDC_ROLE_ARN
               AWS_DEFAULT_REGION: $AWS_REGION
               S3_BUCKET: $S3_BUCKET
-              LOCAL_PATH: 'dist'
+              LOCAL_PATH: "dist"
         artifacts:
           - cloudfront_id.txt
         after-script:
@@ -130,13 +142,24 @@ definitions:
         name: Invalidate CloudFront Cache
         oidc: true
         script:
+          - ENV="${BITBUCKET_BRANCH}"
+
+          # Select correct OIDC role: main -> Monai PROD AWS account, others -> existing role
+          - |
+            if [[ "${ENV}" == "main" ]]; then
+              export OIDC_ROLE_ARN=$PROD_MONAI_OIDC_ROLE_ARN
+            else
+              export OIDC_ROLE_ARN=$MonAi_OIDC_ROLE_ARN
+            fi
+
           - CLOUDFRONT_ID=$(cat cloudfront_id.txt)
+
           - pipe: atlassian/aws-cloudfront-invalidate:0.11.0
             variables:
-              AWS_OIDC_ROLE_ARN: $MonAi_OIDC_ROLE_ARN
+              AWS_OIDC_ROLE_ARN: $OIDC_ROLE_ARN
               AWS_DEFAULT_REGION: $AWS_REGION
               DISTRIBUTION_ID: $CLOUDFRONT_ID
-              PATHS: '/*'
+              PATHS: "/*"
         after-script:
           - apt install git -y
           - export WEBHOOK_URL=$MAI_CHANNEL_WEBHOOK_URL
@@ -150,12 +173,23 @@ pipelines:
       - step: *npmlint
       - step: *npmtest
       - step: *npmbuild
+
   branches:
     feature/*:
       - step: *npminstall
       - step: *npmlint
       - step: *npmtest
-    '{dev,qa}':
+
+    "{dev,qa}":
+      - step: *cloneScriptsRepo
+      - step: *trivyscan
+      - step: *npminstall
+      - step: *npmlint
+      - step: *npmbuild
+      - step: *s3deploy
+      - step: *invalidate_cache
+
+    main:
       - step: *cloneScriptsRepo
       - step: *trivyscan
       - step: *npminstall
