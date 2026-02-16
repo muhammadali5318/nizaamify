@@ -1,13 +1,32 @@
+// src/components/chat/ChatMessageBubble.tsx
 import { Box, CircularProgress, Typography } from '@mui/material'
-import { ChatMessage } from '../../hooks/useChat'
+import { useEffect, useState } from 'react'
+import { ChatMessage } from 'src/store/slices/chatSlice'
 import MessageMarkdown from './MessageMarkdown'
 
 interface Props {
   message: ChatMessage
 }
 
+const thinkingMessages = [
+  'Thinking...',
+  'Still working on it, this is a deep one!',
+  'Almost there, just putting on the finishing touches...'
+]
+
 const ChatMessageBubble = ({ message }: Props) => {
-  const isUser = message.role === 'user'
+  const isUser = message?.role.toLowerCase() === 'user'
+  const [thinkingIndex, setThinkingIndex] = useState(0)
+
+  useEffect(() => {
+    if (!message.isStreaming) return
+
+    const interval = setInterval(() => {
+      setThinkingIndex((prev) => (prev + 1) % thinkingMessages.length)
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }, [message.isStreaming])
 
   return (
     <Box
@@ -21,13 +40,22 @@ const ChatMessageBubble = ({ message }: Props) => {
         borderRadius={2}
         bgcolor={isUser ? 'primary.main' : 'grey.100'}
         color={isUser ? 'primary.contrastText' : 'text.primary'}
-        display={'flex'}
-        alignItems={'center'}
+        display='flex'
+        alignItems='center'
+        gap={1}
       >
-        {message.isStreaming && <CircularProgress size={20} />}
-        <Typography variant='body2' whiteSpace='pre-wrap'>
-          <MessageMarkdown message={message?.content} />
-        </Typography>
+        {message.isStreaming ? (
+          <>
+            <CircularProgress size={18} />
+            <Typography variant='body2' ml={1} fontStyle='italic'>
+              {thinkingMessages[thinkingIndex]}
+            </Typography>
+          </>
+        ) : (
+          <Typography variant='body2' whiteSpace='pre-wrap'>
+            <MessageMarkdown message={message?.content} />
+          </Typography>
+        )}
       </Box>
     </Box>
   )

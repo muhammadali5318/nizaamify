@@ -1,18 +1,20 @@
 import { configureStore, combineReducers } from '@reduxjs/toolkit'
 import storage from 'redux-persist/lib/storage'
 import { persistReducer, persistStore } from 'redux-persist'
+
 import uploadReducer from './slices/uploadSlice'
 import presignReducer from './slices/presignedSlice'
 import processingReducer from './slices/processingSlice'
 import processedReducer from './slices/processedBatchDataSlice'
 import { activePracticeReducer } from './slices/activePracticeSlice'
-import userDetailsInActivePracticeReducer from 'src/store/slices/userDetailsInActivePracticeSlice'
+import userDetailsInActivePracticeReducer from './slices/userDetailsInActivePracticeSlice'
 import selectedUserReducer from './slices/team-management/selectedUserSlice'
 import pollingJobsReducer from './slices/pollingJobSlice'
 import manualEntryQueueReducer from './slices/manualEntryQueueSlice'
 import manualEntryFileReducer from './slices/manualEntryFilesSlice'
 import selectedInstitutionReducer from './slices/selectedInstitution'
 import bankConnectionReducer from './slices/bankConnectionSlice'
+import chatReducer from './slices/chatSlice'
 
 const rootReducer = combineReducers({
   uploads: uploadReducer,
@@ -26,7 +28,8 @@ const rootReducer = combineReducers({
   manualEntryQueue: manualEntryQueueReducer,
   manualEntryFiles: manualEntryFileReducer,
   selectedInstitution: selectedInstitutionReducer,
-  bankConnection: bankConnectionReducer
+  bankConnection: bankConnectionReducer,
+  chat: chatReducer
 })
 
 const persistConfig = {
@@ -37,9 +40,9 @@ const persistConfig = {
     'activePractice',
     'selectedUser',
     'processing',
-    // 'uploads',
     'pollingJobs',
-    'manualEntryFiles'
+    'manualEntryFiles',
+    'chat'
   ]
 }
 
@@ -50,7 +53,8 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false
-    })
+    }),
+  devTools: process.env.NODE_ENV !== 'production'
 })
 
 export const persistor = persistStore(store)

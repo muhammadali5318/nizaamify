@@ -1,3 +1,4 @@
+// src/components/chat/ChatShell.tsx
 import {
   Box,
   Typography,
@@ -11,7 +12,6 @@ import SuggestionGrid from '../suggestions/SuggestionGrid'
 import ChatMessages from './ChatMessages'
 import { useChat } from '../../hooks/useChat'
 import { useEffect, useState } from 'react'
-import { useFetchChatHistory } from '../../hooks/useFetchChatHistory'
 
 interface Props {
   selectedChatId: string | null
@@ -28,17 +28,19 @@ const ChatShell = ({ selectedChatId, onChatCreated }: Props) => {
     sendMessage,
     isSending,
     conversationId,
-    loadConversationHistory
+    isLoadingHistory,
+    loadConversation
   } = useChat()
 
-  const { data: chatHistory, isLoading: isLoadingHistory } =
-    useFetchChatHistory(!!selectedChatId, selectedChatId ?? '')
-
+  // When user selects a chat from sidebar, load it from Redux
   useEffect(() => {
-    if (selectedChatId && chatHistory) {
-      loadConversationHistory(chatHistory, selectedChatId)
+    if (selectedChatId) {
+      loadConversation(selectedChatId)
+    } else {
+      // if no selected chat, we keep current messages (or reset on New Chat)
+      // resetConversation() is triggered by AiChatModule when New Chat is selected
     }
-  }, [selectedChatId, chatHistory, loadConversationHistory])
+  }, [selectedChatId, loadConversation])
 
   useEffect(() => {
     if (selectedChatId === null && conversationId !== null) {

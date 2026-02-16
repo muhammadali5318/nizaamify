@@ -1,5 +1,6 @@
+// src/components/chat/ChatMessages.tsx
 import { Box } from '@mui/material'
-import { ChatMessage } from '../../hooks/useChat'
+import { ChatMessage } from 'src/store/slices/chatSlice'
 import ChatMessageBubble from './ChatMessageBubble'
 import { useEffect, useRef } from 'react'
 
