@@ -19,6 +19,8 @@ import { getUKAvgValue } from '../utils/getUKAvgValue'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import benchmarkIcon from '../../../assets/benchmark-comp-icon.svg'
 import { downloadBenchmarkCsv } from '../utils/downloadBenchmarkCSV'
+import { useAuth } from 'src/context/AuthProvider'
+import { useFetchBenchmarkConfigurations } from 'src/hooks/useFetchBenchmarkConfigurations'
 
 /* ---------------------
    Table component
@@ -30,6 +32,7 @@ interface ExpandableBenchmarkTableProps {
 const ExpandableBenchmarkTable = ({ data }: ExpandableBenchmarkTableProps) => {
   const theme = useTheme()
   const activePracticeData = useActivePractice()
+
   const activePracticeType =
     activePracticeData?.activePractice?.practice_type || 'Predom. NHS'
 
@@ -142,6 +145,15 @@ const ExpandableRow = ({
   activePracticeType
 }: ExpandableRowProps) => {
   const [open, setOpen] = useState(false)
+  const { accessToken } = useAuth()
+  const { data: benchmarkData } = useFetchBenchmarkConfigurations(!!accessToken)
+  const currentPracticeBenchmarks =
+    benchmarkData?.byType?.[activePracticeType] ?? []
+
+  const benchmarkValue = currentPracticeBenchmarks.find(
+    (benchmark) => row.expense_type === benchmark.expense_category_type
+  )
+
   const formatAmountWithPercent = (amount: string, percent: string) => {
     const formattedAmount = Number(amount).toLocaleString('en-GB', {
       style: 'currency',
@@ -178,7 +190,7 @@ const ExpandableRow = ({
           {formatAmountWithPercent(row.amount, row.share_of_total_percent)}
         </TableCell>
         <TableCell align='left'>
-          {getUKAvgValue(row.expense_type, activePracticeType)}
+          {benchmarkValue?.lower_bound} – {benchmarkValue?.upper_bound}%
         </TableCell>
         <TableCell align='left'>-</TableCell>
       </TableRow>
