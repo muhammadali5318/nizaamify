@@ -35,6 +35,7 @@ import {
   setConnectionId,
   setStatus
 } from 'src/store/slices/bankConnectionSlice'
+import { clearChatStorage } from 'src/store/slices/chatSlice'
 
 export default function PracticeSelector() {
   const { isOwnerOrDirectorInAnyPractice } = useUserDetails()
@@ -156,6 +157,8 @@ export default function PracticeSelector() {
             dispatch(setConnectionId(null))
             setSelectedPractice(selected)
             setActiveById(selected?.id ?? '', practices)
+            dispatch(clearChatStorage())
+
             notify.success('Switched to ' + selected?.practice_name)
           }}
           displayEmpty

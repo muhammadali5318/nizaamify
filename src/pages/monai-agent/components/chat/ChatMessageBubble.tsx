@@ -23,7 +23,7 @@ const ChatMessageBubble = ({ message }: Props) => {
 
     const interval = setInterval(() => {
       setThinkingIndex((prev) => (prev + 1) % thinkingMessages.length)
-    }, 3000)
+    }, 3500)
 
     return () => clearInterval(interval)
   }, [message.isStreaming])
@@ -47,7 +47,7 @@ const ChatMessageBubble = ({ message }: Props) => {
         {message.isStreaming ? (
           <>
             <CircularProgress size={18} />
-            <Typography variant='body2' ml={1} fontStyle='italic'>
+            <Typography variant='body2' ml={1} py={1.5} fontStyle='italic'>
               {thinkingMessages[thinkingIndex]}
             </Typography>
           </>

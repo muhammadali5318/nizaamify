@@ -35,6 +35,7 @@ import {
   setConnectionId,
   setStatus
 } from 'src/store/slices/bankConnectionSlice'
+import { clearChatStorage } from 'src/store/slices/chatSlice'
 
 interface PracticeDetailsCardProps {
   status?: 'active' | 'inactive' | 'archived'
@@ -148,6 +149,7 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
     localStorage.removeItem('bank_connection_id')
     dispatch(setStatus(null))
     dispatch(setConnectionId(null))
+    dispatch(clearChatStorage())
     notify.success('Switched to ' + practice?.practice_name)
   }, [practice, setActiveById, allPractices, dispatch])
 

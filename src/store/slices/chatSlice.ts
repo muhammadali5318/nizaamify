@@ -109,6 +109,12 @@ const slice = createSlice({
       state.messages = []
       state.conversationId = null
       state.isSending = false
+    },
+    clearChatStorage(state) {
+      state.messages = []
+      state.conversationId = null
+      state.isSending = false
+      state.isLoadingHistory = false
     }
   },
   extraReducers: (builder) => {
@@ -184,7 +190,7 @@ const slice = createSlice({
   }
 })
 
-export const { resetConversation } = slice.actions
+export const { resetConversation, clearChatStorage } = slice.actions
 export default slice.reducer
 
 /* ============================================================
