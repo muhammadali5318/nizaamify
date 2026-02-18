@@ -9,9 +9,11 @@ interface Props {
 }
 
 const thinkingMessages = [
-  'Thinking...',
-  'Still working on it, this is a deep one!',
-  'Almost there, just putting on the finishing touches...'
+  'Processing your request...',
+  'Generating response...',
+  'Almost done, just a moment...',
+  'Working on it...',
+  'Preparing the answer...'
 ]
 
 const ChatMessageBubble = ({ message }: Props) => {
