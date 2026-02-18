@@ -12,8 +12,6 @@ import ChatHistoryItem from './ChatHistoryItem'
 import { useAuth } from 'src/context/AuthProvider'
 import { useRef, useEffect } from 'react'
 import { useFetchRecentChatsInfinite } from '../../hooks/useFetchRecentChats'
-import { useQueryClient } from '@tanstack/react-query'
-
 interface Props {
   selectedChatId: string | null
   onSelectChat: (id: string | null, title?: string) => void
@@ -24,19 +22,12 @@ const ChatSidebar = ({ selectedChatId, onSelectChat }: Props) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { accessToken } = useAuth()
-  const queryClient = useQueryClient()
 
   const { data, fetchNextPage, hasNextPage, status } =
     useFetchRecentChatsInfinite(!!accessToken, 20)
 
   const items =
     data?.pages?.flatMap((p: any) => p.results ?? p.data?.results ?? []) ?? []
-
-  useEffect(() => {
-    if (selectedChatId && !items.some((item) => item.id === selectedChatId)) {
-      queryClient.invalidateQueries({ queryKey: ['fetchRecentChats'] })
-    }
-  }, [selectedChatId, items, queryClient])
 
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   useEffect(() => {
@@ -116,6 +107,7 @@ const ChatSidebar = ({ selectedChatId, onSelectChat }: Props) => {
               chatMetaData={item}
               onClick={() => onSelectChat(item.id, item.title || item.name)}
               selected={item.id === selectedChatId}
+              selectedChatId={selectedChatId}
             />
           ))
         )}

@@ -10,11 +10,7 @@ export const useFetchChatHistory = (
   const { activePracticeId } = useActivePractice()
 
   return useQuery({
-    queryKey: [
-      'fetchChatHistory',
-      activePracticeId,
-      chatsHistoryId // 👈 THIS WAS MISSING
-    ],
+    queryKey: ['fetchChatHistory', activePracticeId, chatsHistoryId],
     queryFn: async () => {
       if (!activePracticeId || !chatsHistoryId) return null
 
