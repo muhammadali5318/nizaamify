@@ -62,11 +62,16 @@ export const formatAmountWithCommas = (amount: number | string): string => {
   })
 }
 
-export const formatChatDate = (isoDate?: string) => {
+export const formatChatDate = (isoDate?: string): string => {
   if (!isoDate) return ''
 
   const date = new Date(isoDate)
   const now = new Date()
+
+  if (isNaN(date.getTime())) return ''
+
+  const diffMs = now.getTime() - date.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
 
   const isToday =
     date.getDate() === now.getDate() &&
@@ -80,26 +85,35 @@ export const formatChatDate = (isoDate?: string) => {
     })
   }
 
-  const diffMs = now.getTime() - date.getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-  const diffWeeks = Math.floor(diffDays / 7)
-
   // Yesterday
-  if (diffDays <= 1) {
-    return '1 day ago'
+  if (diffDays === 1) {
+    return 'Yesterday'
   }
 
-  // Days ago (2–6 days)
+  // Days (2–6)
   if (diffDays < 7) {
     return `${diffDays} days ago`
   }
 
-  // Weeks ago
-  if (diffWeeks === 1) {
-    return '1 week ago'
+  const diffWeeks = Math.floor(diffDays / 7)
+
+  // Weeks (1–3)
+  if (diffWeeks < 4) {
+    return diffWeeks === 1 ? '1 week ago' : `${diffWeeks} weeks ago`
   }
 
-  return `${diffWeeks} weeks ago`
+  const diffMonths =
+    (now.getFullYear() - date.getFullYear()) * 12 +
+    (now.getMonth() - date.getMonth())
+
+  // Months (1–11)
+  if (diffMonths < 12) {
+    return diffMonths === 1 ? '1 month ago' : `${diffMonths} months ago`
+  }
+
+  const diffYears = now.getFullYear() - date.getFullYear()
+
+  return diffYears === 1 ? '1 year ago' : `${diffYears} years ago`
 }
 
 export const checkEmailEquality = (userEmail?: string, rowEmail?: string) => {

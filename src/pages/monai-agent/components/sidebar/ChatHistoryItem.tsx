@@ -174,7 +174,7 @@ const ChatHistoryItem = ({
               />
             ) : (
               <Typography variant='subtitle2' fontWeight={500} noWrap>
-                {title}
+                {title || 'No title'}
               </Typography>
             )}
 

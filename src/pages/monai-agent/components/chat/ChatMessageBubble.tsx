@@ -61,7 +61,7 @@ const ChatMessageBubble = ({ message }: Props) => {
             </Typography>
           </>
         ) : (
-          <Typography variant='body2' whiteSpace='pre-wrap'>
+          <Typography variant='body2' whiteSpace='normal'>
             <MessageMarkdown message={message?.content} />
           </Typography>
         )}

@@ -137,7 +137,6 @@ const ChatShell = ({ selectedChatId, onChatCreated }: Props) => {
             width: '100%',
             display: 'flex',
             justifyContent: 'center',
-            pb: isMobile ? 2 : 4,
             px: 2
           }}
         >

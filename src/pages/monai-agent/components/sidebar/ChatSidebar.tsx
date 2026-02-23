@@ -13,6 +13,7 @@ import { useAuth } from 'src/context/AuthProvider'
 import { useRef, useEffect } from 'react'
 import { useFetchRecentChatsInfinite } from '../../hooks/useFetchRecentChats'
 import { useQueryClient } from '@tanstack/react-query'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 
 interface Props {
   selectedChatId: string | null
@@ -25,6 +26,7 @@ const ChatSidebar = ({ selectedChatId, onSelectChat }: Props) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { accessToken } = useAuth()
   const queryClient = useQueryClient()
+  const { activePracticeId } = useActivePractice()
 
   const { data, fetchNextPage, hasNextPage, status } =
     useFetchRecentChatsInfinite(!!accessToken, 20)
@@ -34,9 +36,13 @@ const ChatSidebar = ({ selectedChatId, onSelectChat }: Props) => {
 
   useEffect(() => {
     if (selectedChatId && !items.some((item) => item.id === selectedChatId)) {
-      queryClient.invalidateQueries({ queryKey: ['fetchRecentChats'] })
+      // Invalidate any react-query whose first key is 'fetchRecentChats' (covers pageSize & activePractice variations)
+      queryClient.invalidateQueries({
+        predicate: (q) =>
+          Array.isArray(q.queryKey) && q.queryKey[0] === 'fetchRecentChats'
+      })
     }
-  }, [selectedChatId, items, queryClient])
+  }, [selectedChatId, items, queryClient, activePracticeId])
 
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   useEffect(() => {
