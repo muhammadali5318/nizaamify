@@ -36,7 +36,7 @@
     "dotenv": "^17.2.3",
     "exceljs": "^4.4.0",
     "html2canvas-pro": "^1.5.13",
-    "jspdf": "^4.1.0",
+    "jspdf": "^4.2.0",
     "libphonenumber-js": "^1.12.15",
     "lodash": "^4.17.21",
     "mui-tel-input": "^9.0.1",
@@ -70,10 +70,10 @@
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
     "@types/uuid": "^10.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.39.0",
-    "@typescript-eslint/parser": "^8.39.0",
+    "@typescript-eslint/eslint-plugin": "^8.56.0",
+    "@typescript-eslint/parser": "^8.56.0",
     "@vitejs/plugin-react": "^4.7.0",
-    "eslint": "^9.32.0",
+    "eslint": "^9.16.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
@@ -95,5 +95,9 @@
   "engines": {
     "node": ">=20 <=22",
     "npm": ">=10.8.0"
+  },
+  "overrides": {
+    "minimatch": "10.2.1"
+    
   }
 }
