@@ -15,7 +15,7 @@ export const SUGGESTIONS = [
     iconSrc: upTrendIcon
   },
   {
-    text: 'Compare my expenses with similar practices',
+    text: 'How does this month’s revenue compare to last month?',
     iconSrc: chartIcon
   },
   {
@@ -23,11 +23,11 @@ export const SUGGESTIONS = [
     iconSrc: orangeFileIcon
   },
   {
-    text: 'How many active patients do I have?',
+    text: 'What’s my biggest expense category this month?',
     iconSrc: PinkPeopleIcon
   },
   {
-    text: "What's my appointment utilisation rate?",
+    text: 'Which month has been my strongest so far this year?',
     iconSrc: purpleCalendarIcon
   }
 ]
