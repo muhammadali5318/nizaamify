@@ -97,7 +97,6 @@
     "npm": ">=10.8.0"
   },
   "overrides": {
-    "minimatch": "10.2.1"
-    
+    "minimatch": "^10.2.3"
   }
 }
