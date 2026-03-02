@@ -48,17 +48,13 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         inactiveIcon: 'pl-Icon-inactive.svg',
         moduleId: 'non-pandl'
       },
-      ...(CONFIG.envName === 'dev'
-        ? ([
-            {
-              text: 'Monai Agent',
-              to: paths.monaiAgent,
-              activeIcon: 'agent-active.svg',
-              inactiveIcon: 'agent-inactive.svg',
-              moduleId: 'monai-agent'
-            }
-          ] as MenuItemData[])
-        : [])
+      {
+        text: 'Monai Agent',
+        to: paths.monaiAgent,
+        activeIcon: 'agent-active.svg',
+        inactiveIcon: 'agent-inactive.svg',
+        moduleId: 'monai-agent'
+      }
     ]
   },
   {

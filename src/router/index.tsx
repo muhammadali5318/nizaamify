@@ -209,14 +209,11 @@ export function Router() {
           },
           {
             path: paths.monaiAgent,
-            element:
-              CONFIG.envName !== 'dev' ? (
-                <Placeholder title={'Monai chat agent'} />
-              ) : (
-                <FeatureProtectedRoute moduleId='monai-agent'>
-                  <MonaiAgent />
-                </FeatureProtectedRoute>
-              )
+            element: (
+              <FeatureProtectedRoute moduleId='monai-agent'>
+                <MonaiAgent />
+              </FeatureProtectedRoute>
+            )
           },
           {
             path: paths.settings,
