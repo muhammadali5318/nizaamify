@@ -3,33 +3,48 @@ import storage from 'redux-persist/lib/storage'
 import { persistReducer, persistStore } from 'redux-persist'
 
 import uploadReducer from './slices/uploadSlice'
+import ReconciliationTabPresignData from './slices/reconciliationTabPresignDataSlice'
+
 import presignReducer from './slices/presignedSlice'
+import bankStatementPresignReducer from './slices/presignedBankstatementsSlice'
 import processingReducer from './slices/processingSlice'
+import bankStatementProcessingReducer from './slices/bankstatementProcessingSlice'
 import processedReducer from './slices/processedBatchDataSlice'
+import processedBankStatementReducer from './slices/processedBankStatementBatchDataSlice'
 import { activePracticeReducer } from './slices/activePracticeSlice'
 import userDetailsInActivePracticeReducer from './slices/userDetailsInActivePracticeSlice'
 import selectedUserReducer from './slices/team-management/selectedUserSlice'
 import pollingJobsReducer from './slices/pollingJobSlice'
+import pollingBankStatementJobsReducer from './slices/pollingJobBankStatementSlice'
 import manualEntryQueueReducer from './slices/manualEntryQueueSlice'
 import manualEntryFileReducer from './slices/manualEntryFilesSlice'
 import selectedInstitutionReducer from './slices/selectedInstitution'
 import bankConnectionReducer from './slices/bankConnectionSlice'
 import chatReducer from './slices/chatSlice'
+import bankStatementUploadReducer from './slices/bankStatementUploadSlice'
+import bankIntegratorTabReducer from './slices/bankIntegratorTabSlice'
 
 const rootReducer = combineReducers({
   uploads: uploadReducer,
+  bankStatementUploads: bankStatementUploadReducer,
   presign: presignReducer,
+  bankStatementPresighn: bankStatementPresignReducer,
   processing: processingReducer,
+  bankStatementProcessing: bankStatementProcessingReducer,
   processed: processedReducer,
+  processedBankStatement: processedBankStatementReducer,
   activePractice: activePracticeReducer,
   userDetailsInActivePractice: userDetailsInActivePracticeReducer,
   selectedUser: selectedUserReducer,
   pollingJobs: pollingJobsReducer,
+  pollingBankStatementsJobs: pollingBankStatementJobsReducer,
   manualEntryQueue: manualEntryQueueReducer,
   manualEntryFiles: manualEntryFileReducer,
   selectedInstitution: selectedInstitutionReducer,
   bankConnection: bankConnectionReducer,
-  chat: chatReducer
+  chat: chatReducer,
+  bankIntegratorTab: bankIntegratorTabReducer,
+  ReconciliationTabPresignData: ReconciliationTabPresignData
 })
 
 const persistConfig = {
@@ -37,10 +52,13 @@ const persistConfig = {
   storage,
   whitelist: [
     'processed',
+    'processedBankStatement',
     'activePractice',
     'selectedUser',
     'processing',
+    'bankStatementProcessing',
     'pollingJobs',
+    'pollingBankStatementsJobs',
     'manualEntryFiles',
     'chat'
   ]

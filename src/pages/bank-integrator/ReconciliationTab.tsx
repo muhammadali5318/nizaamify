@@ -3,7 +3,28 @@ import StatsCard from 'src/components/team-management/StatsCard'
 import StatsChart from './components/stats-chart'
 import ReconciliationContent from './components/recon-content'
 
-const ReconciliationTab = () => {
+type Props = {
+  totalTransactions: number
+  transactionsWithInvoices: number
+  transactionsWithoutInvoices: number
+  setTotalTransactions: React.Dispatch<React.SetStateAction<number>>
+  setTransactionsWithInvoices: React.Dispatch<React.SetStateAction<number>>
+  setTransactionsWithoutInvoices: React.Dispatch<React.SetStateAction<number>>
+}
+
+const ReconciliationTab = ({
+  totalTransactions,
+  transactionsWithInvoices,
+  transactionsWithoutInvoices,
+  setTotalTransactions,
+  setTransactionsWithInvoices,
+  setTransactionsWithoutInvoices
+}: Props) => {
+  const percentage =
+    totalTransactions > 0
+      ? Math.round((transactionsWithInvoices / totalTransactions) * 100)
+      : 0
+
   return (
     <Stack spacing={2.5}>
       <Alert
@@ -17,12 +38,16 @@ const ReconciliationTab = () => {
         <Typography color='info.dark' fontWeight={700}>
           Keep your practice organized!
         </Typography>
-        <Typography color='info.dark' component='div' sx={{ margin: 0 }}>
+
+        <Typography color='info.dark'>
           Upload invoices for your transactions to achieve verified status.
-          You&apos;ve uploaded 2 of 7 invoices (40%). Upload 4 more to get
-          verified.
+          You&apos;ve uploaded {transactionsWithInvoices} of{' '}
+          {transactionsWithoutInvoices} invoices ({percentage}%). Upload{' '}
+          {Math.max(transactionsWithoutInvoices - transactionsWithInvoices, 0)}{' '}
+          more to get verified.
         </Typography>
       </Alert>
+
       <Box
         className='statsCardRoot'
         sx={{
@@ -32,21 +57,33 @@ const ReconciliationTab = () => {
         <StatsCard
           iconSrc='team-member.svg'
           label='Total Transactions'
-          value={0}
+          value={totalTransactions}
         />
+
         <StatsCard
           iconSrc='active-member.svg'
           label='With Invoices'
-          value={0}
+          value={transactionsWithInvoices}
         />
+
         <StatsCard
           iconSrc='pending-member.svg'
           label='Missing Invoices'
-          value={5}
+          value={transactionsWithoutInvoices}
         />
-        <StatsChart value={82} />
+
+        <StatsChart
+          value={percentage}
+          transactionsWithInvoices={transactionsWithInvoices}
+          transactionsWithoutInvoices={transactionsWithoutInvoices}
+        />
       </Box>
-      <ReconciliationContent />
+
+      <ReconciliationContent
+        setTotalTransactions={setTotalTransactions}
+        setTransactionsWithInvoices={setTransactionsWithInvoices}
+        setTransactionsWithoutInvoices={setTransactionsWithoutInvoices}
+      />
     </Stack>
   )
 }

@@ -1,10 +1,9 @@
 import { Box, Typography, Card, Button } from '@mui/material'
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined'
 import { getFileIcon } from 'src/utils/getFileIcon'
-import { DocumentData } from 'src/store/slices/processedBatchDataSlice'
 
 interface DeletedDocumentsListProps {
-  deletedDocs: DocumentData[]
+  deletedDocs: any
   isTotalTimeout: boolean
   onRetry: () => void
 }
@@ -45,7 +44,7 @@ export default function DeletedDocumentsList({
           </Typography>
         </Box>
 
-        {deletedDocs.map((doc) => (
+        {deletedDocs.map((doc: any) => (
           <Card
             key={doc.document_id}
             sx={{

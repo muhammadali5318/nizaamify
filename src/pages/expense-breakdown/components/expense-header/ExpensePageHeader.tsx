@@ -3,6 +3,7 @@ import ModuleHeader from 'src/components/module-header'
 import DateRangeSelector from 'src/components/date-range-selector'
 import { ExpenseHeaderProps } from '../../types'
 import { downloadCsv } from '../helper'
+// eslint-disable-next-line import/no-named-as-default
 import html2canvas from 'html2canvas-pro'
 // eslint-disable-next-line import/no-named-as-default
 import jsPDF from 'jspdf'

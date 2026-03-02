@@ -32,7 +32,13 @@ export const endpoints = {
     accountsDetails: (practiceId: string) =>
       `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/accounts/`,
     reconsentConfirm: (practiceId: string) =>
-      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/reconsent/confirm/`
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/reconsent/confirm/`,
+    unverifiedTransations: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/unverified-transactions/`,
+    documentStatus: (practiceId: string, documentId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/documents/${documentId}/status/`,
+    reconcileTransactions: (practiceId: string, transactionId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/unverified-transactions/${transactionId}/reconcile/`
   },
   chatBot: {
     chat: (practiceId: string) =>

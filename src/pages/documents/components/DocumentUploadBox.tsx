@@ -31,7 +31,7 @@ interface FileUploadBoxProps {
 
 const FileUploadBox: React.FC<FileUploadBoxProps> = ({
   title = 'Upload or drag and drop your files',
-  subtitle = 'You can upload unlimited files but only a few in one go.',
+  subtitle = '',
   fileInfoText = 'Maximum 10MB each — Supported: .CSV, .PDF, .PNG, .JPG, .DOC',
   maxFiles = 5,
   onFilesSelected,

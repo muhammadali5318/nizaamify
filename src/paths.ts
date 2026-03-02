@@ -21,6 +21,7 @@ export const paths = {
   settings: '/settings',
   auditLogs: '/audit-logs',
   bankIntegrator: '/bank-integrator',
+  uploadBankStatement: '/bank-integrator/upload-bank-statement',
   helpAndSupport: '/help-and-support',
   auth1: {
     login: '/login'

@@ -25,12 +25,15 @@ import { useDispatch } from 'react-redux'
 import { setMergedPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
 import { ALL_PERMISSIONS } from 'src/const'
 import { useFetchAllPracticesData } from 'src/hooks/useFetchAllPracticesData'
-import { notify } from 'src/components/notistack/NotificationProvider'
 import { clearAll } from 'src/store/slices/processedBatchDataSlice'
 import { clearFiles } from 'src/store/slices/uploadSlice'
 import { clearPresignData } from 'src/store/slices/presignedSlice'
 import { clearProcessing } from 'src/store/slices/processingSlice'
 import { AllPracticesDataObject } from 'src/store/slices/activePracticeSlice'
+import { clearProcessing as clearBankStatementProcessing } from 'src/store/slices/bankstatementProcessingSlice'
+import { clearAllBankStatements } from 'src/store/slices/bankStatementUploadSlice'
+import { clearPresignStatementsData } from 'src/store/slices/presignedBankstatementsSlice'
+import { clearAll as clearAllProcessedBankStatements } from 'src/store/slices/processedBankStatementBatchDataSlice'
 import {
   setConnectionId,
   setStatus
@@ -150,7 +153,10 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
     dispatch(setStatus(null))
     dispatch(setConnectionId(null))
     dispatch(clearChatStorage())
-    notify.success('Switched to ' + practice?.practice_name)
+    dispatch(clearAllProcessedBankStatements())
+    dispatch(clearAllBankStatements())
+    dispatch(clearBankStatementProcessing())
+    dispatch(clearPresignStatementsData())
   }, [practice, setActiveById, allPractices, dispatch])
 
   const archiveSteps = useMemo(

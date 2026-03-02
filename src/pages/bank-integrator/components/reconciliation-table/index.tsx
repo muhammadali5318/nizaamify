@@ -1,25 +1,42 @@
+// src/pages/reconciliation/ReconciliationTable.tsx
+
 import { Box, TablePagination } from '@mui/material'
 import { DataGrid, GridSortModel } from '@mui/x-data-grid'
-import { useMemo } from 'react'
+import { useMemo, useState, useRef } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+
 import { NoResultsBox } from 'src/pages/team-management/team-members/components/TeamMembers'
 import { teamMembersSx } from 'src/pages/team-management/team-management-config'
 import { useReconciliationColumns } from '../../hooks/useReconciliationColumns'
+import CategorisationModal from '../categorisation-modal'
 
-// export interface ReconciliationTableDataType {
-//   ReconciliationTableDataType
-// }
+import apiClient from 'src/services/api-client'
+import { endpoints } from 'src/services/backendUrl'
+import { queryClient } from 'src/utils/queryClient'
+import { presignBankStatement } from 'src/services/apis/docsApi'
 
-export interface ReconciliationTableResponse {
-  count: number
-  next: string | null
-  previous: string | null
-  // results: ReconciliationTableDataType[]
+import useUserDetails from 'src/hooks/useUserDetails'
+import { useActivePractice } from 'src/hooks/useActivePractice'
+
+import { notify } from 'src/components/notistack/NotificationProvider'
+
+import {
+  setPresignFileData,
+  setUploadingFile,
+  clearUploadingFile
+} from 'src/store/slices/reconciliationTabPresignDataSlice'
+
+type TransactionCategory = {
+  category: string
+  subtype: string
+  type: string
+  lineItem: string
 }
 
 interface ReconciliationTableProps {
-  data: ReconciliationTableResponse | null
+  rows: any[]
+  total: number
   loading?: boolean
-  // sorting + pagination props coming from useFetchSortedPaginatedData
   sortModel?: GridSortModel
   handleSortChange?: (model: GridSortModel) => void
   page?: number
@@ -29,7 +46,8 @@ interface ReconciliationTableProps {
 }
 
 const ReconciliationTable = ({
-  data,
+  rows = [],
+  total = 0,
   loading = false,
   sortModel = [],
   handleSortChange = () => {},
@@ -38,24 +56,202 @@ const ReconciliationTable = ({
   setPage = () => {},
   setPageSize = () => {}
 }: ReconciliationTableProps) => {
-  const columns = useReconciliationColumns()
+  const dispatch = useDispatch()
 
-  // Compute total minWidth for columns to prevent shrinking
+  const { activePracticeId } = useActivePractice()
+  const { userId } = useUserDetails()
+
+  // =============================
+  // State
+  // =============================
+
+  const [categorisationOpen, setCategorisationOpen] = useState(false)
+  const [selectedRow, setSelectedRow] = useState<any | null>(null)
+
+  // =============================
+  // Refs
+  // =============================
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const fileRowRef = useRef<any | null>(null)
+
+  // =============================
+  // Redux selectors
+  // =============================
+
+  const presignFiles = useSelector(
+    (state: any) => state.ReconciliationTabPresignData.presignFiles
+  )
+
+  // =============================
+  // Categorisation handlers
+  // =============================
+
+  const handleOpenCategorise = (row: any) => {
+    setSelectedRow(row)
+    setCategorisationOpen(true)
+  }
+
+  const handleCloseCategorise = () => {
+    setSelectedRow(null)
+    setCategorisationOpen(false)
+  }
+
+  // =============================
+  // Upload handlers
+  // =============================
+
+  const handleUploadFile = (row: any) => {
+    fileRowRef.current = row
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const row = fileRowRef.current
+    if (!row?.id) {
+      notify.error('Row ID not found')
+      return
+    }
+    const rowId = row.id
+
+    try {
+      // START loader
+      dispatch(setUploadingFile(rowId))
+
+      // Step 1 — get presigned URL
+      const resp = await presignBankStatement(
+        userId ?? '',
+        [file],
+        activePracticeId ?? ''
+      )
+      const item = resp?.data?.items?.[0]
+
+      if (!item?.url) {
+        throw new Error('Presigned URL not found')
+      }
+
+      // Step 2 — upload to S3
+      await apiClient.put(item.url, file, {
+        baseURL: '',
+        headers: {
+          'Content-Type': file.type,
+          Authorization: undefined
+        },
+        transformRequest: [(data) => data]
+      })
+
+      // Step 3 — save to redux
+      dispatch(
+        setPresignFileData({
+          id: rowId,
+          data: {
+            s3Url: item.url,
+            key: item.key,
+            fileName: file.name,
+            fileType: file.type,
+            fileSize: file.size
+          }
+        })
+      )
+
+      notify.success('File uploaded successfully')
+    } catch (error) {
+      console.error(error)
+      notify.error('File upload failed')
+    } finally {
+      // STOP loader
+      dispatch(clearUploadingFile(rowId))
+
+      event.target.value = ''
+      fileRowRef.current = null
+    }
+  }
+
+  // =============================
+  // Save categorisation
+  // =============================
+
+  const handleSaveCategory = async (
+    category: TransactionCategory,
+    row?: { id: string }
+  ) => {
+    if (!row?.id) return
+
+    const fileData = presignFiles[row.id]
+
+    try {
+      const payload: any = {
+        is_verified: true,
+        category: category.category,
+        subtype: category.subtype,
+        type: category.type,
+        expense_category: category.lineItem
+      }
+
+      if (fileData) {
+        const extension = fileData.fileName.split('.').pop() ?? ''
+
+        payload.file_obj = {
+          file_obj_key: fileData.key,
+          file_size: String(fileData.fileSize ?? 0),
+          file_type: extension
+        }
+      }
+
+      await apiClient.put(
+        endpoints.bankIntegrator.reconcileTransactions(
+          activePracticeId ?? '',
+          row.id
+        ),
+        payload
+      )
+
+      await queryClient.invalidateQueries({
+        queryKey: ['unverifiedTransactionsListApi']
+      })
+
+      notify.success('Category saved successfully')
+    } catch (error) {
+      console.error(error)
+      notify.error('Failed to save category')
+    }
+  }
+
+  // =============================
+  // Columns
+  // =============================
+
+  const columns = useReconciliationColumns({
+    onCategorise: handleOpenCategorise,
+    handleUploadFile
+  })
+
   const totalMinWidth = useMemo(() => {
     return columns.reduce((sum, col) => {
-      const colMin = (col as any).minWidth ?? (col as any).width ?? 120
-      return sum + Number(colMin)
+      const colMin = (col as any).minWidth ?? col.width ?? 120
+      return sum + colMin
     }, 0)
   }, [columns])
 
+  // =============================
+  // Render
+  // =============================
+
   return (
-    <Box
-      sx={{
-        width: '100%',
-        maxWidth: '100vw',
-        boxSizing: 'border-box'
-      }}
-    >
+    <Box sx={{ width: '100%', maxWidth: '100vw', boxSizing: 'border-box' }}>
+      {/* Hidden File Input */}
+      <input
+        type='file'
+        ref={fileInputRef}
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+      />
+
       <Box
         sx={{
           width: '100%',
@@ -73,10 +269,9 @@ const ReconciliationTable = ({
           }}
         >
           <DataGrid
-            rows={[]}
+            rows={rows}
             columns={columns}
             getRowId={(row) => row.id}
-            pageSizeOptions={[5, 10, 25, { value: -1, label: 'All' }]}
             disableColumnMenu
             disableColumnResize
             getRowHeight={() => 'auto'}
@@ -111,11 +306,11 @@ const ReconciliationTable = ({
         </Box>
       </Box>
 
+      {/* Pagination */}
       <TablePagination
-        className='pagination-container'
         rowsPerPageOptions={[5, 10, 25, 50]}
         component='div'
-        count={data?.count ?? 0}
+        count={total}
         rowsPerPage={pageSize}
         page={page}
         onPageChange={(_, newPage) => setPage(newPage)}
@@ -126,6 +321,14 @@ const ReconciliationTable = ({
         }}
         showFirstButton
         showLastButton
+      />
+
+      {/* Modal */}
+      <CategorisationModal
+        open={categorisationOpen}
+        onClose={handleCloseCategorise}
+        onSave={handleSaveCategory}
+        row={selectedRow}
       />
     </Box>
   )

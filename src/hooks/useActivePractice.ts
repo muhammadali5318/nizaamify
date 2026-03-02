@@ -14,6 +14,7 @@ export function useActivePractice() {
 
   const activePractice = useSelector(selectActivePractice)
   const activePracticeId = useSelector(selectActivePracticeId)
+  const accountingBasis = activePractice?.accounting_basis
 
   const setActivePractice = (practice: AllPracticesDataObject | null) => {
     dispatch(setActivePracticeAction(practice))
@@ -40,6 +41,7 @@ export function useActivePractice() {
   return {
     activePractice,
     activePracticeId,
+    accountingBasis,
     setActivePractice,
     setActiveById,
     isOnboardingCompleted,

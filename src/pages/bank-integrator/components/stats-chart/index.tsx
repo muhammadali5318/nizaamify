@@ -9,10 +9,12 @@ const BG_COLOR = '#FFFFFF'
 const SIZE = 80
 const CENTER_RADIUS = 30
 
-const StatsChart: React.FC<{ value: number; sx?: object }> = ({
-  value,
-  sx
-}) => {
+const StatsChart: React.FC<{
+  value: number
+  transactionsWithoutInvoices: number
+  transactionsWithInvoices: number
+  sx?: object
+}> = ({ value, transactionsWithoutInvoices, transactionsWithInvoices, sx }) => {
   return (
     <Box className={styles.statsCardRoot} sx={{ ...sx }}>
       <Stack
@@ -92,7 +94,8 @@ const StatsChart: React.FC<{ value: number; sx?: object }> = ({
         fontStyle='italic'
         color='text.primary'
       >
-        You&apos;ve uploaded 2 of 7 invoices ({value}%). Upload 4 more to get
+        You&apos;ve uploaded {transactionsWithInvoices} of{' '}
+        {transactionsWithoutInvoices} invoices ({value}%). Upload 4 more to get
         verified.
       </Typography>
     </Box>

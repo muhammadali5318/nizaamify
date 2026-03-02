@@ -1,16 +1,6 @@
-import React, { useEffect, useState } from 'react'
-import {
-  Box,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-  Checkbox,
-  ListItemText,
-  OutlinedInput,
-  Button
-} from '@mui/material'
+// src/components/reconciliation/reconciliation-content.tsx
+import React, { useEffect, useMemo, useState } from 'react'
+import { Box, TextField, Button } from '@mui/material'
 import { Controller, useForm } from 'react-hook-form'
 
 import styles from './reconcialiation.module.scss'
@@ -19,10 +9,8 @@ import DateRangeSelector, { RangeISO } from 'src/components/date-range-selector'
 import { useFetchSortedPaginatedData } from 'src/hooks/useFetchSortedData.'
 import CloseIcon from '@mui/icons-material/Close'
 import ReconciliationTable from '../reconciliation-table'
-
-/* =======================
-   Types
-======================= */
+import useFetchUnverifiedTransations from '../../hooks/useFetchUnverifiedTransactions'
+import dayjs from 'dayjs'
 
 type TechLogsFilters = {
   value?: string
@@ -30,46 +18,43 @@ type TechLogsFilters = {
   transactionType?: string[]
 }
 
-type Option = {
-  value: string
-  label: string
-}
-
-/* =======================
-   Constants
-======================= */
-
-const STAUS: Option[] = []
-
-const TRANSACTION_TYPE: Option[] = []
-
 const FIELD_FLEX_SX = {
   flex: {
-    xs: '1 1 100%', // mobile - full width
-    sm: '1 1 48%', // small screen - 2 per row
-    md: '1 1 32%', // medium - 3 per row
-    lg: '1 1 22%' // large - 4 per row (slightly less than 25% to account for gap)
+    xs: '1 1 100%',
+    sm: '1 1 48%',
+    md: '1 1 32%',
+    lg: '1 1 22%'
   },
   minWidth: 0
 } as const
 
-/* =======================
-   Helpers
-======================= */
+/* small helper to normalize date values coming from the DateRangeSelector */
+function normalizeDateValue(
+  d: string | Date | null | undefined
+): string | null {
+  if (!d) return null
 
-const joinLabels = (options: Option[] | undefined, values?: string[]) =>
-  (values || [])
-    .map((v) => options?.find((o) => o.value === v)?.label ?? v)
-    .join(', ')
+  const date = d instanceof Date ? dayjs(d) : dayjs(d)
+  if (!date.isValid()) return null
+
+  return date.format('DD-MM-YYYY') // <-- your desired format
+}
 
 /* =======================
    Component
 ======================= */
 
-const ReconciliationContent: React.FC = () => {
-  // const { accessToken } = useAuth()
+type Props = {
+  setTotalTransactions: React.Dispatch<React.SetStateAction<number>>
+  setTransactionsWithInvoices: React.Dispatch<React.SetStateAction<number>>
+  setTransactionsWithoutInvoices: React.Dispatch<React.SetStateAction<number>>
+}
 
-  /* ---------- form ---------- */
+const ReconciliationContent = ({
+  setTotalTransactions,
+  setTransactionsWithInvoices,
+  setTransactionsWithoutInvoices
+}: Props) => {
   const {
     control,
     watch,
@@ -115,10 +100,48 @@ const ReconciliationContent: React.FC = () => {
     filters.status,
     filters.transactionType,
     range.start,
-    range.end
+    range.end,
+    setPage
   ])
 
-  /* =======================
+  /* ---------- build ordering from sortModel (assumes MUI DataGrid-like model) ---------- */
+  const ordering = useMemo(() => {
+    if (
+      !sortModel ||
+      Array.isArray(sortModel) === false ||
+      sortModel.length === 0
+    )
+      return undefined
+    // take first sort instruction (backend expects single field ordering)
+    const first = sortModel[0] as {
+      field?: string
+      sort?: 'asc' | 'desc' | null
+    }
+    if (!first?.field) return undefined
+    return first.sort === 'desc' ? `-${first.field}` : first.field
+  }, [sortModel])
+
+  /* ---------- hook params ---------- */
+  const search = filters.value ?? ''
+  const start_date = normalizeDateValue(range.start)
+  const end_date = normalizeDateValue(range.end)
+
+  const { data, isLoading, isFetching } = useFetchUnverifiedTransations({
+    page,
+    pageSize,
+    search: search || undefined,
+    ordering: ordering ?? undefined,
+    start_date: start_date ?? undefined,
+    end_date: end_date ?? undefined
+  })
+
+  setTotalTransactions(data?.transactions_counts?.total_transactions)
+  setTransactionsWithInvoices(
+    data?.transactions_counts?.transactions_with_invoices
+  )
+  setTransactionsWithoutInvoices(
+    data?.transactions_counts?.transactions_without_invoices
+  ) /* =======================
      Render
   ======================= */
 
@@ -148,90 +171,6 @@ const ReconciliationContent: React.FC = () => {
             )}
           />
 
-          {/* Transactions Type (was Logs category) */}
-          <FormControl sx={FIELD_FLEX_SX}>
-            <InputLabel id='transactions-type-label'>
-              Transactions Type
-            </InputLabel>
-            <Controller
-              name='transactionType'
-              control={control}
-              render={({ field }) => {
-                const selected = Array.isArray(field.value) ? field.value : []
-
-                const handleChange = (event: any) => {
-                  const value = event.target.value
-                  if (value.includes('')) field.onChange([])
-                  else field.onChange(value)
-                }
-
-                return (
-                  <Select
-                    multiple
-                    value={selected}
-                    onChange={handleChange}
-                    input={<OutlinedInput label='Transactions Type' />}
-                    renderValue={() =>
-                      selected.length
-                        ? joinLabels(TRANSACTION_TYPE as any, selected)
-                        : 'All'
-                    }
-                  >
-                    <MenuItem value=''>
-                      <em>All</em>
-                    </MenuItem>
-                    {TRANSACTION_TYPE?.map((o: any) => (
-                      <MenuItem key={o.key} value={o.value}>
-                        <Checkbox checked={selected.includes(o.value)} />
-                        <ListItemText primary={o.value} />
-                      </MenuItem>
-                    ))}
-                  </Select>
-                )
-              }}
-            />
-          </FormControl>
-
-          {/* Status (was Action type) */}
-          <FormControl sx={FIELD_FLEX_SX}>
-            <InputLabel id='status-label'>Status</InputLabel>
-            <Controller
-              name='status'
-              control={control}
-              render={({ field }) => {
-                const selected = Array.isArray(field.value) ? field.value : []
-
-                const handleChange = (event: any) => {
-                  const value = event.target.value
-                  if (value.includes('')) field.onChange([])
-                  else field.onChange(value)
-                }
-
-                return (
-                  <Select
-                    multiple
-                    value={selected}
-                    onChange={handleChange}
-                    input={<OutlinedInput label='Status' />}
-                    renderValue={() =>
-                      selected.length ? joinLabels(STAUS, selected) : 'All'
-                    }
-                  >
-                    <MenuItem value=''>
-                      <em>All</em>
-                    </MenuItem>
-                    {STAUS.map((o) => (
-                      <MenuItem key={o.value} value={o.value}>
-                        <Checkbox checked={selected.includes(o.value)} />
-                        <ListItemText primary={o.label} />
-                      </MenuItem>
-                    ))}
-                  </Select>
-                )
-              }}
-            />
-          </FormControl>
-
           {/* Date range */}
           <Box sx={FIELD_FLEX_SX}>
             <DateRangeSelector
@@ -253,14 +192,17 @@ const ReconciliationContent: React.FC = () => {
       </Box>
       {/* Table */}
       <ReconciliationTable
-        data={[]}
-        loading={false}
+        rows={data?.transactions_data?.results}
+        loading={isLoading || isFetching}
         sortModel={sortModel}
         handleSortChange={handleSortChange}
         page={page}
         pageSize={pageSize}
         setPage={setPage}
         setPageSize={setPageSize}
+        total={data?.transactions_data?.count}
+        // you can pass total if your table supports server-side pagination display
+        // total={total}
       />
     </Box>
   )

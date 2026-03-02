@@ -1,28 +1,52 @@
-// connnectBank.module.scss
-
 .contectYourBankRoot {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; // mobile stacked
   justify-content: center;
   align-items: center;
-  background: #FFF;
+  background: #fff;
   border-radius: 24px 0 0 0;
   padding: 40px 20px;
+  gap: 20px;
+  width: 100%;
 
-  @media (min-width: 600px) {
+  @media (min-width: 768px) {
+    flex-direction: row; // row layout on tablets+
     padding: 80px 40px;
+    align-items: stretch; // children stretch to same height
   }
 
   @media (min-width: 1024px) {
     padding: 80px 158px;
-    min-height: auto;
   }
 }
 
 .contentWrapper {
   width: 100%;
-  max-width: 350px;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; // fill vertical space
+  align-items: center;
+  background: #fafafa;
+  padding: 20px;
+  border-radius: 16px;
+
+  @media (min-width: 768px) {
+    padding: 40px;
+    flex: 1; // stretch equally
+  }
+}
+
+.cardContent {
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
+  gap: 16px;
+  flex: 1; // take remaining space
+}
+
+.cardButton {
+  width: 100%;
+  max-width: 320px;
 }

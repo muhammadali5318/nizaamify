@@ -16,6 +16,7 @@ import MonaiAgent from 'src/pages/monai-agent/index'
 import Placeholder from 'src/components/common/Placeholder'
 import { CONFIG } from 'src/config-global'
 import BankingAggregator from 'src/pages/bank-integrator'
+import UploadBankStatement from 'src/pages/bank-integrator/UploadBankStatement'
 
 // lazy pages
 const Dashboard = lazy(() => import('src/pages/dashboard'))
@@ -181,6 +182,15 @@ export function Router() {
                 </FeatureProtectedRoute>
               )
           },
+          {
+            path: paths.uploadBankStatement,
+            element: (
+              <FeatureProtectedRoute moduleId='bank-integrator'>
+                <UploadBankStatement />
+              </FeatureProtectedRoute>
+            )
+          },
+
           {
             path: paths.expense,
             element: (

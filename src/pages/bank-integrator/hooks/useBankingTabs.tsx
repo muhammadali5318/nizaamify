@@ -1,15 +1,21 @@
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import { ReusableTabItem } from 'src/components/tabs/ReusableTabs'
 import { bankingTabsData } from '../bank-integrator-config'
 import ReconciliationTab from '../ReconciliationTab'
 import BankIntegrator from '../BankIntegrator'
+import Transactions from '../components/transactions'
 
-export default function useBankingTabs(): ReusableTabItem[] {
-  return React.useMemo(() => {
+export default function BankingTabsContainer(): ReusableTabItem[] {
+  const [totalTransactions, setTotalTransactions] = useState(0)
+  const [transactionsWithInvoices, setTransactionsWithInvoices] = useState(0)
+  const [transactionsWithoutInvoices, setTransactionsWithoutInvoices] =
+    useState(0)
+
+  const tabs = useMemo(() => {
     return bankingTabsData.map((t) => {
       let content: React.ReactNode = null
-      let count: number | undefined = t.count
-      let countTotal: number | undefined = t.countTotal
+      let count = t.count
+      let countTotal = t.countTotal
 
       switch (t.key) {
         case 0:
@@ -17,14 +23,24 @@ export default function useBankingTabs(): ReusableTabItem[] {
           break
 
         case 1:
-          // Pending Documents Tab → Use total from hook
-          count = 12
-          countTotal = 60
-          content = <ReconciliationTab />
+          count = transactionsWithInvoices
+          countTotal = totalTransactions
+
+          content = (
+            <ReconciliationTab
+              totalTransactions={totalTransactions}
+              transactionsWithInvoices={transactionsWithInvoices}
+              transactionsWithoutInvoices={transactionsWithoutInvoices}
+              setTotalTransactions={setTotalTransactions}
+              setTransactionsWithInvoices={setTransactionsWithInvoices}
+              setTransactionsWithoutInvoices={setTransactionsWithoutInvoices}
+            />
+          )
           break
 
-        default:
-          content = null
+        case 2:
+          content = <Transactions />
+          break
       }
 
       return {
@@ -37,5 +53,7 @@ export default function useBankingTabs(): ReusableTabItem[] {
         content
       }
     })
-  }, [])
+  }, [totalTransactions, transactionsWithInvoices, transactionsWithoutInvoices])
+
+  return tabs
 }

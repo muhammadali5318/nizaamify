@@ -1,31 +1,63 @@
 import { Box, Button, Stack, Typography } from '@mui/material'
 import styles from './connectBank.module.scss'
 import { Step } from '../../BankIntegrator'
+import { useNavigate } from 'react-router'
+import { paths } from 'src/paths'
 
 interface ConnectYourBankProps {
   goToStep: (step: Step) => void
 }
 
 const ConnectYourBank = ({ goToStep }: ConnectYourBankProps) => {
+  const navigate = useNavigate()
+
   const handleConnectBank = () => {
     goToStep('select-bank')
   }
 
   return (
     <Box className={styles.contectYourBankRoot}>
+      {/* Upload Statement Card */}
       <Box className={styles.contentWrapper}>
-        <Stack spacing={{ xs: 3, sm: 4 }} alignItems='center'>
+        <Box className={styles.cardContent}>
+          <img
+            src='/assets/upload-csv.svg'
+            alt='bank icon'
+            style={{ width: 'min(200px, 80vw)', height: 'auto' }}
+          />
+          <Stack spacing={1}>
+            <Typography variant='h5' fontWeight={700}>
+              Upload Bank Statement
+            </Typography>
+            <Typography variant='body1' color='text.secondary'>
+              Upload your bank statement (CSV or PDF). System will extract the
+              transactions and will ask you to categorise them.
+            </Typography>
+          </Stack>
+        </Box>
+
+        <Box>
+          <Button
+            size='large'
+            variant='contained'
+            className={styles.cardButton}
+            onClick={() => navigate(paths.uploadBankStatement)}
+          >
+            Upload Statement
+          </Button>
+        </Box>
+      </Box>
+
+      {/* Connect Bank Card */}
+      <Box className={styles.contentWrapper}>
+        <Box className={styles.cardContent}>
           <img
             src='/assets/bank.svg'
             alt='bank icon'
-            style={{
-              width: 'min(272px, 80vw)',
-              height: 'auto'
-            }}
+            style={{ width: 'min(200px, 80vw)', height: 'auto' }}
           />
-
-          <Stack spacing={1} alignItems='center' textAlign='center'>
-            <Typography variant='h5' component='h1' fontWeight={700}>
+          <Stack spacing={1}>
+            <Typography variant='h5' fontWeight={700}>
               Connect Your Bank
             </Typography>
             <Typography variant='body1' color='text.secondary'>
@@ -33,18 +65,20 @@ const ConnectYourBank = ({ goToStep }: ConnectYourBankProps) => {
               transactions.
             </Typography>
           </Stack>
+        </Box>
 
+        {/* Bottom section: button + Yapily */}
+        <Stack spacing={2} alignItems='center' mt={4}>
           <Button
             size='large'
             variant='contained'
-            fullWidth
-            sx={{ maxWidth: 320 }}
+            className={styles.cardButton}
             onClick={handleConnectBank}
           >
             Link Bank Account
           </Button>
 
-          <Box display='flex' gap={1.5} alignItems='center' mt={2}>
+          <Box display='flex' gap={1.5} alignItems='center'>
             <img src='/assets/yapily.svg' alt='Yapily' style={{ height: 24 }} />
             <Typography color='text.secondary' variant='caption'>
               Powered by Yapily Connect

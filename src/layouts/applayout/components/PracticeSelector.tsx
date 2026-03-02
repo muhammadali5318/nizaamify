@@ -30,6 +30,10 @@ import { clearPresignData } from 'src/store/slices/presignedSlice'
 import { clearFiles } from 'src/store/slices/uploadSlice'
 import { AllPracticesDataObject } from 'src/store/slices/activePracticeSlice'
 import { clearProcessing } from 'src/store/slices/processingSlice'
+import { clearProcessing as clearBankStatementProcessing } from 'src/store/slices/bankstatementProcessingSlice'
+import { clearAllBankStatements } from 'src/store/slices/bankStatementUploadSlice'
+import { clearPresignStatementsData } from 'src/store/slices/presignedBankstatementsSlice'
+import { clearAll as clearAllProcessedBankStatements } from 'src/store/slices/processedBankStatementBatchDataSlice'
 import useUserDetails from 'src/hooks/useUserDetails'
 import {
   setConnectionId,
@@ -158,6 +162,11 @@ export default function PracticeSelector() {
             setSelectedPractice(selected)
             setActiveById(selected?.id ?? '', practices)
             dispatch(clearChatStorage())
+
+            dispatch(clearAllProcessedBankStatements())
+            dispatch(clearAllBankStatements())
+            dispatch(clearBankStatementProcessing())
+            dispatch(clearPresignStatementsData())
 
             notify.success('Switched to ' + selected?.practice_name)
           }}
