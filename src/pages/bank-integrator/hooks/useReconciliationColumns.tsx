@@ -43,7 +43,6 @@ export const useReconciliationColumns = ({
         sortable: false,
         renderCell: (params: GridCellParams) => (
           <Typography variant='body2'>
-            {' '}
             {params?.row?.date
               ? dayjs(params.row.date).format('DD/MM/YYYY')
               : '-'}

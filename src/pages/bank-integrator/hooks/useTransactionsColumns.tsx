@@ -1,13 +1,16 @@
 import { useMemo } from 'react'
 import { GridColDef, GridCellParams } from '@mui/x-data-grid'
-import { Button, Chip, Typography } from '@mui/material'
+import { Box, Button, Chip, Typography } from '@mui/material'
 import { toTitleCase } from 'src/utils/stringUtils'
+import dayjs from 'dayjs'
 
 type UseTransactionsColumns = (
+  categories: Record<string, any>,
   onCategorise?: (row: any) => void
 ) => GridColDef[]
 
 export const useTransactionsColumns: UseTransactionsColumns = (
+  categories,
   onCategorise
 ) => {
   const columns: GridColDef[] = useMemo(
@@ -19,7 +22,11 @@ export const useTransactionsColumns: UseTransactionsColumns = (
         flex: 1,
         sortable: false,
         renderCell: (params: GridCellParams) => (
-          <Typography variant='body2'>{params?.row?.created_at}</Typography>
+          <Typography variant='body2'>
+            {params?.row?.date
+              ? dayjs(params.row.date).format('DD/MM/YYYY')
+              : '-'}
+          </Typography>
         )
       },
       {
@@ -29,10 +36,47 @@ export const useTransactionsColumns: UseTransactionsColumns = (
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => {
+          const counterparty = params?.row?.counterparty || '-'
+          const reference = params?.row?.reference || ''
+          const type = params?.row?.transaction_type || ''
+
+          const secondaryText =
+            [reference, type].filter(Boolean).map(toTitleCase).join(' • ') ||
+            '-'
+
           return (
-            <Typography variant='body2'>
-              {toTitleCase(params?.row?.event_description) || '-'}
-            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '2px',
+                minWidth: 0
+              }}
+            >
+              <Typography
+                variant='body2'
+                sx={{
+                  fontWeight: 500,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {counterparty}
+              </Typography>
+
+              <Typography
+                variant='caption'
+                sx={{
+                  color: 'text.secondary',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {secondaryText}
+              </Typography>
+            </Box>
           )
         }
       },
@@ -44,7 +88,7 @@ export const useTransactionsColumns: UseTransactionsColumns = (
         sortable: true,
         renderCell: (params: GridCellParams) => (
           <Typography variant='body2'>
-            {toTitleCase(params?.row?.actor_type) || '-'}
+            {params?.row?.amount ? `£${params?.row?.amount}` : '-'}
           </Typography>
         )
       },
@@ -55,7 +99,7 @@ export const useTransactionsColumns: UseTransactionsColumns = (
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => {
-          const value = params?.row?.event_feature?.toLowerCase()
+          const value = Number(params?.row?.amount) > 0 ? 'credit' : 'debit'
 
           const getStyles = () => {
             switch (value) {
@@ -69,16 +113,6 @@ export const useTransactionsColumns: UseTransactionsColumns = (
                   color: 'info.main',
                   backgroundColor: 'rgba(2, 136, 209, 0.15)'
                 }
-              case 'error':
-                return {
-                  color: 'error.main',
-                  backgroundColor: 'rgba(211, 47, 47, 0.15)'
-                }
-              case 'adjustment':
-                return {
-                  color: 'warning.main',
-                  backgroundColor: 'rgba(237, 108, 2, 0.15)'
-                }
               default:
                 return {
                   color: 'rgb(97, 97, 97)',
@@ -89,7 +123,7 @@ export const useTransactionsColumns: UseTransactionsColumns = (
 
           return (
             <Chip
-              label={params?.row?.event_feature}
+              label={value}
               size='small'
               sx={{
                 border: 'none',
@@ -104,16 +138,59 @@ export const useTransactionsColumns: UseTransactionsColumns = (
         field: 'Category',
         headerName: 'Category',
         minWidth: 150,
-        flex: 1,
+        flex: 1.5,
         sortable: false,
-        renderCell: () => {
+        renderCell: (params) => {
+          const row = params.row
+          const idStr = String(row?.id ?? '')
+
+          // API values
+          const hasApiCategory =
+            !!row?.category && !!row?.type && !!row?.subtype
+
+          // RTK values
+          const localCategory = categories?.[idStr]
+
+          const hasLocalCategory =
+            !!localCategory?.category &&
+            !!localCategory?.type &&
+            !!localCategory?.subtype
+
+          if (hasLocalCategory) {
+            return (
+              <Box display={'flex'} gap={1}>
+                <img src='/assets/checked-icon.svg' alt='checked icon' />
+                <Typography
+                  variant='caption'
+                  color='success.main'
+                  fontStyle={'italic'}
+                >
+                  {localCategory.type} / {localCategory.subtype}
+                </Typography>
+              </Box>
+            )
+          }
+
+          if (hasApiCategory) {
+            return (
+              <Box display={'flex'} gap={1}>
+                <img src='/assets/checked-icon.svg' alt='checked icon' />
+                <Typography
+                  variant='caption'
+                  color='success.main'
+                  fontStyle={'italic'}
+                >
+                  {row.type} / {row.subtype}
+                </Typography>
+              </Box>
+            )
+          }
+
           return (
             <Typography
               color='text.secondary'
               variant='caption'
-              sx={{
-                fontStyle: 'italic'
-              }}
+              sx={{ fontStyle: 'italic' }}
             >
               Not categorised
             </Typography>
@@ -127,6 +204,17 @@ export const useTransactionsColumns: UseTransactionsColumns = (
         flex: 1,
         sortable: false,
         renderCell: (params: GridCellParams) => {
+          const row = params.row
+          const idStr = String(row?.id ?? '')
+          const hasApiCategory =
+            !!row?.category && !!row?.type && !!row?.subtype
+
+          const localCategory = categories?.[idStr]
+
+          const hasLocalCategory =
+            !!localCategory?.category &&
+            !!localCategory?.type &&
+            !!localCategory?.subtype
           return (
             <Button
               variant='outlined'
@@ -134,13 +222,13 @@ export const useTransactionsColumns: UseTransactionsColumns = (
                 if (onCategorise) onCategorise(params.row)
               }}
             >
-              Categorise
+              {hasApiCategory || hasLocalCategory ? 'Edit' : 'Categorise'}
             </Button>
           )
         }
       }
     ],
-    []
+    [categories, onCategorise]
   )
 
   return columns

@@ -46,7 +46,7 @@ export default function ProcessingCompletedListForStatement() {
     (state: RootState) =>
       state.processedBankStatement.deletedDocumentsDueToTimeout
   )
-  const { activePracticeId } = useActivePractice()
+  const { activePracticeId, accountingBasis } = useActivePractice()
 
   // -------------- stabilize allDocuments (memo) ----------------
   const allDocuments = useMemo(
@@ -227,14 +227,21 @@ export default function ProcessingCompletedListForStatement() {
               disabled={!areAllDocumentsProcessed}
               startIcon={<CheckCircleOutlineOutlinedIcon />}
               onClick={() => {
-                dispatch(setActiveTab(1))
                 dispatch(clearAll())
                 dispatch(clearAllBankStatements())
                 dispatch(clearProcessing())
                 dispatch(clearPresignStatementsData())
+                if (accountingBasis === 'CASH') {
+                  dispatch(setActiveTab(2))
+                } else if (accountingBasis === 'ACCRUAL') {
+                  dispatch(setActiveTab(1))
+                }
                 navigate(paths.bankIntegrator)
                 queryClient.invalidateQueries({
                   queryKey: ['unverifiedTransactionsListApi']
+                })
+                queryClient.invalidateQueries({
+                  queryKey: ['uncategorisedTransactions']
                 })
               }}
             >

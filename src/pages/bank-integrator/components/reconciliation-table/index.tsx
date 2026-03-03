@@ -58,7 +58,7 @@ const ReconciliationTable = ({
 }: ReconciliationTableProps) => {
   const dispatch = useDispatch()
 
-  const { activePracticeId } = useActivePractice()
+  const { activePracticeId, accountingBasis } = useActivePractice()
   const { userId } = useUserDetails()
 
   // =============================
@@ -145,6 +145,35 @@ const ReconciliationTable = ({
         transformRequest: [(data) => data]
       })
 
+      if (accountingBasis === 'CASH') {
+        try {
+          const payload = {
+            file_obj: {
+              file_obj_key: item.key,
+              file_size: file.size.toString(),
+              file_type: file.type
+            }
+          }
+
+          await apiClient.put(
+            endpoints.bankIntegrator.uploadCategorisedTransactionsInvoice(
+              activePracticeId ?? '',
+              rowId
+            ),
+            payload
+          )
+
+          notify.success('Invoice uploaded successfully')
+          await queryClient.invalidateQueries({
+            queryKey: ['unverifiedTransactionsListApi']
+          })
+          return
+        } catch (error) {
+          console.error('Cash invoice upload failed:', error)
+          notify.error('Invoice upload failed')
+          return
+        }
+      }
       // Step 3 — save to redux
       dispatch(
         setPresignFileData({

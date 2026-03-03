@@ -38,7 +38,18 @@ export const endpoints = {
     documentStatus: (practiceId: string, documentId: string) =>
       `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/documents/${documentId}/status/`,
     reconcileTransactions: (practiceId: string, transactionId: string) =>
-      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/unverified-transactions/${transactionId}/reconcile/`
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/unverified-transactions/${transactionId}/reconcile/`,
+    uncategorisedTransactions: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/uncategorised-transactions/`,
+    categorisedTransactions: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/categorised-transactions/`,
+    uploadCategorisedTransactionsInvoice: (
+      practiceId: string,
+      transactionId: string
+    ) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/categorised-transactions/${transactionId}/invoices/upload/`,
+    uncategorisedTransactionsUpdate: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/uncategorised-transactions/categorise/`
   },
   chatBot: {
     chat: (practiceId: string) =>

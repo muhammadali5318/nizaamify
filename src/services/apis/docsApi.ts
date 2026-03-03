@@ -72,16 +72,17 @@ export const presignBankStatement = async (
     let message = ''
     if (errorData) {
       // Handle nested validation errors like files -> 0 -> filename -> [msg]
-      if (errorData.files) {
+      if (errorData?.files) {
         const firstFileError = Object.values(errorData.files)[0] as any
         message = firstFileError
-      } else if (errorData.detail) {
-        message = errorData.detail
+      } else if (errorData?.error?.files) {
+        message = errorData?.error?.files[0]
+      } else if (errorData?.detail) {
+        message = errorData?.detail
       } else if (typeof errorData === 'string') {
         message = errorData
       }
     }
-
     notify.error(message)
     throw new Error(message)
   }

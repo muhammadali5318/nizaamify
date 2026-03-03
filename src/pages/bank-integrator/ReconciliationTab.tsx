@@ -2,6 +2,7 @@ import { Alert, Box, Stack, Typography } from '@mui/material'
 import StatsCard from 'src/components/team-management/StatsCard'
 import StatsChart from './components/stats-chart'
 import ReconciliationContent from './components/recon-content'
+const VERIFICATION_LIMIT = 4
 
 type Props = {
   totalTransactions: number
@@ -20,10 +21,22 @@ const ReconciliationTab = ({
   setTransactionsWithInvoices,
   setTransactionsWithoutInvoices
 }: Props) => {
+  const remaining = Math.max(VERIFICATION_LIMIT - transactionsWithInvoices, 0)
+
   const percentage =
     totalTransactions > 0
       ? Math.round((transactionsWithInvoices / totalTransactions) * 100)
       : 0
+
+  const message =
+    transactionsWithInvoices >= VERIFICATION_LIMIT
+      ? `You're now a verified Practice!
+          You've uploaded ${transactionsWithInvoices} of
+          ${transactionsWithoutInvoices} invoices (${percentage}%).`
+      : `Upload invoices for your transactions to achieve verified status.
+          You've uploaded ${transactionsWithInvoices} of
+          ${transactionsWithoutInvoices} invoices (${percentage}%). Upload 
+          ${remaining} more to get verified.`
 
   return (
     <Stack spacing={2.5}>
@@ -39,13 +52,7 @@ const ReconciliationTab = ({
           Keep your practice organized!
         </Typography>
 
-        <Typography color='info.dark'>
-          Upload invoices for your transactions to achieve verified status.
-          You&apos;ve uploaded {transactionsWithInvoices} of{' '}
-          {transactionsWithoutInvoices} invoices ({percentage}%). Upload{' '}
-          {Math.max(transactionsWithoutInvoices - transactionsWithInvoices, 0)}{' '}
-          more to get verified.
-        </Typography>
+        <Typography color='info.dark'>{message}</Typography>
       </Alert>
 
       <Box
@@ -75,7 +82,7 @@ const ReconciliationTab = ({
         <StatsChart
           value={percentage}
           transactionsWithInvoices={transactionsWithInvoices}
-          transactionsWithoutInvoices={transactionsWithoutInvoices}
+          total={totalTransactions}
         />
       </Box>
 

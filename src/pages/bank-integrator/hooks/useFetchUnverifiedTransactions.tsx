@@ -38,18 +38,18 @@ type ApiResponse = {
 }
 
 function buildParams(p: UseUnverifiedTransactionsParams) {
-  const params: Record<string, any> = {}
-  if (p.page !== undefined) params.page = p.page + 1 // backend expects 1-based page
-  if (p.pageSize !== undefined) params.page_size = p.pageSize
-  if (p.search) params.search = p.search
-  if (p.ordering) params.ordering = p.ordering
-  if (p.start_date) params.start_date = p.start_date
-  if (p.end_date) params.end_date = p.end_date
-  return params
+  return {
+    page: (p.page ?? 0) + 1, // backend expects 1-based page
+    page_size: p.pageSize ?? 10,
+    search: p.search ?? '',
+    ordering: p.ordering ?? null,
+    start_date: p.start_date ?? null,
+    end_date: p.end_date ?? null
+  }
 }
 
 export function useFetchUnverifiedTransations(
-  params: UseUnverifiedTransactionsParams,
+  params: UseUnverifiedTransactionsParams = {}, // default to empty object
   options?: Omit<
     UseQueryOptions<{
       items: UnverifiedTransactionItem[]
@@ -59,33 +59,36 @@ export function useFetchUnverifiedTransations(
     'queryKey' | 'queryFn'
   >
 ) {
-  const { activePracticeId } = useActivePractice()
-  const endpoint = endpoints.bankIntegrator.unverifiedTransations(
-    activePracticeId ?? ''
-  )
+  const { activePracticeId, accountingBasis } = useActivePractice()
+
+  // Merge defaults here too, so buildParams and queryKey get the same values
+  const mergedParams = {
+    page: 0,
+    pageSize: 10,
+    search: '',
+    ordering: null,
+    start_date: null,
+    end_date: null,
+    ...params
+  }
+
+  const endpoint = useMemo(() => {
+    if (!activePracticeId) return ''
+
+    return accountingBasis === 'CASH'
+      ? endpoints.bankIntegrator.categorisedTransactions(activePracticeId)
+      : endpoints.bankIntegrator.unverifiedTransations(activePracticeId)
+  }, [activePracticeId, accountingBasis])
 
   const queryKey = useMemo(
     () => [
       'unverifiedTransactionsListApi',
       {
-        page: params.page ?? 0,
-        pageSize: params.pageSize ?? 10,
-        search: params.search ?? '',
-        ordering: params.ordering ?? null,
-        start_date: params.start_date ?? null,
-        end_date: params.end_date ?? null,
+        ...mergedParams,
         endpoint
       }
     ],
-    [
-      params.page,
-      params.pageSize,
-      params.search,
-      params.ordering,
-      params.start_date,
-      params.end_date,
-      endpoint
-    ]
+    [mergedParams, endpoint]
   )
 
   const queryFn = async (): Promise<{
@@ -93,7 +96,7 @@ export function useFetchUnverifiedTransations(
     total: number
     rawData?: any
   }> => {
-    const queryParams = buildParams(params)
+    const queryParams = buildParams(mergedParams)
     const { data } = await apiClient.get<ApiResponse>(endpoint, {
       params: queryParams,
       paramsSerializer: (p) => qs.stringify(p, { arrayFormat: 'comma' })
@@ -126,7 +129,7 @@ export function useFetchUnverifiedTransations(
 
   return {
     ...query,
-    items: (query.data?.items ?? []) as UnverifiedTransactionItem[],
+    items: query.data?.items ?? [],
     total: query.data?.total ?? 0,
     rawData: query.data?.rawData
   }
