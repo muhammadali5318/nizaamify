@@ -269,7 +269,7 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
           p: 0,
           mt: 2.5,
           display: 'flex',
-          flexDirection: 'row',
+          flexDirection: { xs: 'column', sm: 'row' },
           gap: 2
         }}
       >
@@ -277,6 +277,7 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
           onClick={onClose}
           variant='outlined'
           size='large'
+          fullWidth
           sx={{ flex: 1 }}
         >
           Cancel
@@ -286,6 +287,7 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
           sx={{ flex: 1 }}
           variant='contained'
           size='large'
+          fullWidth
           onClick={handleSave}
           disabled={!isValid}
         >

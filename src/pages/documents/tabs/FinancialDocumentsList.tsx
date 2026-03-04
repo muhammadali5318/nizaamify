@@ -20,6 +20,7 @@ import {
 import { defaultFinancialDocumentsListFilters } from '../config/documentsConfig'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import { useHasPermission } from 'src/config/module-permissions'
+import DeleteDocumentModal from '../components/DeleteDocumentModal'
 
 interface FinancialDocumentsListProps {
   title: string
@@ -35,7 +36,11 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
   isPendingDocments
 }) => {
   const canViewDocuments = useHasPermission('data.upload_archive')
-
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const [selectedRow, setSelectedRow] = useState<{
+    id: string
+    name: string
+  } | null>(null)
   const { activePracticeId } = useActivePractice()
 
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
@@ -97,9 +102,17 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
     [activePracticeId]
   )
 
+  const handleDeleteIconClick = (row: any) => {
+    setIsDeleteOpen(true)
+    setSelectedRow({
+      id: row.id,
+      name: row.file_name
+    })
+  }
+
   const handlers = useMemo(
-    () => ({ onView, onViewDownload }),
-    [onView, onViewDownload]
+    () => ({ onView, onViewDownload, handleDeleteIconClick }),
+    [onView, onViewDownload, handleDeleteIconClick]
   )
 
   const columns = usePendingDocsColumns(
@@ -220,6 +233,12 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
         open={addDateModalOpen}
         onClose={() => setAddDateModalOpen(false)}
         documentId={documentId ?? ''}
+      />
+
+      <DeleteDocumentModal
+        open={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        document={selectedRow}
       />
     </Box>
   )

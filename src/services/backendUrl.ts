@@ -113,6 +113,8 @@ export const endpoints = {
     expenseBreakdownDocuments: (practiceId: string) =>
       `/${API_BASE_DOCUMENTS}/practices/${practiceId}/expense-breakdown-documents/`,
     benchmarkConfiguration: (practiceId: string) =>
-      `/${API_BASE_DOCUMENTS}/practices/${practiceId}/benchmarking-configurations/`
+      `/${API_BASE_DOCUMENTS}/practices/${practiceId}/benchmarking-configurations/`,
+    deleteDocument: (id: string, documentId: string) =>
+      `/${API_BASE_DOCUMENTS}/practices/${id}/document/${documentId}/`
   }
 }
