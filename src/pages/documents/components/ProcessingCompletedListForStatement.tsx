@@ -33,6 +33,7 @@ import { paths } from 'src/paths'
 import { useNavigate } from 'react-router'
 import { queryClient } from 'src/utils/queryClient'
 import { clearPresignStatementsData } from 'src/store/slices/presignedBankstatementsSlice'
+import NotificationBanner from 'src/components/common/NotificationBanner'
 
 export default function ProcessingCompletedListForStatement() {
   const navigate = useNavigate()
@@ -248,6 +249,13 @@ export default function ProcessingCompletedListForStatement() {
               Continue
             </Button>
           </Box>
+          <NotificationBanner
+            backgroundColor='rgba(239, 108, 0, 0.04)'
+            borderColor='#ff9800'
+            iconColor='#ef6c00'
+            textColor='#ef6c00'
+            content='The Bank Integrator module accepts only bank statements. All other document types will be automatically removed.'
+          />
         </>
       )}
 

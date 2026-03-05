@@ -115,6 +115,8 @@ export const endpoints = {
     benchmarkConfiguration: (practiceId: string) =>
       `/${API_BASE_DOCUMENTS}/practices/${practiceId}/benchmarking-configurations/`,
     deleteDocument: (id: string, documentId: string) =>
-      `/${API_BASE_DOCUMENTS}/practices/${id}/document/${documentId}/`
+      `/${API_BASE_DOCUMENTS}/practices/${id}/document/${documentId}/`,
+    documentStatus: (id: string, documentId: string) =>
+      `/${API_BASE_DOCUMENTS}/practices/${id}/document-status/${documentId}/`
   }
 }

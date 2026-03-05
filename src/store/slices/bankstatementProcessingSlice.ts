@@ -23,7 +23,7 @@ const initialState: ProcessingState = {
 }
 
 const processingSlice = createSlice({
-  name: 'processing',
+  name: 'processingBankStatements',
   initialState,
   reducers: {
     addOrUpdateStatementBatchStatus: (

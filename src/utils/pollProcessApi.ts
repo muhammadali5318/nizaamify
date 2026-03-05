@@ -4,7 +4,8 @@ import apiClient from '../services/api-client'
 import { store } from '../store/store'
 import {
   addOrUpdateProcessedBatchStatus,
-  addDeletedDocsDueToTimeout
+  addDeletedDocsDueToTimeout,
+  removeDocumentsFromBatch
 } from '../store/slices/processedBatchDataSlice'
 import { addOrUpdateBatchStatus } from 'src/store/slices/processingSlice'
 import {
@@ -12,6 +13,7 @@ import {
   removePollingJob
 } from '../store/slices/pollingJobSlice'
 import { deleteBatchDocuments } from 'src/services/apis/deleteBatchDocuments'
+import { endpoints } from 'src/services/backendUrl'
 
 const activeJobs = new Set<string>()
 const DOC_TIMEOUT_MS = 35000
@@ -39,9 +41,10 @@ export const pollBatchStatusUntilComplete = async (
       startedAt: Date.now()
     })
   )
+  let triggerRes: any = null
 
   try {
-    const triggerRes = await triggerProcessAPI(
+    triggerRes = await triggerProcessAPI(
       batchId,
       key,
       filename,
@@ -124,6 +127,38 @@ export const pollBatchStatusUntilComplete = async (
     console.error(`Polling failed for ${filename}`, err)
     throw err
   } finally {
+    try {
+      const resp = await apiClient.get(
+        endpoints.documents.documentStatus(
+          practiceId ?? '',
+          triggerRes.data.document.document_id
+        )
+      )
+      if (resp?.data?.data?.document_subtype === 'Bank statements') {
+        await deleteBatchDocuments(
+          practiceId,
+          batchId,
+          [],
+          [triggerRes.data.document.document_id]
+        )
+
+        store.dispatch(
+          removeDocumentsFromBatch({
+            batchId,
+            documentIds: [triggerRes.data.document.document_id]
+          })
+        )
+      }
+    } catch (error: any) {
+      if (error?.message == 'The document does not exist.') {
+        await deleteBatchDocuments(
+          practiceId,
+          batchId,
+          [],
+          [triggerRes.data.document.document_id]
+        )
+      }
+    }
     activeJobs.delete(jobId)
     store.dispatch(removePollingJob(batchId))
   }

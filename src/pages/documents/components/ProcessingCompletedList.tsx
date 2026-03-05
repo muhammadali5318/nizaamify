@@ -207,6 +207,14 @@ export default function ProcessingCompletedList() {
           </Box>
 
           <NotificationBanner content='Please ensure you review the extracted data before approving them. The data will be used to produce financial records for your practice.' />
+          <NotificationBanner
+            backgroundColor='#FFF3E0'
+            borderColor='#FFCC80'
+            iconColor='#F57C00'
+            textColor='#E65100'
+            content='Please note that all bank statements uploaded through this flow will be automatically deleted.
+To process bank statements, please use the Bank Integrator module.'
+          />
         </>
       )}
 
