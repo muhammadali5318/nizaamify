@@ -11,7 +11,7 @@ import { selectActiveTab } from 'src/store/slices/bankIntegratorTabSlice'
 const BankingAggregator = () => {
   const navigate = useNavigate()
   const tabs = useBankingTabs()
-  const activeTab = useSelector(selectActiveTab)
+  const initalTab = useSelector(selectActiveTab)
 
   return (
     <Box className={styles.bankingRoot}>
@@ -29,16 +29,18 @@ const BankingAggregator = () => {
           subheading='Manage your connected bank accounts and reconcile transactions'
         />
 
-        <Button
-          variant='contained'
-          onClick={() => navigate(paths.uploadBankStatement)}
-          sx={{ width: { xs: 'auto', sm: 'auto' } }}
-        >
-          CSV Upload
-        </Button>
+        {initalTab !== 0 && (
+          <Button
+            variant='contained'
+            onClick={() => navigate(paths.uploadBankStatement)}
+            sx={{ width: { xs: 'auto', sm: 'auto' } }}
+          >
+            Upload statement
+          </Button>
+        )}
       </Box>
 
-      <ReusableTabs tabs={tabs} initialTab={activeTab} />
+      <ReusableTabs tabs={tabs} initialTab={initalTab} setActiveKey={true} />
     </Box>
   )
 }

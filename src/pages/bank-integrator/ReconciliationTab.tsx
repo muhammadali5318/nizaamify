@@ -28,32 +28,29 @@ const ReconciliationTab = ({
       ? Math.round((transactionsWithInvoices / totalTransactions) * 100)
       : 0
 
-  const message =
-    transactionsWithInvoices >= VERIFICATION_LIMIT
-      ? `You're now a verified Practice!
-          You've uploaded ${transactionsWithInvoices} of
-          ${transactionsWithoutInvoices} invoices (${percentage}%).`
-      : `Upload invoices for your transactions to achieve verified status.
+  const message = `Upload invoices for your transactions to achieve verified status.
           You've uploaded ${transactionsWithInvoices} of
           ${transactionsWithoutInvoices} invoices (${percentage}%). Upload 
           ${remaining} more to get verified.`
 
   return (
     <Stack spacing={2.5}>
-      <Alert
-        severity='info'
-        className='alert-info-container'
-        sx={{
-          borderRadius: '16px',
-          border: '1px solid var(--info-main, #0288D1)'
-        }}
-      >
-        <Typography color='info.dark' fontWeight={700}>
-          Keep your practice organized!
-        </Typography>
+      {transactionsWithInvoices < VERIFICATION_LIMIT && (
+        <Alert
+          severity='info'
+          className='alert-info-container'
+          sx={{
+            borderRadius: '16px',
+            border: '1px solid var(--info-main, #0288D1)'
+          }}
+        >
+          <Typography color='info.dark' fontWeight={700}>
+            Keep your practice organized!
+          </Typography>
 
-        <Typography color='info.dark'>{message}</Typography>
-      </Alert>
+          <Typography color='info.dark'>{message}</Typography>
+        </Alert>
+      )}
 
       <Box
         className='statsCardRoot'

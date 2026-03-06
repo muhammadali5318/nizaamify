@@ -5,6 +5,7 @@ import apiClient from 'src/services/api-client'
 import qs from 'qs'
 import { endpoints } from 'src/services/backendUrl'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import { useAuth } from 'src/context/AuthProvider'
 
 export type UnverifiedTransactionItem = {
   id: string
@@ -49,7 +50,7 @@ function buildParams(p: UseUnverifiedTransactionsParams) {
 }
 
 export function useFetchUnverifiedTransations(
-  params: UseUnverifiedTransactionsParams = {}, // default to empty object
+  params: UseUnverifiedTransactionsParams = {},
   options?: Omit<
     UseQueryOptions<{
       items: UnverifiedTransactionItem[]
@@ -60,6 +61,7 @@ export function useFetchUnverifiedTransations(
   >
 ) {
   const { activePracticeId, accountingBasis } = useActivePractice()
+  const { accessToken } = useAuth()
 
   // Merge defaults here too, so buildParams and queryKey get the same values
   const mergedParams = {
@@ -116,13 +118,10 @@ export function useFetchUnverifiedTransations(
     }>
   }, [options])
 
-  const query = useQuery<{
-    items: UnverifiedTransactionItem[]
-    total: number
-    rawData?: any
-  }>({
+  const query = useQuery({
     queryKey,
     queryFn,
+    enabled: !!accessToken && !!endpoint, // ✅ only run if token exists
     keepPreviousData: true,
     ...(sanitizedOptions as any)
   })

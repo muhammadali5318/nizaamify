@@ -2,6 +2,8 @@ import React from 'react'
 import { Box, Tabs } from '@mui/material'
 import CenteredTab from './CenteredTab'
 import TabPanel from './TabPanel'
+import { useDispatch } from 'react-redux'
+import { setActiveTab } from 'src/store/slices/bankIntegratorTabSlice'
 
 const warningSX = {
   display: 'flex',
@@ -55,6 +57,7 @@ interface ReusableTabsProps {
   tabs: ReusableTabItem[]
   initialTab?: TabKey
   variant?: 'scrollable' | 'standard' | 'fullWidth'
+  setActiveKey?: boolean
   onChange?: (key: TabKey) => void
 }
 
@@ -69,14 +72,20 @@ const ReusableTabs: React.FC<ReusableTabsProps> = ({
   tabs,
   initialTab,
   variant = 'scrollable',
-  onChange
+  onChange,
+  setActiveKey = false
 }) => {
+  const dispatch = useDispatch()
+
   const [value, setValue] = React.useState<TabKey>(
     initialTab ?? (tabs.length ? tabs[0].key : 0)
   )
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: TabKey) => {
     setValue(newValue)
+    if (setActiveKey) {
+      dispatch(setActiveTab(newValue))
+    }
     onChange?.(newValue)
   }
 
