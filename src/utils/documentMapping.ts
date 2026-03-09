@@ -14,7 +14,7 @@ export const documentMapping: Record<string, Record<string, string[]>> = {
     'Staff training & CPD': ['Staff Training'],
     'Recruitment costs': ['Recruitment Cost'],
     'HR Services': ['HR Services'],
-    Other: ['Staff Cost']
+    Other: ['Other - Staff Cost']
   },
 
   // --- Clinician Costs ---
