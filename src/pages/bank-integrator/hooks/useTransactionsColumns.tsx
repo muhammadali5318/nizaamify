@@ -88,7 +88,7 @@ export const useTransactionsColumns: UseTransactionsColumns = (
         sortable: true,
         renderCell: (params: GridCellParams) => (
           <Typography variant='body2'>
-            {params?.row?.amount ? `£${params?.row?.amount}` : '-'}
+            {params?.row?.amount ? `£${Math.abs(params?.row?.amount)}` : '-'}
           </Typography>
         )
       },

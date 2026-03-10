@@ -137,7 +137,7 @@ export const useReconciliationColumns = ({
           return (
             <Typography variant='body2'>
               {balance != null && balance !== ''
-                ? `£${Number(balance).toLocaleString()}`
+                ? `£${Math.abs(Number(balance)).toLocaleString()}`
                 : '-'}
             </Typography>
           )
