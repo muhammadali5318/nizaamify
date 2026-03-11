@@ -47,7 +47,8 @@ export const presignDocuments = async (
 export const presignBankStatement = async (
   userId: string,
   files: any[],
-  org_id: string
+  org_id: string,
+  bankAgg?: boolean
 ) => {
   try {
     const payload = {
@@ -58,10 +59,15 @@ export const presignBankStatement = async (
       }))
     }
 
-    const response = await apiClient.post(
-      `/banking/v1/practices/${org_id}/documents/presign/`,
-      payload
-    )
+    let url = `/banking/v1/practices/${org_id}/documents/presign/`
+
+    // Append query param only if passed
+    if (bankAgg) {
+      const params = new URLSearchParams({ bank_agg: 'True' })
+      url += `?${params.toString()}`
+    }
+
+    const response = await apiClient.post(url, payload)
 
     return response.data
   } catch (error: any) {
@@ -71,7 +77,6 @@ export const presignBankStatement = async (
 
     let message = ''
     if (errorData) {
-      // Handle nested validation errors like files -> 0 -> filename -> [msg]
       if (errorData?.files) {
         const firstFileError = Object.values(errorData.files)[0] as any
         message = firstFileError

@@ -58,7 +58,8 @@ export default function UploadQueue() {
       const response = await presignBankStatement(
         userId,
         files,
-        activePracticeId ?? ''
+        activePracticeId ?? '',
+        true
       )
       console.warn('Presign API response:', response)
       const presignData = response.data
