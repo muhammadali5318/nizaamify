@@ -173,7 +173,13 @@ const MainDashboard = () => {
           <PeriodSelector
             options={['Last month', '3-month view', 'Yearly']}
             selected={selectedPeriod}
-            onSelect={setSelectedPeriod}
+            onSelect={(period) => {
+              setSelectedPeriod(period)
+
+              if (period === 'Last month') {
+                setSelectedMonth(dayjs().subtract(1, 'month'))
+              }
+            }}
           />
 
           <Button
