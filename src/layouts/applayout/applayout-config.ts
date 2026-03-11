@@ -36,7 +36,7 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         moduleId: 'documents'
       },
       {
-        text: 'Expenses',
+        text: 'P&L Items',
         to: paths.expense,
         activeIcon: 'active-wallet.svg',
         inactiveIcon: 'expense-inactive.svg',

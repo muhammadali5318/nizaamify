@@ -36,11 +36,11 @@ const ExpenseBreakdown = () => {
   return (
     <Box className={styles.expenseBreakdownRoot} width='100%'>
       <ExpensePageHeader
-        heading='Expense Breakdown'
+        heading='P&L Items Breakdown'
         dateRange={dateRange}
         onDateChange={setDateRange}
         avatarSrc='/assets/wallet-bg-green.svg'
-        subheading='Detailed view of all expense categories and subcategories'
+        subheading='Detailed view of P&L items categories and subcategories'
         data={data}
         allExpanded={allExpanded} // ✅ pass state
         setAllExpanded={setAllExpanded}
