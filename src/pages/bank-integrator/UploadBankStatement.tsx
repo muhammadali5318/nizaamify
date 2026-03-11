@@ -9,7 +9,7 @@ import ModuleHeader from 'src/components/module-header'
 import PageBreadcrumbs from 'src/components/bread-crumbs/PageBreadcrumbs'
 import { uploadCsvBreads } from './bank-integrator-config'
 import UploadQueue from './components/upload-bank-statement-completed/UploadQueue'
-import ProcessingCompletedListForStatement from '../documents/components/ProcessingCompletedListForStatement'
+import ProcessingCompletedListForStatement from './components/upload-bank-statement-completed/ProcessingCompletedListForStatement'
 
 const UploadBankStatement = () => {
   const dispatch = useDispatch()

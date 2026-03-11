@@ -15,10 +15,12 @@ import ManualEntryPage from 'src/pages/documents/manual-entry/ManualEntryPage'
 import MonaiAgent from 'src/pages/monai-agent/index'
 import Placeholder from 'src/components/common/Placeholder'
 import { CONFIG } from 'src/config-global'
-import BankingAggregator from 'src/pages/bank-integrator'
-import UploadBankStatement from 'src/pages/bank-integrator/UploadBankStatement'
 
 // lazy pages
+const UploadBankStatement = lazy(
+  () => import('src/pages/bank-integrator/UploadBankStatement')
+)
+const BankingAggregator = lazy(() => import('src/pages/bank-integrator'))
 const Dashboard = lazy(() => import('src/pages/dashboard'))
 const Documents = lazy(() => import('src/pages/documents'))
 const Reports = lazy(() => import('src/pages/reports'))

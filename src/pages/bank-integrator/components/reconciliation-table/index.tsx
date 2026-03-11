@@ -243,6 +243,9 @@ const ReconciliationTable = ({
       await queryClient.invalidateQueries({
         queryKey: ['unverifiedTransactionsListApi']
       })
+      await queryClient.invalidateQueries({
+        queryKey: ['transactionHistoryListApi']
+      })
 
       notify.success('Category saved successfully')
     } catch (error) {

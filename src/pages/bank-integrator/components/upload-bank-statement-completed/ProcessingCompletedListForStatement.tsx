@@ -13,9 +13,9 @@ import { RootState } from 'src/store/store'
 import { useEffect, useMemo, useState } from 'react'
 import { getFileIcon } from 'src/utils/getFileIcon'
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined'
-import { notify } from '../../../components/notistack/NotificationProvider'
+import { notify } from '../../../../components/notistack/NotificationProvider'
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
-import spinner from '../../../assets/spinnergif.gif'
+import spinner from '../../../../assets/spinnergif.gif'
 
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 
@@ -26,7 +26,6 @@ import {
 import { clearAllBankStatements } from 'src/store/slices/bankStatementUploadSlice'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import { clearProcessing } from 'src/store/slices/bankstatementProcessingSlice'
-import DeletedDocumentsList from './DeletedDocumentsList'
 import { deleteBatchDocuments } from 'src/services/apis/deleteBatchDocuments'
 import { setActiveTab } from 'src/store/slices/bankIntegratorTabSlice'
 import { paths } from 'src/paths'
@@ -34,6 +33,7 @@ import { useNavigate } from 'react-router'
 import { queryClient } from 'src/utils/queryClient'
 import { clearPresignStatementsData } from 'src/store/slices/presignedBankstatementsSlice'
 import NotificationBanner from 'src/components/common/NotificationBanner'
+import DeletedDocumentsList from 'src/pages/documents/components/DeletedDocumentsList'
 
 export default function ProcessingCompletedListForStatement() {
   const navigate = useNavigate()

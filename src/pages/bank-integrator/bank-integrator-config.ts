@@ -20,6 +20,12 @@ export const bankingTabsData = [
     label: 'Transactions',
     activeIcon: '/assets/active-document.svg',
     inactiveIcon: '/assets/inactive-document.svg'
+  },
+  {
+    key: 3,
+    label: 'Transactions history',
+    activeIcon: '/assets/history.svg',
+    inactiveIcon: '/assets/history-icon.svg'
   }
 ]
 
