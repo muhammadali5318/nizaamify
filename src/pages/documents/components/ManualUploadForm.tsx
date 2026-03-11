@@ -62,7 +62,7 @@ interface ManualEntryFormData {
 
 const ManualEntryForm: React.FC = () => {
   const [formData, setFormData] = useState<ManualEntryFormData>({
-    entryDate: null,
+    entryDate: dayjs(),
     paymentDate: null,
     category: '',
     type: '',
@@ -233,7 +233,7 @@ const ManualEntryForm: React.FC = () => {
       notify.success(res.message || 'Manual entry saved successfully')
       navigate('/documents')
       setFormData({
-        entryDate: null,
+        entryDate: dayjs(),
         category: '',
         type: '',
         subtype: '',
