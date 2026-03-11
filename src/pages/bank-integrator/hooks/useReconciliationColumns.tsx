@@ -182,7 +182,7 @@ export const useReconciliationColumns = ({
           // =============================
           // Uploaded state
           // =============================
-          if (hasFile) {
+          if (hasFile || params?.row?.matched_document) {
             return (
               <Chip
                 label='Uploaded'
@@ -193,8 +193,6 @@ export const useReconciliationColumns = ({
                     style={{ width: 16, height: 16 }}
                   />
                 }
-                clickable
-                onClick={() => handleUploadFile?.(params.row)}
                 sx={{
                   borderRadius: '100px',
                   fontWeight: 500,
