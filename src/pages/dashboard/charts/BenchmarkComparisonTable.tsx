@@ -139,7 +139,7 @@ export default function ExpandableBenchmarkTable({
                 <TableCell padding='checkbox' sx={{ width: 48 }} />
                 <TableCell>Category</TableCell>
                 <TableCell align='right'>Your practice value</TableCell>
-                <TableCell align='right'>UK Avg (NHS)</TableCell>
+                <TableCell align='right'>UK Avg</TableCell>
                 <TableCell align='right'>Monai benchmarking</TableCell>
               </TableRow>
             </TableHead>
