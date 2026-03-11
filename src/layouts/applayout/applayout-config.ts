@@ -13,6 +13,7 @@ export interface MenuItemData {
   to: string
   activeIcon: string
   inactiveIcon: string
+  tooltipContent?: string
   moduleId: ModuleId
 }
 
@@ -53,6 +54,8 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         to: paths.monaiAgent,
         activeIcon: 'agent-active.svg',
         inactiveIcon: 'agent-inactive.svg',
+        tooltipContent:
+          'Monai Agent uses guardrails to answer practice finance questions using only your real data in Monai. If the data isn’t available, it won’t guess or hallucinate.',
         moduleId: 'monai-agent'
       }
     ]

@@ -26,6 +26,7 @@ import { selectPermissionsByCategory } from 'src/store/slices/userDetailsInActiv
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import { useEffect, useRef } from 'react'
 import { useUserDetailsInActivePractice } from 'src/hooks/useUserDetailsInActivePractice'
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 
 export default function AppLayout() {
   const location = useLocation()
@@ -374,6 +375,23 @@ export default function AppLayout() {
                                 {item.text}
                               </Typography>
                             </ListItemText>
+                          )}
+
+                          {item?.tooltipContent && showLabels && (
+                            <Tooltip
+                              title={item.tooltipContent}
+                              arrow
+                              placement='top'
+                            >
+                              <HelpOutlineIcon
+                                sx={{
+                                  color: isActive
+                                    ? 'var(--color-primary-black)'
+                                    : 'var(--color-primary-light)',
+                                  cursor: 'pointer'
+                                }}
+                              />
+                            </Tooltip>
                           )}
                         </ListItemButton>
                       </Tooltip>
