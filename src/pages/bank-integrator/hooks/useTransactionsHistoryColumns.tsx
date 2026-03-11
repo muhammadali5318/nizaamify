@@ -44,7 +44,7 @@ export const useTransactionsHistoryColumns = (): GridColDef[] => {
         field: 'Category',
         headerName: 'Category',
         flex: 1,
-        sortable: true,
+        sortable: false,
         renderCell: (params: GridCellParams) => {
           const category = params?.row?.category || '-'
 
@@ -56,7 +56,7 @@ export const useTransactionsHistoryColumns = (): GridColDef[] => {
       // Debit
       // =============================
       {
-        field: 'Type',
+        field: 'type',
         headerName: 'Type',
         flex: 1,
         sortable: true,
@@ -101,10 +101,10 @@ export const useTransactionsHistoryColumns = (): GridColDef[] => {
         }
       },
       {
-        field: 'uploaded on',
+        field: 'created_at',
         headerName: 'Uploaded on',
         flex: 1,
-        sortable: false,
+        sortable: true,
         renderCell: (params: GridCellParams) => {
           return (
             <Typography variant='body2'>
@@ -114,10 +114,10 @@ export const useTransactionsHistoryColumns = (): GridColDef[] => {
         }
       },
       {
-        field: 'uploaded by',
+        field: 'uploaded_by_name',
         headerName: 'Uploaded by',
         flex: 1,
-        sortable: false,
+        sortable: true,
         renderCell: (params: GridCellParams) => {
           return (
             <Typography variant='body2'>
