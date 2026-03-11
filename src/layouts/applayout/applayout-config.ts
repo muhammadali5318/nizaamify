@@ -18,7 +18,7 @@ export interface MenuItemData {
 
 export const menuSections: { title: string; items: MenuItemData[] }[] = [
   {
-    title: 'Main menu',
+    title: 'Main Menu',
     items: [
       {
         text: 'Dashboard',
