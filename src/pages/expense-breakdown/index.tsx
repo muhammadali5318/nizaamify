@@ -16,10 +16,11 @@ const ExpenseBreakdown = () => {
   const { accessToken } = useAuth()
   const [allExpanded, setAllExpanded] = useState(false)
 
-  // Date range state
+  const lastMonth = dayjs().subtract(1, 'month')
+
   const [dateRange, setDateRange] = useState<RangeISO>({
-    start: dayjs().startOf('month').toISOString(),
-    end: dayjs().endOf('month').toISOString()
+    start: lastMonth.startOf('month').toISOString(),
+    end: lastMonth.endOf('month').toISOString()
   })
 
   // Explicit date validity check (UX fix)
