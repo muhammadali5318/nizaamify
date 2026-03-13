@@ -3,9 +3,14 @@ import { Box, Typography } from '@mui/material'
 interface ExpensesGrandTotalProps {
   total: number | string
   label?: string | any
+  title?: string | any
 }
 
-const ExpensesGrandTotal = ({ total, label }: ExpensesGrandTotalProps) => {
+const ExpensesGrandTotal = ({
+  total,
+  label,
+  title = 'GRAND TOTAL'
+}: ExpensesGrandTotalProps) => {
   return (
     <Box
       sx={{
@@ -42,7 +47,7 @@ const ExpensesGrandTotal = ({ total, label }: ExpensesGrandTotalProps) => {
             lineHeight: 1
           }}
         >
-          GRAND TOTAL
+          {title}
         </Typography>
 
         <Typography

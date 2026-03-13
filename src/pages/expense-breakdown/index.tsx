@@ -11,6 +11,7 @@ import { useFetchExpenseBreakdown } from './hooks/useFetchExpenseBreakdown'
 import { useAuth } from 'src/context/AuthProvider'
 import { RangeISO } from 'src/components/date-range-selector'
 import { formatAmountWithCommas } from 'src/utils/stringUtils'
+import RevenueAccordion from './components/revenue-accordion'
 
 const ExpenseBreakdown = () => {
   const { accessToken } = useAuth()
@@ -80,31 +81,62 @@ const ExpenseBreakdown = () => {
       {/* 🔹 Data */}
       {hasValidDate && !isPending && (
         <Stack spacing={2} ref={pageRef} width={'100%'}>
-          <ExpensesGrandTotal
-            label='Total Monthly Expenses:'
-            total={formatAmountWithCommas(data?.total) ?? 0}
-          />
+          <Stack
+            spacing={2}
+            sx={{
+              borderRadius: '24px',
+              border: '1px solid var(--grey-200)',
+              padding: 2
+            }}
+          >
+            <ExpensesGrandTotal
+              title={'REVENUE GRAND TOTAL'}
+              label='Total Monthly Revenue:'
+              total={formatAmountWithCommas(data?.total_revenue) ?? 0}
+            />
+            <RevenueAccordion
+              title={'Income/Revenue'}
+              dateRange={dateRange}
+              incomeAndRevenue={data?.revenue_cateogories}
+              expanded={allExpanded}
+              total={data?.total_revenue}
+            />
+          </Stack>
 
-          {data?.categories?.map((category: any, idx: number) => {
-            const expenseType = data?.expense_type?.find(
-              (expense: any) =>
-                expense.expense_type === category?.parent_category
-            )
+          <Stack
+            spacing={2}
+            sx={{
+              borderRadius: '24px',
+              border: '1px solid var(--grey-200)',
+              padding: 2
+            }}
+          >
+            <ExpensesGrandTotal
+              title={'EXPENSES GRAND TOTAL'}
+              label='Total Monthly Expenses:'
+              total={formatAmountWithCommas(data?.total) ?? 0}
+            />
+            {data?.categories?.map((category: any, idx: number) => {
+              const expenseType = data?.expense_type?.find(
+                (expense: any) =>
+                  expense.expense_type === category?.parent_category
+              )
 
-            return (
-              <ReusableAccordion
-                key={idx}
-                title={category?.parent_category}
-                dateRange={dateRange}
-                total={category?.amount}
-                chips={[
-                  `${expenseType?.expense_subtypes?.length ?? 0} subcategories`
-                ]}
-                expenseSubtypes={expenseType?.expense_subtypes}
-                expanded={allExpanded}
-              />
-            )
-          })}
+              return (
+                <ReusableAccordion
+                  key={idx}
+                  title={category?.parent_category}
+                  dateRange={dateRange}
+                  total={category?.amount}
+                  chips={[
+                    `${expenseType?.expense_subtypes?.length ?? 0} subcategories`
+                  ]}
+                  expenseSubtypes={expenseType?.expense_subtypes}
+                  expanded={allExpanded}
+                />
+              )
+            })}
+          </Stack>
         </Stack>
       )}
     </Box>

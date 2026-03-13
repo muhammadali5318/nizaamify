@@ -193,11 +193,14 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
           params: {
             start_date: toApiDate(dateRange?.start),
             end_date: toApiDate(dateRange?.end),
-            sub_cat: type
+            sub_cat: type,
+            cat: 'Expense'
           }
         }
       )
-      setDownloadableDocuments(response?.data?.data)
+      setDownloadableDocuments(
+        response?.data?.data?.results?.expense_breakdown_docs
+      )
       setOpenDocumentDetails(true)
     } catch {
       setDownloadableDocuments(undefined)
