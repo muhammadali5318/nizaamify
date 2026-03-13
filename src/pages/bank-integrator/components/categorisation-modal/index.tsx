@@ -174,11 +174,11 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
         <Stack spacing={2} mt={2}>
           {/* CATEGORY */}
           <FormControl fullWidth>
-            <InputLabel>Category *</InputLabel>
+            <InputLabel>Type *</InputLabel>
             <Select
               disabled
               value={category}
-              label='Category *'
+              label='Type *'
               MenuProps={menuProps}
               onChange={(e: SelectChangeEvent<string>) =>
                 setCategory(e.target.value)
@@ -198,10 +198,10 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
 
           {/* TYPE */}
           <FormControl fullWidth disabled={!category}>
-            <InputLabel>Document category *</InputLabel>
+            <InputLabel>Category *</InputLabel>
             <Select
               value={type}
-              label='Document category *'
+              label='Category *'
               MenuProps={menuProps}
               onChange={(e) => setType(e.target.value)}
             >
@@ -218,10 +218,10 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
             fullWidth
             disabled={!type || type === 'Income & Revenue'}
           >
-            <InputLabel>Document subcategory *</InputLabel>
+            <InputLabel>Subcategory *</InputLabel>
             <Select
               value={subtype}
-              label='Document subcategory *'
+              label='Subcategory *'
               MenuProps={menuProps}
               onChange={(e) => setSubtype(e.target.value)}
             >

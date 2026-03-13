@@ -1,13 +1,6 @@
 import { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
-import {
-  Box,
-  IconButton,
-  Collapse,
-  Typography,
-  Chip,
-  Stack
-} from '@mui/material'
+import { Box, IconButton, Collapse, Typography } from '@mui/material'
 import { ArrowDropDown, ArrowDropUp } from '@mui/icons-material'
 
 import { RangeISO } from 'src/components/date-range-selector'
@@ -17,7 +10,6 @@ import RevenueBreakdownTable from './RevenueTable'
 interface ReusableAccordionProps {
   title: string
   dateRange: RangeISO
-  chips?: string[]
   total?: any
   defaultExpanded?: boolean
   incomeAndRevenue?: any
@@ -26,7 +18,6 @@ interface ReusableAccordionProps {
 
 export default function RevenueAccordion({
   title,
-  chips = [],
   total = null,
   defaultExpanded = false,
   incomeAndRevenue,
@@ -101,44 +92,8 @@ export default function RevenueAccordion({
             >
               {title}
             </Typography>
-
-            {/* Chips */}
-            {chips.length > 0 && (
-              <Stack direction='row' spacing={0.5} flexWrap='wrap'>
-                {chips.map((c) => (
-                  <Chip
-                    key={c}
-                    label={c}
-                    size='small'
-                    sx={{
-                      border: '1px solid #BEDBFF',
-                      background: '#DBEAFE',
-                      color: '#1447E6',
-                      fontSize: '0.75rem',
-                      height: '24px'
-                    }}
-                    variant='outlined'
-                  />
-                ))}
-              </Stack>
-            )}
           </Box>
         </Box>
-
-        {/* Total Amount - moves below on mobile */}
-        {total !== null && (
-          <Typography
-            variant='h5'
-            sx={{
-              fontWeight: 700,
-              whiteSpace: 'nowrap',
-              alignSelf: { xs: 'flex-end', sm: 'center' },
-              mt: { xs: 0.5, sm: 0 }
-            }}
-          >
-            £{formatAmountWithCommas(total)}
-          </Typography>
-        )}
       </Box>
 
       {/* Collapsible Content */}

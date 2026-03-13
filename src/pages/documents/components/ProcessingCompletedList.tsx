@@ -354,11 +354,11 @@ To process bank statements, please use the Bank Integrator module.'
                       <strong>
                         {dayjs(doc.document_date).format('DD-MM-YYYY') || '—'}
                       </strong>
-                      &nbsp; | &nbsp; Category:{' '}
+                      &nbsp; | &nbsp; Type:{' '}
                       <strong>{doc.document_category || '—'}</strong>
-                      &nbsp; | &nbsp; Document category:{' '}
+                      &nbsp; | &nbsp; Category:{' '}
                       <strong>{doc.document_type || '—'}</strong>
-                      &nbsp; | &nbsp; Document subcategory:{' '}
+                      &nbsp; | &nbsp; Subcategory:{' '}
                       <strong>{doc.document_subtype || '—'}</strong>
                       {!['Revenue', 'Unknown'].includes(
                         doc.document_category
