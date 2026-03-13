@@ -3,7 +3,7 @@ export const documentMapping: Record<string, Record<string, string[]>> = {
   'Income & Revenue': {
     'Practice management reports': [],
     'Bank statements': [],
-    'Capitation scheme statements': [],
+    'NHS BSA PAYMENT': [],
     'Subletting or rental income evidence': []
   },
 

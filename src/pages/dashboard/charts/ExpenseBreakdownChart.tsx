@@ -4,8 +4,10 @@ import {
   Typography,
   Box,
   useMediaQuery,
-  useTheme
+  useTheme,
+  Stack
 } from '@mui/material'
+import InsertChartOutlinedIcon from '@mui/icons-material/InsertChartOutlined'
 import {
   PieChart,
   Pie,
@@ -16,9 +18,9 @@ import {
 } from 'recharts'
 
 interface ExpenseBreakdownChartProps {
-  granularity: string
-  month: number | null
-  year: number
+  granularity?: string
+  month?: number | null
+  year?: number
   data?: any
 }
 
@@ -38,13 +40,12 @@ const COLORS = [
 const ExpenseBreakdownChart = ({ data }: ExpenseBreakdownChartProps) => {
   const chartData =
     data?.current?.expense_types?.map((item: any) => ({
-      name: item?.expense_type,
-      value: parseFloat(item?.share_of_total_percent || 0),
-      amount: parseFloat(item?.amount || 0)
+      name: item?.expense_type ?? 'Unknown',
+      value: Number(parseFloat(item?.share_of_total_percent || 0)),
+      amount: Number(parseFloat(item?.amount || 0))
     })) || []
 
   const theme = useTheme()
-
   const isXs = useMediaQuery(theme.breakpoints.down('sm'))
   const isMd = useMediaQuery(theme.breakpoints.between('sm', 'md'))
   const isLg = useMediaQuery(theme.breakpoints.up('md'))
@@ -63,6 +64,49 @@ const ExpenseBreakdownChart = ({ data }: ExpenseBreakdownChartProps) => {
     outerRadius = '60%'
   }
 
+  // Determine if there's any meaningful data
+  const hasMeaningfulData =
+    chartData.length > 0 &&
+    chartData.some((d) => Number(d.value) > 0 || Number(d.amount) > 0)
+
+  if (!hasMeaningfulData) {
+    return (
+      <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <CardContent sx={{ flex: 1 }}>
+          <Typography variant='h6' mb={2}>
+            Expense Breakdown (as % of total)
+          </Typography>
+
+          <Box
+            sx={{
+              width: '100%',
+              height: 320,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Stack spacing={1} alignItems='center'>
+              <InsertChartOutlinedIcon
+                sx={{ fontSize: 48, color: 'text.secondary' }}
+              />
+              <Typography variant='subtitle1'>No expense data</Typography>
+              <Typography
+                variant='body2'
+                color='text.secondary'
+                textAlign='center'
+                sx={{ maxWidth: 360 }}
+              >
+                There are no expenses for the selected period. Try a different
+                month/year or add transactions to view the breakdown.
+              </Typography>
+            </Stack>
+          </Box>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <CardContent sx={{ flex: 1 }}>
@@ -71,7 +115,7 @@ const ExpenseBreakdownChart = ({ data }: ExpenseBreakdownChartProps) => {
         </Typography>
 
         <Box sx={{ width: '100%', height: 320 }}>
-          <ResponsiveContainer>
+          <ResponsiveContainer aria-label='Expense breakdown pie chart'>
             <PieChart>
               <Pie
                 data={chartData}
@@ -99,9 +143,10 @@ const ExpenseBreakdownChart = ({ data }: ExpenseBreakdownChartProps) => {
                 layout='vertical'
                 iconType='circle'
                 formatter={(value: string) => {
-                  const percentage = chartData
-                    .find((d: any) => d.name === value)
-                    ?.value?.toFixed(1)
+                  const entry = chartData.find((d: any) => d.name === value)
+                  const percentage = entry
+                    ? Number(entry.value).toFixed(1)
+                    : '0.0'
                   return `${value} (${percentage}%)`
                 }}
                 wrapperStyle={{
@@ -114,9 +159,11 @@ const ExpenseBreakdownChart = ({ data }: ExpenseBreakdownChartProps) => {
 
               <Tooltip
                 formatter={(value: number, name: string, props: any) => {
-                  const { payload } = props
+                  const { payload } = props || {}
+                  const amount = payload?.amount ?? 0
+                  const percent = Number(value ?? 0)
                   return [
-                    `  ${payload.amount?.toLocaleString?.() ?? 0} (${value.toFixed(2)}%)`,
+                    `£${Number(amount).toLocaleString?.() ?? 0} (${percent.toFixed(2)}%)`,
                     name
                   ]
                 }}

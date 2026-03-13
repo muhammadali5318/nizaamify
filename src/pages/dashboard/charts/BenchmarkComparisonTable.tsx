@@ -138,9 +138,9 @@ export default function ExpandableBenchmarkTable({
               <TableRow>
                 <TableCell padding='checkbox' sx={{ width: 48 }} />
                 <TableCell>Category</TableCell>
-                <TableCell align='right'>Your practice value</TableCell>
-                <TableCell align='right'>UK Avg (NHS)</TableCell>
-                <TableCell align='right'>Monai benchmarking</TableCell>
+                <TableCell>Your practice value</TableCell>
+                <TableCell>UK Avg</TableCell>
+                <TableCell>Monai benchmarking</TableCell>
               </TableRow>
             </TableHead>
 
@@ -221,15 +221,15 @@ function ExpandableRow({
         <TableCell component='th' scope='row' sx={{ fontWeight: 600 }}>
           {row.expense_type}
         </TableCell>
-        <TableCell align='right'>
+        <TableCell align='left'>
           {formatValue(row.amount, row.share_of_total_percent)}
         </TableCell>
-        <TableCell align='right'>
+        <TableCell align='left'>
           {benchmark
             ? `${benchmark.lower_bound} – ${benchmark.upper_bound}%`
             : '-'}
         </TableCell>
-        <TableCell align='right'>-</TableCell>
+        <TableCell align='left'>-</TableCell>
       </TableRow>
 
       {/* Expanded content */}

@@ -13,12 +13,13 @@ export interface MenuItemData {
   to: string
   activeIcon: string
   inactiveIcon: string
+  tooltipContent?: string
   moduleId: ModuleId
 }
 
 export const menuSections: { title: string; items: MenuItemData[] }[] = [
   {
-    title: 'Main menu',
+    title: 'Main Menu',
     items: [
       {
         text: 'Dashboard',
@@ -35,10 +36,12 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         moduleId: 'documents'
       },
       {
-        text: 'Expenses',
+        text: 'P&L Items',
         to: paths.expense,
         activeIcon: 'active-wallet.svg',
         inactiveIcon: 'expense-inactive.svg',
+        tooltipContent:
+          'Items such as owners withdrawals, capital loans/injections or tax matters which do not belong in the P&L statement are recorded here',
         moduleId: 'expenses'
       },
       {
@@ -53,6 +56,8 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         to: paths.monaiAgent,
         activeIcon: 'agent-active.svg',
         inactiveIcon: 'agent-inactive.svg',
+        tooltipContent:
+          'Monai Agent uses guardrails to answer practice finance questions using only your real data in Monai. If the data isn’t available, it won’t guess or hallucinate.',
         moduleId: 'monai-agent'
       }
     ]

@@ -45,7 +45,7 @@ const ReconciliationTab = ({
           }}
         >
           <Typography color='info.dark' fontWeight={700}>
-            Keep your practice organized!
+            Keep your practice organised!
           </Typography>
 
           <Typography color='info.dark'>{message}</Typography>

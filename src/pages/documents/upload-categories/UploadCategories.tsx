@@ -20,7 +20,7 @@ const categories = [
     examples: [
       'Bank statements',
       'Practice management reports',
-      'Capitation scheme statements',
+      'NHS BSA PAYMENT',
       'Subletting or rental income'
     ]
   },
@@ -34,7 +34,7 @@ const categories = [
       'Staff training & CPD',
       'Recruitment costs',
       'HR services',
-      'Other'
+      'Other - Staff Costs'
     ]
   },
   {

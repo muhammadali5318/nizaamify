@@ -32,7 +32,7 @@ export const downloadBenchmarkCsv = (
     'Subcategory',
     'Your practice value (£)',
     '% of total',
-    'UK Avg (NHS)',
+    'UK Avg',
     'Monai benchmarking'
   ])
 
