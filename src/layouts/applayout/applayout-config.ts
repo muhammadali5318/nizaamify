@@ -40,8 +40,6 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         to: paths.expense,
         activeIcon: 'active-wallet.svg',
         inactiveIcon: 'expense-inactive.svg',
-        tooltipContent:
-          'Items such as owners withdrawals, capital loans/injections or tax matters which do not belong in the P&L statement are recorded here',
         moduleId: 'expenses'
       },
       {
@@ -49,6 +47,8 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         to: paths.nonPandL,
         activeIcon: 'pl-Icon-active.svg',
         inactiveIcon: 'pl-Icon-inactive.svg',
+        tooltipContent:
+          'Items such as owners withdrawals, capital loans/injections or tax matters which do not belong in the P&L statement are recorded here',
         moduleId: 'non-pandl'
       },
       {

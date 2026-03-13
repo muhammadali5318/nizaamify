@@ -43,7 +43,7 @@ const ExpenseBreakdown = () => {
         avatarSrc='/assets/wallet-bg-green.svg'
         subheading='Detailed view of P&L items categories and subcategories'
         data={data}
-        allExpanded={allExpanded} // ✅ pass state
+        allExpanded={allExpanded}
         setAllExpanded={setAllExpanded}
         pdfRef={pageRef}
       />
