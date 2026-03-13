@@ -44,7 +44,12 @@ const DeleteDocumentModal: React.FC<DeleteDocumentModalProps> = ({
     setLoading(true)
     try {
       await apiClient.delete(
-        endpoints.documents.deleteDocument(activePracticeId, document.id)
+        endpoints.documents.deleteDocument(activePracticeId, document.id),
+        {
+          params: {
+            module: 'docs'
+          }
+        }
       )
 
       await queryClient.invalidateQueries({

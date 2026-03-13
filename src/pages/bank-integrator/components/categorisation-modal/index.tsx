@@ -81,12 +81,9 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
     }, 0)
   }, [open, initial])
 
-  /**
-   * Derived dropdown data
-   */
   const types = useMemo(() => {
     const filtered = getFilteredDocumentTypes(category)
-    return filtered.slice(0, -1)
+    return filtered
   }, [category])
 
   const subtypes = useMemo(() => {

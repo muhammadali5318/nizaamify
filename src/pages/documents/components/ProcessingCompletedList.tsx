@@ -218,212 +218,217 @@ To process bank statements, please use the Bank Integrator module.'
         </>
       )}
 
-      {allDocuments?.map((doc) => (
-        <Card
-          key={doc.document_id}
-          sx={{
-            mb: 2,
-            borderRadius: '12px',
-            boxShadow: '0px 2px 6px rgba(0,0,0,0.08)',
-            border: '1px solid #e5e7eb'
-          }}
-        >
-          <CardContent>
-            {/* File Header */}
-            <Box
-              display='flex'
-              flexWrap='wrap'
-              gap={2}
-              alignItems='center'
-              justifyContent='space-between'
-            >
-              <Box display='flex' alignItems='center' gap={2}>
-                <img
-                  src={getFileIcon(doc.file_name)}
-                  alt='File Type'
-                  width={28}
-                  height={28}
-                />
-                <Box sx={{ textAlign: 'left' }}>
-                  <Typography variant='subtitle1' fontWeight='600'>
-                    {doc.file_name}
-                  </Typography>
-                  <Typography variant='body2' color='text.secondary'>
-                    File Format:{' '}
-                    {doc.file_name.split('.').pop()?.toUpperCase()}{' '}
-                  </Typography>
+      {allDocuments?.map((doc) => {
+        if (doc?.document_subtype === 'Bank statements') {
+          return
+        }
+        return (
+          <Card
+            key={doc.document_id}
+            sx={{
+              mb: 2,
+              borderRadius: '12px',
+              boxShadow: '0px 2px 6px rgba(0,0,0,0.08)',
+              border: '1px solid #e5e7eb'
+            }}
+          >
+            <CardContent>
+              {/* File Header */}
+              <Box
+                display='flex'
+                flexWrap='wrap'
+                gap={2}
+                alignItems='center'
+                justifyContent='space-between'
+              >
+                <Box display='flex' alignItems='center' gap={2}>
+                  <img
+                    src={getFileIcon(doc.file_name)}
+                    alt='File Type'
+                    width={28}
+                    height={28}
+                  />
+                  <Box sx={{ textAlign: 'left' }}>
+                    <Typography variant='subtitle1' fontWeight='600'>
+                      {doc.file_name}
+                    </Typography>
+                    <Typography variant='body2' color='text.secondary'>
+                      File Format:{' '}
+                      {doc.file_name.split('.').pop()?.toUpperCase()}{' '}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box display={'flex'} gap={1}>
+                  {(doc.status === 'SUCCESS' || doc.status === 'PENDING') && (
+                    <Button
+                      sx={{
+                        background: '#fff',
+                        color: '#EF6C00',
+                        borderRadius: '12px',
+                        border: '1px solid #EF6C00',
+                        textTransform: 'none'
+                      }}
+                      startIcon={
+                        <img
+                          src={editIcon}
+                          alt='Processing'
+                          width={20}
+                          height={20}
+                        />
+                      }
+                      variant='outlined'
+                      onClick={() => handleEdit(doc)}
+                    >
+                      Edit
+                    </Button>
+                  )}
+
+                  <Tooltip title='Remove Document from batch' placement='top'>
+                    <IconButton
+                      onClick={() => handleRemoveDocument(doc)}
+                      disabled={deletingIds.includes(doc.document_id)}
+                      sx={{
+                        borderColor: 'error.main',
+                        color: 'error.main'
+                      }}
+                    >
+                      {deletingIds.includes(doc.document_id) ? (
+                        <CircularProgress size={16} />
+                      ) : (
+                        <CancelOutlinedIcon />
+                      )}
+                    </IconButton>
+                  </Tooltip>
                 </Box>
               </Box>
-              <Box display={'flex'} gap={1}>
-                {(doc.status === 'SUCCESS' || doc.status === 'PENDING') && (
-                  <Button
-                    sx={{
-                      background: '#fff',
-                      color: '#EF6C00',
-                      borderRadius: '12px',
-                      border: '1px solid #EF6C00',
-                      textTransform: 'none'
-                    }}
-                    startIcon={
-                      <img
-                        src={editIcon}
-                        alt='Processing'
-                        width={20}
-                        height={20}
-                      />
-                    }
-                    variant='outlined'
-                    onClick={() => handleEdit(doc)}
-                  >
-                    Edit
-                  </Button>
-                )}
 
-                <Tooltip title='Remove Document from batch' placement='top'>
-                  <IconButton
-                    onClick={() => handleRemoveDocument(doc)}
-                    disabled={deletingIds.includes(doc.document_id)}
-                    sx={{
-                      borderColor: 'error.main',
-                      color: 'error.main'
-                    }}
-                  >
-                    {deletingIds.includes(doc.document_id) ? (
-                      <CircularProgress size={16} />
-                    ) : (
-                      <CancelOutlinedIcon />
-                    )}
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            </Box>
+              <Divider sx={{ my: 2 }} />
 
-            <Divider sx={{ my: 2 }} />
-
-            {/* AI Summary Section */}
-            {doc.status === 'PENDING' ? (
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  p: 4
-                }}
-              >
-                <CircularProgress />
-              </Box>
-            ) : doc.status === 'SUCCESS' || doc.status === 'UNKNOWN' ? (
-              <Box>
-                <Typography
-                  variant='subtitle2'
-                  sx={{
-                    fontWeight: 600,
-                    mb: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    background: '#FAFAFA',
-                    padding: '0px 0px 0px 0px',
-                    borderRadius: '12px'
-                  }}
-                >
-                  <img src={aiIcon} alt='ai icon'></img> <p>AI summary</p>
-                </Typography>
-
+              {/* AI Summary Section */}
+              {doc.status === 'PENDING' ? (
                 <Box
                   sx={{
-                    backgroundColor: '#F9FAFB',
-                    borderRadius: '8px',
-                    p: 2,
-                    border: '1px solid #E5E7EB',
-                    textAlign: 'left'
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    p: 4
                   }}
                 >
-                  <Typography variant='body2' fontWeight='600'>
-                    Document summary:
-                  </Typography>
-                  <Typography
-                    variant='body2'
-                    sx={{ mt: 0.5, color: '#374151' }}
-                  >
-                    Date on document:{' '}
-                    <strong>
-                      {dayjs(doc.document_date).format('DD-MM-YYYY') || '—'}
-                    </strong>
-                    &nbsp; | &nbsp; Category:{' '}
-                    <strong>{doc.document_category || '—'}</strong>
-                    &nbsp; | &nbsp; Document category:{' '}
-                    <strong>{doc.document_type || '—'}</strong>
-                    &nbsp; | &nbsp; Document subcategory:{' '}
-                    <strong>{doc.document_subtype || '—'}</strong>
-                    {!['Revenue', 'Unknown'].includes(
-                      doc.document_category
-                    ) && (
-                      <>
-                        &nbsp; | &nbsp; Line item:{' '}
-                        <strong>{doc.expense_category || '—'}</strong>
-                      </>
-                    )}
-                  </Typography>
-                  <Divider sx={{ mt: '5px' }} />
-
-                  <Typography
-                    variant='body2'
-                    fontWeight='600'
-                    sx={{ mt: 2, color: '#111827' }}
-                  >
-                    Financial data summary:
-                  </Typography>
-
-                  <Typography
-                    variant='body2'
-                    sx={{ mt: 0.5, color: '#374151' }}
-                  >
-                    Extracted amount:{' '}
-                    <strong>
-                      £ {Number(doc.amount || 0).toLocaleString()}
-                    </strong>
-                  </Typography>
+                  <CircularProgress />
                 </Box>
-              </Box>
-            ) : (
-              <Box
-                sx={{
-                  backgroundColor: '#FEF2F2',
-                  borderRadius: '8px',
-                  border: '1px solid #FCA5A5',
-                  p: 2,
-                  textAlign: 'left'
-                }}
-                role='alert'
-                aria-live='polite'
-              >
-                <Stack
-                  direction='row'
-                  spacing={2}
-                  alignItems='center'
-                  sx={{ mb: 1 }}
-                >
-                  <ErrorOutlineIcon sx={{ color: '#DC2626', fontSize: 22 }} />
+              ) : doc.status === 'SUCCESS' || doc.status === 'UNKNOWN' ? (
+                <Box>
                   <Typography
                     variant='subtitle2'
-                    sx={{ fontWeight: 700, color: '#DC2626' }}
+                    sx={{
+                      fontWeight: 600,
+                      mb: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      background: '#FAFAFA',
+                      padding: '0px 0px 0px 0px',
+                      borderRadius: '12px'
+                    }}
                   >
-                    Processing failed
+                    <img src={aiIcon} alt='ai icon'></img> <p>AI summary</p>
                   </Typography>
-                </Stack>
 
-                <Typography variant='body2' sx={{ color: '#7F1D1D', mb: 1 }}>
-                  This document could not be processed by the AI due to an
-                  error. To proceed with batch approval, please remove this
-                  document from the batch. Once removed, you can continue
-                  approving the remaining documents.
-                </Typography>
-              </Box>
-            )}
-          </CardContent>
-        </Card>
-      ))}
+                  <Box
+                    sx={{
+                      backgroundColor: '#F9FAFB',
+                      borderRadius: '8px',
+                      p: 2,
+                      border: '1px solid #E5E7EB',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <Typography variant='body2' fontWeight='600'>
+                      Document summary:
+                    </Typography>
+                    <Typography
+                      variant='body2'
+                      sx={{ mt: 0.5, color: '#374151' }}
+                    >
+                      Date on document:{' '}
+                      <strong>
+                        {dayjs(doc.document_date).format('DD-MM-YYYY') || '—'}
+                      </strong>
+                      &nbsp; | &nbsp; Category:{' '}
+                      <strong>{doc.document_category || '—'}</strong>
+                      &nbsp; | &nbsp; Document category:{' '}
+                      <strong>{doc.document_type || '—'}</strong>
+                      &nbsp; | &nbsp; Document subcategory:{' '}
+                      <strong>{doc.document_subtype || '—'}</strong>
+                      {!['Revenue', 'Unknown'].includes(
+                        doc.document_category
+                      ) && (
+                        <>
+                          &nbsp; | &nbsp; Line item:{' '}
+                          <strong>{doc.expense_category || '—'}</strong>
+                        </>
+                      )}
+                    </Typography>
+                    <Divider sx={{ mt: '5px' }} />
+
+                    <Typography
+                      variant='body2'
+                      fontWeight='600'
+                      sx={{ mt: 2, color: '#111827' }}
+                    >
+                      Financial data summary:
+                    </Typography>
+
+                    <Typography
+                      variant='body2'
+                      sx={{ mt: 0.5, color: '#374151' }}
+                    >
+                      Extracted amount:{' '}
+                      <strong>
+                        £ {Number(doc.amount || 0).toLocaleString()}
+                      </strong>
+                    </Typography>
+                  </Box>
+                </Box>
+              ) : (
+                <Box
+                  sx={{
+                    backgroundColor: '#FEF2F2',
+                    borderRadius: '8px',
+                    border: '1px solid #FCA5A5',
+                    p: 2,
+                    textAlign: 'left'
+                  }}
+                  role='alert'
+                  aria-live='polite'
+                >
+                  <Stack
+                    direction='row'
+                    spacing={2}
+                    alignItems='center'
+                    sx={{ mb: 1 }}
+                  >
+                    <ErrorOutlineIcon sx={{ color: '#DC2626', fontSize: 22 }} />
+                    <Typography
+                      variant='subtitle2'
+                      sx={{ fontWeight: 700, color: '#DC2626' }}
+                    >
+                      Processing failed
+                    </Typography>
+                  </Stack>
+
+                  <Typography variant='body2' sx={{ color: '#7F1D1D', mb: 1 }}>
+                    This document could not be processed by the AI due to an
+                    error. To proceed with batch approval, please remove this
+                    document from the batch. Once removed, you can continue
+                    approving the remaining documents.
+                  </Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        )
+      })}
       <DeletedDocumentsList
         deletedDocs={deletedDocs}
         isTotalTimeout={isTotalTimeout}

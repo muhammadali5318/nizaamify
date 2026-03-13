@@ -203,6 +203,7 @@ const ManualEntryForm: React.FC = () => {
       const fileObj = presignedFiles?.map((p: any) => ({
         file_size: p.size?.toString() || '0',
         file_type: p.filename.split('.').pop() || '',
+        file_name: p.filename || '',
         file_obj_key: p.key
       }))
 
