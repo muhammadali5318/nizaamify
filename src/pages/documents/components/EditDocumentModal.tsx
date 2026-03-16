@@ -27,12 +27,14 @@ interface EditDocumentModalProps {
   document: any
 }
 import editModalIcon from '../../../assets/edit-modal-icon.svg'
+import { useActivePractice } from 'src/hooks/useActivePractice'
 export default function EditDocumentModal({
   open,
   onClose,
   document
 }: EditDocumentModalProps) {
   const dispatch = useDispatch()
+  const { accountingBasis } = useActivePractice()
 
   const [formData, setFormData] = useState({
     document_category: '',
@@ -61,7 +63,10 @@ export default function EditDocumentModal({
   }, [document])
 
   useEffect(() => {
-    const subtypes = getDocumentSubtypes(formData.document_type)
+    const subtypes = getDocumentSubtypes(
+      formData.document_type,
+      accountingBasis
+    )
     setAvailableSubtypes(subtypes)
   }, [formData.document_type])
   const availableLineItems =
@@ -126,7 +131,19 @@ export default function EditDocumentModal({
   const isCategoryDisabled = formData.document_subtype === 'Bank statements'
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth='sm'>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth='sm'
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: '24px'
+          }
+        }
+      }}
+    >
       <Box sx={{ padding: '20px' }}>
         <Box
           sx={{
@@ -158,7 +175,7 @@ export default function EditDocumentModal({
             <TextField
               select
               fullWidth
-              label='Category'
+              label='Type'
               value={formData.document_category}
               onChange={(e) =>
                 handleChange('document_category', e.target.value)
@@ -174,7 +191,7 @@ export default function EditDocumentModal({
             <TextField
               select
               fullWidth
-              label='Document category'
+              label='Category'
               value={formData.document_type}
               onChange={(e) => handleChange('document_type', e.target.value)}
             >
@@ -188,7 +205,7 @@ export default function EditDocumentModal({
             <TextField
               select
               fullWidth
-              label='Document subcategory'
+              label='Subcategory'
               value={formData.document_subtype}
               onChange={(e) => handleChange('document_subtype', e.target.value)}
               disabled={!formData.document_type}

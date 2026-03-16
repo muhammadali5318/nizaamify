@@ -112,7 +112,7 @@ const modules: ModuleConfig[] = [
   {
     id: 'bank-integrator',
     name: 'Bank Integrator',
-    isEnabled: evaluateIsModuleEnabled
+    requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
   }
 ]
 

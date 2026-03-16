@@ -8,13 +8,26 @@ const BG_COLOR = '#FFFFFF'
 
 const SIZE = 80
 const CENTER_RADIUS = 30
+const VERIFICATION_LIMIT = 4
 
 const StatsChart: React.FC<{
   value: number
-  transactionsWithoutInvoices: number
+  total: number
   transactionsWithInvoices: number
   sx?: object
-}> = ({ value, transactionsWithoutInvoices, transactionsWithInvoices, sx }) => {
+}> = ({ value, transactionsWithInvoices, total, sx }) => {
+  const remaining = Math.max(VERIFICATION_LIMIT - transactionsWithInvoices, 0)
+
+  // Dynamic message
+  const message =
+    transactionsWithInvoices >= VERIFICATION_LIMIT
+      ? `You're now a verified Practice. You've uploaded ${transactionsWithInvoices} of ${total} invoice${
+          transactionsWithInvoices !== 1 ? 's' : ''
+        }`
+      : `You've uploaded ${transactionsWithInvoices} of ${total} invoices${
+          transactionsWithInvoices !== 1 ? 's' : ''
+        }. Upload ${remaining} more to get verified.`
+
   return (
     <Box className={styles.statsCardRoot} sx={{ ...sx }}>
       <Stack
@@ -24,7 +37,7 @@ const StatsChart: React.FC<{
       >
         <Box position='relative' width={SIZE} height={SIZE}>
           <PieChart width={SIZE} height={SIZE}>
-            {/* Background ring (thin, centered) */}
+            {/* Background ring */}
             <Pie
               data={[{ value: 100 }]}
               dataKey='value'
@@ -38,7 +51,7 @@ const StatsChart: React.FC<{
               isAnimationActive={false}
             />
 
-            {/* Progress ring (thicker, centered) */}
+            {/* Progress ring */}
             <Pie
               data={[{ value }]}
               dataKey='value'
@@ -93,10 +106,9 @@ const StatsChart: React.FC<{
         fontWeight={500}
         fontStyle='italic'
         color='text.primary'
+        sx={{ mt: 1 }}
       >
-        You&apos;ve uploaded {transactionsWithInvoices} of{' '}
-        {transactionsWithoutInvoices} invoices ({value}%). Upload 4 more to get
-        verified.
+        {message}
       </Typography>
     </Box>
   )

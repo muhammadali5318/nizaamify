@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Typography, Button } from '@mui/material'
+import { Box, CircularProgress, Typography, Button, Stack } from '@mui/material'
 import { useEffect, useState, useRef } from 'react'
 import dayjs from 'dayjs'
 
@@ -21,6 +21,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 import { downloadDashboardPDF } from '../utils/downloadPdf'
+import SubmitFeedback from '../components/submit-feedback'
 
 const MainDashboard = () => {
   // default to Last month
@@ -34,6 +35,7 @@ const MainDashboard = () => {
   )
 
   const dashboardRef = useRef<any>(null)
+  const feedbackRef = useRef<any>(null)
 
   const getDateRange = (label: string) => {
     let endDate = dayjs()
@@ -171,7 +173,13 @@ const MainDashboard = () => {
           <PeriodSelector
             options={['Last month', '3-month view', 'Yearly']}
             selected={selectedPeriod}
-            onSelect={setSelectedPeriod}
+            onSelect={(period) => {
+              setSelectedPeriod(period)
+
+              if (period === 'Last month') {
+                setSelectedMonth(dayjs().subtract(1, 'month'))
+              }
+            }}
           />
 
           <Button
@@ -186,21 +194,24 @@ const MainDashboard = () => {
               boxShadow: 'none'
             }}
             onClick={() =>
-              downloadDashboardPDF(dashboardRef, 'Financial-Dashboard')
+              downloadDashboardPDF(
+                dashboardRef,
+                feedbackRef,
+                'Financial-Dashboard'
+              )
             }
           >
             Download PDF
           </Button>
         </Box>
       </Box>
-      <Box ref={dashboardRef}>
+      <Stack spacing={2.5} ref={dashboardRef}>
         {/* KPI CARDS */}
         <DashboardStatsSection
           granularity={granularity}
           month={month}
           year={year}
         />
-
         {/* EXPENSE SECTION */}
         <Box
           sx={{
@@ -240,7 +251,6 @@ const MainDashboard = () => {
             </Box>
           )}
         </Box>
-
         {/* EXPENSE TREND */}
         <Box display='flex' flexDirection={{ xs: 'column', md: 'row' }} gap={2}>
           <Box flex={1} sx={{ minHeight: 280 }}>
@@ -252,10 +262,8 @@ const MainDashboard = () => {
             />
           </Box>
         </Box>
-
         {/* BENCHMARK TABLE */}
         <ExpandableBenchmarkTable data={expenseData} />
-
         {/* REVENUE VS PROFIT SECTION */}
         <Box
           display='flex'
@@ -281,7 +289,6 @@ const MainDashboard = () => {
             />
           </Box>
         </Box>
-
         {/* AI INSIGHTS */}
         <Box
           sx={{
@@ -319,6 +326,9 @@ const MainDashboard = () => {
             </Box>
           </Box>
         </Box>
+      </Stack>
+      <Box ref={feedbackRef}>
+        <SubmitFeedback />
       </Box>
     </Box>
   )

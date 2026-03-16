@@ -62,7 +62,7 @@ interface ManualEntryFormData {
 
 const ManualEntryForm: React.FC = () => {
   const [formData, setFormData] = useState<ManualEntryFormData>({
-    entryDate: null,
+    entryDate: dayjs(),
     paymentDate: null,
     category: '',
     type: '',
@@ -81,9 +81,11 @@ const ManualEntryForm: React.FC = () => {
   const dispatch = useDispatch()
   const queue = useSelector((state: RootState) => state.manualEntryQueue.queue)
   const { user } = useAuth0()
-  const { activePracticeId } = useActivePractice()
+  const { activePracticeId, accountingBasis } = useActivePractice()
   const types = getFilteredDocumentTypes(formData.category)
-  const subtypes = formData.type ? getDocumentSubtypes(formData.type) : []
+  const subtypes = formData.type
+    ? getDocumentSubtypes(formData.type, accountingBasis)
+    : []
   const MAX_FILES = 5
 
   const handleFilesSelected = (incomingFiles: FileList | File[]) => {
@@ -203,6 +205,7 @@ const ManualEntryForm: React.FC = () => {
       const fileObj = presignedFiles?.map((p: any) => ({
         file_size: p.size?.toString() || '0',
         file_type: p.filename.split('.').pop() || '',
+        file_name: p.filename || '',
         file_obj_key: p.key
       }))
 
@@ -233,7 +236,7 @@ const ManualEntryForm: React.FC = () => {
       notify.success(res.message || 'Manual entry saved successfully')
       navigate('/documents')
       setFormData({
-        entryDate: null,
+        entryDate: dayjs(),
         category: '',
         type: '',
         subtype: '',
@@ -325,16 +328,15 @@ const ManualEntryForm: React.FC = () => {
             />
           </LocalizationProvider>
           <FormControl fullWidth>
-            <InputLabel>Category *</InputLabel>
+            <InputLabel>Type *</InputLabel>
             <Select
               name='category'
               value={formData.category}
-              label='Category *'
+              label='Type *'
               onChange={handleSelectChange}
             >
               <MenuItem value={category.expense}>Expense</MenuItem>
               <MenuItem value={category.revenue}>Revenue</MenuItem>
-              <MenuItem value={category.unknown}>Unknown</MenuItem>
             </Select>
           </FormControl>
         </Stack>
@@ -342,11 +344,11 @@ const ManualEntryForm: React.FC = () => {
         {/* Row 2 */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <FormControl fullWidth>
-            <InputLabel>Document category *</InputLabel>
+            <InputLabel>Category *</InputLabel>
             <Select
               name='type'
               value={formData.type}
-              label='Document category *'
+              label='Category *'
               onChange={handleSelectChange}
             >
               {types.map((type) => (
@@ -357,11 +359,11 @@ const ManualEntryForm: React.FC = () => {
             </Select>
           </FormControl>
           <FormControl fullWidth disabled={!formData.type}>
-            <InputLabel>Document subcategory *</InputLabel>
+            <InputLabel>Subcategory *</InputLabel>
             <Select
               name='subtype'
               value={formData.subtype}
-              label='Document subcategory *'
+              label='Subcategory *'
               onChange={handleSelectChange}
             >
               {subtypes.map((subtype) => (

@@ -157,10 +157,10 @@ const FilterBar: React.FC<{
 
       {/* --------------------------- CATEGORY -------------------------------- */}
       <FormControl>
-        <InputLabel>Categories</InputLabel>
+        <InputLabel>Type</InputLabel>
         <Select
           multiple
-          label='Categories'
+          label='Type'
           value={categories}
           onChange={(e) =>
             onChange({
@@ -217,9 +217,9 @@ const FilterBar: React.FC<{
 
       {/* ------------------------- DOCUMENT TYPE ----------------------------- */}
       <FormControl>
-        <InputLabel>Document category</InputLabel>
+        <InputLabel>Category</InputLabel>
         <Select
-          label='Document category'
+          label='Category'
           value={docType ?? ''}
           onChange={(e) =>
             onChange({
@@ -242,9 +242,9 @@ const FilterBar: React.FC<{
 
       {/* ----------------------- DOCUMENT SUBTYPE ---------------------------- */}
       <FormControl>
-        <InputLabel>Document Subcategory</InputLabel>
+        <InputLabel>Subcategory</InputLabel>
         <Select
-          label='Document Subcategory'
+          label='Subcategory'
           multiple
           value={docSubtype}
           disabled={!docType}

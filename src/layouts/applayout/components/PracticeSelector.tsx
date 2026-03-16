@@ -14,6 +14,7 @@ import {
   ListItemText
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
+import VerifiedIcon from '@mui/icons-material/Verified'
 import styles from '../AppLayout.module.scss'
 import { useAuth } from 'src/context/AuthProvider'
 import { useState, useEffect, useRef } from 'react'
@@ -40,13 +41,21 @@ import {
   setStatus
 } from 'src/store/slices/bankConnectionSlice'
 import { clearChatStorage } from 'src/store/slices/chatSlice'
+import useFetchUnverifiedTransations from 'src/pages/bank-integrator/hooks/useFetchUnverifiedTransactions'
 
 export default function PracticeSelector() {
-  const { isOwnerOrDirectorInAnyPractice } = useUserDetails()
+  const { isOwnerOrDirectorInAnyPractice, isUserOwnerOrDirector } =
+    useUserDetails()
   const { accessToken } = useAuth()
   const dispatch = useDispatch()
   const { data: rawPractices } = useFetchAllPracticesData(!!accessToken)
+  const { data } = useFetchUnverifiedTransations(
+    { page: 0 },
+    isUserOwnerOrDirector
+  )
 
+  const isPracticeVerified =
+    Number(data?.transactions_counts?.transactions_with_invoices) >= 4
   const practices: AllPracticesDataObject[] = Array.isArray(rawPractices)
     ? rawPractices
     : rawPractices && Array.isArray((rawPractices as any).results)
@@ -189,21 +198,23 @@ export default function PracticeSelector() {
           renderValue={() => (
             <Stack direction='column' spacing={0} sx={{ minWidth: 0 }}>
               {/* Practice name */}
-              <Typography
-                variant='subtitle2'
-                noWrap
-                sx={{
-                  display: 'block',
-                  fontWeight: 700,
-                  maxWidth: { xs: '140px', sm: '240px' },
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}
-              >
-                {selectedPractice?.practice_name || 'Select practice'}
-              </Typography>
-
+              <Box display={'flex'} gap={1} alignItems={'center'}>
+                <Typography
+                  variant='subtitle2'
+                  noWrap
+                  sx={{
+                    display: 'block',
+                    fontWeight: 700,
+                    maxWidth: { xs: '140px', sm: '240px' },
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
+                  {selectedPractice?.practice_name || 'Select practice'}{' '}
+                </Typography>
+                {isPracticeVerified && <VerifiedIcon sx={{ fontSize: 16 }} />}
+              </Box>
               <Typography
                 variant='caption'
                 noWrap

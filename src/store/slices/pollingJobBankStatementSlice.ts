@@ -18,7 +18,7 @@ const initialState: PollingJobsState = {
 }
 
 const pollingJobsSlice = createSlice({
-  name: 'pollingJobs',
+  name: 'pollingJobsBankStatement',
   initialState,
   reducers: {
     addPollingJob: (state, action: PayloadAction<PollingJob>) => {

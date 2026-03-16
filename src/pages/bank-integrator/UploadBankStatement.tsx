@@ -9,7 +9,7 @@ import ModuleHeader from 'src/components/module-header'
 import PageBreadcrumbs from 'src/components/bread-crumbs/PageBreadcrumbs'
 import { uploadCsvBreads } from './bank-integrator-config'
 import UploadQueue from './components/upload-bank-statement-completed/UploadQueue'
-import ProcessingCompletedListForStatement from '../documents/components/ProcessingCompletedListForStatement'
+import ProcessingCompletedListForStatement from './components/upload-bank-statement-completed/ProcessingCompletedListForStatement'
 
 const UploadBankStatement = () => {
   const dispatch = useDispatch()
@@ -51,7 +51,7 @@ const UploadBankStatement = () => {
         />
         <FileUploadBox
           title='Upload or drag and drop your financial documents'
-          fileInfoText='Maximum File Size is 10MB. Supported File Types are: .CSV, .PDF'
+          fileInfoText='Maximum File Size is 10MB. Supported File Types are: .CSV'
           maxFiles={5}
           fileCount={bankStatements?.length}
           isProcessingComplete={
@@ -60,7 +60,7 @@ const UploadBankStatement = () => {
           completedView={<ProcessingCompletedListForStatement />}
           onFilesSelected={handleFilesSelected}
           uploadIcon={uploadIcon}
-          fileTypeIcon='/assets/pdf-svg.svg'
+          fileTypeIcon='/assets/CSV.svg'
         />
         {completedBankStatements?.length > 0 || hasBatches ? (
           ''

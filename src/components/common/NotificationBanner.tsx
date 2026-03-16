@@ -4,9 +4,19 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 
 interface NotificationBannerProps {
   content: string
+  backgroundColor?: string
+  borderColor?: string
+  iconColor?: string
+  textColor?: string
 }
 
-const NotificationBanner: React.FC<NotificationBannerProps> = ({ content }) => {
+const NotificationBanner: React.FC<NotificationBannerProps> = ({
+  content,
+  backgroundColor = '#E3F2FD',
+  borderColor = '#B3E5FC',
+  iconColor = '#0288D1',
+  textColor = '#01579B'
+}) => {
   return (
     <Box
       sx={{
@@ -15,21 +25,22 @@ const NotificationBanner: React.FC<NotificationBannerProps> = ({ content }) => {
         alignItems: 'center',
         justifyContent: 'flex-start',
         gap: '8px',
-        backgroundColor: '#E3F2FD',
+        backgroundColor,
         borderRadius: '8px',
         padding: '8px 12px',
-        border: '1px solid #B3E5FC',
+        border: `1px solid ${borderColor}`,
         mb: 2,
         textAlign: 'left'
       }}
     >
-      <Box sx={{ paddingTop: '4px', color: '#0288D1' }}>
+      <Box sx={{ paddingTop: '4px', color: iconColor }}>
         <ErrorOutlineIcon />
       </Box>
+
       <Typography
         variant='body2'
         fontSize={{ xs: 13, md: 15 }}
-        sx={{ color: '#01579B' }}
+        sx={{ color: textColor }}
       >
         {content}
       </Typography>

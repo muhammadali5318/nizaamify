@@ -38,7 +38,20 @@ export const endpoints = {
     documentStatus: (practiceId: string, documentId: string) =>
       `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/documents/${documentId}/status/`,
     reconcileTransactions: (practiceId: string, transactionId: string) =>
-      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/unverified-transactions/${transactionId}/reconcile/`
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/unverified-transactions/${transactionId}/reconcile/`,
+    uncategorisedTransactions: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/uncategorised-transactions/`,
+    categorisedTransactions: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/categorised-transactions/`,
+    uploadCategorisedTransactionsInvoice: (
+      practiceId: string,
+      transactionId: string
+    ) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/categorised-transactions/${transactionId}/invoices/upload/`,
+    uncategorisedTransactionsUpdate: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/uncategorised-transactions/categorise/`,
+    transactionsHistory: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/transaction-documents/`
   },
   chatBot: {
     chat: (practiceId: string) =>
@@ -101,7 +114,15 @@ export const endpoints = {
       `/${API_BASE_DOCUMENTS}/practices/${practiceId}/expense-breakdown-detail/`,
     expenseBreakdownDocuments: (practiceId: string) =>
       `/${API_BASE_DOCUMENTS}/practices/${practiceId}/expense-breakdown-documents/`,
+    expenseBreakdownManualDocuments: (practiceId: string) =>
+      `/${API_BASE_DOCUMENTS}/practices/${practiceId}/expense-breakdown-manual-entries/`,
+    expenseBreakdownAggregatorDocuments: (practiceId: string) =>
+      `/${API_BASE_DOCUMENTS}/practices/${practiceId}/expense-breakdown-aggregator-entries/`,
     benchmarkConfiguration: (practiceId: string) =>
-      `/${API_BASE_DOCUMENTS}/practices/${practiceId}/benchmarking-configurations/`
+      `/${API_BASE_DOCUMENTS}/practices/${practiceId}/benchmarking-configurations/`,
+    deleteDocument: (id: string, documentId: string) =>
+      `/${API_BASE_DOCUMENTS}/practices/${id}/document/${documentId}/`,
+    documentStatus: (id: string, documentId: string) =>
+      `/${API_BASE_DOCUMENTS}/practices/${id}/document-status/${documentId}/`
   }
 }

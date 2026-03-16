@@ -1,17 +1,15 @@
-// src/components/reconciliation/reconciliation-content.tsx
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Box, TextField, Button } from '@mui/material'
 import { Controller, useForm } from 'react-hook-form'
 
-import styles from './reconcialiation.module.scss'
+import styles from './history.module.scss'
 import DateRangeSelector, { RangeISO } from 'src/components/date-range-selector'
 // import { useAuth } from 'src/context/AuthProvider'
 import { useFetchSortedPaginatedData } from 'src/hooks/useFetchSortedData.'
 import CloseIcon from '@mui/icons-material/Close'
-import ReconciliationTable from '../reconciliation-table'
-import useFetchUnverifiedTransations from '../../hooks/useFetchUnverifiedTransactions'
 import dayjs from 'dayjs'
-import useUserDetails from 'src/hooks/useUserDetails'
+import HistoryTable from './HistoryTable'
+import useFetchTransactionsHistory from '../../hooks/useFetchTransactionsHistory'
 
 type TechLogsFilters = {
   value?: string
@@ -38,24 +36,10 @@ function normalizeDateValue(
   const date = d instanceof Date ? dayjs(d) : dayjs(d)
   if (!date.isValid()) return null
 
-  return date.format('DD-MM-YYYY') // <-- your desired format
+  return date.format('DD-MM-YYYY')
 }
 
-/* =======================
-   Component
-======================= */
-
-type Props = {
-  setTotalTransactions: React.Dispatch<React.SetStateAction<number>>
-  setTransactionsWithInvoices: React.Dispatch<React.SetStateAction<number>>
-  setTransactionsWithoutInvoices: React.Dispatch<React.SetStateAction<number>>
-}
-
-const ReconciliationContent = ({
-  setTotalTransactions,
-  setTransactionsWithInvoices,
-  setTransactionsWithoutInvoices
-}: Props) => {
+const TransactionsHistory = () => {
   const {
     control,
     watch,
@@ -73,7 +57,6 @@ const ReconciliationContent = ({
 
   /* ---------- date range ---------- */
   const [range, setRange] = useState<RangeISO>({ start: null, end: null })
-  const { isUserOwnerOrDirector } = useUserDetails()
 
   const onClearFilters = () => {
     // Reset react-hook-form fields
@@ -128,27 +111,14 @@ const ReconciliationContent = ({
   const start_date = normalizeDateValue(range.start)
   const end_date = normalizeDateValue(range.end)
 
-  const { data, isLoading, isFetching } = useFetchUnverifiedTransations(
-    {
-      page,
-      pageSize,
-      search: search || undefined,
-      ordering: ordering ?? undefined,
-      start_date: start_date ?? undefined,
-      end_date: end_date ?? undefined
-    },
-    isUserOwnerOrDirector
-  )
-
-  setTotalTransactions(data?.transactions_counts?.total_transactions)
-  setTransactionsWithInvoices(
-    data?.transactions_counts?.transactions_with_invoices
-  )
-  setTransactionsWithoutInvoices(
-    data?.transactions_counts?.transactions_without_invoices
-  ) /* =======================
-     Render
-  ======================= */
+  const { data, isLoading, isFetching } = useFetchTransactionsHistory({
+    page,
+    pageSize,
+    search: search || undefined,
+    ordering: ordering ?? undefined,
+    start_date: start_date ?? undefined,
+    end_date: end_date ?? undefined
+  })
 
   return (
     <Box className={styles.contentRoot}>
@@ -196,8 +166,8 @@ const ReconciliationContent = ({
         </Button>
       </Box>
       {/* Table */}
-      <ReconciliationTable
-        rows={data?.transactions_data?.results}
+      <HistoryTable
+        rows={data?.results}
         loading={isLoading || isFetching}
         sortModel={sortModel}
         handleSortChange={handleSortChange}
@@ -205,7 +175,7 @@ const ReconciliationContent = ({
         pageSize={pageSize}
         setPage={setPage}
         setPageSize={setPageSize}
-        total={data?.transactions_data?.count}
+        total={data?.count}
         // you can pass total if your table supports server-side pagination display
         // total={total}
       />
@@ -213,4 +183,4 @@ const ReconciliationContent = ({
   )
 }
 
-export default ReconciliationContent
+export default TransactionsHistory

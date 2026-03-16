@@ -27,7 +27,7 @@ const initialState: PresignState = {
 }
 
 const presignSlice = createSlice({
-  name: 'presign',
+  name: 'presignBankStatement',
   initialState,
   reducers: {
     setPresignStatementsData: (state, action: PayloadAction<PresignData>) => {

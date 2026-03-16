@@ -13,9 +13,9 @@ import { RootState } from 'src/store/store'
 import { useEffect, useMemo, useState } from 'react'
 import { getFileIcon } from 'src/utils/getFileIcon'
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined'
-import { notify } from '../../../components/notistack/NotificationProvider'
+import { notify } from '../../../../components/notistack/NotificationProvider'
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
-import spinner from '../../../assets/spinnergif.gif'
+import spinner from '../../../../assets/spinnergif.gif'
 
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 
@@ -26,13 +26,14 @@ import {
 import { clearAllBankStatements } from 'src/store/slices/bankStatementUploadSlice'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import { clearProcessing } from 'src/store/slices/bankstatementProcessingSlice'
-import DeletedDocumentsList from './DeletedDocumentsList'
 import { deleteBatchDocuments } from 'src/services/apis/deleteBatchDocuments'
 import { setActiveTab } from 'src/store/slices/bankIntegratorTabSlice'
 import { paths } from 'src/paths'
 import { useNavigate } from 'react-router'
 import { queryClient } from 'src/utils/queryClient'
 import { clearPresignStatementsData } from 'src/store/slices/presignedBankstatementsSlice'
+import NotificationBanner from 'src/components/common/NotificationBanner'
+import DeletedDocumentsList from 'src/pages/documents/components/DeletedDocumentsList'
 
 export default function ProcessingCompletedListForStatement() {
   const navigate = useNavigate()
@@ -46,7 +47,7 @@ export default function ProcessingCompletedListForStatement() {
     (state: RootState) =>
       state.processedBankStatement.deletedDocumentsDueToTimeout
   )
-  const { activePracticeId } = useActivePractice()
+  const { activePracticeId, accountingBasis } = useActivePractice()
 
   // -------------- stabilize allDocuments (memo) ----------------
   const allDocuments = useMemo(
@@ -227,20 +228,34 @@ export default function ProcessingCompletedListForStatement() {
               disabled={!areAllDocumentsProcessed}
               startIcon={<CheckCircleOutlineOutlinedIcon />}
               onClick={() => {
-                dispatch(setActiveTab(1))
                 dispatch(clearAll())
                 dispatch(clearAllBankStatements())
                 dispatch(clearProcessing())
                 dispatch(clearPresignStatementsData())
+                if (accountingBasis === 'CASH') {
+                  dispatch(setActiveTab(2))
+                } else if (accountingBasis === 'ACCRUAL') {
+                  dispatch(setActiveTab(1))
+                }
                 navigate(paths.bankIntegrator)
                 queryClient.invalidateQueries({
                   queryKey: ['unverifiedTransactionsListApi']
+                })
+                queryClient.invalidateQueries({
+                  queryKey: ['uncategorisedTransactions']
                 })
               }}
             >
               Continue
             </Button>
           </Box>
+          <NotificationBanner
+            backgroundColor='rgba(239, 108, 0, 0.04)'
+            borderColor='#ff9800'
+            iconColor='#ef6c00'
+            textColor='#ef6c00'
+            content='The Bank Integrator module accepts only bank statements. All other document types will be automatically removed.'
+          />
         </>
       )}
 

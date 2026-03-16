@@ -11,7 +11,7 @@ const escapeCsv = (value: unknown) => {
 const buildCsvRows = (data: DataShape) => {
   const rows: Array<Array<string>> = []
 
-  // Friendly, flat report headers
+  // Friendly, flat report headers (expenses)
   rows.push([
     'Date range',
     'Category',
@@ -43,8 +43,47 @@ const buildCsvRows = (data: DataShape) => {
     })
   })
 
-  // Grand total row
+  // Grand total row for expenses
   rows.push([data.label ?? '', 'TOTAL', data.total ?? '', '', ''])
+
+  // --------- Revenue section (appended after expense table) ----------
+  const revenueList =
+    // support typo or correctly spelled key
+    (data as any).revenue_cateogories || (data as any).revenue_categories || []
+
+  if (Array.isArray(revenueList) && revenueList.length > 0) {
+    // blank separation row
+    rows.push(['', '', '', '', ''])
+
+    // Revenue-specific header (mapped into same 5-column layout)
+    // Columns: Date range | Revenue type | Category total | Source | Amount
+    rows.push([
+      'Date range',
+      'Revenue type',
+      'Category total',
+      'Source',
+      'Amount'
+    ])
+
+    revenueList.forEach((r: any) => {
+      rows.push([
+        data.label ?? '',
+        r.revenue_type ?? '',
+        '', // no category total for revenue rows
+        r.source ?? '',
+        r.amount ?? ''
+      ])
+    })
+
+    // Grand total row for revenue — put total where earlier 'Category total' sits for consistency
+    rows.push([
+      data.label ?? '',
+      'TOTAL REVENUE',
+      (data as any).total_revenue ?? '',
+      '',
+      ''
+    ])
+  }
 
   return rows
 }
@@ -61,7 +100,7 @@ export const downloadCsv = (data?: DataShape) => {
   const label = data.label
     ? data.label.replace(/[^a-z0-9-_]/gi, '_')
     : new Date().toISOString().slice(0, 10)
-  const filename = `expenses_${label}.csv`
+  const filename = `expenses_revenue_${label}.csv`
 
   const link = document.createElement('a')
   const url = URL.createObjectURL(blob)

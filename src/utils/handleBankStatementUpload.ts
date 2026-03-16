@@ -13,7 +13,7 @@ export const handleBankStatementUpload = async (
 ) => {
   const selectedFiles = Array.from(e.target.files || [])
 
-  const allowedExtensions = ['csv', 'pdf']
+  const allowedExtensions = ['csv']
   const maxSize = 10 * 1024 * 1024
   const maxFilesAllowed = 5
 
@@ -33,7 +33,7 @@ export const handleBankStatementUpload = async (
     const isUnderSize = file.size <= maxSize
 
     if (!isAllowed) {
-      notify.error(`Unsupported file format: ${file.name}. Allowed: PDF, CSV`)
+      notify.error(`Unsupported file format: ${file.name}. Allowed: CSV`)
       continue
     }
 

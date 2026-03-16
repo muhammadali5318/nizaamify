@@ -6,19 +6,19 @@ import { ModuleId, UserContext } from '../../types/feature-flags'
 import { featureFlagConfig } from 'src/config/feature-flag-config'
 import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
 import { FeatureFlagService } from 'src/services/FeatureFlagService'
-import { CONFIG } from 'src/config-global'
 
 export interface MenuItemData {
   text: string
   to: string
   activeIcon: string
   inactiveIcon: string
+  tooltipContent?: string
   moduleId: ModuleId
 }
 
 export const menuSections: { title: string; items: MenuItemData[] }[] = [
   {
-    title: 'Main menu',
+    title: 'Main Menu',
     items: [
       {
         text: 'Dashboard',
@@ -35,7 +35,7 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         moduleId: 'documents'
       },
       {
-        text: 'Expenses',
+        text: 'P&L Items',
         to: paths.expense,
         activeIcon: 'active-wallet.svg',
         inactiveIcon: 'expense-inactive.svg',
@@ -46,6 +46,8 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         to: paths.nonPandL,
         activeIcon: 'pl-Icon-active.svg',
         inactiveIcon: 'pl-Icon-inactive.svg',
+        tooltipContent:
+          'Items such as owners withdrawals, capital loans/injections or tax matters which do not belong in the P&L statement are recorded here',
         moduleId: 'non-pandl'
       },
       {
@@ -53,6 +55,8 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         to: paths.monaiAgent,
         activeIcon: 'agent-active.svg',
         inactiveIcon: 'agent-inactive.svg',
+        tooltipContent:
+          'Monai Agent uses guardrails to answer practice finance questions using only your real data in Monai. If the data isn’t available, it won’t guess or hallucinate.',
         moduleId: 'monai-agent'
       }
     ]
@@ -100,17 +104,13 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         inactiveIcon: 'inactive-settings.svg',
         moduleId: 'settings'
       },
-      ...(CONFIG.envName === 'dev'
-        ? ([
-            {
-              text: 'Bank Integrator',
-              to: paths.bankIntegrator,
-              activeIcon: 'bank-active.svg',
-              inactiveIcon: 'bank-inactive.svg',
-              moduleId: 'bank-integrator'
-            }
-          ] as MenuItemData[])
-        : [])
+      {
+        text: 'Bank Integrator',
+        to: paths.bankIntegrator,
+        activeIcon: 'bank-active.svg',
+        inactiveIcon: 'bank-inactive.svg',
+        moduleId: 'bank-integrator'
+      }
     ]
   },
   {

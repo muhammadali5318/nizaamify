@@ -14,6 +14,7 @@ import { bytesToReadableSize } from 'src/utils/bytesToMB'
 type Handlers = {
   onView: (id: string) => void
   onViewDownload: (id: string) => void
+  handleDeleteIconClick: (id: string) => void
 }
 
 export const usePendingDocsColumns = (
@@ -21,7 +22,7 @@ export const usePendingDocsColumns = (
   isPendingDocuments: boolean,
   downloadingId: string | null
 ) => {
-  const { onView, onViewDownload } = handlers
+  const { onView, onViewDownload, handleDeleteIconClick } = handlers
 
   const columns: GridColDef[] = useMemo(
     () => [
@@ -136,6 +137,23 @@ export const usePendingDocsColumns = (
                   </IconButton>
                 </span>
               </Tooltip>
+              {!isPendingDocuments && (
+                <Tooltip title='Delete document' placement='top'>
+                  <span>
+                    <IconButton
+                      size='small'
+                      onClick={() => handleDeleteIconClick(params?.row)}
+                      disabled={!!downloadingId}
+                    >
+                      {isRowLoading ? (
+                        <CircularProgress size={20} />
+                      ) : (
+                        <img src='/assets/active-trash.svg' alt='Trash icon' />
+                      )}
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              )}
 
               {isPendingDocuments && (
                 <Button

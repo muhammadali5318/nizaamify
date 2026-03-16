@@ -20,6 +20,8 @@ import {
 import { defaultFinancialDocumentsListFilters } from '../config/documentsConfig'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import { useHasPermission } from 'src/config/module-permissions'
+import DeleteDocumentModal from '../components/DeleteDocumentModal'
+import { queryClient } from 'src/utils/queryClient'
 
 interface FinancialDocumentsListProps {
   title: string
@@ -35,11 +37,51 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
   isPendingDocments
 }) => {
   const canViewDocuments = useHasPermission('data.upload_archive')
-
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const [selectedRow, setSelectedRow] = useState<{
+    id: string
+    name: string
+  } | null>(null)
   const { activePracticeId } = useActivePractice()
 
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
   const [documentId, setDocumentId] = useState<string | null>(null)
+
+  const [deleteLoading, setDeleteLoading] = useState(false)
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!selectedRow || !activePracticeId) return
+
+    setDeleteLoading(true)
+
+    try {
+      await apiClient.delete(
+        endpoints.documents.deleteDocument(activePracticeId, selectedRow.id),
+        {
+          params: { module: 'docs' }
+        }
+      )
+
+      await queryClient.invalidateQueries({
+        queryKey: ['uploadedDocumentListApi'],
+        exact: false
+      })
+
+      await queryClient.invalidateQueries({
+        queryKey: ['docs', 'counts']
+      })
+
+      notify.success('Selected document has been deleted successfully')
+
+      setIsDeleteOpen(false)
+      setSelectedRow(null)
+    } catch (error) {
+      console.error('Delete error:', error)
+      notify.error('Failed to delete document')
+    } finally {
+      setDeleteLoading(false)
+    }
+  }, [selectedRow, activePracticeId])
 
   // external hook: paging & sorting
   const { sortModel, page, pageSize, setPage, setPageSize, handleSortChange } =
@@ -97,9 +139,17 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
     [activePracticeId]
   )
 
+  const handleDeleteIconClick = (row: any) => {
+    setIsDeleteOpen(true)
+    setSelectedRow({
+      id: row.id,
+      name: row.file_name
+    })
+  }
+
   const handlers = useMemo(
-    () => ({ onView, onViewDownload }),
-    [onView, onViewDownload]
+    () => ({ onView, onViewDownload, handleDeleteIconClick }),
+    [onView, onViewDownload, handleDeleteIconClick]
   )
 
   const columns = usePendingDocsColumns(
@@ -220,6 +270,14 @@ const FinancialDocumentsList: React.FC<FinancialDocumentsListProps> = ({
         open={addDateModalOpen}
         onClose={() => setAddDateModalOpen(false)}
         documentId={documentId ?? ''}
+      />
+
+      <DeleteDocumentModal
+        open={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        loading={deleteLoading}
+        document={selectedRow}
       />
     </Box>
   )

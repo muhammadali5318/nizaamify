@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -50,34 +50,40 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
   row
 }) => {
   /**
-   * Default category = Expense
-   * If editing, use initial value
+   * Local state
    */
-  const defaultCategory = initial?.category ?? categoryConstants.expense
-
-  const [category, setCategory] = useState<string>(defaultCategory)
-  const [type, setType] = useState<string>(initial?.type ?? '')
-  const [subtype, setSubtype] = useState<string>(initial?.subtype ?? '')
-  const [lineItem, setLineItem] = useState<string>(initial?.lineItem ?? '')
+  const [category, setCategory] = useState<string>(categoryConstants.expense)
+  const [type, setType] = useState<string>('')
+  const [subtype, setSubtype] = useState<string>('')
+  const [lineItem, setLineItem] = useState<string>('')
 
   /**
-   * Reset state when modal opens or initial changes
+   * Flag to prevent dependent reset during initialization
+   */
+  const isInitializingRef = useRef(false)
+
+  /**
+   * Populate values when modal opens
    */
   useEffect(() => {
     if (!open) return
+
+    isInitializingRef.current = true
 
     setCategory(initial?.category ?? categoryConstants.expense)
     setType(initial?.type ?? '')
     setSubtype(initial?.subtype ?? '')
     setLineItem(initial?.lineItem ?? '')
+
+    // allow next render cycle to finish before enabling resets
+    setTimeout(() => {
+      isInitializingRef.current = false
+    }, 0)
   }, [open, initial])
 
-  /**
-   * Derived data
-   */
   const types = useMemo(() => {
     const filtered = getFilteredDocumentTypes(category)
-    return filtered.slice(0, -1)
+    return filtered
   }, [category])
 
   const subtypes = useMemo(() => {
@@ -90,20 +96,26 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
   }, [type, subtype])
 
   /**
-   * Reset dependent fields when parent changes
+   * Reset dependent fields ONLY when user changes manually
    */
   useEffect(() => {
+    if (isInitializingRef.current) return
+
     setType('')
     setSubtype('')
     setLineItem('')
   }, [category])
 
   useEffect(() => {
+    if (isInitializingRef.current) return
+
     setSubtype('')
     setLineItem('')
   }, [type])
 
   useEffect(() => {
+    if (isInitializingRef.current) return
+
     setLineItem('')
   }, [subtype])
 
@@ -153,22 +165,20 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
       }}
     >
       <DialogTitle sx={{ p: 0 }}>
-        {' '}
         <Typography variant='h5' fontWeight={700}>
-          {/* Categorise {row?.amount} */}
           Categorise
-        </Typography>{' '}
+        </Typography>
       </DialogTitle>
 
       <DialogContent sx={{ p: 0, mt: 2 }}>
         <Stack spacing={2} mt={2}>
           {/* CATEGORY */}
           <FormControl fullWidth>
-            <InputLabel>Category *</InputLabel>
+            <InputLabel>Type *</InputLabel>
             <Select
-              disabled={true}
+              disabled
               value={category}
-              label='Category *'
+              label='Type *'
               MenuProps={menuProps}
               onChange={(e: SelectChangeEvent<string>) =>
                 setCategory(e.target.value)
@@ -177,11 +187,9 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
               <MenuItem value={categoryConstants.expense}>
                 {categoryConstants.expense}
               </MenuItem>
-
               <MenuItem value={categoryConstants.revenue}>
                 {categoryConstants.revenue}
               </MenuItem>
-
               <MenuItem value={categoryConstants.unknown}>
                 {categoryConstants.unknown}
               </MenuItem>
@@ -190,10 +198,10 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
 
           {/* TYPE */}
           <FormControl fullWidth disabled={!category}>
-            <InputLabel>Document category *</InputLabel>
+            <InputLabel>Category *</InputLabel>
             <Select
               value={type}
-              label='Document category *'
+              label='Category *'
               MenuProps={menuProps}
               onChange={(e) => setType(e.target.value)}
             >
@@ -210,11 +218,10 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
             fullWidth
             disabled={!type || type === 'Income & Revenue'}
           >
-            <InputLabel>Document subcategory *</InputLabel>
-
+            <InputLabel>Subcategory *</InputLabel>
             <Select
               value={subtype}
-              label='Document subcategory *'
+              label='Subcategory *'
               MenuProps={menuProps}
               onChange={(e) => setSubtype(e.target.value)}
             >
@@ -232,7 +239,6 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
             disabled={!subtype || type === 'Income & Revenue'}
           >
             <InputLabel>Line Item *</InputLabel>
-
             <Select
               value={lineItem}
               label='Line Item *'
@@ -260,7 +266,7 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
           p: 0,
           mt: 2.5,
           display: 'flex',
-          flexDirection: 'row',
+          flexDirection: { xs: 'column', sm: 'row' },
           gap: 2
         }}
       >
@@ -268,6 +274,7 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
           onClick={onClose}
           variant='outlined'
           size='large'
+          fullWidth
           sx={{ flex: 1 }}
         >
           Cancel
@@ -277,6 +284,7 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
           sx={{ flex: 1 }}
           variant='contained'
           size='large'
+          fullWidth
           onClick={handleSave}
           disabled={!isValid}
         >

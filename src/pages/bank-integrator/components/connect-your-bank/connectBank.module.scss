@@ -11,12 +11,12 @@
 
   @media (min-width: 768px) {
     flex-direction: row; // row layout on tablets+
-    padding: 80px 40px;
+    padding: 45px 40px;
     align-items: stretch; // children stretch to same height
   }
 
   @media (min-width: 1024px) {
-    padding: 80px 158px;
+    padding: 45px 158px;
   }
 }
 
@@ -32,7 +32,7 @@
   border-radius: 16px;
 
   @media (min-width: 768px) {
-    padding: 40px;
+    padding: 20px 40px;
     flex: 1; // stretch equally
   }
 }

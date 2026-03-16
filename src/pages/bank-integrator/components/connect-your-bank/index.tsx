@@ -20,23 +20,23 @@ const ConnectYourBank = ({ goToStep }: ConnectYourBankProps) => {
       {/* Upload Statement Card */}
       <Box className={styles.contentWrapper}>
         <Box className={styles.cardContent}>
-          <img
-            src='/assets/upload-csv.svg'
-            alt='bank icon'
-            style={{ width: 'min(200px, 80vw)', height: 'auto' }}
-          />
-          <Stack spacing={1}>
+          <Stack spacing={1} alignItems={'center'}>
+            <img
+              src='/assets/upload-csv.svg'
+              alt='bank icon'
+              style={{ width: 'min(200px, 80vw)', height: 'auto' }}
+            />
             <Typography variant='h5' fontWeight={700}>
               Upload Bank Statement
             </Typography>
             <Typography variant='body1' color='text.secondary'>
-              Upload your bank statement (CSV or PDF). System will extract the
+              Upload your bank statement (CSV). System will extract the
               transactions and will ask you to categorise them.
             </Typography>
           </Stack>
         </Box>
 
-        <Box>
+        <Stack spacing={2} alignItems='center' mt={4}>
           <Button
             size='large'
             variant='contained'
@@ -45,18 +45,25 @@ const ConnectYourBank = ({ goToStep }: ConnectYourBankProps) => {
           >
             Upload Statement
           </Button>
-        </Box>
+          <Box
+            sx={{
+              visibility: 'hidden'
+            }}
+          >
+            none
+          </Box>
+        </Stack>
       </Box>
 
       {/* Connect Bank Card */}
       <Box className={styles.contentWrapper}>
         <Box className={styles.cardContent}>
-          <img
-            src='/assets/bank.svg'
-            alt='bank icon'
-            style={{ width: 'min(200px, 80vw)', height: 'auto' }}
-          />
-          <Stack spacing={1}>
+          <Stack spacing={1} alignItems={'center'}>
+            <img
+              src='/assets/bank.svg'
+              alt='bank icon'
+              style={{ width: 'min(200px, 80vw)', height: 'auto' }}
+            />
             <Typography variant='h5' fontWeight={700}>
               Connect Your Bank
             </Typography>

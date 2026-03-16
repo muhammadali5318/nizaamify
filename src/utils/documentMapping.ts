@@ -3,7 +3,7 @@ export const documentMapping: Record<string, Record<string, string[]>> = {
   'Income & Revenue': {
     'Practice management reports': [],
     'Bank statements': [],
-    'Capitation scheme statements': [],
+    'NHS BSA PAYMENT': [],
     'Subletting or rental income evidence': []
   },
 
@@ -14,7 +14,7 @@ export const documentMapping: Record<string, Record<string, string[]>> = {
     'Staff training & CPD': ['Staff Training'],
     'Recruitment costs': ['Recruitment Cost'],
     'HR Services': ['HR Services'],
-    Other: ['Staff Cost']
+    Other: ['Other - Staff Cost']
   },
 
   // --- Clinician Costs ---
@@ -94,8 +94,29 @@ export const documentMapping: Record<string, Record<string, string[]>> = {
 export const getDocumentTypes = (): string[] => Object.keys(documentMapping)
 
 // Updated: Now returns Subtypes (keys of the nested object)
-export const getDocumentSubtypes = (type: string): string[] =>
-  documentMapping[type] ? Object.keys(documentMapping[type]) : []
+export const getDocumentSubtypes = (
+  type: string,
+  method?: string
+): string[] => {
+  if (!documentMapping[type]) return []
+
+  // Special logic for Income & Revenue
+  if (type === 'Income & Revenue') {
+    if (method === 'CASH') {
+      return ['Bank statements', 'Subletting or rental income evidence']
+    }
+
+    if (method === 'ACCRUAL') {
+      return [
+        'Practice management reports',
+        'NHS BSA PAYMENT',
+        'Subletting or rental income evidence'
+      ]
+    }
+  }
+
+  return Object.keys(documentMapping[type])
+}
 
 // New Function: To retrieve the third level (Expense Sub-categories)
 export const getExpenseSubcategories = (

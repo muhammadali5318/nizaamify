@@ -3,7 +3,6 @@ import MainDashboard from './sections/index'
 import DashboardWarningAlertBox from './components/DashboardWarningAlertBox'
 // import { useCheckBankConnectionHealth } from 'src/hooks/useCheckBankConnectionHealth'
 import useUserDetails from 'src/hooks/useUserDetails'
-import SubmitFeedback from './components/submit-feedback'
 import Stats from './components/stats'
 import Welcome from './components/welcome'
 
@@ -26,7 +25,6 @@ const Dashboard = () => {
       {isUserOwnerOrDirector && <MainDashboard />}
       {isUserManageOrSimpleUser && <Welcome />}
       {isUserManageOrSimpleUser && <Stats />}
-      <SubmitFeedback />
     </Stack>
   )
 }

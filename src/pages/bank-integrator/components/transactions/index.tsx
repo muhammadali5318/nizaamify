@@ -1,11 +1,11 @@
-import { Box, Stack, Typography, LinearProgress } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import styles from './transactions.module.scss'
 import ModuleHeader from 'src/components/module-header'
 import TransactionsTable from './TransactionsTable'
 
-const total = 8
-const current = 1
-const progressValue = (current / total) * 100
+// const total = 8
+// const current = 1
+// const progressValue = (current / total) * 100
 
 const Transactions = () => {
   return (
@@ -32,7 +32,7 @@ const Transactions = () => {
           subheading='Assign categories to your transactions. You can skip and categorize later if needed.'
         />
 
-        <Box
+        {/* <Box
           display='flex'
           alignItems='center'
           gap={1}
@@ -57,7 +57,7 @@ const Transactions = () => {
               }
             }}
           />
-        </Box>
+        </Box> */}
       </Box>
 
       <TransactionsTable />

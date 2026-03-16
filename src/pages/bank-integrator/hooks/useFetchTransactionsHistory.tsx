@@ -1,4 +1,3 @@
-// src/hooks/useFetchUnverifiedTransations.ts
 import { useMemo } from 'react'
 import { useQuery, UseQueryOptions } from '@tanstack/react-query'
 import apiClient from 'src/services/api-client'
@@ -7,7 +6,7 @@ import { endpoints } from 'src/services/backendUrl'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import { useAuth } from 'src/context/AuthProvider'
 
-export type UnverifiedTransactionItem = {
+export type transactionsHistoryItem = {
   id: string
   amount?: number | string
   date?: string
@@ -17,7 +16,7 @@ export type UnverifiedTransactionItem = {
   [key: string]: any
 }
 
-export type UseUnverifiedTransactionsParams = {
+export type transactionsHistoryParams = {
   page?: number
   pageSize?: number
   search?: string
@@ -38,7 +37,7 @@ type ApiResponse = {
   error?: any
 }
 
-function buildParams(p: UseUnverifiedTransactionsParams) {
+function buildParams(p: transactionsHistoryParams) {
   return {
     page: (p.page ?? 0) + 1,
     page_size: p.pageSize ?? 10,
@@ -49,22 +48,20 @@ function buildParams(p: UseUnverifiedTransactionsParams) {
   }
 }
 
-export function useFetchUnverifiedTransations(
-  params: UseUnverifiedTransactionsParams = {},
-  fetch: boolean = true,
+export function useFetchTransactionsHistory(
+  params: transactionsHistoryParams = {},
   options?: Omit<
     UseQueryOptions<{
-      items: UnverifiedTransactionItem[]
+      items: transactionsHistoryItem[]
       total: number
       rawData?: any
     }>,
     'queryKey' | 'queryFn'
   >
 ) {
-  const { activePracticeId, accountingBasis } = useActivePractice()
   const { accessToken } = useAuth()
+  const { activePracticeId } = useActivePractice()
 
-  // Merge defaults here too, so buildParams and queryKey get the same values
   const mergedParams = {
     page: 0,
     pageSize: 10,
@@ -75,29 +72,29 @@ export function useFetchUnverifiedTransations(
     ...params
   }
 
-  const endpoint = useMemo(() => {
-    if (!activePracticeId) return ''
-
-    return accountingBasis === 'CASH'
-      ? endpoints.bankIntegrator.categorisedTransactions(activePracticeId)
-      : endpoints.bankIntegrator.unverifiedTransations(activePracticeId)
-  }, [activePracticeId, accountingBasis])
-
   const queryKey = useMemo(
-    () => ['unverifiedTransactionsListApi', { ...mergedParams, endpoint }],
-    [mergedParams, endpoint]
+    () => [
+      'transactionHistoryListApi',
+      {
+        ...mergedParams
+      }
+    ],
+    [mergedParams]
   )
 
   const queryFn = async (): Promise<{
-    items: UnverifiedTransactionItem[]
+    items: transactionsHistoryItem[]
     total: number
     rawData?: any
   }> => {
     const queryParams = buildParams(mergedParams)
-    const { data } = await apiClient.get<ApiResponse>(endpoint, {
-      params: queryParams,
-      paramsSerializer: (p) => qs.stringify(p, { arrayFormat: 'comma' })
-    })
+    const { data } = await apiClient.get<ApiResponse>(
+      endpoints.bankIntegrator.transactionsHistory(activePracticeId ?? ''),
+      {
+        params: queryParams,
+        paramsSerializer: (p) => qs.stringify(p, { arrayFormat: 'comma' })
+      }
+    )
 
     return data?.data
   }
@@ -107,7 +104,7 @@ export function useFetchUnverifiedTransations(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { queryKey: _qk, queryFn: _qf, ...rest } = options as any
     return rest as UseQueryOptions<{
-      items: UnverifiedTransactionItem[]
+      items: transactionsHistoryItem[]
       total: number
       rawData?: any
     }>
@@ -116,7 +113,7 @@ export function useFetchUnverifiedTransations(
   const query = useQuery({
     queryKey,
     queryFn,
-    enabled: fetch && !!accessToken && !!endpoint,
+    enabled: !!accessToken,
     keepPreviousData: true,
     ...(sanitizedOptions as any)
   })
@@ -129,4 +126,4 @@ export function useFetchUnverifiedTransations(
   }
 }
 
-export default useFetchUnverifiedTransations
+export default useFetchTransactionsHistory

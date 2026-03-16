@@ -39,11 +39,10 @@ export const useReconciliationColumns = ({
       {
         field: 'Transaction date',
         headerName: 'Transaction Date',
-        flex: 1,
+        flex: 0.7,
         sortable: false,
         renderCell: (params: GridCellParams) => (
           <Typography variant='body2'>
-            {' '}
             {params?.row?.date
               ? dayjs(params.row.date).format('DD/MM/YYYY')
               : '-'}
@@ -57,7 +56,7 @@ export const useReconciliationColumns = ({
       {
         field: 'description',
         headerName: 'Description',
-        flex: 1,
+        flex: 1.8,
         sortable: true,
         renderCell: (params: GridCellParams) => {
           const counterparty = params?.row?.counterparty || '-'
@@ -115,27 +114,10 @@ export const useReconciliationColumns = ({
         sortable: true,
         renderCell: (params: GridCellParams) => {
           const amount = Number(params?.row?.amount)
-          return (
-            <Typography variant='body2'>
-              {amount < 0 ? `£${amount}` : '-'}
-            </Typography>
-          )
-        }
-      },
 
-      // =============================
-      // Credit
-      // =============================
-      {
-        field: 'credit',
-        headerName: 'Credit',
-        flex: 1,
-        sortable: false,
-        renderCell: (params: GridCellParams) => {
-          const amount = Number(params?.row?.amount)
           return (
             <Typography variant='body2'>
-              {amount > 0 ? `£${amount}` : '-'}
+              {amount < 0 ? `£${Math.abs(amount)}` : '-'}
             </Typography>
           )
         }
@@ -155,7 +137,7 @@ export const useReconciliationColumns = ({
           return (
             <Typography variant='body2'>
               {balance != null && balance !== ''
-                ? `£${Number(balance).toLocaleString()}`
+                ? `£${Math.abs(Number(balance)).toLocaleString()}`
                 : '-'}
             </Typography>
           )
@@ -200,7 +182,7 @@ export const useReconciliationColumns = ({
           // =============================
           // Uploaded state
           // =============================
-          if (hasFile) {
+          if (hasFile || params?.row?.matched_document) {
             return (
               <Chip
                 label='Uploaded'
@@ -211,8 +193,6 @@ export const useReconciliationColumns = ({
                     style={{ width: 16, height: 16 }}
                   />
                 }
-                clickable
-                onClick={() => handleUploadFile?.(params.row)}
                 sx={{
                   borderRadius: '100px',
                   fontWeight: 500,

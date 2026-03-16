@@ -2,7 +2,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface BankIntegratorTabState {
-  activeTab: number
+  activeTab: number | string
 }
 
 const initialState: BankIntegratorTabState = {

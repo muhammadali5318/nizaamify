@@ -10,12 +10,15 @@ import { formatAmountWithCommas } from 'src/utils/stringUtils'
 import { useFetchNonPLBreakdown } from 'src/hooks/useFetchNonPLBreakdown'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import { mapExpenseSubtypes } from './types'
+
 const NonPLItemsBreakdown = () => {
   const { activePracticeId } = useActivePractice()
 
+  const lastMonth = dayjs().subtract(1, 'month')
+
   const [dateRange, setDateRange] = useState<RangeISO>({
-    start: dayjs().startOf('month').toISOString(),
-    end: dayjs().endOf('month').toISOString()
+    start: lastMonth.startOf('month').toISOString(),
+    end: lastMonth.endOf('month').toISOString()
   })
 
   const { data, loading } = useFetchNonPLBreakdown({
@@ -24,18 +27,9 @@ const NonPLItemsBreakdown = () => {
     endDate: dayjs(dateRange.end).format('YYYY-MM-DD')
   })
 
-  if (loading) {
-    return (
-      <Box display='flex' justifyContent='center' mt={4}>
-        <CircularProgress />
-      </Box>
-    )
-  }
-
-  if (!data) return null
-
   return (
     <Box className={styles.nonPLItemsBreakdownRoot} width='100%'>
+      {/* HEADER (always mounted so state does not reset) */}
       <ExpensePageHeader
         heading='Non P&L Items Breakdown'
         dateRange={dateRange}
@@ -44,34 +38,44 @@ const NonPLItemsBreakdown = () => {
         subheading='Detailed view of all Non P&L items categories and subcategories'
         showDownloadBtn={false}
         allExpanded={false}
-        setAllExpanded={function (): void {
-          throw new Error('Function not implemented.')
-        }}
+        setAllExpanded={() => {}}
       />
 
-      <ExpensesGrandTotal
-        total={formatAmountWithCommas(data.total)}
-        label='Total Monthly Non P&L Items Expenses:'
-      />
+      {/* LOADING STATE */}
+      {loading && (
+        <Box display='flex' justifyContent='center' mt={4} width={'100%'}>
+          <CircularProgress />
+        </Box>
+      )}
 
-      {data.categories.map((category, idx) => {
-        const expenseType = data.expense_type.find(
-          (item) => item.expense_type === category.parent_category
-        )
-
-        return (
-          <ReusableAccordion
-            key={idx}
-            title={category.parent_category}
-            dateRange={dateRange}
-            total={category.amount}
-            chips={[
-              `${expenseType?.expense_subtypes?.length ?? 0} subcategories`
-            ]}
-            expenseSubtypes={mapExpenseSubtypes(expenseType)}
+      {/* CONTENT */}
+      {!loading && data && (
+        <>
+          <ExpensesGrandTotal
+            total={formatAmountWithCommas(data.total)}
+            label='Total Monthly Non P&L Items Expenses:'
           />
-        )
-      })}
+
+          {data.categories.map((category, idx) => {
+            const expenseType = data.expense_type.find(
+              (item) => item.expense_type === category.parent_category
+            )
+
+            return (
+              <ReusableAccordion
+                key={idx}
+                title={category.parent_category}
+                dateRange={dateRange}
+                total={category.amount}
+                chips={[
+                  `${expenseType?.expense_subtypes?.length ?? 0} subcategories`
+                ]}
+                expenseSubtypes={mapExpenseSubtypes(expenseType)}
+              />
+            )
+          })}
+        </>
+      )}
     </Box>
   )
 }
