@@ -1,3 +1,4 @@
+// (paste this into your parent file, replacing the previous content)
 import React, { useEffect, useState } from 'react'
 import {
   Table,
@@ -166,8 +167,30 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
   const [open, setOpen] = useState(false)
   const { activePracticeId } = useActivePractice()
   const [openDocumentDetails, setOpenDocumentDetails] = useState<boolean>(false)
-  const [downloadableDocuments, setDownloadableDocuments] =
-    useState<any>(undefined)
+
+  // store current subcategory when opening modal so pagination calls have context
+  const [currentSubCat, setCurrentSubCat] = useState<string>('')
+
+  // three independent list states with pagination metadata
+  const [documentsState, setDocumentsState] = useState({
+    items: [] as any[],
+    page: 1,
+    page_size: 10,
+    total: 0
+  })
+  const [manualState, setManualState] = useState({
+    items: [] as any[],
+    page: 1,
+    page_size: 10,
+    total: 0
+  })
+  const [aggregatorState, setAggregatorState] = useState({
+    items: [] as any[],
+    page: 1,
+    page_size: 10,
+    total: 0
+  })
+
   const theme = useTheme()
   const isSmDown = useMediaQuery(theme.breakpoints.down('sm'))
 
@@ -185,7 +208,15 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
     }
   }, [expanded, hasChildData])
 
-  const handleDocumentDetails = async (type: string) => {
+  // helper to safely read totals from API response
+  const extractListResponse = (resp: any) => {
+    const results = resp?.data?.data?.results ?? resp?.data?.results ?? []
+    const total = resp?.data?.data?.count
+    return { results, total }
+  }
+
+  // fetch functions for each endpoint
+  const fetchDocuments = async (page = 1, page_size = 10, subCat?: string) => {
     try {
       const response = await apiClient.get(
         endpoints.documents.expenseBreakdownDocuments(activePracticeId ?? ''),
@@ -193,19 +224,97 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
           params: {
             start_date: toApiDate(dateRange?.start),
             end_date: toApiDate(dateRange?.end),
-            sub_cat: type,
-            cat: 'Expense'
+            sub_cat: subCat ?? currentSubCat,
+            cat: 'Expense',
+            page,
+            page_size
           }
         }
       )
-      setDownloadableDocuments(
-        response?.data?.data?.results?.expense_breakdown_docs
-      )
-      setOpenDocumentDetails(true)
+      const { results, total } = extractListResponse(response)
+      setDocumentsState({ items: results, page, page_size, total })
     } catch {
-      setDownloadableDocuments(undefined)
-      setOpenDocumentDetails(true)
+      setDocumentsState({ items: [], page, page_size, total: 0 })
     }
+  }
+
+  const fetchManual = async (page = 1, page_size = 10, subCat?: string) => {
+    try {
+      const response = await apiClient.get(
+        endpoints.documents.expenseBreakdownManualDocuments(
+          activePracticeId ?? ''
+        ),
+        {
+          params: {
+            start_date: toApiDate(dateRange?.start),
+            end_date: toApiDate(dateRange?.end),
+            sub_cat: subCat ?? currentSubCat,
+            cat: 'Expense',
+            page,
+            page_size
+          }
+        }
+      )
+      const { results, total } = extractListResponse(response)
+      setManualState({ items: results, page, page_size, total })
+    } catch {
+      setManualState({ items: [], page, page_size, total: 0 })
+    }
+  }
+
+  const fetchAggregator = async (page = 1, page_size = 10, subCat?: string) => {
+    console.warn(page)
+    console.warn(page_size)
+    console.warn(subCat)
+
+    // try {
+    //   const response = await apiClient.get(
+    //     endpoints.documents.expenseBreakdownAggregatorDocuments(
+    //       activePracticeId ?? ''
+    //     ),
+    //     {
+    //       params: {
+    //         start_date: toApiDate(dateRange?.start),
+    //         end_date: toApiDate(dateRange?.end),
+    //         sub_cat: subCat ?? currentSubCat,
+    //         cat: 'Expense',
+    //         page,
+    //         page_size
+    //       }
+    //     }
+    //   )
+    //   const { results, total } = extractListResponse(response)
+    //   setAggregatorState({ items: results, page, page_size, total })
+    // } catch {
+    //   setAggregatorState({ items: [], page, page_size, total: 0 })
+    // }
+  }
+
+  const handleDocumentDetails = async (type: string) => {
+    // open modal and load first page for all three lists (default page_size: 10)
+    setCurrentSubCat(type)
+    setOpenDocumentDetails(true)
+
+    // reset UI quickly (optional)
+    setDocumentsState((s) => ({ ...s, items: [], page: 1, page_size: 10 }))
+    setManualState((s) => ({ ...s, items: [], page: 1, page_size: 10 }))
+    setAggregatorState((s) => ({ ...s, items: [], page: 1, page_size: 10 }))
+
+    // fetch page 1 for all three lists in parallel
+    fetchDocuments(1, 10, type)
+    fetchManual(1, 10, type)
+    fetchAggregator(1, 10, type)
+  }
+
+  // callbacks passed to modal for pagination controls
+  const onFetchDocumentsPage = (page: number, page_size: number) => {
+    fetchDocuments(page, page_size)
+  }
+  const onFetchManualPage = (page: number, page_size: number) => {
+    fetchManual(page, page_size)
+  }
+  const onFetchAggregatorPage = (page: number, page_size: number) => {
+    fetchAggregator(page, page_size)
   }
 
   return (
@@ -465,7 +574,21 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
       <DocumentDetailsModal
         open={openDocumentDetails}
         onClose={() => setOpenDocumentDetails(false)}
-        downloadableDocuments={downloadableDocuments}
+        documents={documentsState.items}
+        documentsPage={documentsState.page}
+        documentsPageSize={documentsState.page_size}
+        documentsTotal={documentsState.total}
+        manualEntries={manualState.items}
+        manualPage={manualState.page}
+        manualPageSize={manualState.page_size}
+        manualTotal={manualState.total}
+        aggregators={aggregatorState.items}
+        aggregatorPage={aggregatorState.page}
+        aggregatorPageSize={aggregatorState.page_size}
+        aggregatorTotal={aggregatorState.total}
+        onFetchDocumentsPage={onFetchDocumentsPage}
+        onFetchManualPage={onFetchManualPage}
+        onFetchAggregatorPage={onFetchAggregatorPage}
       />
     </>
   )

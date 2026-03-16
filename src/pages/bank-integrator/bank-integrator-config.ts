@@ -23,7 +23,7 @@ export const bankingTabsData = [
   },
   {
     key: 3,
-    label: 'Transactions history',
+    label: 'Invoice Upload History',
     activeIcon: '/assets/history.svg',
     inactiveIcon: '/assets/history-icon.svg'
   }

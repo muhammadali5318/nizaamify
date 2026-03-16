@@ -67,7 +67,7 @@ const ExpenseBreakdownChart = ({ data }: ExpenseBreakdownChartProps) => {
   // Determine if there's any meaningful data
   const hasMeaningfulData =
     chartData.length > 0 &&
-    chartData.some((d) => Number(d.value) > 0 || Number(d.amount) > 0)
+    chartData.some((d) => Number(d.value) > 0 && Number(d.amount) > 0)
 
   if (!hasMeaningfulData) {
     return (

@@ -44,11 +44,15 @@ import { clearChatStorage } from 'src/store/slices/chatSlice'
 import useFetchUnverifiedTransations from 'src/pages/bank-integrator/hooks/useFetchUnverifiedTransactions'
 
 export default function PracticeSelector() {
-  const { isOwnerOrDirectorInAnyPractice } = useUserDetails()
+  const { isOwnerOrDirectorInAnyPractice, isUserOwnerOrDirector } =
+    useUserDetails()
   const { accessToken } = useAuth()
   const dispatch = useDispatch()
   const { data: rawPractices } = useFetchAllPracticesData(!!accessToken)
-  const { data } = useFetchUnverifiedTransations()
+  const { data } = useFetchUnverifiedTransations(
+    { page: 0 },
+    isUserOwnerOrDirector
+  )
 
   const isPracticeVerified =
     Number(data?.transactions_counts?.transactions_with_invoices) >= 4

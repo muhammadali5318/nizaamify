@@ -11,6 +11,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import ReconciliationTable from '../reconciliation-table'
 import useFetchUnverifiedTransations from '../../hooks/useFetchUnverifiedTransactions'
 import dayjs from 'dayjs'
+import useUserDetails from 'src/hooks/useUserDetails'
 
 type TechLogsFilters = {
   value?: string
@@ -72,6 +73,7 @@ const ReconciliationContent = ({
 
   /* ---------- date range ---------- */
   const [range, setRange] = useState<RangeISO>({ start: null, end: null })
+  const { isUserOwnerOrDirector } = useUserDetails()
 
   const onClearFilters = () => {
     // Reset react-hook-form fields
@@ -126,14 +128,17 @@ const ReconciliationContent = ({
   const start_date = normalizeDateValue(range.start)
   const end_date = normalizeDateValue(range.end)
 
-  const { data, isLoading, isFetching } = useFetchUnverifiedTransations({
-    page,
-    pageSize,
-    search: search || undefined,
-    ordering: ordering ?? undefined,
-    start_date: start_date ?? undefined,
-    end_date: end_date ?? undefined
-  })
+  const { data, isLoading, isFetching } = useFetchUnverifiedTransations(
+    {
+      page,
+      pageSize,
+      search: search || undefined,
+      ordering: ordering ?? undefined,
+      start_date: start_date ?? undefined,
+      end_date: end_date ?? undefined
+    },
+    isUserOwnerOrDirector
+  )
 
   setTotalTransactions(data?.transactions_counts?.total_transactions)
   setTransactionsWithInvoices(

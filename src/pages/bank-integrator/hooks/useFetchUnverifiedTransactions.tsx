@@ -40,7 +40,7 @@ type ApiResponse = {
 
 function buildParams(p: UseUnverifiedTransactionsParams) {
   return {
-    page: (p.page ?? 0) + 1, // backend expects 1-based page
+    page: (p.page ?? 0) + 1,
     page_size: p.pageSize ?? 10,
     search: p.search ?? '',
     ordering: p.ordering ?? null,
@@ -51,6 +51,7 @@ function buildParams(p: UseUnverifiedTransactionsParams) {
 
 export function useFetchUnverifiedTransations(
   params: UseUnverifiedTransactionsParams = {},
+  fetch: boolean = true,
   options?: Omit<
     UseQueryOptions<{
       items: UnverifiedTransactionItem[]
@@ -83,13 +84,7 @@ export function useFetchUnverifiedTransations(
   }, [activePracticeId, accountingBasis])
 
   const queryKey = useMemo(
-    () => [
-      'unverifiedTransactionsListApi',
-      {
-        ...mergedParams,
-        endpoint
-      }
-    ],
+    () => ['unverifiedTransactionsListApi', { ...mergedParams, endpoint }],
     [mergedParams, endpoint]
   )
 
@@ -121,7 +116,7 @@ export function useFetchUnverifiedTransations(
   const query = useQuery({
     queryKey,
     queryFn,
-    enabled: !!accessToken && !!endpoint, // ✅ only run if token exists
+    enabled: fetch && !!accessToken && !!endpoint,
     keepPreviousData: true,
     ...(sanitizedOptions as any)
   })

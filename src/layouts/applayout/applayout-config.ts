@@ -6,7 +6,6 @@ import { ModuleId, UserContext } from '../../types/feature-flags'
 import { featureFlagConfig } from 'src/config/feature-flag-config'
 import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
 import { FeatureFlagService } from 'src/services/FeatureFlagService'
-import { CONFIG } from 'src/config-global'
 
 export interface MenuItemData {
   text: string
@@ -105,17 +104,13 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         inactiveIcon: 'inactive-settings.svg',
         moduleId: 'settings'
       },
-      ...(CONFIG.envName === 'dev'
-        ? ([
-            {
-              text: 'Bank Integrator',
-              to: paths.bankIntegrator,
-              activeIcon: 'bank-active.svg',
-              inactiveIcon: 'bank-inactive.svg',
-              moduleId: 'bank-integrator'
-            }
-          ] as MenuItemData[])
-        : [])
+      {
+        text: 'Bank Integrator',
+        to: paths.bankIntegrator,
+        activeIcon: 'bank-active.svg',
+        inactiveIcon: 'bank-inactive.svg',
+        moduleId: 'bank-integrator'
+      }
     ]
   },
   {

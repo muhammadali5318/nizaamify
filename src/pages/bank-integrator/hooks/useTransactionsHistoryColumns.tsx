@@ -36,28 +36,9 @@ export const useTransactionsHistoryColumns = (): GridColDef[] => {
           </Typography>
         )
       },
-
-      // =============================
-      // Description
-      // =============================
-      {
-        field: 'Category',
-        headerName: 'Category',
-        flex: 1,
-        sortable: false,
-        renderCell: (params: GridCellParams) => {
-          const category = params?.row?.category || '-'
-
-          return <Typography variant='body2'>{category ?? '-'}</Typography>
-        }
-      },
-
-      // =============================
-      // Debit
-      // =============================
       {
         field: 'type',
-        headerName: 'Type',
+        headerName: 'Category',
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => {
@@ -72,7 +53,7 @@ export const useTransactionsHistoryColumns = (): GridColDef[] => {
       // =============================
       {
         field: 'subtype',
-        headerName: 'Subtype',
+        headerName: 'Subcategorty',
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => {

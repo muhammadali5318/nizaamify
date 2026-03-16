@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import useUserDetails from 'src/hooks/useUserDetails'
 import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
 
@@ -8,6 +9,7 @@ export const useFetchRecentChatsInfinite = (
   pageSize = 20
 ) => {
   const { activePracticeId } = useActivePractice()
+  const { isUserOwnerOrDirector } = useUserDetails()
 
   return useInfiniteQuery({
     queryKey: ['fetchRecentChats', activePracticeId, pageSize],
@@ -36,7 +38,7 @@ export const useFetchRecentChatsInfinite = (
       return undefined
     },
 
-    enabled: enabled && !!activePracticeId,
+    enabled: enabled && !!activePracticeId && isUserOwnerOrDirector,
     staleTime: 0,
     refetchOnMount: 'always'
   })

@@ -13,8 +13,6 @@ import { SplashScreen } from 'src/components/common/SplashScreen'
 
 import ManualEntryPage from 'src/pages/documents/manual-entry/ManualEntryPage'
 import MonaiAgent from 'src/pages/monai-agent/index'
-import Placeholder from 'src/components/common/Placeholder'
-import { CONFIG } from 'src/config-global'
 
 // lazy pages
 const UploadBankStatement = lazy(
@@ -175,14 +173,11 @@ export function Router() {
           },
           {
             path: paths.bankIntegrator,
-            element:
-              CONFIG.envName !== 'dev' ? (
-                <Placeholder title={'Bank Aggregator'} />
-              ) : (
-                <FeatureProtectedRoute moduleId='bank-integrator'>
-                  <BankingAggregator />
-                </FeatureProtectedRoute>
-              )
+            element: (
+              <FeatureProtectedRoute moduleId='bank-integrator'>
+                <BankingAggregator />
+              </FeatureProtectedRoute>
+            )
           },
           {
             path: paths.uploadBankStatement,
