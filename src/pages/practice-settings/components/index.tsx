@@ -39,6 +39,7 @@ import {
   setStatus
 } from 'src/store/slices/bankConnectionSlice'
 import { clearChatStorage } from 'src/store/slices/chatSlice'
+import { resetPresignResponse } from 'src/store/slices/manualEntryFilesSlice'
 
 interface PracticeDetailsCardProps {
   status?: 'active' | 'inactive' | 'archived'
@@ -157,6 +158,9 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
     dispatch(clearAllBankStatements())
     dispatch(clearBankStatementProcessing())
     dispatch(clearPresignStatementsData())
+
+    // remove mannual entries
+    dispatch(resetPresignResponse())
   }, [practice, setActiveById, allPractices, dispatch])
 
   const archiveSteps = useMemo(

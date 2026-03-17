@@ -10,6 +10,7 @@ import PageBreadcrumbs from 'src/components/bread-crumbs/PageBreadcrumbs'
 import { uploadCsvBreads } from './bank-integrator-config'
 import UploadQueue from './components/upload-bank-statement-completed/UploadQueue'
 import ProcessingCompletedListForStatement from './components/upload-bank-statement-completed/ProcessingCompletedListForStatement'
+import { useResumeBankStatementPollingJob } from 'src/utils/autoResumeBankStatementPollingJob'
 
 const UploadBankStatement = () => {
   const dispatch = useDispatch()
@@ -29,6 +30,8 @@ const UploadBankStatement = () => {
     } as unknown as React.ChangeEvent<HTMLInputElement>
     handleBankStatementUpload(event, dispatch, bankStatements.length)
   }
+
+  useResumeBankStatementPollingJob()
   return (
     <Stack
       spacing={2.5}

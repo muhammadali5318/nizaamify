@@ -29,7 +29,7 @@ const Transactions = () => {
         <ModuleHeader
           avatarSrc='/assets/bank-module.svg'
           heading='Categorise Transactions'
-          subheading='Assign categories to your transactions. You can skip and categorize later if needed.'
+          subheading='Assign categories to your transactions. You can skip and categorise later if needed.'
         />
 
         {/* <Box

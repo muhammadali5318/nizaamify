@@ -395,10 +395,9 @@ export default function ProcessingCompletedListForStatement() {
                   </Stack>
 
                   <Typography variant='body2' sx={{ color: '#7F1D1D', mb: 1 }}>
-                    This document could not be processed by the AI due to an
-                    error. To proceed with batch approval, please remove this
-                    document from the batch. Once removed, you can continue
-                    approving the remaining documents.
+                    This document could not be processed by error. Please remove
+                    this document from the batch. Once removed, you can continue
+                    with remaining documents.
                   </Typography>
                 </Box>
               )}
