@@ -185,7 +185,7 @@ const DocumentDetailsModal: React.FC<DocumentDetailsModalProps> = React.memo(
               display: 'flex',
               gap: 2,
               flexDirection: { xs: 'column', md: 'row' },
-              alignItems: 'flex-start'
+              alignItems: 'stretch'
             }}
           >
             <DocumentsList

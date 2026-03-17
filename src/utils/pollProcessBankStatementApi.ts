@@ -15,7 +15,7 @@ import { deleteBatchDocuments } from 'src/services/apis/deleteBatchDocuments'
 import { endpoints } from 'src/services/backendUrl'
 
 const activeJobs = new Set<string>()
-const DOC_TIMEOUT_MS = 350000
+const DOC_TIMEOUT_MS = 120000
 
 export const pollBatchStatusUntilComplete = async (
   batchId: string,

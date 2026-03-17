@@ -6,6 +6,11 @@ import { clearChatStorage } from 'src/store/slices/chatSlice'
 import { clearAll } from 'src/store/slices/processedBatchDataSlice'
 import { clearProcessing } from 'src/store/slices/processingSlice'
 import { clearFiles } from 'src/store/slices/uploadSlice'
+import { clearAll as clearAllProcessedBankStatements } from 'src/store/slices/processedBankStatementBatchDataSlice'
+import { clearAllBankStatements } from 'src/store/slices/bankStatementUploadSlice'
+import { clearProcessing as clearBankStatementProcessing } from 'src/store/slices/bankstatementProcessingSlice'
+import { clearPresignStatementsData } from 'src/store/slices/presignedBankstatementsSlice'
+import { resetPresignResponse } from 'src/store/slices/manualEntryFilesSlice'
 
 export const useLogout = () => {
   const store = useStore()
@@ -17,6 +22,12 @@ export const useLogout = () => {
       store.dispatch(clearProcessing())
       store.dispatch(clearFiles())
       store.dispatch(clearChatStorage())
+
+      store.dispatch(clearAllProcessedBankStatements())
+      store.dispatch(clearAllBankStatements())
+      store.dispatch(clearBankStatementProcessing())
+      store.dispatch(clearPresignStatementsData())
+      store.dispatch(resetPresignResponse())
       logout({
         logoutParams: {
           returnTo: redirectTo ?? window.location.origin

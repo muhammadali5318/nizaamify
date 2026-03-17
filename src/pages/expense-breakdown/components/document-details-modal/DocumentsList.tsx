@@ -193,7 +193,7 @@ const DocumentsList: React.FC<DocumentsListProps> = ({
 
       {/* Pagination */}
       {/* Pagination */}
-      {docs && docs.length > 0 && (
+      {docs.length > 0 && (
         <Box
           sx={{
             display: 'flex',

@@ -276,7 +276,7 @@ export default function ManualListColumn({
         </Typography>
       )}
 
-      {docs && docs.length && (
+      {docs?.length > 0 && (
         <Box
           sx={{
             display: 'flex',
