@@ -145,11 +145,7 @@ export const usePendingDocsColumns = (
                       onClick={() => handleDeleteIconClick(params?.row)}
                       disabled={!!downloadingId}
                     >
-                      {isRowLoading ? (
-                        <CircularProgress size={20} />
-                      ) : (
-                        <img src='/assets/active-trash.svg' alt='Trash icon' />
-                      )}
+                      <img src='/assets/active-trash.svg' alt='Trash icon' />
                     </IconButton>
                   </span>
                 </Tooltip>
