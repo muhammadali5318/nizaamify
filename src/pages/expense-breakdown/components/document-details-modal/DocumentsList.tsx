@@ -143,7 +143,9 @@ const DocumentsList: React.FC<DocumentsListProps> = ({
                   fontWeight={700}
                   sx={{ whiteSpace: 'nowrap' }}
                 >
-                  £{doc?.amount_decimal}
+                  {doc?.amount_decimal != null
+                    ? `£${doc?.amount_decimal}`
+                    : '-'}
                 </Typography>
 
                 <Divider orientation='vertical' flexItem sx={{ height: 24 }} />

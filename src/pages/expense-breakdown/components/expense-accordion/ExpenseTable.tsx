@@ -267,27 +267,27 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
     console.warn(page_size)
     console.warn(subCat)
 
-    // try {
-    //   const response = await apiClient.get(
-    //     endpoints.documents.expenseBreakdownAggregatorDocuments(
-    //       activePracticeId ?? ''
-    //     ),
-    //     {
-    //       params: {
-    //         start_date: toApiDate(dateRange?.start),
-    //         end_date: toApiDate(dateRange?.end),
-    //         sub_cat: subCat ?? currentSubCat,
-    //         cat: 'Expense',
-    //         page,
-    //         page_size
-    //       }
-    //     }
-    //   )
-    //   const { results, total } = extractListResponse(response)
-    //   setAggregatorState({ items: results, page, page_size, total })
-    // } catch {
-    //   setAggregatorState({ items: [], page, page_size, total: 0 })
-    // }
+    try {
+      const response = await apiClient.get(
+        endpoints.documents.expenseBreakdownAggregatorDocuments(
+          activePracticeId ?? ''
+        ),
+        {
+          params: {
+            start_date: toApiDate(dateRange?.start),
+            end_date: toApiDate(dateRange?.end),
+            sub_cat: subCat ?? currentSubCat,
+            cat: 'Expense',
+            page,
+            page_size
+          }
+        }
+      )
+      const { results, total } = extractListResponse(response)
+      setAggregatorState({ items: results, page, page_size, total })
+    } catch {
+      setAggregatorState({ items: [], page, page_size, total: 0 })
+    }
   }
 
   const handleDocumentDetails = async (type: string) => {

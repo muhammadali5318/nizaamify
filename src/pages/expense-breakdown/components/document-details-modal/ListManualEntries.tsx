@@ -12,8 +12,9 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemSecondaryAction,
-  Button
+  Button,
+  CircularProgress,
+  IconButton
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ArticleIcon from '@mui/icons-material/Article'
@@ -24,11 +25,13 @@ import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
 import { queryClient } from 'src/utils/queryClient'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import { useDownloadHistoryDoc } from 'src/hooks/useDownloadHistoryDoc'
 
 type ManualEntry = {
   id: string
   amount: string
   supporting_docs?: Array<{
+    id: string
     file_name: string
     file_size?: string | number
     file_obj_key?: string
@@ -65,6 +68,8 @@ export default function ManualListColumn({
   const [loading, setLoading] = useState(false)
   const [selectedDoc, setSelectedDoc] = useState<any | null>(null)
   const [expanded, setExpanded] = useState<string | false>(false)
+  const { downloadingId, download } = useDownloadHistoryDoc()
+
   const handleExpand = (panel: string) => (_: any, isExpanded: boolean) =>
     setExpanded(isExpanded ? panel : false)
 
@@ -173,7 +178,7 @@ export default function ManualListColumn({
                           noWrap
                           title={`Amount: £${entry.amount}`}
                         >
-                          £{entry.amount}
+                          {entry.amount != null ? `£${entry.amount}` : '-'}
                         </Typography>
                       </Box>
                     </Box>
@@ -213,8 +218,29 @@ export default function ManualListColumn({
                           key={`sdoc-${rowIndex}-${docIndex}`}
                           divider
                           disableGutters
+                          secondaryAction={
+                            title === 'Bank Aggregator' ? (
+                              <IconButton
+                                edge='end'
+                                size='small'
+                                aria-label={`download-${rowIndex}-${docIndex}`}
+                                onClick={() => download(sdoc?.id)}
+                              >
+                                {downloadingId === sdoc?.id ? (
+                                  <CircularProgress size={18} />
+                                ) : (
+                                  <img
+                                    src='/assets/document-download.svg'
+                                    alt='download'
+                                    style={{ width: 20, height: 20 }}
+                                  />
+                                )}
+                              </IconButton>
+                            ) : null
+                          }
                         >
                           <ArticleIcon fontSize='small' sx={{ mr: 1 }} />
+
                           <ListItemText
                             primary={
                               <Typography
@@ -236,26 +262,6 @@ export default function ManualListColumn({
                               </Typography>
                             }
                           />
-                          <ListItemSecondaryAction>
-                            {/* <IconButton
-                              edge='end'
-                              size='small'
-                              aria-label={`download-${rowIndex}-${docIndex}`}
-                              onClick={() =>
-                                onDownload('manual_entries', sdoc?.id, docIndex)
-                              }
-                            >
-                              {downloadingKey === spinnerKey ? (
-                                <CircularProgress size={18} />
-                              ) : (
-                                <img
-                                  src='/assets/document-download.svg'
-                                  alt='download'
-                                  style={{ width: 20, height: 20 }}
-                                />
-                              )}
-                            </IconButton> */}
-                          </ListItemSecondaryAction>
                         </ListItem>
                       )
                     })}

@@ -2,19 +2,13 @@
 
 import { Box, TablePagination } from '@mui/material'
 import { DataGrid, GridSortModel } from '@mui/x-data-grid'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 import { NoResultsBox } from 'src/pages/team-management/team-members/components/TeamMembers'
 import { teamMembersSx } from 'src/pages/team-management/team-management-config'
 
 import { useTransactionsHistoryColumns } from '../../hooks/useTransactionsHistoryColumns'
-import apiClient from 'src/services/api-client'
-import { endpoints } from 'src/services/backendUrl'
-import { useActivePractice } from 'src/hooks/useActivePractice'
-import {
-  fetchAndSaveFile,
-  getFileNameFromUrl
-} from 'src/utils/downloadFileUtils'
+import { useDownloadHistoryDoc } from 'src/hooks/useDownloadHistoryDoc'
 
 interface ReconciliationTableProps {
   rows: any[]
@@ -39,31 +33,10 @@ const HistoryTable = ({
   setPage = () => {},
   setPageSize = () => {}
 }: ReconciliationTableProps) => {
-  const [downloadingId, setDownloadingId] = useState<string | null>(null)
-
-  const { activePracticeId } = useActivePractice()
-  const onDownload = async (id: string) => {
-    setDownloadingId(id)
-
-    try {
-      const response = await apiClient.get(
-        endpoints.bankIntegrator.downloadHistoryDoc(activePracticeId ?? '', id)
-      )
-
-      const fileUrl = response?.data?.data
-
-      if (!fileUrl) return
-
-      await fetchAndSaveFile(fileUrl, getFileNameFromUrl(fileUrl) || undefined)
-    } catch (error) {
-      console.error('Download failed:', error)
-    } finally {
-      setDownloadingId(null)
-    }
-  }
+  const { downloadingId, download } = useDownloadHistoryDoc()
 
   const handlers = {
-    onDownload
+    onDownload: download
   }
   const columns = useTransactionsHistoryColumns(handlers, downloadingId ?? '')
 
