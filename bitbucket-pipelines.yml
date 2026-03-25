@@ -20,7 +20,7 @@ definitions:
 
     - step: &trivyscan
         name: Dependency Vulnerability Scan
-        image: aquasec/trivy:latest
+        image: aquasec/trivy:0.69.3
         script:
           - trivy fs --scanners vuln --vuln-type library --severity CRITICAL,HIGH --format table --ignore-unfixed --include-dev-deps --exit-code 1 .
         after-script:
@@ -102,9 +102,9 @@ definitions:
         script:
           - ENV="${BITBUCKET_BRANCH}"
 
-          # Select correct OIDC role: main -> Monai PROD AWS account, others -> existing role
+          # Select correct OIDC role: main, dev -> Monai PROD AWS account, others -> existing role
           - |
-            if [[ "${ENV}" == "main" ]]; then
+            if [[ "${ENV}" == "main" ]] || [[ "${ENV}" == "dev" ]]; then
               export OIDC_ROLE_ARN=$PROD_MONAI_OIDC_ROLE_ARN
             else
               export OIDC_ROLE_ARN=$MonAi_OIDC_ROLE_ARN
@@ -144,9 +144,9 @@ definitions:
         script:
           - ENV="${BITBUCKET_BRANCH}"
 
-          # Select correct OIDC role: main -> Monai PROD AWS account, others -> existing role
+          # Select correct OIDC role: main, dev -> Monai PROD AWS account, others -> existing role
           - |
-            if [[ "${ENV}" == "main" ]]; then
+            if [[ "${ENV}" == "main" ]] || [[ "${ENV}" == "dev" ]]; then
               export OIDC_ROLE_ARN=$PROD_MONAI_OIDC_ROLE_ARN
             else
               export OIDC_ROLE_ARN=$MonAi_OIDC_ROLE_ARN
