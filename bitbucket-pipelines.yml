@@ -20,7 +20,7 @@ definitions:
 
     - step: &trivyscan
         name: Dependency Vulnerability Scan
-        image: aquasec/trivy:latest
+        image: aquasec/trivy:0.69.3
         script:
           - trivy fs --scanners vuln --vuln-type library --severity CRITICAL,HIGH --format table --ignore-unfixed --include-dev-deps --exit-code 1 .
         after-script:
