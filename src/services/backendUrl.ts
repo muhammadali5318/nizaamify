@@ -51,7 +51,9 @@ export const endpoints = {
     uncategorisedTransactionsUpdate: (practiceId: string) =>
       `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/uncategorised-transactions/categorise/`,
     transactionsHistory: (practiceId: string) =>
-      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/transaction-documents/`
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/transaction-documents/`,
+    downloadHistoryDoc: (practiceId: string, docId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/transaction-documents/${docId}/download/`
   },
   chatBot: {
     chat: (practiceId: string) =>

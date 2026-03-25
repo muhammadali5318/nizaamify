@@ -8,6 +8,7 @@ import { NoResultsBox } from 'src/pages/team-management/team-members/components/
 import { teamMembersSx } from 'src/pages/team-management/team-management-config'
 
 import { useTransactionsHistoryColumns } from '../../hooks/useTransactionsHistoryColumns'
+import { useDownloadHistoryDoc } from 'src/hooks/useDownloadHistoryDoc'
 
 interface ReconciliationTableProps {
   rows: any[]
@@ -32,7 +33,12 @@ const HistoryTable = ({
   setPage = () => {},
   setPageSize = () => {}
 }: ReconciliationTableProps) => {
-  const columns = useTransactionsHistoryColumns()
+  const { downloadingId, download } = useDownloadHistoryDoc()
+
+  const handlers = {
+    onDownload: download
+  }
+  const columns = useTransactionsHistoryColumns(handlers, downloadingId ?? '')
 
   const totalMinWidth = useMemo(() => {
     return columns.reduce((sum, col) => {

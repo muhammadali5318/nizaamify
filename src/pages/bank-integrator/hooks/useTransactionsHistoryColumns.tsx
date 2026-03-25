@@ -2,7 +2,13 @@
 
 import { useMemo } from 'react'
 import { GridColDef, GridCellParams } from '@mui/x-data-grid'
-import { Typography } from '@mui/material'
+import {
+  Box,
+  CircularProgress,
+  IconButton,
+  Tooltip,
+  Typography
+} from '@mui/material'
 
 import { useActivePractice } from 'src/hooks/useActivePractice'
 
@@ -13,9 +19,15 @@ import {
 } from 'src/store/slices/reconciliationTabPresignDataSlice'
 import dayjs from 'dayjs'
 
-export const useTransactionsHistoryColumns = (): GridColDef[] => {
+type Handlers = {
+  onDownload: (id: any) => void
+}
+export const useTransactionsHistoryColumns = (
+  handlers: Handlers,
+  downloadingId: string
+): GridColDef[] => {
   const { accountingBasis } = useActivePractice()
-
+  const { onDownload } = handlers
   // Redux selectors
   const presignFiles = useSelector(selectAllPresignFiles)
   const uploadingFiles = useSelector(selectAllUploadingFiles)
@@ -106,11 +118,43 @@ export const useTransactionsHistoryColumns = (): GridColDef[] => {
             </Typography>
           )
         }
+      },
+      {
+        field: 'download',
+        headerName: 'Actions',
+        flex: 1,
+        sortable: true,
+        renderCell: (params: GridCellParams) => {
+          const isRowLoading = downloadingId === params?.row?.id
+
+          return (
+            <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+              <Tooltip title='Download document' placement='top'>
+                <span>
+                  <IconButton
+                    size='small'
+                    onClick={() => onDownload(params?.row?.id)}
+                    disabled={!!downloadingId}
+                  >
+                    {isRowLoading ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                      <img
+                        src='/assets/document-download.svg'
+                        alt='download icon'
+                      />
+                    )}
+                  </IconButton>
+                </span>
+              </Tooltip>
+            </Box>
+          )
+        }
       }
     ]
 
     return baseColumns
-  }, [accountingBasis, presignFiles, uploadingFiles])
+  }, [accountingBasis, presignFiles, uploadingFiles, onDownload, downloadingId])
 
   return columns
 }

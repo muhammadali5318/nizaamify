@@ -214,7 +214,7 @@ const DocumentDetailsModal: React.FC<DocumentDetailsModalProps> = React.memo(
               closeParent={onClose}
             />
 
-            <DocumentsList
+            <ManualListColumn
               title='Bank Aggregator'
               docs={aggregators}
               downloadingKey={downloadingKey}
