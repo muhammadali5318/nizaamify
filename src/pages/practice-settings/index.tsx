@@ -33,6 +33,13 @@ const PracticeSettings: React.FC = () => {
       user_role: userPracticeMap[p.id] || null
     })) || []
 
+  const unarchivedPractices = updatedPracticeList?.filter(
+    (practice: AllPracticesDataObject) => practice.status !== 'ARCHIVED'
+  )
+  const archivedPractices = updatedPracticeList?.filter(
+    (practice: AllPracticesDataObject) => practice.status === 'ARCHIVED'
+  )
+
   const handleOpen = () => setIsAddOpen(true)
   const handleClose = () => setIsAddOpen(false)
 
@@ -62,26 +69,36 @@ const PracticeSettings: React.FC = () => {
 
       {/* Practice cards */}
       <Box className={styles.practiceDetailsWrapper}>
-        {updatedPracticeList.map((practice: AllPracticesDataObject) => (
+        {unarchivedPractices.map((practice: AllPracticesDataObject) => (
           <PracticeDetailsCard
             key={practice.id}
             status={practice.id === activePracticeId ? 'active' : 'inactive'}
             practice={practice}
+            unarchivedPractices={unarchivedPractices}
+            practicesListLength={unarchivedPractices?.length}
           />
         ))}
       </Box>
 
-      {/* <PageHeader
-        title={'Archived Practices'}
-        description={'Manage all your archived dental practices in one place'}
-        logo='/assets/archive.svg'
-        isDividerVisible={false}
-      />
+      {archivedPractices?.length > 0 && (
+        <PageHeader
+          title={'Archived Practices'}
+          description={'Manage all your archived dental practices in one place'}
+          logo='/assets/archive.svg'
+          isDividerVisible={false}
+        />
+      )}
 
       <Box className={styles.practiceDetailsWrapper}>
-        <PracticeDetailsCard status='archived' />
-        <PracticeDetailsCard status='archived' />
-      </Box> */}
+        {archivedPractices?.map((practice: AllPracticesDataObject) => (
+          <PracticeDetailsCard
+            key={practice.id}
+            status={practice?.status === 'ARCHIVED' ? 'archived' : 'inactive'}
+            practice={practice}
+            practicesListLength={archivedPractices?.length}
+          />
+        ))}
+      </Box>
 
       {/* Add Practice dialog */}
       <AddPracticeModal open={isAddOpen} onClose={handleClose} />

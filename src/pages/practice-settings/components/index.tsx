@@ -7,12 +7,12 @@ import {
   Stack,
   Typography,
   SxProps,
-  Theme
-  // IconButton,
-  // Menu
+  Theme,
+  IconButton,
+  Menu
 } from '@mui/material'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
-// import MoreVertIcon from '@mui/icons-material/MoreVert'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
 import styles from './PracticeDetailsCard.module.scss'
 import ArchivePractice from './ArchivePracticeModal'
 import { VerifyIdentityStep } from '../../../components/idetity-verification/VerifyIdentityStep'
@@ -40,33 +40,89 @@ import {
 } from 'src/store/slices/bankConnectionSlice'
 import { clearChatStorage } from 'src/store/slices/chatSlice'
 import { resetPresignResponse } from 'src/store/slices/manualEntryFilesSlice'
+import apiClient from 'src/services/api-client'
+import { endpoints } from 'src/services/backendUrl'
+import useUserDetails from 'src/hooks/useUserDetails'
+import { queryClient } from 'src/utils/queryClient'
+import { useLogout } from 'src/hooks/useLogout'
+import { useAuth0 } from '@auth0/auth0-react'
+import { useNavigate } from 'react-router'
+import { paths } from 'src/paths'
+import { notify } from 'src/components/notistack/NotificationProvider'
 
 interface PracticeDetailsCardProps {
   status?: 'active' | 'inactive' | 'archived'
   practice: AllPracticesDataObject
+  unarchivedPractices?: AllPracticesDataObject[]
+  practicesListLength: number
 }
 
 const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
   status = 'inactive',
-  practice
+  practice,
+  practicesListLength,
+  unarchivedPractices
 }) => {
+  const { handleLogout } = useLogout()
+
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { setActiveById } = useActivePractice()
   const { data: allPractices } = useFetchAllPracticesData(true)
+  const { activePracticeId } = useActivePractice()
+  const { userId, email } = useUserDetails()
+  const { getAccessTokenSilently } = useAuth0()
+  const [isUnarchiving, setIsUnarchiving] = useState(false)
+  const [isArchiving, setIsArchiving] = useState(false)
 
   const [isArchiveOpen, setIsArchiveOpen] = useState(false)
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
 
-  // const openArchive = useCallback(() => setIsArchiveOpen(true), [])
+  const openArchive = useCallback(() => setIsArchiveOpen(true), [])
   const closeArchive = useCallback(() => setIsArchiveOpen(false), [])
-  const closeSuccessDialog = useCallback(() => setSuccessDialogOpen(false), [])
+
+  const closeSuccessDialog = useCallback(async () => {
+    try {
+      await queryClient.invalidateQueries({
+        queryKey: ['listAllPracticesData']
+      })
+
+      const token = await getAccessTokenSilently({
+        cacheMode: 'off'
+      })
+      apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
+    } catch (error) {
+      console.error('Failed to invalidate queries:', error)
+    } finally {
+      setSuccessDialogOpen(false)
+    }
+  }, [])
+
+  const submitSuccessDialog = useCallback(async () => {
+    try {
+      await queryClient.invalidateQueries({
+        queryKey: ['listAllPracticesData']
+      })
+
+      handleSwitchToPractice(practice?.id)
+      navigate(paths.dashboard)
+      const token = await getAccessTokenSilently({
+        cacheMode: 'off'
+      })
+      apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
+    } catch (error) {
+      console.error('Failed to invalidate queries:', error)
+    } finally {
+      setSuccessDialogOpen(false)
+    }
+  }, [])
 
   // three-dots dropdown
-  // const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
-  // const isMenuOpen = Boolean(menuAnchorEl)
-  // const openMenu = (e: React.MouseEvent<HTMLElement>) =>
-  // setMenuAnchorEl(e.currentTarget)
-  // const closeMenu = () => setMenuAnchorEl(null)
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
+  const isMenuOpen = Boolean(menuAnchorEl)
+  const openMenu = (e: React.MouseEvent<HTMLElement>) =>
+    setMenuAnchorEl(e.currentTarget)
+  const closeMenu = () => setMenuAnchorEl(null)
 
   // active chip styles
   const activeChipSx = useMemo<SxProps<Theme>>(
@@ -143,25 +199,47 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
     [practice]
   )
 
-  const handleSwitchToPractice = useCallback(() => {
-    setActiveById(practice?.id, allPractices)
-    dispatch(setMergedPermissionsByCategory(ALL_PERMISSIONS))
-    dispatch(clearAll())
-    dispatch(clearProcessing())
-    dispatch(clearFiles())
-    dispatch(clearPresignData())
-    localStorage.removeItem('bank_connection_id')
-    dispatch(setStatus(null))
-    dispatch(setConnectionId(null))
-    dispatch(clearChatStorage())
-    dispatch(clearAllProcessedBankStatements())
-    dispatch(clearAllBankStatements())
-    dispatch(clearBankStatementProcessing())
-    dispatch(clearPresignStatementsData())
+  const handleSwitchToPractice = useCallback(
+    (practiceId: string) => {
+      setActiveById(practiceId, allPractices)
+      dispatch(setMergedPermissionsByCategory(ALL_PERMISSIONS))
+      dispatch(clearAll())
+      dispatch(clearProcessing())
+      dispatch(clearFiles())
+      dispatch(clearPresignData())
+      localStorage.removeItem('bank_connection_id')
+      dispatch(setStatus(null))
+      dispatch(setConnectionId(null))
+      dispatch(clearChatStorage())
+      dispatch(clearAllProcessedBankStatements())
+      dispatch(clearAllBankStatements())
+      dispatch(clearBankStatementProcessing())
+      dispatch(clearPresignStatementsData())
 
-    // remove mannual entries
-    dispatch(resetPresignResponse())
-  }, [practice, setActiveById, allPractices, dispatch])
+      // remove mannual entries
+      dispatch(resetPresignResponse())
+    },
+    [practice, setActiveById, allPractices, dispatch]
+  )
+
+  const handleUnarchive = async () => {
+    if (!userId || !practice?.id) return
+
+    setIsUnarchiving(true)
+
+    try {
+      await apiClient.put(endpoints.unarchivePractice(userId, practice.id), {
+        action: 'UNARCHIVE'
+      })
+
+      notify.success('Practice unarchived successfully')
+      setSuccessDialogOpen(true)
+    } catch (error) {
+      console.error('Failed to unarchive practice:', error)
+    } finally {
+      setIsUnarchiving(false)
+    }
+  }
 
   const archiveSteps = useMemo(
     () => [
@@ -181,9 +259,47 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
         render: ({ goBack, close }: any) => (
           <GetUserReason
             onBack={() => goBack()}
-            onArchive={async () => {
-              close()
+            onArchive={async (reason) => {
+              if (!userId || !practice?.id) return
+
+              setIsArchiving(true)
+              try {
+                await apiClient.put(
+                  endpoints.archivePractice(userId ?? '', practice?.id ?? ''),
+                  {
+                    email,
+                    reason,
+                    action: 'ARCHIVE'
+                  }
+                )
+
+                await queryClient.invalidateQueries({
+                  queryKey: ['listAllPracticesData']
+                })
+
+                if (practicesListLength > 1) {
+                  if (practice?.id === activePracticeId) {
+                    const firstNonActivePractice = unarchivedPractices?.find(
+                      (p) => p.id !== activePracticeId
+                    )
+                    handleSwitchToPractice(firstNonActivePractice?.id ?? '')
+                  }
+                } else {
+                  handleLogout()
+                }
+
+                close()
+                const token = await getAccessTokenSilently({
+                  cacheMode: 'off'
+                })
+                apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
+              } catch (error) {
+                console.error('Failed to archive practice:', error)
+              } finally {
+                setIsArchiving(false)
+              }
             }}
+            isLoading={isArchiving}
           />
         )
       }
@@ -217,42 +333,47 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
                 <StatusChip sx={{ display: { xs: 'none', sm: 'flex' } }} />
 
                 {/* three dots */}
-                {/* <IconButton
-                  aria-label='more actions'
-                  onClick={openMenu}
-                  size='small'
-                  sx={{
-                    padding: '0px'
-                  }}
-                >
-                  <MoreVertIcon />
-                </IconButton> */}
-
-                {/* <Menu
-                  anchorEl={menuAnchorEl}
-                  open={isMenuOpen}
-                  onClose={closeMenu}
-                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                >
-                  <Box sx={{ padding: '0px 16px' }}>
-                    <Button
+                {status !== 'archived' ? (
+                  <>
+                    <IconButton
+                      aria-label='more actions'
+                      onClick={openMenu}
                       size='small'
-                      variant='outlined'
-                      fullWidth
-                      color='warning'
-                      endIcon={
-                        <img
-                          src='/assets/archive-only.svg'
-                          alt='archive icon'
-                        />
-                      }
-                      onClick={openArchive}
+                      sx={{
+                        padding: '0px'
+                      }}
                     >
-                      Archive practice
-                    </Button>
-                  </Box>
-                </Menu> */}
+                      <MoreVertIcon />
+                    </IconButton>
+                    <Menu
+                      anchorEl={menuAnchorEl}
+                      open={isMenuOpen}
+                      onClose={closeMenu}
+                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                    >
+                      <Box sx={{ padding: '0px 16px' }}>
+                        <Button
+                          size='small'
+                          variant='outlined'
+                          fullWidth
+                          color='warning'
+                          endIcon={
+                            <img
+                              src='/assets/archive-only.svg'
+                              alt='archive icon'
+                            />
+                          }
+                          onClick={openArchive}
+                        >
+                          Archive practice
+                        </Button>
+                      </Box>
+                    </Menu>
+                  </>
+                ) : (
+                  ' '
+                )}
               </Box>
             </Box>
 
@@ -332,7 +453,8 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
             variant='outlined'
             fullWidth
             color='warning'
-            onClick={() => setSuccessDialogOpen(true)}
+            loading={isUnarchiving}
+            onClick={() => handleUnarchive()}
             endIcon={<img src='/assets/archive-only.svg' alt='archive icon' />}
           >
             Unarchive practice
@@ -348,7 +470,7 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
             variant='outlined'
             fullWidth
             endIcon={<img src='/assets/switch.svg' alt='switch icon' />}
-            onClick={handleSwitchToPractice}
+            onClick={() => handleSwitchToPractice(practice?.id)}
           >
             Switch to this practice
           </Button>
@@ -357,7 +479,7 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
 
       <ConfirmationSuccessDialog
         open={successDialogOpen}
-        onSubmit={closeSuccessDialog}
+        onSubmit={submitSuccessDialog}
         onClose={closeSuccessDialog}
         buttonTitle='Go to practice dashboard'
         title='Practice Successfully Rearchived'

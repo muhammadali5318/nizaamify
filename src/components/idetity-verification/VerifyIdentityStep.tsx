@@ -9,24 +9,30 @@ export interface VerifyIdentityStepProps {
   onCancel?: () => void
 }
 
-const schema = z.object({
-  email: z.string().email('Enter a valid email')
-})
-
 export function VerifyIdentityStep({
   onNext,
   onCancel
 }: VerifyIdentityStepProps) {
   const { user } = useAuth0()
+  const referenceEmail = user?.email ?? ''
 
+  const schema = z.object({
+    email: z
+      .string()
+      .refine((val) => /^\S+@\S+\.\S+$/.test(val), {
+        message: 'Enter a valid email'
+      })
+      .refine((val) => val === referenceEmail, {
+        message: 'Please enter the correct email'
+      })
+  })
   const {
     handleSubmit,
     control,
     formState: { isValid }
   } = useForm({
     resolver: zodResolver(schema),
-    mode: 'onChange',
-    defaultValues: { email: user?.email ?? '' }
+    mode: 'onChange'
   })
 
   const onSubmit = () => {
@@ -38,7 +44,7 @@ export function VerifyIdentityStep({
       <Stack spacing={1.8}>
         <Stack spacing={'2px'}>
           <Typography variant='h5' color='#000' fontWeight={700}>
-            Verify Your Identity{' '}
+            Verify Your Identity
           </Typography>
           <Box>
             <Typography variant='subtitle1' color='text.primary'>
@@ -61,7 +67,6 @@ export function VerifyIdentityStep({
               label='Email Address'
               fullWidth
               required
-              disabled
               error={!!fieldState.error}
               helperText={fieldState.error?.message}
             />
@@ -83,7 +88,7 @@ export function VerifyIdentityStep({
             type='submit'
             disabled={!isValid}
           >
-            Verify & continue
+            Verify & Continue
           </Button>
         </Box>
       </Stack>

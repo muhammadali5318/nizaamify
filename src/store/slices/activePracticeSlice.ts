@@ -3,6 +3,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 export type AllPracticesDataObject = {
   id: string
   practice_name: string
+  status: string
   email?: string | null
   practice_type?: string
   address?: string | null

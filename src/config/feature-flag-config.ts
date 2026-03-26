@@ -38,11 +38,6 @@ const rules: FeatureRule[] = [
 // ---------- MODULES CONFIG ----------
 const modules: ModuleConfig[] = [
   {
-    id: 'dashboard',
-    name: 'Dashboard',
-    isEnabled: evaluateIsModuleEnabled
-  },
-  {
     id: 'documents',
     name: 'Documents',
     isEnabled: evaluateIsModuleEnabled,

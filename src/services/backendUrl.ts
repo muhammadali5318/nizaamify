@@ -84,6 +84,10 @@ export const endpoints = {
   listAllPractices: (userId: string) =>
     `${API_BASE}/users/${userId}/practices/`,
   practiceProfile: (id: string) => `${API_BASE}/practices/${id}/profile/`,
+  archivePractice: (userId: string, practiceId: string) =>
+    `${API_BASE}/users/${userId}/practices/${practiceId}/archive/`,
+  unarchivePractice: (userId: string, practiceId: string) =>
+    `${API_BASE}/users/${userId}/practices/${practiceId}/unarchive/`,
   inviteUser: (id: string) => `${API_BASE}/invited-users/${id}/`,
   userWithActivePractices: (id: string) => `${API_BASE}/users/${id}/`,
   userProfile: (id: string) => `${API_BASE}/users/${id}/profile/`,

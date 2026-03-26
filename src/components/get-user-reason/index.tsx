@@ -21,6 +21,7 @@ export interface GetUserReasonProps {
   onArchive: (reason: string) => void
 
   introTitle?: string
+  isLoading?: boolean
   introItems?: Array<string | React.ReactNode>
   questionTitle?: string
   reasonOptions?: string[]
@@ -64,6 +65,7 @@ export function GetUserReason({
   otherMaxChars = 1500,
   backButtonText = 'Back',
   submitButtonText = 'Archive practice',
+  isLoading,
   children
 }: GetUserReasonProps) {
   const schema = z
@@ -183,6 +185,7 @@ export function GetUserReason({
               color='error'
               variant='contained'
               type='submit'
+              loading={isLoading}
               disabled={!isValid}
             >
               {submitButtonText}

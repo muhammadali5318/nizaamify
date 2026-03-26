@@ -57,11 +57,15 @@ export default function PracticeSelector() {
 
   const isPracticeVerified =
     Number(data?.transactions_counts?.transactions_with_invoices) >= 4
-  const practices: AllPracticesDataObject[] = Array.isArray(rawPractices)
+  const updatedPractices: AllPracticesDataObject[] = Array.isArray(rawPractices)
     ? rawPractices
     : rawPractices && Array.isArray((rawPractices as any).results)
       ? (rawPractices as any).results
       : []
+
+  const practices: AllPracticesDataObject[] = updatedPractices?.filter(
+    (practice) => practice.status !== 'ARCHIVED'
+  )
 
   const {
     activePracticeId: persistedId,
