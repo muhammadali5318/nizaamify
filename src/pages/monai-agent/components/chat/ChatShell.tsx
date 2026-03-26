@@ -118,7 +118,7 @@ const ChatShell = ({ selectedChatId, onChatCreated }: Props) => {
               <SuggestionGrid onSelect={handleSend} />
               <Box display={'flex'} justifyContent={'center'}>
                 <Typography color='#6A7282' variant='caption'>
-                  MonAi Agent can make mistakes. Please verify important
+                  Monai Agent can make mistakes. Please verify important
                   information.{' '}
                 </Typography>
               </Box>
