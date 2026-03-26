@@ -1,6 +1,6 @@
 // src/pages/Documents/DocumentsPage.tsx  (or wherever your file lives)
 import React from 'react'
-import { Box, Typography, Link } from '@mui/material'
+import { Box } from '@mui/material'
 import styles from './documents.module.scss'
 import StatsCard from 'src/components/team-management/StatsCard'
 import { ReusableTabs } from 'src/components/tabs'
@@ -9,9 +9,7 @@ import {
   documentsModuleBreadCrumbs,
   documentsTabsData
 } from './config/documentsConfig'
-import { useInitialData } from '../../hooks/useFetchInitialData'
-import { Outlet, useLocation, useNavigate } from 'react-router'
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import { Outlet, useLocation } from 'react-router'
 import PageBreadcrumbs from 'src/components/bread-crumbs/PageBreadcrumbs'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import { useHasPermission } from 'src/config/module-permissions'
@@ -19,8 +17,6 @@ import useDocumentCounts from './hooks/useDocumentCounts'
 
 const DocumentsPage: React.FC = () => {
   const tabs = useDocumentsTabs()
-  const navigate = useNavigate()
-  const { data, isLoading, isError } = useInitialData(true)
   const { activePracticeId } = useActivePractice()
   const canViewDocuments = useHasPermission('data.upload_archive')
 
@@ -31,13 +27,6 @@ const DocumentsPage: React.FC = () => {
 
   const location = useLocation()
   const isSubRoute = location.pathname === '/documents/manual-entry'
-
-  const handleNavigateToSettings = () => navigate('/settings')
-
-  const toTitleCase = (text: string) =>
-    text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : ''
-
-  const accountingBasis = toTitleCase(data?.accounting_basis || 'N/A')
 
   // derive stats safely
   const stats = {
@@ -60,59 +49,6 @@ const DocumentsPage: React.FC = () => {
       />
       {!isSubRoute ? (
         <>
-          <Box
-            className={styles.headerBanner}
-            sx={{
-              textAlign: { xs: 'center', md: 'left' },
-              color: '#01579B',
-              backgroundColor: '#F2F9FC',
-              width: { xs: '96%', sm: '94%', md: '94%', lg: '96%' },
-              marginLeft: '0px',
-              border: '1px solid #0288D1',
-              borderRadius: '16px'
-            }}
-          >
-            {isLoading ? (
-              <Typography variant='body2'>
-                Loading practice details...
-              </Typography>
-            ) : isError ? (
-              <Typography color='error' variant='body2'>
-                Failed to load practice details
-              </Typography>
-            ) : (
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                  gap: '6px'
-                }}
-              >
-                <Box paddingTop='4px' color='#0288D1'>
-                  <ErrorOutlineIcon />
-                </Box>
-                <Typography variant='body2' fontSize={{ xs: 13, md: 15 }}>
-                  Your accounting method is set to {accountingBasis}. You can
-                  change this in{' '}
-                  <Link
-                    component='button'
-                    onClick={handleNavigateToSettings}
-                    sx={{
-                      color: '#01579B',
-                      fontWeight: 'bold',
-                      textDecoration: 'underline',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Settings
-                  </Link>
-                </Typography>
-              </Box>
-            )}
-          </Box>
-
           <Box
             flexDirection={{ xs: 'column', md: 'row', lg: 'row' }}
             gap={{ xs: 2, md: 3 }}

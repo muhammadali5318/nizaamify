@@ -16,7 +16,7 @@ export default function BankingTabsContainer(): ReusableTabItem[] {
 
   const tabs = useMemo(() => {
     return bankingTabsData
-      .filter((t) => !(accountingBasis === 'ACCRUAL' && t.key === 2))
+      .filter((t) => !(accountingBasis === 'ACCRUAL' && t.key === 1))
       .map((t) => {
         let content: React.ReactNode = null
         let count = t.count
@@ -27,7 +27,7 @@ export default function BankingTabsContainer(): ReusableTabItem[] {
             content = <BankIntegrator />
             break
 
-          case 1:
+          case 2:
             count = transactionsWithInvoices
             countTotal = totalTransactions
 
@@ -43,7 +43,7 @@ export default function BankingTabsContainer(): ReusableTabItem[] {
             )
             break
 
-          case 2:
+          case 1:
             content = <Transactions />
             break
           case 3:

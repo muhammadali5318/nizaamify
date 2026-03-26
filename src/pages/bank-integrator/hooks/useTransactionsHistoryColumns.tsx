@@ -65,7 +65,7 @@ export const useTransactionsHistoryColumns = (
       // =============================
       {
         field: 'subtype',
-        headerName: 'Subcategorty',
+        headerName: 'Subcategory',
         flex: 1,
         sortable: true,
         renderCell: (params: GridCellParams) => {

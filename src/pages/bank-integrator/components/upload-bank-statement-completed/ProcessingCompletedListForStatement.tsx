@@ -233,9 +233,9 @@ export default function ProcessingCompletedListForStatement() {
                 dispatch(clearProcessing())
                 dispatch(clearPresignStatementsData())
                 if (accountingBasis === 'CASH') {
-                  dispatch(setActiveTab(2))
-                } else if (accountingBasis === 'ACCRUAL') {
                   dispatch(setActiveTab(1))
+                } else if (accountingBasis === 'ACCRUAL') {
+                  dispatch(setActiveTab(2))
                 }
                 navigate(paths.bankIntegrator)
                 queryClient.invalidateQueries({

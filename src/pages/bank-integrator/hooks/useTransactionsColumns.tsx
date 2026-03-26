@@ -165,7 +165,7 @@ export const useTransactionsColumns: UseTransactionsColumns = (
                   color='success.main'
                   fontStyle={'italic'}
                 >
-                  {localCategory.type} / {localCategory.subtype}
+                  {localCategory.subtype}
                 </Typography>
               </Box>
             )
@@ -180,7 +180,7 @@ export const useTransactionsColumns: UseTransactionsColumns = (
                   color='success.main'
                   fontStyle={'italic'}
                 >
-                  {row.type} / {row.subtype}
+                  {row.subtype}
                 </Typography>
               </Box>
             )

@@ -122,28 +122,6 @@ export const useReconciliationColumns = ({
           )
         }
       },
-
-      // =============================
-      // Balance
-      // =============================
-      {
-        field: 'balance',
-        headerName: 'Available Balance',
-        flex: 1,
-        sortable: true,
-        renderCell: (params: GridCellParams) => {
-          const balance = params?.row?.balance
-
-          return (
-            <Typography variant='body2'>
-              {balance != null && balance !== ''
-                ? `£${Math.abs(Number(balance)).toLocaleString()}`
-                : '-'}
-            </Typography>
-          )
-        }
-      },
-
       // =============================
       // Invoice Upload Column
       // =============================
@@ -233,7 +211,7 @@ export const useReconciliationColumns = ({
     if (accountingBasis === 'ACCRUAL') {
       baseColumns.push({
         field: 'fin',
-        headerName: 'Add in financial calc.',
+        headerName: 'Record as accounting entry',
         flex: 1,
         sortable: false,
         renderCell: (params: GridCellParams) => (
