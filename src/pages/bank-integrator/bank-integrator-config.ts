@@ -30,6 +30,6 @@ export const bankingTabsData = [
 ]
 
 export const uploadCsvBreads = [
-  { label: 'Bank integrator', to: paths.bankIntegrator },
+  { label: 'Bank connector', to: paths.bankIntegrator },
   { label: 'Upload Bank Statement' }
 ]

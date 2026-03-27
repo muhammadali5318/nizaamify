@@ -25,7 +25,7 @@ const BankingAggregator = () => {
       >
         <ModuleHeader
           avatarSrc='/assets/bank-module.svg'
-          heading='Bank Aggregator'
+          heading='Bank Connector'
           subheading='Manage your connected bank accounts and reconcile transactions'
         />
 

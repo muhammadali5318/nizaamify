@@ -35,21 +35,28 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         moduleId: 'documents'
       },
       {
-        text: 'P&L Items',
+        text: 'Bank Connector',
+        to: paths.bankIntegrator,
+        activeIcon: 'bank-active.svg',
+        inactiveIcon: 'bank-inactive.svg',
+        moduleId: 'bank-integrator'
+      },
+      {
+        text: 'P&L',
         to: paths.expense,
         activeIcon: 'active-wallet.svg',
         inactiveIcon: 'expense-inactive.svg',
         moduleId: 'expenses'
       },
-      {
-        text: 'Non P&L Items',
-        to: paths.nonPandL,
-        activeIcon: 'pl-Icon-active.svg',
-        inactiveIcon: 'pl-Icon-inactive.svg',
-        tooltipContent:
-          'Items such as owners withdrawals, capital loans/injections or tax matters which do not belong in the P&L statement are recorded here',
-        moduleId: 'non-pandl'
-      },
+      // {
+      //   text: 'Non P&L Items',
+      //   to: paths.nonPandL,
+      //   activeIcon: 'pl-Icon-active.svg',
+      //   inactiveIcon: 'pl-Icon-inactive.svg',
+      //   tooltipContent:
+      //     'Items such as owners withdrawals, capital loans/injections or tax matters which do not belong in the P&L statement are recorded here',
+      //   moduleId: 'non-pandl'
+      // },
       {
         text: 'Monai Agent',
         to: paths.monaiAgent,
@@ -62,15 +69,16 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
     ]
   },
   {
-    title: 'Management',
+    title: 'Settings',
     items: [
       {
-        text: 'Team Management',
-        to: paths.teamManagement.root,
-        activeIcon: 'active-team-management.svg',
-        inactiveIcon: 'inactive-team-management.svg',
-        moduleId: 'team-management'
+        text: 'User Settings',
+        to: paths.settings,
+        activeIcon: 'active-settings.svg',
+        inactiveIcon: 'inactive-settings.svg',
+        moduleId: 'settings'
       },
+
       {
         text: 'Practice Settings',
         to: paths.practiceSettings,
@@ -79,40 +87,22 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         moduleId: 'practice-settings'
       },
       {
-        text: 'Subscription & Billing',
+        text: 'Team Management',
+        to: paths.teamManagement.root,
+        activeIcon: 'active-team-management.svg',
+        inactiveIcon: 'inactive-team-management.svg',
+        moduleId: 'team-management'
+      },
+      {
+        text: 'Billing',
         to: paths.billing,
         activeIcon: 'active-billing.svg',
         inactiveIcon: 'inactive-billing.svg',
         moduleId: 'billing'
-      },
-      {
-        text: 'Audit logs',
-        to: paths.auditLogs,
-        activeIcon: 'audit-active.svg',
-        inactiveIcon: 'audit-inactive.svg',
-        moduleId: 'audit-logs'
       }
     ]
   },
-  {
-    title: 'Account',
-    items: [
-      {
-        text: 'Settings',
-        to: paths.settings,
-        activeIcon: 'active-settings.svg',
-        inactiveIcon: 'inactive-settings.svg',
-        moduleId: 'settings'
-      },
-      {
-        text: 'Bank Integrator',
-        to: paths.bankIntegrator,
-        activeIcon: 'bank-active.svg',
-        inactiveIcon: 'bank-inactive.svg',
-        moduleId: 'bank-integrator'
-      }
-    ]
-  },
+
   {
     title: 'Support',
     items: [
@@ -122,6 +112,13 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         activeIcon: 'active-help-support.svg',
         inactiveIcon: 'inactive-help-support.svg',
         moduleId: 'help-support'
+      },
+      {
+        text: 'Audit logs',
+        to: paths.auditLogs,
+        activeIcon: 'audit-active.svg',
+        inactiveIcon: 'audit-inactive.svg',
+        moduleId: 'audit-logs'
       }
     ]
   }

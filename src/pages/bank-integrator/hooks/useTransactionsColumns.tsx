@@ -165,7 +165,7 @@ export const useTransactionsColumns: UseTransactionsColumns = (
                   color='success.main'
                   fontStyle={'italic'}
                 >
-                  {localCategory.subtype}
+                  {localCategory.lineItem}
                 </Typography>
               </Box>
             )
@@ -180,7 +180,7 @@ export const useTransactionsColumns: UseTransactionsColumns = (
                   color='success.main'
                   fontStyle={'italic'}
                 >
-                  {row.subtype}
+                  {row.expense_category}
                 </Typography>
               </Box>
             )

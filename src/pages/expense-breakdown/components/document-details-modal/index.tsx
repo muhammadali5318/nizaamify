@@ -215,7 +215,7 @@ const DocumentDetailsModal: React.FC<DocumentDetailsModalProps> = React.memo(
             />
 
             <ManualListColumn
-              title='Bank Aggregator'
+              title='Bank Connector'
               docs={aggregators}
               downloadingKey={downloadingKey}
               listKey={'docs'}

@@ -219,7 +219,7 @@ export default function ManualListColumn({
                           divider
                           disableGutters
                           secondaryAction={
-                            title === 'Bank Aggregator' ? (
+                            title === 'Bank Connector' ? (
                               <IconButton
                                 edge='end'
                                 size='small'

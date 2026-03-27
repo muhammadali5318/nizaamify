@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { useAuth } from 'src/context/AuthProvider'
+// import { useAuth } from 'src/context/AuthProvider'
 import ConnectYourBank from './components/connect-your-bank'
 import SelectYourBank from './components/select-bank'
 import RequireConsent from './components/require-consent'
 import ConnectionSuccessful from './components/connection-successful'
 import BankDetails from './components/bank-details'
-import { useFetchAllInstitutionsData } from './hooks/useFetchInstitutions'
+// import { useFetchAllInstitutionsData } from './hooks/useFetchInstitutions'
 import { useSearchParams } from 'react-router'
 import { Box } from '@mui/material'
 
@@ -17,9 +17,9 @@ export type Step =
   | 'success'
 
 const BankIntegrator = () => {
-  const { accessToken } = useAuth()
+  // const { accessToken } = useAuth()
   const connectionId = localStorage.getItem('bank_connection_id')
-  useFetchAllInstitutionsData(!!accessToken)
+  // useFetchAllInstitutionsData(!!accessToken)
   const [searchParams] = useSearchParams()
   const isConnectionSuccessful =
     searchParams.get('connection-successful') === 'true'

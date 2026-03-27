@@ -1,6 +1,5 @@
 import { Alert, Box, Stack, Typography } from '@mui/material'
 import StatsCard from 'src/components/team-management/StatsCard'
-import StatsChart from './components/stats-chart'
 import ReconciliationContent from './components/recon-content'
 const VERIFICATION_LIMIT = 4
 
@@ -21,17 +20,13 @@ const ReconciliationTab = ({
   setTransactionsWithInvoices,
   setTransactionsWithoutInvoices
 }: Props) => {
-  const remaining = Math.max(VERIFICATION_LIMIT - transactionsWithInvoices, 0)
-
   const percentage =
     totalTransactions > 0
       ? Math.round((transactionsWithInvoices / totalTransactions) * 100)
       : 0
 
-  const message = `Upload invoices for your transactions to achieve verified status.
-          You've uploaded ${transactionsWithInvoices} of
-          ${transactionsWithoutInvoices} invoices (${percentage}%). Upload 
-          ${remaining} more to get verified.`
+  const message = `Enrich your practice data! Upload invoices for your transations to enrich the data. You have uploaded ${transactionsWithInvoices} out of
+          ${transactionsWithoutInvoices} (${percentage}%).`
 
   return (
     <Stack spacing={2.5}>
@@ -76,11 +71,11 @@ const ReconciliationTab = ({
           value={transactionsWithoutInvoices}
         />
 
-        <StatsChart
+        {/* <StatsChart
           value={percentage}
           transactionsWithInvoices={transactionsWithInvoices}
           total={totalTransactions}
-        />
+        /> */}
       </Box>
 
       <ReconciliationContent

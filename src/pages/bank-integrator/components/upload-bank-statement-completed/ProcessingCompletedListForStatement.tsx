@@ -254,7 +254,7 @@ export default function ProcessingCompletedListForStatement() {
             borderColor='#ff9800'
             iconColor='#ef6c00'
             textColor='#ef6c00'
-            content='The Bank Integrator module accepts only bank statements. All other document types will be automatically removed.'
+            content='The Bank Connector module accepts only bank statements. All other document types will be automatically removed.'
           />
         </>
       )}
