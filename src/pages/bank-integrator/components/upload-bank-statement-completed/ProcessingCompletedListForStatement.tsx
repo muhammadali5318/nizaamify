@@ -256,6 +256,13 @@ export default function ProcessingCompletedListForStatement() {
             textColor='#ef6c00'
             content='The Bank Connector module accepts only bank statements. All other document types will be automatically removed.'
           />
+          <NotificationBanner
+            backgroundColor='rgba(239, 108, 0, 0.04)'
+            borderColor='#ff9800'
+            iconColor='#ef6c00'
+            textColor='#ef6c00'
+            content='Please note that large bank statements require additional processing time and are best uploaded individually to prevent potential timeouts. Smaller statements may be uploaded in multiple batches.'
+          />
         </>
       )}
 

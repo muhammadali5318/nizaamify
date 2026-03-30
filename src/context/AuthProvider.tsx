@@ -1,4 +1,5 @@
 import { AppState, Auth0Provider, useAuth0 } from '@auth0/auth0-react'
+import { jwtDecode } from 'jwt-decode'
 import React, {
   createContext,
   useCallback,
@@ -18,6 +19,10 @@ import apiClient from 'src/services/api-client'
 /* ---------------------- Types ---------------------- */
 
 type Props = { children: React.ReactNode }
+
+type JwtPayload = {
+  exp: number
+}
 
 type AppUser = {
   id?: string
@@ -103,6 +108,7 @@ function AuthProviderContainer({ children }: Props) {
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [tokenLoading, setTokenLoading] = useState<boolean>(true)
   const [isInfoLoading, setIsInfoLoading] = useState<boolean>(true)
+  const [tokenExpiry, setTokenExpiry] = useState<number | null>(null)
 
   const getAccessToken = useCallback(async (): Promise<string | null> => {
     setTokenLoading(true)
@@ -135,6 +141,38 @@ function AuthProviderContainer({ children }: Props) {
       setTokenLoading(false)
     }
   }, [getAccessTokenSilently, isAuthenticated])
+
+  const refreshAccessToken = useCallback(async () => {
+    try {
+      const token = await getAccessTokenSilently({ cacheMode: 'off' })
+      setAccessToken(token)
+      const decoded = jwtDecode<JwtPayload>(token)
+      setTokenExpiry(decoded?.exp * 1000)
+      apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
+    } catch (error) {
+      console.warn('Error refreshing token:', error)
+      setAccessToken(null)
+      setTokenExpiry(null)
+      delete apiClient.defaults.headers.common.Authorization
+    }
+  }, [getAccessTokenSilently])
+
+  useEffect(() => {
+    if (!tokenExpiry) return
+
+    const refreshTime = tokenExpiry - Date.now() - 5000 // 5 seconds before expiry
+
+    if (refreshTime <= 0) {
+      refreshAccessToken()
+      return
+    }
+
+    const timer = setTimeout(() => {
+      refreshAccessToken()
+    }, refreshTime)
+
+    return () => clearTimeout(timer)
+  }, [tokenExpiry, refreshAccessToken])
 
   // fetch token when authentication state changes
   useEffect(() => {
