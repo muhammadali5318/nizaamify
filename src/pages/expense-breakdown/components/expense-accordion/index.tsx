@@ -19,6 +19,7 @@ interface ReusableAccordionProps {
   dateRange: RangeISO
   chips?: string[]
   total?: any
+  totalPercentage: string
   defaultExpanded?: boolean
   expenseSubtypes?: any
   expanded?: boolean
@@ -31,7 +32,8 @@ export default function ReusableAccordion({
   defaultExpanded = false,
   expenseSubtypes,
   dateRange,
-  expanded
+  expanded,
+  totalPercentage
 }: ReusableAccordionProps) {
   const [open, setOpen] = useState(defaultExpanded)
 
@@ -127,17 +129,33 @@ export default function ReusableAccordion({
 
         {/* Total Amount - moves below on mobile */}
         {total !== null && (
-          <Typography
-            variant='h5'
-            sx={{
-              fontWeight: 700,
-              whiteSpace: 'nowrap',
-              alignSelf: { xs: 'flex-end', sm: 'center' },
-              mt: { xs: 0.5, sm: 0 }
-            }}
-          >
-            £{formatAmountWithCommas(total)}
-          </Typography>
+          <Box display={'flex'} gap={5}>
+            <Typography
+              variant='h5'
+              sx={{
+                fontWeight: 700,
+                whiteSpace: 'nowrap',
+                alignSelf: { xs: 'flex-end', sm: 'center' },
+                mt: { xs: 0.5, sm: 0 }
+              }}
+            >
+              £{formatAmountWithCommas(total)}
+            </Typography>
+
+            {totalPercentage !== null && (
+              <Typography
+                variant='h5'
+                sx={{
+                  fontWeight: 700,
+                  whiteSpace: 'nowrap',
+                  alignSelf: { xs: 'flex-end', sm: 'center' },
+                  mt: { xs: 0.5, sm: 0 }
+                }}
+              >
+                %{totalPercentage}
+              </Typography>
+            )}
+          </Box>
         )}
       </Box>
 

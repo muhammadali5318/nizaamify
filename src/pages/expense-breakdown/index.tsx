@@ -135,6 +135,7 @@ const ExpenseBreakdown = () => {
                     ]}
                     expenseSubtypes={expenseType?.expense_subtypes}
                     expanded={allExpanded}
+                    totalPercentage={category?.share_of_total_percent}
                   />
                 )
               })}

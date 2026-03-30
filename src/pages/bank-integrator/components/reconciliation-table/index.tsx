@@ -25,6 +25,7 @@ import {
   setUploadingFile,
   clearUploadingFile
 } from 'src/store/slices/reconciliationTabPresignDataSlice'
+import InvoiceUploadModal from '../invoice-upload-modal'
 
 type TransactionCategory = {
   category: string
@@ -66,6 +67,8 @@ const ReconciliationTable = ({
   // =============================
 
   const [categorisationOpen, setCategorisationOpen] = useState(false)
+  const [confirmCategorisationOpen, setConfirmCategorisationOpen] =
+    useState(false)
   const [selectedRow, setSelectedRow] = useState<any | null>(null)
 
   // =============================
@@ -87,14 +90,24 @@ const ReconciliationTable = ({
   // Categorisation handlers
   // =============================
 
-  const handleOpenCategorise = (row: any) => {
-    setSelectedRow(row)
+  const handleOpenCategorise = () => {
     setCategorisationOpen(true)
+  }
+
+  const handleOpenConfirmCategorise = (row: any) => {
+    setSelectedRow(row)
+    setConfirmCategorisationOpen(true)
   }
 
   const handleCloseCategorise = () => {
     setSelectedRow(null)
     setCategorisationOpen(false)
+    setConfirmCategorisationOpen(false)
+  }
+
+  const handleCloseConfirmCategorise = () => {
+    setSelectedRow(null)
+    setConfirmCategorisationOpen(false)
   }
 
   // =============================
@@ -259,7 +272,7 @@ const ReconciliationTable = ({
   // =============================
 
   const columns = useReconciliationColumns({
-    onCategorise: handleOpenCategorise,
+    onCategorise: handleOpenConfirmCategorise,
     handleUploadFile
   })
 
@@ -361,6 +374,12 @@ const ReconciliationTable = ({
         onClose={handleCloseCategorise}
         onSave={handleSaveCategory}
         row={selectedRow}
+      />
+
+      <InvoiceUploadModal
+        open={confirmCategorisationOpen}
+        onClose={handleCloseConfirmCategorise}
+        onConfirm={handleOpenCategorise}
       />
     </Box>
   )
