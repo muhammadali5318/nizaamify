@@ -33,6 +33,10 @@ const ConnectYourBank = ({ goToStep }: ConnectYourBankProps) => {
               Upload your bank statement (CSV). System will extract the
               transactions and will ask you to categorise them.
             </Typography>
+            <Typography variant='body1' color='text.secondary' fontWeight={600}>
+              Please upload a CSV file containing the statement for a single
+              month only.
+            </Typography>
           </Stack>
         </Box>
 
