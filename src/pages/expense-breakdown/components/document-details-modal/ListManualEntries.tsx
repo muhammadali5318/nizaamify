@@ -178,7 +178,9 @@ export default function ManualListColumn({
                           noWrap
                           title={`Amount: £${entry.amount}`}
                         >
-                          {entry.amount != null ? `£${entry.amount}` : '-'}
+                          {entry.amount != null
+                            ? `£${Math.abs(Number(entry.amount))}`
+                            : '-'}
                         </Typography>
                       </Box>
                     </Box>
@@ -278,7 +280,7 @@ export default function ManualListColumn({
           textAlign='center'
           py={4}
         >
-          No manual entries found.
+          No items found.
         </Typography>
       )}
 

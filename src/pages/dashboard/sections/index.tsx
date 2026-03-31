@@ -289,6 +289,8 @@ const MainDashboard = () => {
             />
           </Box>
         </Box>
+      </Stack>
+      <Stack spacing={2.4} ref={feedbackRef}>
         {/* AI INSIGHTS */}
         <Box
           sx={{
@@ -326,10 +328,8 @@ const MainDashboard = () => {
             </Box>
           </Box>
         </Box>
-      </Stack>
-      <Box ref={feedbackRef}>
         <SubmitFeedback />
-      </Box>
+      </Stack>
     </Box>
   )
 }

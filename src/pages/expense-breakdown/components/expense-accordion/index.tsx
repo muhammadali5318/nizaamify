@@ -129,30 +129,21 @@ export default function ReusableAccordion({
 
         {/* Total Amount - moves below on mobile */}
         {total !== null && (
-          <Box display={'flex'} gap={5}>
-            <Typography
-              variant='h5'
-              sx={{
-                fontWeight: 700,
-                whiteSpace: 'nowrap',
-                alignSelf: { xs: 'flex-end', sm: 'center' },
-                mt: { xs: 0.5, sm: 0 }
-              }}
-            >
+          <Box display='flex' alignItems='baseline' gap={1}>
+            <Typography variant='h5' sx={{ fontWeight: 700 }}>
               £{formatAmountWithCommas(total)}
             </Typography>
 
             {totalPercentage !== null && (
               <Typography
-                variant='h5'
+                variant='subtitle2'
                 sx={{
-                  fontWeight: 700,
-                  whiteSpace: 'nowrap',
-                  alignSelf: { xs: 'flex-end', sm: 'center' },
-                  mt: { xs: 0.5, sm: 0 }
+                  fontWeight: 600,
+                  fontStyle: 'italic',
+                  color: '#6B7280' // muted gray
                 }}
               >
-                %{totalPercentage}
+                ({totalPercentage}%)
               </Typography>
             )}
           </Box>

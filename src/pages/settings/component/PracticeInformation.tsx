@@ -578,7 +578,11 @@ const PracticeInformation = () => {
           </FormControl>
 
           <Box>
-            <Typography variant='subtitle1' className='font-weight--700'>
+            <Typography
+              variant='subtitle1'
+              className='font-weight--700'
+              sx={{ mb: 1 }}
+            >
               Primary reasons for using Monai tech:
             </Typography>
 
@@ -597,9 +601,15 @@ const PracticeInformation = () => {
 
                 return (
                   <Box
-                    sx={{ display: 'flex', gap: 15, alignItems: 'flex-start' }}
+                    sx={{
+                      display: 'flex',
+                      flexDirection: { xs: 'column', sm: 'row' },
+                      gap: { xs: 2, sm: 6 },
+                      alignItems: 'flex-start',
+                      flexWrap: 'wrap'
+                    }}
                   >
-                    <Stack sx={{ flex: 1 }}>
+                    <Stack sx={{ flex: 1, minWidth: { xs: '100%', sm: '0' } }}>
                       {LEFT_REASONS.map((label) => (
                         <FormControlLabel
                           key={label}
@@ -614,7 +624,7 @@ const PracticeInformation = () => {
                       ))}
                     </Stack>
 
-                    <Stack sx={{ flex: 1 }}>
+                    <Stack sx={{ flex: 1, minWidth: { xs: '100%', sm: '0' } }}>
                       {RIGHT_REASONS.map((label) => (
                         <FormControlLabel
                           key={label}
@@ -632,6 +642,7 @@ const PracticeInformation = () => {
                 )
               }}
             />
+
             <FormHelperText error>
               {errors.primaryReasons?.message as React.ReactNode}
             </FormHelperText>
