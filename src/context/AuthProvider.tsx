@@ -15,7 +15,7 @@ import { useInitialData } from 'src/hooks/useFetchInitialData'
 import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
 import apiClient from 'src/services/api-client'
 
-const TOKEN_REFRESH_TIME = 1 * 60 * 1000
+// const TOKEN_REFRESH_TIME = 1 * 60 * 1000
 
 type Props = { children: React.ReactNode }
 
@@ -144,25 +144,25 @@ function AuthProviderContainer({ children }: Props) {
     }
   }, [applyToken, clearToken, getAccessTokenSilently, isAuthenticated])
 
-  const refreshAccessToken = useCallback(async () => {
-    try {
-      if (!isAuthenticated) {
-        clearToken()
-        return
-      }
+  // const refreshAccessToken = useCallback(async () => {
+  //   try {
+  //     if (!isAuthenticated) {
+  //       clearToken()
+  //       return
+  //     }
 
-      const token = await getAccessTokenSilently({ cacheMode: 'off' })
+  //     const token = await getAccessTokenSilently({ cacheMode: 'off' })
 
-      // eslint-disable-next-line no-console
-      console.log('token refresheddd')
-      if (token) {
-        applyToken(token)
-      }
-    } catch (error) {
-      console.warn('Error refreshing token:', error)
-      clearToken()
-    }
-  }, [applyToken, clearToken, getAccessTokenSilently, isAuthenticated])
+  //     // eslint-disable-next-line no-console
+  //     console.log('token refresheddd')
+  //     if (token) {
+  //       applyToken(token)
+  //     }
+  //   } catch (error) {
+  //     console.warn('Error refreshing token:', error)
+  //     clearToken()
+  //   }
+  // }, [applyToken, clearToken, getAccessTokenSilently, isAuthenticated])
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -174,15 +174,15 @@ function AuthProviderContainer({ children }: Props) {
     }
   }, [clearToken, getAccessToken, isAuthenticated])
 
-  useEffect(() => {
-    if (!isAuthenticated) return
+  // useEffect(() => {
+  //   if (!isAuthenticated) return
 
-    const interval = setInterval(() => {
-      void refreshAccessToken()
-    }, TOKEN_REFRESH_TIME)
+  //   const interval = setInterval(() => {
+  //     void refreshAccessToken()
+  //   }, TOKEN_REFRESH_TIME)
 
-    return () => clearInterval(interval)
-  }, [isAuthenticated, refreshAccessToken])
+  //   return () => clearInterval(interval)
+  // }, [isAuthenticated, refreshAccessToken])
 
   const { isPending: isLoading1 } = useFetchAllPracticesData(!!accessToken)
   const { isPending: isLoading2 } =
