@@ -134,13 +134,13 @@ export default function ReusableAccordion({
               £{formatAmountWithCommas(total)}
             </Typography>
 
-            {totalPercentage !== null && (
+            {totalPercentage && (
               <Typography
                 variant='subtitle2'
                 sx={{
                   fontWeight: 600,
                   fontStyle: 'italic',
-                  color: '#6B7280' // muted gray
+                  color: '#6B7280'
                 }}
               >
                 ({totalPercentage}%)

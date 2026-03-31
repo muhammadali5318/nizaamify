@@ -22,6 +22,7 @@ const ExpensePageHeader = ({
   allExpanded,
   setAllExpanded,
   pdfRef,
+  tooltipText,
   showDownloadBtn = true
 }: ExpenseHeaderProps) => {
   const [loadingPDF, setLoadingPDF] = useState(false)
@@ -198,6 +199,7 @@ const ExpensePageHeader = ({
           avatarSrc={avatarSrc}
           heading={heading}
           subheading={subheading}
+          tooltipText={tooltipText}
         />
 
         <Box

@@ -39,6 +39,7 @@ const NonPLItemsBreakdown = () => {
         showDownloadBtn={false}
         allExpanded={false}
         setAllExpanded={() => {}}
+        tooltipText='Items such as owners withdrawals, capital loans/injections or tax matters which do not belong in the P&L statement are recorded here'
       />
 
       {/* LOADING STATE */}

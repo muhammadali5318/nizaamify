@@ -40,4 +40,5 @@ export type ExpenseHeaderProps = {
   setAllExpanded: (val: boolean) => void
   pdfRef?: React.RefObject<HTMLDivElement | null>
   showDownloadBtn?: boolean
+  tooltipText?: string
 }

@@ -15,7 +15,7 @@ import { useInitialData } from 'src/hooks/useFetchInitialData'
 import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
 import apiClient from 'src/services/api-client'
 
-const TOKEN_REFRESH_TIME = 10 * 60 * 1000
+const TOKEN_REFRESH_TIME = 1 * 60 * 1000
 
 type Props = { children: React.ReactNode }
 
@@ -153,6 +153,8 @@ function AuthProviderContainer({ children }: Props) {
 
       const token = await getAccessTokenSilently({ cacheMode: 'off' })
 
+      // eslint-disable-next-line no-console
+      console.log('token refresheddd')
       if (token) {
         applyToken(token)
       }

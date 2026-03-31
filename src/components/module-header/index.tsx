@@ -5,8 +5,10 @@ import {
   Typography,
   TypographyProps,
   SxProps,
-  Theme
+  Theme,
+  Tooltip
 } from '@mui/material'
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 
 export interface ModuleHeaderProps {
   avatarSrc: string
@@ -18,6 +20,7 @@ export interface ModuleHeaderProps {
   variant?: TypographyProps['variant']
   imgAlt?: string
   gap?: number
+  tooltipText?: string
   sx?: SxProps<Theme>
 }
 
@@ -31,7 +34,8 @@ const ModuleHeader: React.FC<ModuleHeaderProps> = ({
   variant,
   imgAlt,
   sx,
-  gap = 0.5
+  gap = 0.5,
+  tooltipText
 }) => {
   const resolvedHeadingVariant: TypographyProps['variant'] = (variant ??
     headingVariant) as TypographyProps['variant']
@@ -52,9 +56,24 @@ const ModuleHeader: React.FC<ModuleHeaderProps> = ({
       />
 
       <Stack spacing={gap}>
-        <Typography variant={resolvedHeadingVariant} fontWeight={700}>
-          {heading}
-        </Typography>
+        <Box display={'flex'} alignItems={'center'} gap={2}>
+          <Typography variant={resolvedHeadingVariant} fontWeight={700}>
+            {heading}
+          </Typography>
+
+          {tooltipText && (
+            <Tooltip title={tooltipText} arrow placement='top'>
+              <HelpOutlineIcon
+                sx={{
+                  color: 'var(--color-primary-black)',
+                  cursor: 'pointer'
+                }}
+                aria-hidden={false}
+                role='img'
+              />
+            </Tooltip>
+          )}
+        </Box>
 
         {subheading && (
           <Typography variant={subheadingVariant} color='text.secondary'>
