@@ -1,5 +1,4 @@
 import { AppState, Auth0Provider, useAuth0 } from '@auth0/auth0-react'
-import { jwtDecode } from 'jwt-decode'
 import React, {
   createContext,
   useCallback,
@@ -16,9 +15,6 @@ import { useInitialData } from 'src/hooks/useFetchInitialData'
 import { useFetchUserWithActivePracticeData } from 'src/hooks/useFetchUserWithActivePracticeData'
 import apiClient from 'src/services/api-client'
 
-type JwtPayload = {
-  exp: number
-}
 type Props = { children: React.ReactNode }
 
 type AppUser = {
@@ -105,7 +101,6 @@ function AuthProviderContainer({ children }: Props) {
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [tokenLoading, setTokenLoading] = useState<boolean>(true)
   const [isInfoLoading, setIsInfoLoading] = useState<boolean>(true)
-  const [tokenExpiry, setTokenExpiry] = useState<number | null>(null)
 
   const clearToken = useCallback(() => {
     setAccessToken(null)
@@ -147,21 +142,6 @@ function AuthProviderContainer({ children }: Props) {
     }
   }, [applyToken, clearToken, getAccessTokenSilently, isAuthenticated])
 
-  const refreshAccessToken = useCallback(async () => {
-    try {
-      const token = await getAccessTokenSilently({ cacheMode: 'off' })
-      setAccessToken(token)
-      const decoded = jwtDecode<JwtPayload>(token)
-      setTokenExpiry(decoded.exp * 1000)
-      apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
-    } catch (error) {
-      console.warn('Error refreshing token:', error)
-      setAccessToken(null)
-      setTokenExpiry(null)
-      delete apiClient.defaults.headers.common.Authorization
-    }
-  }, [getAccessTokenSilently])
-
   useEffect(() => {
     if (isAuthenticated) {
       void getAccessToken()
@@ -172,22 +152,32 @@ function AuthProviderContainer({ children }: Props) {
     }
   }, [clearToken, getAccessToken, isAuthenticated])
 
+  // Background refresh every 10 minutes + update axios header
   useEffect(() => {
-    if (!tokenExpiry) return
+    if (!isAuthenticated) return
 
-    const refreshTime = tokenExpiry - Date.now() - 14 * 60 * 1000
+    const interval = setInterval(
+      async () => {
+        try {
+          const token = await getAccessTokenSilently({
+            cacheMode: 'off' // Force silent refresh using refresh token
+          })
 
-    if (refreshTime <= 0) {
-      refreshAccessToken()
-      return
-    }
+          if (token) {
+            setAccessToken(token)
+            apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
+          }
+        } catch (err) {
+          console.warn('Background token refresh failed:', err)
+          // Optional: clear token if refresh completely fails
+          // clearToken()
+        }
+      },
+      1 * 60 * 1000
+    ) // Every 1 minutes
 
-    const timer = setTimeout(() => {
-      refreshAccessToken()
-    }, refreshTime)
-
-    return () => clearTimeout(timer)
-  }, [tokenExpiry, refreshAccessToken])
+    return () => clearInterval(interval)
+  }, [isAuthenticated, getAccessTokenSilently])
 
   const { isPending: isLoading1 } = useFetchAllPracticesData(!!accessToken)
   const { isPending: isLoading2 } =
