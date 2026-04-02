@@ -173,7 +173,7 @@ function AuthProviderContainer({ children }: Props) {
           // clearToken()
         }
       },
-      1 * 60 * 1000
+      13 * 60 * 1000
     ) // Every 1 minutes
 
     return () => clearInterval(interval)
