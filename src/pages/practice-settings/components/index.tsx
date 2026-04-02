@@ -83,13 +83,13 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
 
   const closeSuccessDialog = useCallback(async () => {
     try {
+      await queryClient.invalidateQueries({
+        queryKey: ['listAllPracticesData']
+      })
       const token = await getAccessTokenSilently({
         cacheMode: 'off'
       })
       apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
-      await queryClient.invalidateQueries({
-        queryKey: ['listAllPracticesData']
-      })
     } catch (error) {
       console.error('Failed to invalidate queries:', error)
     } finally {
@@ -99,16 +99,16 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
 
   const submitSuccessDialog = useCallback(async () => {
     try {
-      const token = await getAccessTokenSilently({
-        cacheMode: 'off'
-      })
-      apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
       await queryClient.invalidateQueries({
         queryKey: ['listAllPracticesData']
       })
 
       handleSwitchToPractice(practice?.id)
       navigate(paths.dashboard)
+      const token = await getAccessTokenSilently({
+        cacheMode: 'off'
+      })
+      apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
     } catch (error) {
       console.error('Failed to invalidate queries:', error)
     } finally {
@@ -272,15 +272,12 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
                   }
                 )
 
-                const token = await getAccessTokenSilently({
-                  cacheMode: 'off'
-                })
-                apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
-
                 await queryClient.invalidateQueries({
                   queryKey: ['listAllPracticesData']
                 })
 
+                // eslint-disable-next-line no-console
+                console.log('practicesListLength' + practicesListLength)
                 if (practicesListLength > 1) {
                   if (practice?.id === activePracticeId) {
                     const firstNonActivePractice = unarchivedPractices?.find(
@@ -288,6 +285,11 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
                     )
                     handleSwitchToPractice(firstNonActivePractice?.id ?? '')
                   }
+
+                  const token = await getAccessTokenSilently({
+                    cacheMode: 'off'
+                  })
+                  apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
                 } else {
                   handleLogout()
                 }
