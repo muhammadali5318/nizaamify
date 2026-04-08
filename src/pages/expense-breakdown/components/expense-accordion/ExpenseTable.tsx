@@ -98,9 +98,9 @@ const ExpenseBreakdownTable: React.FC<ExpenseBreakdownTableProps> = ({
               </Typography>
             </TableCell>
             <TableCell sx={{ width: { xs: '20%', sm: '40%' } }} align='left'>
-              <Typography variant='subtitle2' fontWeight={500}>
+              {/* <Typography variant='subtitle2' fontWeight={500}>
                 Source Documents
-              </Typography>
+              </Typography> */}
             </TableCell>
           </TableRow>
 
@@ -410,14 +410,14 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
 
         {/* col 4 */}
         <TableCell sx={{ width: { xs: '20%', sm: '40%' } }} align='left'>
-          <IconButton
+          {/* <IconButton
             size={isSmDown ? 'small' : 'small'}
             aria-label='View Expense details'
             onClick={() => handleDocumentDetails(row?.expense_subtype)}
             sx={{ padding: isSmDown ? '6px' : undefined }}
           >
             <RemoveRedEyeOutlinedIcon fontSize='small' />
-          </IconButton>
+          </IconButton> */}
         </TableCell>
       </TableRow>
 

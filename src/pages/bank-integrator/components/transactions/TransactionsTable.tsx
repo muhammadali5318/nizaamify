@@ -295,10 +295,6 @@ const TransactionsTable = () => {
         { transactions }
       )
 
-      await queryClient.invalidateQueries({
-        queryKey: ['uncategorisedTransactions']
-      })
-
       // Reset after successful update
       dispatch(clearCategories())
       setRowSelectionModel({ type: 'include', ids: new Set() })
@@ -312,6 +308,9 @@ const TransactionsTable = () => {
       notify.error('Bulk update failed.')
     } finally {
       setIsCategorising(false)
+      queryClient.removeQueries({
+        queryKey: ['uncategorisedTransactions']
+      })
     }
   }, [
     rowSelectionModel,

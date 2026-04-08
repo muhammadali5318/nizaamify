@@ -5,7 +5,7 @@ import ReconciliationTab from '../ReconciliationTab'
 import BankIntegrator from '../BankIntegrator'
 import Transactions from '../components/transactions'
 import { useActivePractice } from 'src/hooks/useActivePractice'
-import TransactionsHistory from '../components/transactions-history'
+// import TransactionsHistory from '../components/transactions-history'
 
 export default function BankingTabsContainer(): ReusableTabItem[] {
   const { accountingBasis } = useActivePractice()
@@ -46,9 +46,9 @@ export default function BankingTabsContainer(): ReusableTabItem[] {
           case 1:
             content = <Transactions />
             break
-          case 3:
-            content = <TransactionsHistory />
-            break
+          // case 3:
+          //   content = <TransactionsHistory />
+          //   break
         }
 
         return {

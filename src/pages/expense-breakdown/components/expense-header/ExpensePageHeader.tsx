@@ -202,83 +202,85 @@ const ExpensePageHeader = ({
           tooltipText={tooltipText}
         />
 
-        <Box
-          sx={{
-            width: { xs: '100%', sm: 'auto' },
-            display: 'flex',
-            gap: 1,
-            alignItems: 'center',
-            position: 'relative'
-          }}
-        >
+        {showDownloadBtn && (
           <Box
             sx={{
-              mb: 0,
+              width: { xs: '100%', sm: 'auto' },
               display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              alignItems: { xs: 'start', sm: 'center' },
-              gap: 1
+              gap: 1,
+              alignItems: 'center',
+              position: 'relative'
             }}
           >
-            <Box>
-              {selectedPeriod === 'Last month' && (
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker
-                    views={['year', 'month']}
-                    label='Select Month'
-                    value={selectedMonth}
-                    onChange={(newValue: any) => {
-                      setSelectedMonth(newValue)
-                      setSelectedPeriod('Last month')
-                      applySelectedMonth(newValue)
-                    }}
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                        sx: {
-                          '& .MuiPickersInputBase-root': {
-                            borderRadius: '12px'
-                          },
-                          size: 'small',
-                          '& input': { padding: '8px 0px 8px 12px' }
-                        }
-                      }
-                    }}
-                  />
-                </LocalizationProvider>
-              )}
-            </Box>
-
-            <PeriodSelector
-              options={['Last month', '3-month view', 'Yearly']}
-              selected={selectedPeriod}
-              onSelect={(period) => {
-                setSelectedPeriod(period)
-
-                if (period === 'Last month') {
-                  const lastMonth = dayjs().subtract(1, 'month')
-                  setSelectedMonth(lastMonth)
-                  applySelectedMonth(lastMonth)
-                } else if (period === '3-month view') {
-                  // last 3 months up to current month (start at startOf month 3 months ago)
-                  const start = dayjs().subtract(2, 'month').startOf('month')
-                  const end = dayjs().endOf('month')
-                  onDateChange({
-                    start: start.toISOString(),
-                    end: end.toISOString()
-                  })
-                } else if (period === 'Yearly') {
-                  const start = dayjs().startOf('year')
-                  const end = dayjs().endOf('year')
-                  onDateChange({
-                    start: start.toISOString(),
-                    end: end.toISOString()
-                  })
-                }
+            <Box
+              sx={{
+                mb: 0,
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                alignItems: { xs: 'start', sm: 'center' },
+                gap: 1
               }}
-            />
+            >
+              <Box>
+                {selectedPeriod === 'Last month' && (
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      views={['year', 'month']}
+                      label='Select Month'
+                      value={selectedMonth}
+                      onChange={(newValue: any) => {
+                        setSelectedMonth(newValue)
+                        setSelectedPeriod('Last month')
+                        applySelectedMonth(newValue)
+                      }}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          sx: {
+                            '& .MuiPickersInputBase-root': {
+                              borderRadius: '12px'
+                            },
+                            size: 'small',
+                            '& input': { padding: '8px 0px 8px 12px' }
+                          }
+                        }
+                      }}
+                    />
+                  </LocalizationProvider>
+                )}
+              </Box>
+
+              <PeriodSelector
+                options={['Last month', '3-month view', 'Yearly']}
+                selected={selectedPeriod}
+                onSelect={(period) => {
+                  setSelectedPeriod(period)
+
+                  if (period === 'Last month') {
+                    const lastMonth = dayjs().subtract(1, 'month')
+                    setSelectedMonth(lastMonth)
+                    applySelectedMonth(lastMonth)
+                  } else if (period === '3-month view') {
+                    // last 3 months up to current month (start at startOf month 3 months ago)
+                    const start = dayjs().subtract(2, 'month').startOf('month')
+                    const end = dayjs().endOf('month')
+                    onDateChange({
+                      start: start.toISOString(),
+                      end: end.toISOString()
+                    })
+                  } else if (period === 'Yearly') {
+                    const start = dayjs().startOf('year')
+                    const end = dayjs().endOf('year')
+                    onDateChange({
+                      start: start.toISOString(),
+                      end: end.toISOString()
+                    })
+                  }
+                }}
+              />
+            </Box>
           </Box>
-        </Box>
+        )}
       </Box>
       {showDownloadBtn && (
         <Box

@@ -2,7 +2,7 @@
 import React from 'react'
 import { Box } from '@mui/material'
 import styles from './documents.module.scss'
-import StatsCard from 'src/components/team-management/StatsCard'
+// import StatsCard from 'src/components/team-management/StatsCard'
 import { ReusableTabs } from 'src/components/tabs'
 import useDocumentsTabs from './hooks/useDocumentsTabs'
 import {
@@ -11,29 +11,29 @@ import {
 } from './config/documentsConfig'
 import { Outlet, useLocation } from 'react-router'
 import PageBreadcrumbs from 'src/components/bread-crumbs/PageBreadcrumbs'
-import { useActivePractice } from 'src/hooks/useActivePractice'
-import { useHasPermission } from 'src/config/module-permissions'
-import useDocumentCounts from './hooks/useDocumentCounts'
+// import { useActivePractice } from 'src/hooks/useActivePractice'
+// import { useHasPermission } from 'src/config/module-permissions'
+// import useDocumentCounts from './hooks/useDocumentCounts'
 
 const DocumentsPage: React.FC = () => {
   const tabs = useDocumentsTabs()
-  const { activePracticeId } = useActivePractice()
-  const canViewDocuments = useHasPermission('data.upload_archive')
+  // const { activePracticeId } = useActivePractice()
+  // const canViewDocuments = useHasPermission('data.upload_archive')
 
-  const { data: counts } = useDocumentCounts(
-    activePracticeId,
-    !!canViewDocuments
-  )
+  // const { data: counts } = useDocumentCounts(
+  //   activePracticeId,
+  //   !!canViewDocuments
+  // )
 
   const location = useLocation()
   const isSubRoute = location.pathname === '/documents/manual-entry'
 
   // derive stats safely
-  const stats = {
-    all: counts?.all ?? 0,
-    uploaded: counts?.uploaded ?? 0,
-    review: counts?.review ?? 0
-  }
+  // const stats = {
+  //   all: counts?.all ?? 0,
+  //   uploaded: counts?.uploaded ?? 0,
+  //   review: counts?.review ?? 0
+  // }
 
   return (
     <Box className={styles.documentsRoot}>
@@ -49,7 +49,7 @@ const DocumentsPage: React.FC = () => {
       />
       {!isSubRoute ? (
         <>
-          <Box
+          {/* <Box
             flexDirection={{ xs: 'column', md: 'row', lg: 'row' }}
             gap={{ xs: 2, md: 3 }}
             justifyContent={{
@@ -81,7 +81,7 @@ const DocumentsPage: React.FC = () => {
               value={stats.review}
               sx={{ minHeight: '17vh' }}
             />
-          </Box>
+          </Box> */}
 
           <Box
             sx={{

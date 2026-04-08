@@ -143,7 +143,7 @@ const ExpenseBreakdown = () => {
           </Stack>
         )}
       </Box>
-      <NonPLItemsBreakdown />
+      <NonPLItemsBreakdown dateRange={dateRange} onDateChange={setDateRange} />
     </>
   )
 }

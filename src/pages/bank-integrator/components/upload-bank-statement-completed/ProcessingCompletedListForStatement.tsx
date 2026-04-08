@@ -1,7 +1,6 @@
 import {
   Box,
   Typography,
-  Button,
   CircularProgress,
   IconButton,
   Tooltip,
@@ -12,7 +11,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from 'src/store/store'
 import { useEffect, useMemo, useState } from 'react'
 import { getFileIcon } from 'src/utils/getFileIcon'
-import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined'
 import { notify } from '../../../../components/notistack/NotificationProvider'
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
 import spinner from '../../../../assets/spinnergif.gif'
@@ -38,6 +36,8 @@ import DeletedDocumentsList from 'src/pages/documents/components/DeletedDocument
 export default function ProcessingCompletedListForStatement() {
   const navigate = useNavigate()
   const [deletingIds, setDeletingIds] = useState<string[]>([])
+  const [hasTriggered, setHasTriggered] = useState(false)
+
   const dispatch = useDispatch()
   const [progressMap, setProgressMap] = useState<Record<string, number>>({})
   const batches = useSelector(
@@ -82,6 +82,35 @@ export default function ProcessingCompletedListForStatement() {
     () => allDocuments.filter((d) => d.status === 'PENDING').length,
     [allDocuments]
   )
+
+  const handleContinue = () => {
+    dispatch(clearAll())
+    dispatch(clearAllBankStatements())
+    dispatch(clearProcessing())
+    dispatch(clearPresignStatementsData())
+
+    if (accountingBasis === 'CASH') {
+      dispatch(setActiveTab(1))
+    } else if (accountingBasis === 'ACCRUAL') {
+      dispatch(setActiveTab(2))
+    }
+
+    navigate(paths.bankIntegrator)
+
+    queryClient.invalidateQueries({
+      queryKey: ['unverifiedTransactionsListApi']
+    })
+    queryClient.invalidateQueries({
+      queryKey: ['uncategorisedTransactions']
+    })
+  }
+
+  useEffect(() => {
+    if (areAllDocumentsProcessed && !hasTriggered) {
+      setHasTriggered(true)
+      handleContinue()
+    }
+  }, [areAllDocumentsProcessed, hasTriggered])
 
   // ------------- initialize progress entries for new docs ------------
   useEffect(() => {
@@ -181,7 +210,6 @@ export default function ProcessingCompletedListForStatement() {
     try {
       setDeletingIds((s) => [...s, docId])
 
-      // 1️⃣ Delete document
       await deleteBatchDocuments(activePracticeId, batchId, [], [docId])
       notify.success('Document removed from batch')
 
@@ -222,7 +250,7 @@ export default function ProcessingCompletedListForStatement() {
                 : 'Processing in Progress'}
             </Typography>
 
-            <Button
+            {/* <Button
               variant='contained'
               color='success'
               disabled={!areAllDocumentsProcessed}
@@ -247,7 +275,7 @@ export default function ProcessingCompletedListForStatement() {
               }}
             >
               Continue
-            </Button>
+            </Button> */}
           </Box>
           <NotificationBanner
             backgroundColor='rgba(239, 108, 0, 0.04)'

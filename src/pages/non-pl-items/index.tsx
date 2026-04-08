@@ -3,37 +3,39 @@ import styles from './nonPLItemsBreakdown.module.scss'
 import ExpensePageHeader from '../expense-breakdown/components/expense-header/ExpensePageHeader'
 import ExpensesGrandTotal from '../expense-breakdown/components/expense-header'
 import ReusableAccordion from '../expense-breakdown/components/expense-accordion'
-import { useState } from 'react'
-import dayjs from 'dayjs'
 import { RangeISO } from 'src/components/date-range-selector'
 import { formatAmountWithCommas } from 'src/utils/stringUtils'
 import { useFetchNonPLBreakdown } from 'src/hooks/useFetchNonPLBreakdown'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import { mapExpenseSubtypes } from './types'
 
-const NonPLItemsBreakdown = () => {
+type NonPLItemsBreakdownProps = {
+  dateRange: RangeISO
+  onDateChange: (range: RangeISO) => void
+}
+
+const NonPLItemsBreakdown = ({
+  dateRange,
+  onDateChange
+}: NonPLItemsBreakdownProps) => {
   const { activePracticeId } = useActivePractice()
-
-  const lastMonth = dayjs().subtract(1, 'month')
-
-  const [dateRange, setDateRange] = useState<RangeISO>({
-    start: lastMonth.startOf('month').toISOString(),
-    end: lastMonth.endOf('month').toISOString()
-  })
 
   const { data, loading } = useFetchNonPLBreakdown({
     practiceId: activePracticeId!,
-    startDate: dayjs(dateRange.start).format('YYYY-MM-DD'),
-    endDate: dayjs(dateRange.end).format('YYYY-MM-DD')
+    startDate: dateRange.start
+      ? new Date(dateRange.start).toISOString().slice(0, 10)
+      : '',
+    endDate: dateRange.end
+      ? new Date(dateRange.end).toISOString().slice(0, 10)
+      : ''
   })
 
   return (
     <Box className={styles.nonPLItemsBreakdownRoot} width='100%'>
-      {/* HEADER (always mounted so state does not reset) */}
       <ExpensePageHeader
         heading='Non P&L Items Breakdown'
         dateRange={dateRange}
-        onDateChange={setDateRange}
+        onDateChange={onDateChange}
         avatarSrc='/assets/non-pl-green-icon.svg'
         subheading='Detailed view of all Non P&L items categories and subcategories'
         showDownloadBtn={false}
@@ -42,9 +44,8 @@ const NonPLItemsBreakdown = () => {
         tooltipText='Items such as owners withdrawals, capital loans/injections or tax matters which do not belong in the P&L statement are recorded here'
       />
 
-      {/* LOADING STATE */}
       {loading && (
-        <Box display='flex' justifyContent='center' mt={4} width={'100%'}>
+        <Box display='flex' justifyContent='center' mt={4} width='100%'>
           <CircularProgress />
         </Box>
       )}

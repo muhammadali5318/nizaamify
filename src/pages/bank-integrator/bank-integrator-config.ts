@@ -20,13 +20,13 @@ export const bankingTabsData = [
     inactiveIcon: '/assets/in-active-union.svg',
     count: 0,
     countTotal: 0
-  },
-  {
-    key: 3,
-    label: 'Invoice Upload History',
-    activeIcon: '/assets/history.svg',
-    inactiveIcon: '/assets/history-icon.svg'
   }
+  // {
+  //   key: 3,
+  //   label: 'Invoice Upload History',
+  //   activeIcon: '/assets/history.svg',
+  //   inactiveIcon: '/assets/history-icon.svg'
+  // }
 ]
 
 export const uploadCsvBreads = [
