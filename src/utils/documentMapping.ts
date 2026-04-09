@@ -50,7 +50,7 @@ export const documentMapping: Record<string, Record<string, string[]>> = {
     'Cleaning Services': ['Cleaning Services'],
     'Security & Alarm Contracts': ['Security & Alarm Contracts'],
     'Waste disposal': ['Waste disposal'],
-    Other: ['Premises']
+    Other: ['Other - Premises']
   },
 
   // --- Business Operations ---
