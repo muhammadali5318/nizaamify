@@ -47,10 +47,10 @@ const DocumentsList: React.FC<DocumentsListProps> = ({
 
   const totalPages = Math.max(1, Math.ceil((total || 0) / (pageSize || 10)))
 
-  // const handleDeleteClick = (doc: any) => {
-  //   setSelectedDoc(doc)
-  //   setIsDeleteOpen(true)
-  // }
+  const handleDeleteClick = (doc: any) => {
+    setSelectedDoc(doc)
+    setIsDeleteOpen(true)
+  }
 
   const handleDeleteConfirm = async () => {
     if (!selectedDoc) return
@@ -165,7 +165,7 @@ const DocumentsList: React.FC<DocumentsListProps> = ({
                   )}
                 </IconButton>
 
-                {/* <IconButton
+                <IconButton
                   size='small'
                   aria-label={`delete ${doc.file_name}`}
                   onClick={() => handleDeleteClick(doc)}
@@ -175,7 +175,7 @@ const DocumentsList: React.FC<DocumentsListProps> = ({
                     alt='delete'
                     style={{ width: 20, height: 20, display: 'block' }}
                   />
-                </IconButton> */}
+                </IconButton>
               </Box>
             </Box>
 

@@ -37,7 +37,7 @@ interface DocumentDetailsModalProps {
   documentsTotal?: number
 
   // manual entries have a different shape (array of entries with supporting_docs)
-  manualEntries: any[]
+  manualEntries: DocumentItem[]
   manualPage?: number
   manualPageSize?: number
   manualTotal?: number
@@ -205,7 +205,7 @@ const DocumentDetailsModal: React.FC<DocumentDetailsModalProps> = React.memo(
               title='Manual Entries'
               docs={manualEntries}
               downloadingKey={downloadingKey}
-              listKey='manual'
+              listKey='manual_entries'
               page={manualPage}
               pageSize={manualPageSize}
               total={manualTotal}
@@ -218,7 +218,7 @@ const DocumentDetailsModal: React.FC<DocumentDetailsModalProps> = React.memo(
               title='Bank Connector'
               docs={aggregators}
               downloadingKey={downloadingKey}
-              listKey={'docs'}
+              listKey={'bank_aggregator'}
               page={aggregatorPage}
               pageSize={aggregatorPageSize}
               total={aggregatorTotal}

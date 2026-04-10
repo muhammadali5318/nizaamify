@@ -45,11 +45,45 @@ interface ManualListColumnProps {
   pageSize?: number
   total?: number
   downloadingKey: string | null
-  listKey: 'manual'
+  listKey: string
   onPageChange?: (page: number, pageSize: number) => void
   closeParent: () => void
   onDownload: (listKey: string, id: string, indexKey: string | number) => void
 }
+
+const manualEntriesContent = (
+  <Box>
+    <Typography variant='subtitle1'>
+      Are you sure you want to delete this manual entry?
+    </Typography>
+
+    <Typography variant='subtitle1' sx={{ mt: 1 }}>
+      Deleting this entry will permanently remove it and reverse all related
+      financial calculations recorded in the system.
+    </Typography>
+
+    <Typography variant='subtitle1' sx={{ mt: 1 }}>
+      This action cannot be undone.
+    </Typography>
+  </Box>
+)
+
+const bankConnectorContent = (
+  <Box>
+    <Typography variant='subtitle1'>
+      Are you sure you want to delete this bank connector entry?
+    </Typography>
+
+    <Typography variant='subtitle1' sx={{ mt: 1 }}>
+      Deleting this entry will permanently remove it and reverse all related
+      financial calculations recorded in the system.
+    </Typography>
+
+    <Typography variant='subtitle1' sx={{ mt: 1 }}>
+      This action cannot be undone.
+    </Typography>
+  </Box>
+)
 
 export default function ManualListColumn({
   title,
@@ -57,6 +91,7 @@ export default function ManualListColumn({
   page = 1,
   pageSize = 10,
   total = 0,
+  listKey,
   // downloadingKey,
   onPageChange,
   // onDownload,
@@ -73,10 +108,10 @@ export default function ManualListColumn({
   const handleExpand = (panel: string) => (_: any, isExpanded: boolean) =>
     setExpanded(isExpanded ? panel : false)
 
-  // const handleDeleteClick = (doc: any) => {
-  //   setSelectedDoc(doc)
-  //   setIsDeleteOpen(true)
-  // }
+  const handleDeleteClick = (doc: any) => {
+    setSelectedDoc(doc)
+    setIsDeleteOpen(true)
+  }
 
   const handleDeleteConfirm = async () => {
     if (!selectedDoc) return
@@ -88,7 +123,7 @@ export default function ManualListColumn({
           selectedDoc?.id
         ),
         {
-          params: { module: 'manual_entries' }
+          params: { module: listKey }
         }
       )
 
@@ -194,7 +229,7 @@ export default function ManualListColumn({
                     >
                       {count} doc{count !== 1 ? 's' : ''}
                     </Typography>
-                    {/* <IconButton
+                    <IconButton
                       size='small'
                       onClick={() => handleDeleteClick(entry)}
                     >
@@ -207,7 +242,7 @@ export default function ManualListColumn({
                           display: 'block'
                         }}
                       />
-                    </IconButton> */}
+                    </IconButton>
                   </Box>
                 </AccordionSummary>
 
@@ -328,22 +363,15 @@ export default function ManualListColumn({
         onConfirm={handleDeleteConfirm}
         loading={loading}
         document={selectedDoc}
-        title='  Confirm Manual Entry Deletion'
+        title={
+          listKey === 'manual_entries'
+            ? '  Confirm Manual entry deletion'
+            : '  Confirm bank connector entry deletion'
+        }
         content={
-          <Box>
-            <Typography variant='subtitle1'>
-              Are you sure you want to delete this manual entry?
-            </Typography>
-
-            <Typography variant='subtitle1' sx={{ mt: 1 }}>
-              Deleting this entry will permanently remove it and reverse all
-              related financial calculations recorded in the system.
-            </Typography>
-
-            <Typography variant='subtitle1' sx={{ mt: 1 }}>
-              This action cannot be undone.
-            </Typography>
-          </Box>
+          listKey === 'manual_entries'
+            ? manualEntriesContent
+            : bankConnectorContent
         }
       />
     </Box>
