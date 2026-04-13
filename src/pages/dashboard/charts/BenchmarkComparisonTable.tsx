@@ -10,7 +10,7 @@ import {
   Box,
   Typography,
   useTheme,
-  Button,
+  // Button,
   Stack,
   TableContainer
 } from '@mui/material'
@@ -19,7 +19,7 @@ import { useState } from 'react'
 import { getUKAvgValue } from '../utils/getUKAvgValue'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 import benchmarkIcon from '../../../assets/benchmark-comp-icon.svg'
-import { downloadBenchmarkCsv } from '../utils/downloadBenchmarkCSV'
+// import { downloadBenchmarkCsv } from '../utils/downloadBenchmarkCSV'
 import { useAuth } from 'src/context/AuthProvider'
 import { useFetchBenchmarkConfigurations } from 'src/hooks/useFetchBenchmarkConfigurations'
 
@@ -72,7 +72,7 @@ export default function ExpandableBenchmarkTable({
           </Box>
 
           <Stack direction='row' spacing={1.5}>
-            <Button
+            {/* <Button
               variant='outlined'
               size='small'
               onClick={() =>
@@ -82,7 +82,7 @@ export default function ExpandableBenchmarkTable({
               }
             >
               Download CSV
-            </Button>
+            </Button> */}
           </Stack>
         </Box>
 
@@ -146,7 +146,8 @@ export default function ExpandableBenchmarkTable({
 
             <TableBody>
               {expenseTypes.map((type: any) =>
-                type.expense_type !== 'Tax Documents' ? (
+                type.expense_type !== 'Tax Documents' &&
+                type.expense_type !== 'Business Operations' ? (
                   <ExpandableRow
                     key={type.expense_type}
                     row={type}

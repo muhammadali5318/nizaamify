@@ -129,6 +129,8 @@ export const endpoints = {
     deleteDocument: (id: string, documentId: string) =>
       `/${API_BASE_DOCUMENTS}/practices/${id}/document/${documentId}/`,
     documentStatus: (id: string, documentId: string) =>
-      `/${API_BASE_DOCUMENTS}/practices/${id}/document-status/${documentId}/`
+      `/${API_BASE_DOCUMENTS}/practices/${id}/document-status/${documentId}/`,
+    dashboardAiSummary: (id: string) =>
+      `${API_BASE_DOCUMENTS}/practices/${id}/dashboard/ai-summary/`
   }
 }
