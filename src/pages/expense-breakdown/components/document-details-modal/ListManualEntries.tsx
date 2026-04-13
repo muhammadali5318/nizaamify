@@ -134,6 +134,9 @@ export default function ManualListColumn({
       await queryClient.invalidateQueries({
         queryKey: ['allExpenseBreakDown']
       })
+      await queryClient.invalidateQueries({
+        queryKey: ['useFetchNonPL']
+      })
     } catch (error) {
       console.error('Delete error:', error)
       notify.error('Failed to delete the item')

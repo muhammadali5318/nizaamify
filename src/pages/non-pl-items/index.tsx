@@ -5,9 +5,8 @@ import ExpensesGrandTotal from '../expense-breakdown/components/expense-header'
 import ReusableAccordion from '../expense-breakdown/components/expense-accordion'
 import { RangeISO } from 'src/components/date-range-selector'
 import { formatAmountWithCommas } from 'src/utils/stringUtils'
-import { useFetchNonPLBreakdown } from 'src/hooks/useFetchNonPLBreakdown'
-import { useActivePractice } from 'src/hooks/useActivePractice'
 import { mapExpenseSubtypes } from './types'
+import { useFetchNonPL } from './hooks/useFetchNonPL'
 
 type NonPLItemsBreakdownProps = {
   dateRange: RangeISO
@@ -18,16 +17,18 @@ const NonPLItemsBreakdown = ({
   dateRange,
   onDateChange
 }: NonPLItemsBreakdownProps) => {
-  const { activePracticeId } = useActivePractice()
+  const startDate = dateRange.start
+    ? new Date(dateRange.start).toISOString().slice(0, 10)
+    : null
 
-  const { data, loading } = useFetchNonPLBreakdown({
-    practiceId: activePracticeId!,
-    startDate: dateRange.start
-      ? new Date(dateRange.start).toISOString().slice(0, 10)
-      : '',
-    endDate: dateRange.end
-      ? new Date(dateRange.end).toISOString().slice(0, 10)
-      : ''
+  const endDate = dateRange.end
+    ? new Date(dateRange.end).toISOString().slice(0, 10)
+    : null
+
+  const { data, isPending } = useFetchNonPL({
+    enabled: !!startDate && !!endDate,
+    startDate,
+    endDate
   })
 
   return (
@@ -44,21 +45,21 @@ const NonPLItemsBreakdown = ({
         tooltipText='Items such as owners withdrawals, capital loans/injections or tax matters which do not belong in the P&L statement are recorded here'
       />
 
-      {loading && (
+      {isPending && (
         <Box display='flex' justifyContent='center' mt={4} width='100%'>
           <CircularProgress />
         </Box>
       )}
 
       {/* CONTENT */}
-      {!loading && data && (
+      {!isPending && data && (
         <>
           <ExpensesGrandTotal
             total={formatAmountWithCommas(data.total)}
             label='Total Monthly Non P&L Items Expenses:'
           />
 
-          {data.categories.map((category, idx) => {
+          {data?.categories?.map((category, idx) => {
             const expenseType = data.expense_type.find(
               (item) => item.expense_type === category.parent_category
             )

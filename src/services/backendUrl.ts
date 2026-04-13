@@ -118,6 +118,8 @@ export const endpoints = {
       `/${API_BASE_DOCUMENTS}/practices/${id}/documents/${documentId}/post-date/`,
     expenseBreakdown: (practiceId: string) =>
       `/${API_BASE_DOCUMENTS}/practices/${practiceId}/expense-breakdown-detail/`,
+    nonPLBreakDown: (practiceId: string) =>
+      `/${API_BASE_DOCUMENTS}/practices/${practiceId}/non-pl-expense-breakdown/`,
     expenseBreakdownDocuments: (practiceId: string) =>
       `/${API_BASE_DOCUMENTS}/practices/${practiceId}/expense-breakdown-documents/`,
     expenseBreakdownManualDocuments: (practiceId: string) =>

@@ -75,6 +75,9 @@ const DocumentsList: React.FC<DocumentsListProps> = ({
       await queryClient.invalidateQueries({
         queryKey: ['allExpenseBreakDown']
       })
+      await queryClient.invalidateQueries({
+        queryKey: ['useFetchNonPL']
+      })
     } catch (error) {
       console.error('Delete error:', error)
       notify.error('Failed to delete document')
