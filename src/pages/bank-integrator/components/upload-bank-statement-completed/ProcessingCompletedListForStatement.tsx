@@ -296,7 +296,11 @@ export default function ProcessingCompletedListForStatement() {
 
       {allDocuments?.map((doc) => {
         const id = doc.document_id ?? doc.id
-        const progress = Math.round((progressMap[id] ?? 0) * 100) / 100 // round for stable rendering
+        const progress = Math.round((progressMap[id] ?? 0) * 100) / 100
+
+        const isDuplicateTransactionError =
+          doc?.error_message ===
+          'Duplicate transactions detected. This statement may have already been processed.'
 
         return (
           <Box
@@ -305,10 +309,10 @@ export default function ProcessingCompletedListForStatement() {
               mb: '10px',
               borderRadius: '16px',
               border: '1px solid #eee',
-              padding: '10px  16px'
+              padding: '10px 16px'
             }}
           >
-            <Stack spacing={'10px'}>
+            <Stack spacing='10px'>
               <Box
                 display='flex'
                 flexWrap='wrap'
@@ -329,36 +333,38 @@ export default function ProcessingCompletedListForStatement() {
                     </Typography>
                     <Typography variant='caption' color='text.secondary'>
                       File Format:{' '}
-                      {doc.file_name.split('.').pop()?.toUpperCase()}{' '}
+                      {doc.file_name.split('.').pop()?.toUpperCase()}
                     </Typography>
                   </Box>
                 </Box>
-                <Box display={'flex'} gap={1} alignItems={'center'}>
-                  <>
-                    {doc.status !== 'SUCCESS' && (
-                      <img
-                        src={spinner}
-                        alt='processing'
-                        style={{
-                          width: 20,
-                          height: 20,
-                          borderRadius: '50%',
-                          animation: 'spin 1s linear infinite'
-                        }}
-                      />
-                    )}
-                    <Typography variant='caption' fontStyle={'italic'}>
-                      {doc.status === 'SUCCESS' ? 'Processed' : 'Processing...'}
-                    </Typography>
-                  </>
+
+                <Box display='flex' gap={1} alignItems='center'>
+                  {!isDuplicateTransactionError && doc.status !== 'SUCCESS' && (
+                    <img
+                      src={spinner}
+                      alt='processing'
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                      }}
+                    />
+                  )}
+
+                  <Typography variant='caption' fontStyle='italic'>
+                    {isDuplicateTransactionError
+                      ? 'Removed from batch'
+                      : doc.status === 'SUCCESS'
+                        ? 'Processed'
+                        : 'Processing...'}
+                  </Typography>
+
                   <Tooltip title='Remove Document from batch' placement='top'>
                     <IconButton
                       onClick={() => handleRemoveDocument(doc)}
                       disabled={deletingIds.includes(doc.id)}
-                      sx={{
-                        borderColor: 'error.main',
-                        color: 'error.main'
-                      }}
+                      sx={{ borderColor: 'error.main', color: 'error.main' }}
                     >
                       {deletingIds.includes(doc.id) ? (
                         <CircularProgress size={16} />
@@ -370,38 +376,54 @@ export default function ProcessingCompletedListForStatement() {
                 </Box>
               </Box>
 
-              {doc.status === 'PENDING' ? (
-                <Box display='flex' flexDirection='column' gap={1}>
-                  <LinearProgress
-                    variant='determinate'
-                    value={progress}
-                    sx={{
-                      height: 6,
-                      borderRadius: '4px',
-                      backgroundColor: '#e0e0e0',
-                      '& .MuiLinearProgress-bar': {
-                        backgroundColor: '#0288d1'
-                      }
-                    }}
-                  />
+              {isDuplicateTransactionError ? (
+                <Box
+                  sx={{
+                    backgroundColor: '#FEF2F2',
+                    borderRadius: '8px',
+                    border: '1px solid #FCA5A5',
+                    p: 2,
+                    textAlign: 'left'
+                  }}
+                  role='alert'
+                  aria-live='polite'
+                >
+                  <Stack
+                    direction='row'
+                    spacing={2}
+                    alignItems='center'
+                    sx={{ mb: 1 }}
+                  >
+                    <ErrorOutlineIcon sx={{ color: '#DC2626', fontSize: 22 }} />
+                    <Typography
+                      variant='subtitle2'
+                      sx={{ fontWeight: 700, color: '#DC2626' }}
+                    >
+                      Duplicate transaction detected
+                    </Typography>
+                  </Stack>
+
+                  <Typography variant='body2' sx={{ color: '#7F1D1D' }}>
+                    Duplicate transactions were found in this statement. It may
+                    have already been processed, so this file has been removed
+                    from the batch.
+                  </Typography>
                 </Box>
-              ) : doc.status === 'SUCCESS' || doc.status === 'UNKNOWN' ? (
-                <Box display='flex' flexDirection='column' gap={1}>
-                  <Box display='flex' flexDirection='column' gap={1}>
-                    <LinearProgress
-                      variant='determinate'
-                      value={progress}
-                      sx={{
-                        height: 6,
-                        borderRadius: '4px',
-                        backgroundColor: '#e0e0e0',
-                        '& .MuiLinearProgress-bar': {
-                          backgroundColor: '#0288d1'
-                        }
-                      }}
-                    />
-                  </Box>
-                </Box>
+              ) : doc.status === 'PENDING' ||
+                doc.status === 'SUCCESS' ||
+                doc.status === 'UNKNOWN' ? (
+                <LinearProgress
+                  variant='determinate'
+                  value={progress}
+                  sx={{
+                    height: 6,
+                    borderRadius: '4px',
+                    backgroundColor: '#e0e0e0',
+                    '& .MuiLinearProgress-bar': {
+                      backgroundColor: '#0288d1'
+                    }
+                  }}
+                />
               ) : (
                 <Box
                   sx={{
@@ -429,10 +451,9 @@ export default function ProcessingCompletedListForStatement() {
                     </Typography>
                   </Stack>
 
-                  <Typography variant='body2' sx={{ color: '#7F1D1D', mb: 1 }}>
-                    This document could not be processed by error. Please remove
-                    this document from the batch. Once removed, you can continue
-                    with remaining documents.
+                  <Typography variant='body2' sx={{ color: '#7F1D1D' }}>
+                    This document could not be processed. Please remove it from
+                    the batch, then continue with the remaining documents.
                   </Typography>
                 </Box>
               )}
