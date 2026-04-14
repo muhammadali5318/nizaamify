@@ -25,9 +25,7 @@ export const documentMapping: Record<string, Record<string, string[]>> = {
 
   // --- Materials & Equipment ---
   'Materials & Equipment': {
-    Materials: [
-      'Materials' // As pointed out in your example
-    ],
+    Materials: ['Materials'],
     Equipment: [
       'Equipment purchases',
       'Equipment leasing',
@@ -93,7 +91,6 @@ export const documentMapping: Record<string, Record<string, string[]>> = {
 
 export const getDocumentTypes = (): string[] => Object.keys(documentMapping)
 
-// Updated: Now returns Subtypes (keys of the nested object)
 export const getDocumentSubtypes = (
   type: string,
   method?: string
@@ -118,14 +115,43 @@ export const getDocumentSubtypes = (
   return Object.keys(documentMapping[type])
 }
 
-// New Function: To retrieve the third level (Expense Sub-categories)
 export const getExpenseSubcategories = (
   type: string,
   subtype: string
-): string[] =>
-  documentMapping[type] && documentMapping[type][subtype]
-    ? documentMapping[type][subtype]
-    : []
+): string[] => documentMapping[type]?.[subtype] ?? []
+
+export const getDocumentLineItems = (
+  type: string,
+  subtype?: string
+): string[] => {
+  const typeMapping = documentMapping[type]
+  if (!typeMapping) return []
+
+  // Revenue documents do not use line items
+  if (type === 'Income & Revenue') return []
+
+  if (subtype) {
+    return typeMapping[subtype] ?? []
+  }
+
+  // Backward compatible behavior:
+  // when only the category/type is selected, return all line items from all subcategories
+  return Object.values(typeMapping).flat()
+}
+
+export const getSubtypeForLineItem = (
+  type: string,
+  lineItem: string
+): string => {
+  const typeMapping = documentMapping[type]
+  if (!typeMapping) return ''
+
+  for (const [subtype, items] of Object.entries(typeMapping)) {
+    if (items.includes(lineItem)) return subtype
+  }
+
+  return ''
+}
 
 export const category = {
   expense: 'Expense',
@@ -141,11 +167,10 @@ export const getFilteredDocumentTypes = (category: string): string[] => {
   }
 
   if (category === 'Expense') {
-    // Filter out non-expense types
     return allTypes.filter(
       (t) => t !== 'Income & Revenue' && t !== 'Tax Documents'
     )
   }
 
-  return allTypes // Unknown → ALL
+  return allTypes
 }

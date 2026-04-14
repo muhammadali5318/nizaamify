@@ -17,7 +17,8 @@ import {
   getDocumentSubtypes,
   category,
   getFilteredDocumentTypes,
-  getExpenseSubcategories
+  getDocumentLineItems,
+  getSubtypeForLineItem
 } from '../../../utils/documentMapping'
 
 interface EditDocumentModalProps {
@@ -26,8 +27,10 @@ interface EditDocumentModalProps {
   batchId: string
   document: any
 }
+
 import editModalIcon from '../../../assets/edit-modal-icon.svg'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+
 export default function EditDocumentModal({
   open,
   onClose,
@@ -42,75 +45,104 @@ export default function EditDocumentModal({
     document_subtype: '',
     amount: '',
     expense_category: '',
-
     document_date: '',
     payment_date: ''
   })
 
-  const [availableSubtypes, setAvailableSubtypes] = useState<string[]>([])
   useEffect(() => {
-    if (document) {
-      setFormData({
-        document_category: document.document_category || '',
-        document_type: document.document_type || '',
-        document_subtype: document.document_subtype || '',
-        expense_category: document.expense_category || '',
-        amount: document.amount || '',
-        document_date: document.document_date || '',
-        payment_date: document.payment_date || ''
-      })
-    }
+    if (!document) return
+
+    const normalizedCategory = document.document_type
+      ? document.document_type === 'Income & Revenue'
+        ? 'Revenue'
+        : 'Expense'
+      : document.document_category || ''
+
+    const availableTypes = getFilteredDocumentTypes(normalizedCategory)
+    const normalizedType = document.document_type || availableTypes[0] || ''
+
+    const normalizedSubtype =
+      document.document_subtype ||
+      (document.expense_category
+        ? getSubtypeForLineItem(normalizedType, document.expense_category)
+        : '')
+
+    setFormData({
+      document_category: normalizedCategory,
+      document_type: normalizedType,
+      document_subtype: normalizedSubtype,
+      expense_category: document.expense_category || '',
+      amount: document.amount || '',
+      document_date: document.document_date || '',
+      payment_date: document.payment_date || ''
+    })
   }, [document])
 
-  useEffect(() => {
-    const subtypes = getDocumentSubtypes(
-      formData.document_type,
-      accountingBasis
-    )
-    setAvailableSubtypes(subtypes)
-  }, [formData.document_type])
+  const availableSubtypes = getDocumentSubtypes(
+    formData.document_type,
+    accountingBasis
+  )
+
   const availableLineItems =
-    formData.document_type && formData.document_subtype
-      ? getExpenseSubcategories(
-          formData.document_type,
-          formData.document_subtype
-        )
+    formData.document_type && formData.document_type !== 'Income & Revenue'
+      ? getDocumentLineItems(formData.document_type, formData.document_subtype)
       : []
+
   const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
+    setFormData((prev) => {
+      if (field === 'document_category') {
+        const nextTypes = getFilteredDocumentTypes(value)
+        const autoSelectedType = nextTypes[0] || ''
 
-      ...(field === 'document_category'
-        ? {
-            document_type: '',
-            document_subtype: '',
-            expense_category: ''
-          }
-        : {}),
+        return {
+          ...prev,
+          document_category: value,
+          document_type: autoSelectedType,
+          document_subtype: '',
+          expense_category: ''
+        }
+      }
 
-      ...(field === 'document_type'
-        ? {
-            document_subtype: '',
-            expense_category: ''
-          }
-        : {}),
+      if (field === 'document_type') {
+        return {
+          ...prev,
+          document_type: value,
+          document_category:
+            value === 'Income & Revenue' ? 'Revenue' : 'Expense',
+          document_subtype: '',
+          expense_category: ''
+        }
+      }
 
-      ...(field === 'document_subtype'
-        ? {
-            expense_category: ''
-          }
-        : {})
-    }))
+      if (field === 'document_subtype') {
+        return {
+          ...prev,
+          document_subtype: value,
+          expense_category: ''
+        }
+      }
+
+      if (field === 'expense_category') {
+        const matchedSubtype = getSubtypeForLineItem(prev.document_type, value)
+
+        return {
+          ...prev,
+          expense_category: value,
+          document_subtype: matchedSubtype || prev.document_subtype
+        }
+      }
+
+      return {
+        ...prev,
+        [field]: value
+      } as typeof prev
+    })
   }
 
   const handleUpdate = () => {
     const updates: Record<string, any> = { ...formData }
 
-    if (
-      updates.document_category === 'Revenue' ||
-      updates.document_category === 'Unknown'
-    ) {
+    if (updates.document_type === 'Income & Revenue') {
       delete updates.expense_category
     }
 
@@ -156,11 +188,13 @@ export default function EditDocumentModal({
         >
           <img src={editModalIcon} alt='edit' />
         </Box>
+
         <DialogTitle
           sx={{ fontWeight: 700, fontSize: '24px', marginBottom: '-18px' }}
         >
           Change document information
         </DialogTitle>
+
         <DialogContent>
           <Typography
             variant='subtitle1'
@@ -188,6 +222,7 @@ export default function EditDocumentModal({
                 </MenuItem>
               ))}
             </TextField>
+
             <TextField
               select
               fullWidth
@@ -216,6 +251,7 @@ export default function EditDocumentModal({
                 </MenuItem>
               ))}
             </TextField>
+
             {formData.document_type !== 'Income & Revenue' && (
               <TextField
                 select
@@ -225,7 +261,7 @@ export default function EditDocumentModal({
                 onChange={(e) =>
                   handleChange('expense_category', e.target.value)
                 }
-                disabled={!formData.document_subtype}
+                disabled={!formData.document_type}
               >
                 {availableLineItems.map((item) => (
                   <MenuItem key={item} value={item}>
@@ -267,15 +303,14 @@ export default function EditDocumentModal({
           }}
         >
           <Button
-            sx={{
-              width: '100%'
-            }}
+            sx={{ width: '100%' }}
             onClick={onClose}
             variant='outlined'
             color='inherit'
           >
             Cancel
           </Button>
+
           <Button
             sx={{
               width: '100%',

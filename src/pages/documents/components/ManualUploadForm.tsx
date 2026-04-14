@@ -26,7 +26,8 @@ import {
   getDocumentSubtypes,
   category,
   getFilteredDocumentTypes,
-  getExpenseSubcategories
+  getDocumentLineItems,
+  getSubtypeForLineItem
 } from '../../../utils/documentMapping'
 import {
   addFilesToQueue,
@@ -45,6 +46,7 @@ import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
 import { getFileIcon } from 'src/utils/getFileIcon'
 import { useNavigate } from 'react-router'
 import { resetPresignResponse } from 'src/store/slices/manualEntryFilesSlice'
+
 interface ManualEntryFormData {
   entryDate: dayjs.Dayjs | null
   paymentDate: dayjs.Dayjs | null
@@ -56,7 +58,6 @@ interface ManualEntryFormData {
   invoiceNumber: string
   description: string
   lineItem: string
-
   attachments: File[]
 }
 
@@ -74,6 +75,7 @@ const ManualEntryForm: React.FC = () => {
     description: '',
     attachments: []
   })
+
   const { completedFiles } = useSelector((state: RootState) => state.uploads)
   const [isSaving, setIsSaving] = useState(false)
   const batches = useSelector((state: RootState) => state.processed.batches)
@@ -82,10 +84,26 @@ const ManualEntryForm: React.FC = () => {
   const queue = useSelector((state: RootState) => state.manualEntryQueue.queue)
   const { user } = useAuth0()
   const { activePracticeId, accountingBasis } = useActivePractice()
+  const navigate = useNavigate()
+  const [amountError, setAmountError] = useState<string>('')
+
+  const userId = user?.user_data?.user_metadata?.uuid
+
+  const manualEntryFiles = useSelector(
+    (state: RootState) => state.manualEntryFiles
+  )
+
   const types = getFilteredDocumentTypes(formData.category)
+
   const subtypes = formData.type
     ? getDocumentSubtypes(formData.type, accountingBasis)
     : []
+
+  const lineItems =
+    formData.type && formData.type !== 'Income & Revenue'
+      ? getDocumentLineItems(formData.type, formData.subtype || undefined)
+      : []
+
   const MAX_FILES = 5
 
   const handleFilesSelected = (incomingFiles: FileList | File[]) => {
@@ -111,16 +129,11 @@ const ManualEntryForm: React.FC = () => {
     dispatch(addFilesToQueue(newFiles))
   }
 
-  const navigate = useNavigate()
-  const [amountError, setAmountError] = useState<string>('')
-  const userId = user?.user_data?.user_metadata?.uuid
-  const manualEntryFiles = useSelector(
-    (state: RootState) => state.manualEntryFiles
-  )
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
+
     if ((name === 'entryDate' || name === 'paymentDate') && value) {
       const selectedDate = new Date(value)
       const today = new Date()
@@ -131,12 +144,14 @@ const ManualEntryForm: React.FC = () => {
         return
       }
     }
+
     if (name === 'amount') {
       const numberValue = parseFloat(value)
 
       if (value !== '' && numberValue < 0) {
-        setAmountError('Amount cannot be negative')
-        notify.error(amountError || 'Amount cannot be negative')
+        const message = 'Amount cannot be negative'
+        setAmountError(message)
+        notify.error(message)
       } else {
         setAmountError('')
       }
@@ -145,6 +160,7 @@ const ManualEntryForm: React.FC = () => {
     if (name === 'amount' && value !== '' && parseFloat(value) < 0) {
       return
     }
+
     if (name === 'vendorName' || name === 'invoiceNumber') {
       if (value.length > 255) {
         notify.error(
@@ -156,23 +172,75 @@ const ManualEntryForm: React.FC = () => {
 
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
-  const lineItems =
-    formData.type && formData.subtype
-      ? getExpenseSubcategories(formData.type, formData.subtype)
-      : []
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target
 
     if (!name) return
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-      ...(name === 'category' ? { type: '', subtype: '', lineItem: '' } : {}),
-      ...(name === 'type' ? { subtype: '', lineItem: '' } : {}),
-      ...(name === 'subtype' ? { lineItem: '' } : {})
-    }))
+    setFormData((prev) => {
+      /**
+       * 1. CATEGORY (Expense / Revenue selector)
+       * Auto selects first available type AND resets rest
+       */
+      if (name === 'category') {
+        const nextTypes = getFilteredDocumentTypes(value)
+        const autoSelectedType = nextTypes[0] || ''
+
+        return {
+          ...prev,
+          category: value,
+          type: autoSelectedType,
+          subtype: '',
+          lineItem: ''
+        }
+      }
+
+      /**
+       * 2. TYPE (Document Type)
+       * IMPORTANT FIX:
+       * If Income & Revenue → category = Revenue
+       * Else → category = Expense
+       */
+      if (name === 'type') {
+        return {
+          ...prev,
+          type: value,
+          category: value === 'Income & Revenue' ? 'Revenue' : 'Expense',
+          subtype: '',
+          lineItem: ''
+        }
+      }
+
+      /**
+       * 3. SUBTYPE
+       */
+      if (name === 'subtype') {
+        return {
+          ...prev,
+          subtype: value,
+          lineItem: ''
+        }
+      }
+
+      /**
+       * 4. LINE ITEM → auto resolve subtype
+       */
+      if (name === 'lineItem') {
+        const matchedSubtype = getSubtypeForLineItem(prev.type, value)
+
+        return {
+          ...prev,
+          lineItem: value,
+          subtype: matchedSubtype || prev.subtype
+        }
+      }
+
+      return {
+        ...prev,
+        [name]: value
+      } as ManualEntryFormData
+    })
   }
 
   const handleConfirmUpload = () => {
@@ -188,6 +256,7 @@ const ManualEntryForm: React.FC = () => {
     navigate('/documents')
     dispatch(resetPresignResponse())
   }
+
   const handleSubmit = async () => {
     if (isSaving) return
 
@@ -199,7 +268,6 @@ const ManualEntryForm: React.FC = () => {
         return
       }
 
-      // Map uploaded files
       const presignedFiles = manualEntryFiles.items
 
       const fileObj = presignedFiles?.map((p: any) => ({
@@ -213,7 +281,6 @@ const ManualEntryForm: React.FC = () => {
         entry_date: formData.entryDate
           ? formData.entryDate.format('DD/MM/YYYY')
           : null,
-
         category: formData.category,
         type: formData.type,
         subtype: formData.subtype,
@@ -235,6 +302,7 @@ const ManualEntryForm: React.FC = () => {
 
       notify.success(res.message || 'Manual entry saved successfully')
       navigate('/documents')
+
       setFormData({
         entryDate: dayjs(),
         category: '',
@@ -248,24 +316,23 @@ const ManualEntryForm: React.FC = () => {
         description: '',
         attachments: []
       })
-      dispatch({ type: 'manualEntryQueue/clearQueue' })
 
+      dispatch({ type: 'manualEntryQueue/clearQueue' })
       dispatch({ type: 'manualEntryFiles/clearFiles' })
       dispatch(resetPresignResponse())
-
       dispatch({ type: 'processed/clearBatches' })
     } catch (err: any) {
       console.error(err)
 
       const backendErrors = err?.error
-
       const { parseApiErrors } = await import('src/utils/parseApiErrors')
       const messages = parseApiErrors(backendErrors)
+
       if (messages.length > 0) {
         notify.error(messages.join('\n'))
       } else {
         if (err?.message) {
-          notify.error(err?.message)
+          notify.error(err.message)
           return
         }
         notify.error(err?.response?.data?.message || 'Failed to save entry')
@@ -305,10 +372,10 @@ const ManualEntryForm: React.FC = () => {
           </Typography>
         </Box>
       </Box>
+
       <Divider sx={{ mb: 3 }} />
 
       <Stack spacing={2}>
-        {/* Row 1 */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
@@ -327,6 +394,7 @@ const ManualEntryForm: React.FC = () => {
               }}
             />
           </LocalizationProvider>
+
           <FormControl fullWidth>
             <InputLabel>Type *</InputLabel>
             <Select
@@ -341,7 +409,6 @@ const ManualEntryForm: React.FC = () => {
           </FormControl>
         </Stack>
 
-        {/* Row 2 */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <FormControl fullWidth>
             <InputLabel>Category *</InputLabel>
@@ -358,6 +425,7 @@ const ManualEntryForm: React.FC = () => {
               ))}
             </Select>
           </FormControl>
+
           <FormControl fullWidth disabled={!formData.type}>
             <InputLabel>Subcategory *</InputLabel>
             <Select
@@ -373,8 +441,12 @@ const ManualEntryForm: React.FC = () => {
               ))}
             </Select>
           </FormControl>
+
           {formData.type !== 'Income & Revenue' && (
-            <FormControl fullWidth disabled={!formData.subtype}>
+            <FormControl
+              fullWidth
+              disabled={!formData.type || lineItems.length === 0}
+            >
               <InputLabel>Line Item *</InputLabel>
               <Select
                 name='lineItem'
@@ -392,7 +464,6 @@ const ManualEntryForm: React.FC = () => {
           )}
         </Stack>
 
-        {/* Row 3 */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <TextField
             label='Amount (£) *'
@@ -401,6 +472,8 @@ const ManualEntryForm: React.FC = () => {
             value={formData.amount}
             onChange={handleChange}
             fullWidth
+            error={Boolean(amountError)}
+            helperText={amountError}
           />
           <TextField
             label='Vendor/Supplier Name'
@@ -411,7 +484,6 @@ const ManualEntryForm: React.FC = () => {
           />
         </Stack>
 
-        {/* Row 4 */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <TextField
             label='Invoice Number'
@@ -439,7 +511,6 @@ const ManualEntryForm: React.FC = () => {
           </LocalizationProvider>
         </Stack>
 
-        {/* Description */}
         <TextField
           label='Description/Notes'
           name='description'
@@ -451,7 +522,6 @@ const ManualEntryForm: React.FC = () => {
           rows={3}
         />
 
-        {/* File Upload */}
         <FileUploadBox
           title='Upload or drag and drop your supporting documents'
           subtitle='You can upload unlimited files but only 5 in one go.'
@@ -464,7 +534,7 @@ const ManualEntryForm: React.FC = () => {
           uploadIcon={uploadIcon}
           fileTypeIcon={fileimage}
         />
-        {/* QUEUE SECTION */}
+
         {queue.length > 0 && (
           <Box mt={3}>
             <Box
@@ -480,18 +550,15 @@ const ManualEntryForm: React.FC = () => {
                 Upload queue ({queue.length})
               </Typography>
 
-              {queue.length > 0 && (
-                <Button
-                  variant='contained'
-                  sx={{ background: '#000' }}
-                  onClick={handleConfirmUpload}
-                >
-                  Confirm Upload ({queue.length})
-                </Button>
-              )}
+              <Button
+                variant='contained'
+                sx={{ background: '#000' }}
+                onClick={handleConfirmUpload}
+              >
+                Confirm Upload ({queue.length})
+              </Button>
             </Box>
 
-            {/* List Queued Files */}
             {queue.map((item) => (
               <Box
                 key={item.id}
@@ -510,7 +577,6 @@ const ManualEntryForm: React.FC = () => {
                   justifyContent='space-between'
                   alignItems='center'
                 >
-                  {/* LEFT SIDE - FILE ICON + DETAILS */}
                   <Box display='flex' alignItems='center' gap={1.2}>
                     <img
                       src={getFileIcon(item.file.name)}
@@ -529,7 +595,6 @@ const ManualEntryForm: React.FC = () => {
                     </Box>
                   </Box>
 
-                  {/* RIGHT SIDE - REMOVE BUTTON */}
                   <IconButton
                     onClick={() => dispatch(removeFileFromQueue(item.id))}
                     size='small'
@@ -542,6 +607,7 @@ const ManualEntryForm: React.FC = () => {
             ))}
           </Box>
         )}
+
         <Box>
           {manualEntryFiles.items.length > 0 && (
             <Box mt={3}>
@@ -579,7 +645,7 @@ const ManualEntryForm: React.FC = () => {
             </Box>
           )}
         </Box>
-        {/* Buttons */}
+
         <Box
           sx={{
             display: 'flex',
