@@ -161,7 +161,7 @@ export const pollBatchStatusUntilComplete = async (
         )
       }
     } catch (error: any) {
-      if (error?.message == 'The document does not exist.') {
+      if (error?.message !== null) {
         await deleteBatchDocuments(
           practiceId,
           batchId,

@@ -298,9 +298,7 @@ export default function ProcessingCompletedListForStatement() {
         const id = doc.document_id ?? doc.id
         const progress = Math.round((progressMap[id] ?? 0) * 100) / 100
 
-        const isDuplicateTransactionError =
-          doc?.error_message ===
-          'Duplicate transactions detected. This statement may have already been processed.'
+        const isDuplicateTransactionError = doc?.error_message !== null
 
         return (
           <Box
@@ -354,7 +352,7 @@ export default function ProcessingCompletedListForStatement() {
 
                   <Typography variant='caption' fontStyle='italic'>
                     {isDuplicateTransactionError
-                      ? 'Removed from batch'
+                      ? 'Error processing file'
                       : doc.status === 'SUCCESS'
                         ? 'Processed'
                         : 'Processing...'}
