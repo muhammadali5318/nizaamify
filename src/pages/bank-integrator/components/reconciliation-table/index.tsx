@@ -32,6 +32,7 @@ type TransactionCategory = {
   subtype: string
   type: string
   lineItem: string
+  transaction_posting_date: string
 }
 
 interface ReconciliationTableProps {
@@ -232,7 +233,8 @@ const ReconciliationTable = ({
         category: category.category,
         subtype: category.subtype,
         type: category.type,
-        expense_category: category.lineItem
+        expense_category: category.lineItem,
+        transaction_posting_date: category.transaction_posting_date
       }
 
       if (fileData) {

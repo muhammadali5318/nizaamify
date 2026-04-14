@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import dayjs, { Dayjs } from 'dayjs'
 import {
   Dialog,
   DialogTitle,
@@ -13,6 +14,7 @@ import {
   Stack,
   SelectChangeEvent
 } from '@mui/material'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 
 import {
   getFilteredDocumentTypes,
@@ -20,6 +22,8 @@ import {
   getExpenseSubcategories,
   category as categoryConstants
 } from 'src/utils/documentMapping'
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 type CategorisationModalProps = {
   open: boolean
@@ -30,6 +34,7 @@ type CategorisationModalProps = {
       type: string
       subtype: string
       lineItem: string
+      transaction_posting_date: string
     },
     row: any
   ) => void
@@ -38,6 +43,7 @@ type CategorisationModalProps = {
     type?: string
     subtype?: string
     lineItem?: string
+    transaction_posting_date?: string
   }
   row?: any
 }
@@ -49,22 +55,14 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
   initial,
   row
 }) => {
-  /**
-   * Local state
-   */
   const [category, setCategory] = useState<string>(categoryConstants.expense)
   const [type, setType] = useState<string>('')
   const [subtype, setSubtype] = useState<string>('')
   const [lineItem, setLineItem] = useState<string>('')
+  const [transactionDate, setTransactionDate] = useState<Dayjs | null>(null)
 
-  /**
-   * Flag to prevent dependent reset during initialization
-   */
   const isInitializingRef = useRef(false)
 
-  /**
-   * Populate values when modal opens
-   */
   useEffect(() => {
     if (!open) return
 
@@ -74,33 +72,28 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
     setType(initial?.type ?? '')
     setSubtype(initial?.subtype ?? '')
     setLineItem(initial?.lineItem ?? '')
+    setTransactionDate(
+      initial?.transaction_posting_date
+        ? dayjs(initial.transaction_posting_date)
+        : null
+    )
 
-    // allow next render cycle to finish before enabling resets
     setTimeout(() => {
       isInitializingRef.current = false
     }, 0)
   }, [open, initial])
 
-  const types = useMemo(() => {
-    const filtered = getFilteredDocumentTypes(category)
-    return filtered
-  }, [category])
+  const types = useMemo(() => getFilteredDocumentTypes(category), [category])
 
-  const subtypes = useMemo(() => {
-    return getDocumentSubtypes(type)
-  }, [type])
+  const subtypes = useMemo(() => getDocumentSubtypes(type), [type])
 
   const lineItems = useMemo(() => {
     if (!type || !subtype) return []
     return getExpenseSubcategories(type, subtype)
   }, [type, subtype])
 
-  /**
-   * Reset dependent fields ONLY when user changes manually
-   */
   useEffect(() => {
     if (isInitializingRef.current) return
-
     setType('')
     setSubtype('')
     setLineItem('')
@@ -108,37 +101,31 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
 
   useEffect(() => {
     if (isInitializingRef.current) return
-
     setSubtype('')
     setLineItem('')
   }, [type])
 
   useEffect(() => {
     if (isInitializingRef.current) return
-
     setLineItem('')
   }, [subtype])
 
-  /**
-   * Validation
-   */
   const isValid =
     Boolean(category) &&
     Boolean(type) &&
+    Boolean(transactionDate) &&
     (type === 'Income & Revenue' || (Boolean(subtype) && Boolean(lineItem)))
 
-  /**
-   * Save handler
-   */
   const handleSave = () => {
-    if (!isValid) return
+    if (!isValid || !transactionDate) return
 
     onSave?.(
       {
         category,
         type,
         subtype,
-        lineItem
+        lineItem,
+        transaction_posting_date: transactionDate.format('YYYY-MM-DD')
       },
       row
     )
@@ -172,7 +159,6 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
 
       <DialogContent sx={{ p: 0, mt: 2 }}>
         <Stack spacing={2} mt={2}>
-          {/* CATEGORY */}
           <FormControl fullWidth>
             <InputLabel>Type *</InputLabel>
             <Select
@@ -258,6 +244,25 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
               )}
             </Select>
           </FormControl>
+
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label='Transaction posting date'
+              value={transactionDate}
+              onChange={(newValue) => setTransactionDate(newValue)}
+              format='YYYY-MM-DD'
+              disableFuture
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  required: true,
+                  sx: {
+                    '& .MuiPickersInputBase-root': { borderRadius: '12px' }
+                  }
+                }
+              }}
+            />
+          </LocalizationProvider>
         </Stack>
       </DialogContent>
 
