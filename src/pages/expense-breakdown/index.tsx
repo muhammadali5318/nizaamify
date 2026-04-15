@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Stack, Typography } from '@mui/material'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import dayjs from 'dayjs'
 
 import styles from './expenseBreakdown.module.scss'
@@ -34,8 +34,6 @@ const ExpenseBreakdown = () => {
     endDate: dateRange.end
   })
 
-  const pageRef = useRef<HTMLDivElement>(null)
-
   return (
     <>
       <Box className={styles.expenseBreakdownRoot} width='100%'>
@@ -48,14 +46,12 @@ const ExpenseBreakdown = () => {
           data={data}
           allExpanded={allExpanded}
           setAllExpanded={setAllExpanded}
-          pdfRef={pageRef}
         />
 
-        {/* 🔹 No date selected */}
         {!hasValidDate && (
           <Box
             minHeight='20vh'
-            width={'100%'}
+            width='100%'
             display='flex'
             alignItems='center'
             justifyContent='center'
@@ -67,7 +63,6 @@ const ExpenseBreakdown = () => {
           </Box>
         )}
 
-        {/* 🔹 Loading */}
         {hasValidDate && isPending && (
           <Box
             width='100%'
@@ -80,9 +75,8 @@ const ExpenseBreakdown = () => {
           </Box>
         )}
 
-        {/* 🔹 Data */}
-        {hasValidDate && !isPending && (
-          <Stack spacing={2} ref={pageRef} width={'100%'}>
+        {hasValidDate && !isPending && data && (
+          <Stack spacing={2} width='100%'>
             <Stack
               spacing={2}
               sx={{
@@ -92,12 +86,12 @@ const ExpenseBreakdown = () => {
               }}
             >
               <ExpensesGrandTotal
-                title={'REVENUE GRAND TOTAL'}
+                title='REVENUE GRAND TOTAL'
                 label='Total Monthly Revenue:'
                 total={formatAmountWithCommas(data?.total_revenue) ?? 0}
               />
               <RevenueAccordion
-                title={'Income/Revenue'}
+                title='Income/Revenue'
                 dateRange={dateRange}
                 incomeAndRevenue={data?.revenue_cateogories}
                 expanded={allExpanded}
@@ -114,7 +108,7 @@ const ExpenseBreakdown = () => {
               }}
             >
               <ExpensesGrandTotal
-                title={'EXPENSES GRAND TOTAL'}
+                title='EXPENSES GRAND TOTAL'
                 label='Total Monthly Expenses:'
                 total={formatAmountWithCommas(data?.total) ?? 0}
               />
@@ -143,6 +137,7 @@ const ExpenseBreakdown = () => {
           </Stack>
         )}
       </Box>
+
       <NonPLItemsBreakdown dateRange={dateRange} onDateChange={setDateRange} />
     </>
   )
