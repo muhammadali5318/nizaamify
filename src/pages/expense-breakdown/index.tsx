@@ -1,145 +1,38 @@
-import { Box, CircularProgress, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
-import dayjs from 'dayjs'
-
+import { useDispatch, useSelector } from 'react-redux'
 import styles from './expenseBreakdown.module.scss'
-import ExpensePageHeader from './components/expense-header/ExpensePageHeader'
-import ExpensesGrandTotal from './components/expense-header'
-import ReusableAccordion from './components/expense-accordion'
 
-import { useFetchExpenseBreakdown } from './hooks/useFetchExpenseBreakdown'
-import { useAuth } from 'src/context/AuthProvider'
-import { RangeISO } from 'src/components/date-range-selector'
-import { formatAmountWithCommas } from 'src/utils/stringUtils'
-import RevenueAccordion from './components/revenue-accordion'
-import NonPLItemsBreakdown from '../non-pl-items'
+import ExpensePageHeader from './components/expense-header/ExpensePageHeader'
+import usePLTabs from './hooks/usePLTabs'
+import { ReusableTabs } from 'src/components/tabs'
+import { tabsData } from './expense-breakdown-config'
+import {
+  selectExpenseBreakdownDateRange,
+  setDateRange
+} from 'src/store/slices/expenseBreakdownSlice'
+import { Box } from '@mui/material'
 
 const ExpenseBreakdown = () => {
-  const { accessToken } = useAuth()
+  const dispatch = useDispatch()
   const [allExpanded, setAllExpanded] = useState(false)
+  const dateRange = useSelector(selectExpenseBreakdownDateRange)
 
-  const lastMonth = dayjs().subtract(1, 'month')
-
-  const [dateRange, setDateRange] = useState<RangeISO>({
-    start: lastMonth.startOf('month').toISOString(),
-    end: lastMonth.endOf('month').toISOString()
-  })
-
-  // Explicit date validity check (UX fix)
-  const hasValidDate = Boolean(dateRange?.start) && Boolean(dateRange?.end)
-
-  const { data, isPending } = useFetchExpenseBreakdown({
-    enabled: !!accessToken && hasValidDate,
-    startDate: dateRange.start,
-    endDate: dateRange.end
-  })
+  const tabs = usePLTabs()
 
   return (
-    <>
-      <Box className={styles.expenseBreakdownRoot} width='100%'>
-        <ExpensePageHeader
-          heading='P&L Items Breakdown'
-          dateRange={dateRange}
-          onDateChange={setDateRange}
-          avatarSrc='/assets/wallet-bg-green.svg'
-          subheading='Detailed view of P&L items categories and subcategories'
-          data={data}
-          allExpanded={allExpanded}
-          setAllExpanded={setAllExpanded}
-        />
+    <Box className={styles.expenseBreakdownRoot} width='100%'>
+      <ExpensePageHeader
+        heading='P&L Items Breakdown'
+        dateRange={dateRange}
+        onDateChange={(range) => dispatch(setDateRange(range))}
+        avatarSrc='/assets/wallet-bg-green.svg'
+        subheading='Detailed view of P&L items categories and subcategories'
+        allExpanded={allExpanded}
+        setAllExpanded={setAllExpanded}
+      />
 
-        {!hasValidDate && (
-          <Box
-            minHeight='20vh'
-            width='100%'
-            display='flex'
-            alignItems='center'
-            justifyContent='center'
-            textAlign='center'
-          >
-            <Typography variant='body2' color='text.secondary'>
-              Select a date range to view expense breakdown.
-            </Typography>
-          </Box>
-        )}
-
-        {hasValidDate && isPending && (
-          <Box
-            width='100%'
-            display='flex'
-            alignItems='center'
-            justifyContent='center'
-            minHeight='20vh'
-          >
-            <CircularProgress />
-          </Box>
-        )}
-
-        {hasValidDate && !isPending && data && (
-          <Stack spacing={2} width='100%'>
-            <Stack
-              spacing={2}
-              sx={{
-                borderRadius: '24px',
-                border: '1px solid var(--grey-200)',
-                padding: 2
-              }}
-            >
-              <ExpensesGrandTotal
-                title='REVENUE GRAND TOTAL'
-                label='Total Monthly Revenue:'
-                total={formatAmountWithCommas(data?.total_revenue) ?? 0}
-              />
-              <RevenueAccordion
-                title='Income/Revenue'
-                dateRange={dateRange}
-                incomeAndRevenue={data?.revenue_cateogories}
-                expanded={allExpanded}
-                total={data?.total_revenue}
-              />
-            </Stack>
-
-            <Stack
-              spacing={2}
-              sx={{
-                borderRadius: '24px',
-                border: '1px solid var(--grey-200)',
-                padding: 2
-              }}
-            >
-              <ExpensesGrandTotal
-                title='EXPENSES GRAND TOTAL'
-                label='Total Monthly Expenses:'
-                total={formatAmountWithCommas(data?.total) ?? 0}
-              />
-              {data?.categories?.map((category: any, idx: number) => {
-                const expenseType = data?.expense_type?.find(
-                  (expense: any) =>
-                    expense.expense_type === category?.parent_category
-                )
-
-                return (
-                  <ReusableAccordion
-                    key={idx}
-                    title={category?.parent_category}
-                    dateRange={dateRange}
-                    total={category?.amount}
-                    chips={[
-                      `${expenseType?.expense_subtypes?.length ?? 0} subcategories`
-                    ]}
-                    expenseSubtypes={expenseType?.expense_subtypes}
-                    expanded={allExpanded}
-                    totalPercentage={category?.share_of_total_percent}
-                  />
-                )
-              })}
-            </Stack>
-          </Stack>
-        )}
-      </Box>
-
-      <NonPLItemsBreakdown dateRange={dateRange} onDateChange={setDateRange} />
-    </>
+      <ReusableTabs tabs={tabs} initialTab={tabsData[0].key} />
+    </Box>
   )
 }
 

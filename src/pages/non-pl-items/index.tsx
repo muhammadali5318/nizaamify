@@ -1,4 +1,4 @@
-import { Box, CircularProgress } from '@mui/material'
+import { Box, CircularProgress, Stack } from '@mui/material'
 import styles from './nonPLItemsBreakdown.module.scss'
 import ExpensePageHeader from '../expense-breakdown/components/expense-header/ExpensePageHeader'
 import ExpensesGrandTotal from '../expense-breakdown/components/expense-header'
@@ -53,7 +53,15 @@ const NonPLItemsBreakdown = ({
 
       {/* CONTENT */}
       {!isPending && data && (
-        <>
+        <Stack
+          spacing={2}
+          sx={{
+            borderRadius: '24px',
+            border: '1px solid var(--grey-200)',
+            padding: 2
+          }}
+          width={'100%'}
+        >
           <ExpensesGrandTotal
             total={formatAmountWithCommas(data.total)}
             label='Total Monthly Non P&L Items Expenses:'
@@ -77,7 +85,7 @@ const NonPLItemsBreakdown = ({
               />
             )
           })}
-        </>
+        </Stack>
       )}
     </Box>
   )

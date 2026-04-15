@@ -35,7 +35,6 @@ export type ExpenseHeaderProps = {
   heading?: string | any
   avatarSrc?: string | any
   subheading?: string | any
-  data?: DataShape
   allExpanded: boolean
   setAllExpanded: (val: boolean) => void
   pdfRef?: React.RefObject<HTMLDivElement | null>
