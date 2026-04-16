@@ -1,9 +1,11 @@
 import PendingOnboardingBanner from 'src/components/dashboard/PendingOnboardingBanner'
 import PendingOnboardingForManager from 'src/components/dashboard/PendingOnboardingForManager'
+import PendingSubscription from 'src/components/dashboard/PendingSubscription'
 import WarningAlertWrapper from 'src/components/dashboard/WarningAlertWrapper'
 import { useActivePractice } from 'src/hooks/useActivePractice'
 // import { useCheckBankConnectionHealth } from 'src/hooks/useCheckBankConnectionHealth'
 import useUserDetails from 'src/hooks/useUserDetails'
+import { paths } from 'src/paths'
 
 interface DashboardWarningAlertBoxProps {
   title: string
@@ -26,8 +28,25 @@ const DashboardWarningAlertBox = ({
     isUserManageOrSimpleUser
   } = useUserDetails()
   // const shouldFetch = Boolean(accessToken) && isUserOwnerOrDirector === true
+  const { hasActivePracticeType } = useActivePractice()
 
-  // const { data } = useCheckBankConnectionHealth(shouldFetch)
+  if (!hasActivePracticeType) {
+    return (
+      <WarningAlertWrapper title={title}>
+        <PendingSubscription
+          message={
+            <>
+              Your practice type is currently not configured. Please update it
+              in Practice Settings to unlock the full functionality of the
+              application and gain access to all features.
+            </>
+          }
+          actionLabel='View Details'
+          actionPath={paths.settings}
+        />
+      </WarningAlertWrapper>
+    )
+  }
   if (isOnboardingCompleted) return null
 
   // if (renderDetail === 'bankAlert') {

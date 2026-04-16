@@ -32,6 +32,14 @@ const rules: FeatureRule[] = [
       const role = context?.role
       return role === 'PRACTICE OWNER' || role === 'COMPANY DIRECTOR'
     }
+  },
+  {
+    id: FEATURE_RULE_IDS.HAS_ACTIVE_PRACTICE_TYPE,
+    description: 'Practice has an active type',
+    evaluate: (context) => {
+      if (typeof context === 'boolean') return context
+      return !!context?.hasActivePracticeType
+    }
   }
 ]
 
@@ -41,7 +49,10 @@ const modules: ModuleConfig[] = [
     id: 'documents',
     name: 'Documents',
     isEnabled: evaluateIsModuleEnabled,
-    requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
+    requiredRules: [
+      FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
+      FEATURE_RULE_IDS.HAS_ACTIVE_PRACTICE_TYPE
+    ]
   },
   {
     id: 'reports',
@@ -49,7 +60,8 @@ const modules: ModuleConfig[] = [
     isEnabled: evaluateIsModuleEnabled,
     requiredRules: [
       FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
-      FEATURE_RULE_IDS.SUBSCRIPTION_ACTIVE
+      FEATURE_RULE_IDS.SUBSCRIPTION_ACTIVE,
+      FEATURE_RULE_IDS.HAS_ACTIVE_PRACTICE_TYPE
     ]
   },
   {
@@ -58,7 +70,8 @@ const modules: ModuleConfig[] = [
     isEnabled: evaluateIsModuleEnabled,
     requiredRules: [
       FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
-      FEATURE_RULE_IDS.SUBSCRIPTION_ACTIVE
+      FEATURE_RULE_IDS.SUBSCRIPTION_ACTIVE,
+      FEATURE_RULE_IDS.HAS_ACTIVE_PRACTICE_TYPE
     ]
   },
   {
@@ -107,7 +120,10 @@ const modules: ModuleConfig[] = [
   {
     id: 'bank-integrator',
     name: 'Bank Integrator',
-    requiredRules: [FEATURE_RULE_IDS.ONBOARDING_COMPLETED]
+    requiredRules: [
+      FEATURE_RULE_IDS.ONBOARDING_COMPLETED,
+      FEATURE_RULE_IDS.HAS_ACTIVE_PRACTICE_TYPE
+    ]
   }
 ]
 

@@ -32,8 +32,11 @@ export default function AppLayout() {
   const location = useLocation()
 
   const permissionsByCategory = useSelector(selectPermissionsByCategory)
-  const { isOnboardingCompleted, isActivePracticeSubscribed } =
-    useActivePractice()
+  const {
+    isOnboardingCompleted,
+    isActivePracticeSubscribed,
+    hasActivePracticeType
+  } = useActivePractice()
 
   const { userDetails } = useUserDetailsInActivePractice() // <-- hook at top-level
 
@@ -162,7 +165,8 @@ export default function AppLayout() {
       const featureContext = {
         onboardingCompleted: isOnboardingCompleted,
         subscriptionActive: isActivePracticeSubscribed,
-        role: userDetails?.user_role
+        role: userDetails?.user_role,
+        hasActivePracticeType: hasActivePracticeType
       }
 
       return (
