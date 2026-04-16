@@ -495,6 +495,7 @@ const TransactionsTable = () => {
           onSave={handleSaveCategory}
           row={selectedRow}
           initial={modalInitial ?? undefined}
+          showDatePicker={false}
         />
       </Box>
     </Box>

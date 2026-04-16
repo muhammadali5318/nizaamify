@@ -146,7 +146,7 @@ export const pollBatchStatusUntilComplete = async (
       )
 
       if (
-        response?.data?.data?.error_message.includes(
+        response?.data?.data?.error_message?.includes(
           'Duplicate transactions detected'
         )
       ) {
@@ -156,6 +156,7 @@ export const pollBatchStatusUntilComplete = async (
           [],
           [triggerRes.data.document.document_id]
         )
+
         notify.error(
           `${response?.data?.data?.file_name} was deleted because duplicate transactions were detected.`
         )

@@ -28,6 +28,7 @@ import {
 
 type CategorisationModalProps = {
   open: boolean
+  showDatePicker?: boolean
   onClose: () => void
   onSave?: (
     payload: {
@@ -60,7 +61,8 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
   onClose,
   onSave,
   initial,
-  row
+  row,
+  showDatePicker = true
 }) => {
   const [category, setCategory] = useState<string>(categoryConstants.expense)
   const [type, setType] = useState<string>('')
@@ -151,22 +153,23 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
   const isValid =
     Boolean(category) &&
     Boolean(type) &&
-    Boolean(transactionDate) &&
     (type === 'Income & Revenue' || (Boolean(subtype) && Boolean(lineItem)))
 
   const handleSave = () => {
-    if (!isValid || !transactionDate) return
+    if (!isValid) return
 
-    onSave?.(
-      {
-        category,
-        type,
-        subtype,
-        lineItem,
-        transaction_posting_date: transactionDate.format('YYYY-MM-DD')
-      },
-      row
-    )
+    const payload: any = {
+      category,
+      type,
+      subtype,
+      lineItem
+    }
+
+    if (transactionDate) {
+      payload.transaction_posting_date = transactionDate.format('YYYY-MM-DD')
+    }
+
+    onSave?.(payload, row)
 
     onClose()
   }
@@ -279,25 +282,25 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
               )}
             </Select>
           </FormControl>
-
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label='Transaction posting date'
-              value={transactionDate}
-              onChange={(newValue) => setTransactionDate(newValue)}
-              format='DD-MM-YYYY'
-              disableFuture
-              slotProps={{
-                textField: {
-                  fullWidth: true,
-                  required: true,
-                  sx: {
-                    '& .MuiPickersInputBase-root': { borderRadius: '12px' }
+          {showDatePicker && (
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label='Transaction posting date'
+                value={transactionDate}
+                onChange={(newValue) => setTransactionDate(newValue)}
+                format='DD-MM-YYYY'
+                disableFuture
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    sx: {
+                      '& .MuiPickersInputBase-root': { borderRadius: '12px' }
+                    }
                   }
-                }
-              }}
-            />
-          </LocalizationProvider>
+                }}
+              />
+            </LocalizationProvider>
+          )}
         </Stack>
       </DialogContent>
 
