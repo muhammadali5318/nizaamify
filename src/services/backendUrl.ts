@@ -41,6 +41,10 @@ export const endpoints = {
       `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/unverified-transactions/${transactionId}/reconcile/`,
     uncategorisedTransactions: (practiceId: string) =>
       `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/uncategorised-transactions/`,
+    revenueTransactions: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/uncategorised-revenue-transactions/`,
+    revenueTransactionsCategorise: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/uncategorised-revenue-transactions/categorise/`,
     categorisedTransactions: (practiceId: string) =>
       `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/categorised-transactions/`,
     uploadCategorisedTransactionsInvoice: (

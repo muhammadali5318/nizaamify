@@ -103,6 +103,9 @@ export default function ProcessingCompletedListForStatement() {
     queryClient.invalidateQueries({
       queryKey: ['uncategorisedTransactions']
     })
+    queryClient.invalidateQueries({
+      queryKey: ['revenueTransactions']
+    })
   }
 
   useEffect(() => {

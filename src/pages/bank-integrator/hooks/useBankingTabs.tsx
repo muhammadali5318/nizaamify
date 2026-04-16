@@ -5,6 +5,7 @@ import ReconciliationTab from '../ReconciliationTab'
 import BankIntegrator from '../BankIntegrator'
 import Transactions from '../components/transactions'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import Revenue from '../components/revenue'
 // import TransactionsHistory from '../components/transactions-history'
 
 export default function BankingTabsContainer(): ReusableTabItem[] {
@@ -16,7 +17,9 @@ export default function BankingTabsContainer(): ReusableTabItem[] {
 
   const tabs = useMemo(() => {
     return bankingTabsData
-      .filter((t) => !(accountingBasis === 'ACCRUAL' && t.key === 1))
+      .filter(
+        (t) => !(accountingBasis === 'ACCRUAL' && (t.key === 1 || t.key === 3))
+      )
       .map((t) => {
         let content: React.ReactNode = null
         let count = t.count
@@ -45,6 +48,9 @@ export default function BankingTabsContainer(): ReusableTabItem[] {
 
           case 1:
             content = <Transactions />
+            break
+          case 3:
+            content = <Revenue />
             break
           // case 3:
           //   content = <TransactionsHistory />

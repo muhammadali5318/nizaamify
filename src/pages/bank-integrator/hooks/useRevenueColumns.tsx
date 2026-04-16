@@ -4,12 +4,12 @@ import { Box, Button, Chip, Typography } from '@mui/material'
 import { formatAmountWithCommas, toTitleCase } from 'src/utils/stringUtils'
 import dayjs from 'dayjs'
 
-type UseTransactionsColumns = (
+type useRevenueColumns = (
   categories: Record<string, any>,
   onCategorise?: (row: any) => void
 ) => GridColDef[]
 
-export const useTransactionsColumns: UseTransactionsColumns = (
+export const useRevenueColumns: useRevenueColumns = (
   categories,
   onCategorise
 ) => {
