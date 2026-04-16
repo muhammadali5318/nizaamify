@@ -94,6 +94,7 @@ const ManualEntryForm: React.FC = () => {
   )
 
   const types = getFilteredDocumentTypes(formData.category)
+  const isRevenue = formData.category === category.revenue
 
   const subtypes = formData.type
     ? getDocumentSubtypes(formData.type, accountingBasis)
@@ -101,7 +102,7 @@ const ManualEntryForm: React.FC = () => {
 
   const lineItems =
     formData.type && formData.type !== 'Income & Revenue'
-      ? getDocumentLineItems(formData.type, formData.subtype || undefined)
+      ? getDocumentLineItems(formData.type)
       : []
 
   const MAX_FILES = 5
@@ -192,7 +193,9 @@ const ManualEntryForm: React.FC = () => {
           category: value,
           type: autoSelectedType,
           subtype: '',
-          lineItem: ''
+          lineItem: '',
+          vendorName: value === category.revenue ? '' : prev.vendorName,
+          invoiceNumber: value === category.revenue ? '' : prev.invoiceNumber
         }
       }
 
@@ -410,39 +413,46 @@ const ManualEntryForm: React.FC = () => {
         </Stack>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <FormControl fullWidth>
-            <InputLabel>Category *</InputLabel>
-            <Select
-              name='type'
-              value={formData.type}
-              label='Category *'
-              onChange={handleSelectChange}
-            >
-              {types.map((type) => (
-                <MenuItem key={type} value={type}>
-                  {type}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          {!isRevenue && (
+            <FormControl fullWidth>
+              <InputLabel>Category *</InputLabel>
+              <Select
+                name='type'
+                value={formData.type}
+                label='Category *'
+                onChange={handleSelectChange}
+              >
+                {types.map((type) => (
+                  <MenuItem key={type} value={type}>
+                    {type}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
 
-          <FormControl fullWidth disabled={!formData.type}>
-            <InputLabel>Subcategory *</InputLabel>
-            <Select
-              name='subtype'
-              value={formData.subtype}
-              label='Subcategory *'
-              onChange={handleSelectChange}
+          {isRevenue && (
+            <FormControl
+              disabled={!formData.type}
+              sx={{ width: { xs: '100%', sm: '49%' } }}
             >
-              {subtypes.map((subtype) => (
-                <MenuItem key={subtype} value={subtype}>
-                  {subtype}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              <InputLabel>Subcategory *</InputLabel>
+              <Select
+                name='subtype'
+                value={formData.subtype}
+                label='Subcategory *'
+                onChange={handleSelectChange}
+              >
+                {subtypes.map((subtype) => (
+                  <MenuItem key={subtype} value={subtype}>
+                    {subtype}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
 
-          {formData.type !== 'Income & Revenue' && (
+          {!isRevenue && (
             <FormControl
               fullWidth
               disabled={!formData.type || lineItems.length === 0}
@@ -464,52 +474,62 @@ const ManualEntryForm: React.FC = () => {
           )}
         </Stack>
 
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <TextField
-            label='Amount (£) *'
-            name='amount'
-            type='number'
-            value={formData.amount}
-            onChange={handleChange}
-            fullWidth
-            error={Boolean(amountError)}
-            helperText={amountError}
-          />
-          <TextField
-            label='Vendor/Supplier Name'
-            name='vendorName'
-            value={formData.vendorName}
-            onChange={handleChange}
-            fullWidth
-          />
-        </Stack>
-
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <TextField
-            label='Invoice Number'
-            name='invoiceNumber'
-            value={formData.invoiceNumber}
-            onChange={handleChange}
-            fullWidth
-          />
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              format='DD/MM/YYYY'
-              label='Payment Date'
-              disableFuture
-              value={formData.paymentDate}
-              onChange={(v) => setFormData((p) => ({ ...p, paymentDate: v }))}
-              slotProps={{
-                textField: { fullWidth: true }
-              }}
-              sx={{
-                '& .MuiPickersInputBase-root': {
-                  borderRadius: '12px'
-                }
-              }}
+        <Box
+          display={'flex'}
+          gap={2}
+          flexDirection={isRevenue ? 'row' : 'column'}
+        >
+          <Stack flex={1} direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <TextField
+              label='Amount (£) *'
+              name='amount'
+              type='number'
+              value={formData.amount}
+              onChange={handleChange}
+              fullWidth
+              error={Boolean(amountError)}
+              helperText={amountError}
             />
-          </LocalizationProvider>
-        </Stack>
+            {!isRevenue && (
+              <TextField
+                label='Vendor/Supplier Name'
+                name='vendorName'
+                value={formData.vendorName}
+                onChange={handleChange}
+                fullWidth
+              />
+            )}
+          </Stack>
+
+          <Stack flex={1} direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            {!isRevenue && (
+              <TextField
+                label='Invoice Number'
+                name='invoiceNumber'
+                value={formData.invoiceNumber}
+                onChange={handleChange}
+                fullWidth
+              />
+            )}
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                format='DD/MM/YYYY'
+                label='Transaction Date *'
+                disableFuture
+                value={formData.paymentDate}
+                onChange={(v) => setFormData((p) => ({ ...p, paymentDate: v }))}
+                slotProps={{
+                  textField: { fullWidth: true }
+                }}
+                sx={{
+                  '& .MuiPickersInputBase-root': {
+                    borderRadius: '12px'
+                  }
+                }}
+              />
+            </LocalizationProvider>
+          </Stack>
+        </Box>
 
         <TextField
           label='Description/Notes'
