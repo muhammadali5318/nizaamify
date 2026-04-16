@@ -36,9 +36,10 @@ const DashboardWarningAlertBox = ({
         <PendingSubscription
           message={
             <>
-              Your practice type is currently not configured. Please update it
-              in Practice Settings to unlock the full functionality of the
-              application and gain access to all features.
+              Your practice type is currently not configured. Please update it,
+              along with any other missing settings in Practice Settings, to
+              unlock the full functionality of the application and access all
+              features.
             </>
           }
           actionLabel='View Details'

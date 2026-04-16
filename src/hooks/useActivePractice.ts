@@ -31,7 +31,12 @@ export function useActivePractice() {
 
   const isOnboardingCompleted =
     activePractice?.onboarding_status === 'COMPLETED'
-  const hasActivePracticeType = !!activePractice?.practice_type?.trim()
+
+  const practiceTypeIsValid = !!activePractice?.practice_type?.trim()
+
+  const hasActivePracticeType = !isOnboardingCompleted
+    ? true
+    : practiceTypeIsValid
   const isActivePracticeSubscribed =
     activePractice?.subscription_details?.is_subscribed
 
