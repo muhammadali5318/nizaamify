@@ -189,13 +189,16 @@ export const useRevenueColumns: useRevenueColumns = (
           }
 
           return (
-            <Typography
-              color='text.secondary'
-              variant='caption'
-              sx={{ fontStyle: 'italic' }}
-            >
-              Not categorised
-            </Typography>
+            <Box display={'flex'} gap={1}>
+              <img src='/assets/checked-icon.svg' alt='checked icon' />
+              <Typography
+                color='success.main'
+                variant='caption'
+                sx={{ fontStyle: 'italic' }}
+              >
+                Revenue
+              </Typography>
+            </Box>
           )
         }
       },

@@ -102,7 +102,7 @@ const ManualEntryForm: React.FC = () => {
 
   const lineItems =
     formData.type && formData.type !== 'Income & Revenue'
-      ? getDocumentLineItems(formData.type)
+      ? getDocumentLineItems(formData.type, formData.subtype || undefined)
       : []
 
   const MAX_FILES = 5
@@ -431,26 +431,24 @@ const ManualEntryForm: React.FC = () => {
             </FormControl>
           )}
 
-          {isRevenue && (
-            <FormControl
-              disabled={!formData.type}
-              sx={{ width: { xs: '100%', sm: '49%' } }}
+          <FormControl
+            disabled={!formData.type}
+            sx={{ width: { xs: '100%', sm: isRevenue ? '49%' : '100%' } }}
+          >
+            <InputLabel>Subcategory *</InputLabel>
+            <Select
+              name='subtype'
+              value={formData.subtype}
+              label='Subcategory *'
+              onChange={handleSelectChange}
             >
-              <InputLabel>Subcategory *</InputLabel>
-              <Select
-                name='subtype'
-                value={formData.subtype}
-                label='Subcategory *'
-                onChange={handleSelectChange}
-              >
-                {subtypes.map((subtype) => (
-                  <MenuItem key={subtype} value={subtype}>
-                    {subtype}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
+              {subtypes.map((subtype) => (
+                <MenuItem key={subtype} value={subtype}>
+                  {subtype}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
           {!isRevenue && (
             <FormControl
