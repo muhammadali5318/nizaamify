@@ -103,12 +103,12 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
         queryKey: ['listAllPracticesData']
       })
 
-      handleSwitchToPractice(practice?.id)
-      navigate(paths.dashboard)
       const token = await getAccessTokenSilently({
         cacheMode: 'off'
       })
       apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
+      handleSwitchToPractice(practice?.id)
+      navigate(paths.dashboard)
     } catch (error) {
       console.error('Failed to invalidate queries:', error)
     } finally {
