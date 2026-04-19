@@ -36,3 +36,9 @@ export type UserProfileForm = {
   role?: string
   phone?: string
 }
+
+export type StepProps = {
+  onNext: () => void
+  onBack: () => void
+  activeStep: number
+}

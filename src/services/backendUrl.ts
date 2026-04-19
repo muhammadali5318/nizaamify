@@ -138,5 +138,17 @@ export const endpoints = {
       `/${API_BASE_DOCUMENTS}/practices/${id}/document-status/${documentId}/`,
     dashboardAiSummary: (id: string) =>
       `${API_BASE_DOCUMENTS}/practices/${id}/dashboard/ai-summary/`
+  },
+  accountingBasis: {
+    sendOtp: (orgId: string) => `${API_BASE}/practices/${orgId}/otp/send/`,
+    exportPracticeData: (orgId: string) =>
+      `${API_BASE}/practices/${orgId}/export/`,
+    exportPracticeDataHistory: (orgId: string) =>
+      `${API_BASE}/practices/${orgId}/export/history/`,
+    exportPracticeDataStatus: (orgId: string, exportId: string) =>
+      `${API_BASE}/practices/${orgId}/export/${exportId}/status`,
+    verifyOtp: (orgId: string) => `${API_BASE}/practices/${orgId}/otp/verify/`,
+    verifyIdentity: (orgId: string) =>
+      `${API_BASE}/practices/${orgId}/identity/verify/`
   }
 }

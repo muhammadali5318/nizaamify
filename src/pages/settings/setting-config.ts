@@ -1,5 +1,6 @@
 // src/config/settingsMenu.ts
 
+import ArchivedDataSet from './component/ArchivedDataSet'
 import PracticeInformation from './component/PracticeInformation'
 import ProfileInformation from './component/ProfileInformation'
 import Security from './component/Security'
@@ -22,6 +23,15 @@ export const SETTINGS_MENU: MenuItem[] = [
     description: 'Update your practice details and settings.',
     logo: '/assets/practice-settings.svg',
     component: PracticeInformation
+  },
+  {
+    id: 'archivedDataSet',
+    label: 'Archived Data Set',
+    title: 'Archived Data Set',
+    description:
+      'Download your archived data set generated during the accounting basis switch.',
+    logo: '/assets/archive.svg',
+    component: ArchivedDataSet
   },
   {
     id: 'security',
@@ -272,3 +282,16 @@ export const mapPracticeApiToForm = (api: PracticeApi): PracticeFormValues => {
     accountingBasis: api?.accounting_basis
   }
 }
+
+export const steps = [
+  { heading: 'Review & Confirm' },
+  { heading: 'Verify Credentials' },
+  { heading: '2FA Verification' },
+  { heading: 'Export Data' },
+  { heading: 'Apply Changes' }
+]
+
+export const accountingBasisBreadCrumbs = [
+  { label: 'Account Settings', to: '/settings' },
+  { label: 'Switch Accounting Basis' }
+]

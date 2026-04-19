@@ -3,7 +3,7 @@ import { Box, Stack, Avatar, Typography, Divider } from '@mui/material'
 
 interface PageProps {
   title: string
-  description: string
+  description?: React.ReactNode | string
   logo: string
   isDividerVisible?: boolean
   backgroundColor?: string
@@ -12,7 +12,7 @@ interface PageProps {
 
 const PageHeader: React.FC<PageProps> = ({
   title,
-  description,
+  description = '',
   logo,
   isDividerVisible = true,
   backgroundColor = '#FFF',
@@ -44,11 +44,12 @@ const PageHeader: React.FC<PageProps> = ({
           </Typography>
         </Box>
       </Stack>
+
       {isDividerVisible && (
         <Box>
           <Divider sx={{ mb: 2.5 }} />
         </Box>
-      )}{' '}
+      )}
     </Stack>
   )
 }

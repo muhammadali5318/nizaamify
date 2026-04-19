@@ -49,6 +49,8 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
 import { notify } from 'src/components/notistack/NotificationProvider'
+import { clearAccountingBasisSwitchData } from 'src/store/slices/accountingBasisSwitchSlice'
+import { clearPendingPracticePayload } from 'src/store/slices/practiceAccountingBasisSlice'
 
 interface PracticeDetailsCardProps {
   status?: 'active' | 'inactive' | 'archived'
@@ -217,6 +219,10 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
 
       // remove mannual entries
       dispatch(resetPresignResponse())
+
+      // remove accounting basis
+      dispatch(clearPendingPracticePayload())
+      dispatch(clearAccountingBasisSwitchData())
     },
     [practice, setActiveById, allPractices, dispatch]
   )

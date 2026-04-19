@@ -30,6 +30,8 @@ type SidebarTabsProps = {
   scrollAmount?: number
 }
 
+const PRACTICE_DEPENDENT_TABS = ['practice', 'archivedDataSet']
+
 const SidebarTabs: React.FC<SidebarTabsProps> = ({
   menu,
   activeId,
@@ -49,7 +51,6 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
   const canEditPractice = useHasPermission('user.edit_practice_profile')
   const permissionsByCategory = useSelector(selectPermissionsByCategory)
 
-  // module permission for subscription
   const canViewSubscription = evaluateIsModuleEnabled(
     permissionsByCategory,
     'billing'
@@ -111,13 +112,13 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
         position: 'relative'
       }}
     >
-      {header ? (
+      {header && (
         <Typography variant='h6' fontWeight={700} sx={{ mb: 1 }}>
           {header}
         </Typography>
-      ) : null}
+      )}
 
-      {showLeft && !isSmUp ? (
+      {showLeft && !isSmUp && (
         <IconButton
           aria-label='scroll left'
           onClick={() => scrollBy(-scrollAmount)}
@@ -134,9 +135,9 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
         >
           <ChevronLeftIcon />
         </IconButton>
-      ) : null}
+      )}
 
-      {showRight && !isSmUp ? (
+      {showRight && !isSmUp && (
         <IconButton
           aria-label='scroll right'
           onClick={() => scrollBy(scrollAmount)}
@@ -153,7 +154,7 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
         >
           <ChevronRightIcon />
         </IconButton>
-      ) : null}
+      )}
 
       <Box
         ref={scrollRef}
@@ -166,8 +167,7 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
           WebkitOverflowScrolling: 'touch',
           '&::-webkit-scrollbar': {
             height: { xs: '8px', sm: '0px' }
-          },
-          px: { xs: showLeft || showRight ? 0 : 0, sm: 0 }
+          }
         }}
         aria-label='Sidebar tabs scroll area'
       >
@@ -183,11 +183,10 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
           }}
         >
           {menu.map((m) => {
-            const isPracticeTab = m.id === 'practice'
+            const isPracticeLikeTab = PRACTICE_DEPENDENT_TABS.includes(m.id)
             const isSubscriptionTab = m.id === 'billing'
 
-            // 🔥 FINAL DISABLE LOGIC
-            const isDisabled = isPracticeTab
+            const isDisabled = isPracticeLikeTab
               ? !onboardingCompleted || !canEditPractice
               : isSubscriptionTab
                 ? !canViewSubscription
@@ -219,11 +218,7 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
                   mb: { sm: 1 }
                 }}
               >
-                <Typography
-                  className='font-weight--700'
-                  variant='subtitle2'
-                  py={0.2}
-                >
+                <Typography variant='subtitle2' fontWeight={700} py={0.2}>
                   {m.label}
                 </Typography>
               </ListItemButton>

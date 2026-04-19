@@ -19,6 +19,7 @@ export const paths = {
   practiceSettings: '/practice-settings',
   billing: '/billing',
   settings: '/settings',
+  accountingBasisSettings: '/settings/accounting-basis',
   auditLogs: '/audit-logs',
   bankIntegrator: '/bank-integrator',
   uploadBankStatement: '/bank-integrator/upload-bank-statement',

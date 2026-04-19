@@ -43,6 +43,8 @@ import {
 import { clearChatStorage } from 'src/store/slices/chatSlice'
 import useFetchUnverifiedTransations from 'src/pages/bank-integrator/hooks/useFetchUnverifiedTransactions'
 import { resetPresignResponse } from 'src/store/slices/manualEntryFilesSlice'
+import { clearAccountingBasisSwitchData } from 'src/store/slices/accountingBasisSwitchSlice'
+import { clearPendingPracticePayload } from 'src/store/slices/practiceAccountingBasisSlice'
 
 export default function PracticeSelector() {
   const { isOwnerOrDirectorInAnyPractice, isUserOwnerOrDirector } =
@@ -185,6 +187,10 @@ export default function PracticeSelector() {
 
             // remove mannual entries
             dispatch(resetPresignResponse())
+
+            // remove accounting basis data
+            dispatch(clearPendingPracticePayload())
+            dispatch(clearAccountingBasisSwitchData())
 
             notify.success('Switched to ' + selected?.practice_name)
           }}

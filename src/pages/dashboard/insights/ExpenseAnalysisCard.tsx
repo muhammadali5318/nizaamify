@@ -1,5 +1,6 @@
 import { Typography, Stack, Chip, Box } from '@mui/material'
 import expenseIcon from '../../../assets/expense-analysis-icon.svg'
+import { formatAmountWithCommas } from 'src/utils/stringUtils'
 
 interface ExpenseItem {
   category: string
@@ -42,7 +43,7 @@ const ExpenseAnalysisCard = ({
     </Box>
 
     <Typography variant='h4' color='primary' fontWeight={600}>
-      £{total}
+      £{formatAmountWithCommas(total)}
     </Typography>
     <Typography variant='body2' color='text.secondary'>
       Total expenses this month
