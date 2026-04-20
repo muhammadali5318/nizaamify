@@ -140,7 +140,7 @@ const StepThree: React.FC<StepProps> = ({ onNext, onBack }) => {
 
   return (
     <Box className={styles.stepTwoRoot}>
-      <Box className={styles.container}>
+      <Box className={styles.stepThreeContainer}>
         <Typography variant='subtitle1' color='text.secondary'>
           Step 3 of 5
         </Typography>

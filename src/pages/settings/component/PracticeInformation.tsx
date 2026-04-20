@@ -127,7 +127,6 @@ const PracticeInformation = () => {
       }
 
       await savePractice(values)
-      notify.success('Practice information updated successfully')
     } catch (err) {
       notify.error('Failed to update practice information')
       throw err

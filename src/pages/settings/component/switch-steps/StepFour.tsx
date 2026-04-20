@@ -216,7 +216,7 @@ const StepFour: React.FC<StepProps> = ({ onNext, onBack }) => {
 
         <Stack direction='row' spacing={2} className={styles.actions}>
           <Button variant='outlined' onClick={handleBackClick}>
-            Back
+            Cancel
           </Button>
 
           <Button variant='contained' onClick={onNext} disabled={!isCompleted}>
