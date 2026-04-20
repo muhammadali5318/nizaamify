@@ -7,6 +7,7 @@ import { z } from 'zod'
 import PasswordField from 'src/components/common/PasswordField'
 import { useUpdateUserProfile } from '../hooks/useUserProfile'
 import { notify } from 'src/components/notistack/NotificationProvider'
+import ResetMFA from './reset-mfa/ResetMFA'
 
 export const ChangePasswordSchema = z
   .object({
@@ -129,7 +130,7 @@ const Security = () => {
         component='form'
         noValidate
         onSubmit={handleSubmit(submit)}
-        sx={{ mt: 1 }}
+        sx={{ mt: 1, mb: 2.5 }}
       >
         <Stack spacing={2}>
           <PasswordField
@@ -164,6 +165,7 @@ const Security = () => {
           </Stack>
         </Stack>
       </Box>
+      <ResetMFA />
     </Box>
   )
 }

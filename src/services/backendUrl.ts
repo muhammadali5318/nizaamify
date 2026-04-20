@@ -111,6 +111,7 @@ export const endpoints = {
     `${API_BASE}/practices/${orgId}/users/${userId}/deactivate/`,
   approveOrRejectTeamMember: (orgId: string, userId: string | undefined) =>
     `${API_BASE}/practices/${orgId}/users/${userId}/requests/status/`,
+  resetMFA: (userId: string) => `${API_BASE}/users/${userId}/mfa/reset/`,
   documents: {
     uploadedDocumentList: (id: string) =>
       `/${API_BASE_DOCUMENTS}/practices/${id}/documents/`,
