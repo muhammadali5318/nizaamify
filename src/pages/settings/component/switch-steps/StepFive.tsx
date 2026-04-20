@@ -53,7 +53,7 @@ const StepFive: React.FC<StepProps> = ({ onBack }) => {
       dispatch(clearAccountingBasisSwitchData())
 
       notify.success('Practice information updated successfully')
-      navigate(paths.settings)
+      navigate(paths.gotoSettingsTab('archivedDataSet'))
     } catch (error) {
       notify.error('Failed to update practice information')
       console.error(error)

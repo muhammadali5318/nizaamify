@@ -215,6 +215,14 @@ export function Router() {
             )
           },
           {
+            path: paths.settingsTab,
+            element: (
+              <FeatureProtectedRoute moduleId='settings'>
+                <Settings />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
             path: paths.accountingBasisSettings,
             element: (
               <FeatureProtectedRoute moduleId='settings'>

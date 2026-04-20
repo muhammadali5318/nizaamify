@@ -1,15 +1,28 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { Box, Stack } from '@mui/material'
+import { useNavigate, useParams } from 'react-router'
 import styles from './settings.module.scss'
 import { SETTINGS_MENU } from './setting-config'
 import { MenuItem } from './type'
 import SidebarTabs from 'src/components/SidebarTabs/SidebarTabs'
 import PageHeader from 'src/components/page-header'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import { paths } from 'src/paths'
 
 const Settings = () => {
   const { isOnboardingCompleted } = useActivePractice()
-  const [active, setActive] = useState<string>(SETTINGS_MENU[0].id)
+  const navigate = useNavigate()
+  const { tabId } = useParams<{ tabId?: string }>()
+  const defaultTabId = SETTINGS_MENU[0].id
+
+  const active = SETTINGS_MENU.some((item) => item.id === tabId)
+    ? (tabId as string)
+    : defaultTabId
+
+  useEffect(() => {
+    if (tabId === active) return
+    navigate(paths.gotoSettingsTab(active), { replace: true })
+  }, [active, navigate, tabId])
 
   const activeItem: MenuItem | undefined = SETTINGS_MENU.find(
     (m) => m.id === active
@@ -33,7 +46,7 @@ const Settings = () => {
           <SidebarTabs
             menu={SETTINGS_MENU}
             activeId={active}
-            onChange={setActive}
+            onChange={(id) => navigate(paths.gotoSettingsTab(id))}
             onboardingCompleted={isOnboardingCompleted}
           />
         </Box>
