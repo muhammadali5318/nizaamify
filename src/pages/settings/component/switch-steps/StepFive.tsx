@@ -60,11 +60,6 @@ const StepFive: React.FC<StepProps> = ({ onBack }) => {
     }
   }
 
-  const timeRange =
-    exportData?.start_date && exportData?.end_date
-      ? `${exportData.start_date} - ${exportData.end_date}`
-      : 'N/A'
-
   const totalRecords =
     typeof exportData?.total_records === 'number'
       ? `${exportData.total_records} records`
@@ -128,7 +123,6 @@ const StepFive: React.FC<StepProps> = ({ onBack }) => {
           </Box>
 
           <Box display='flex' width='100%' gap={2} flexWrap='wrap'>
-            <ExportDetails label='Time Range:' value={timeRange} />
             <ExportDetails label='Total Records:' value={totalRecords} />
             <ExportDetails label='Files Generated:' value={filesGenerated} />
           </Box>

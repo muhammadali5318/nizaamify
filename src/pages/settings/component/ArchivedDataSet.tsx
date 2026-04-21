@@ -91,13 +91,6 @@ const getTimestampFromS3Key = (s3Key: string) => {
   return new Date(year, month, day, hour, minute, second).getTime()
 }
 
-const formatRange = (startDate: string | null, endDate: string | null) => {
-  if (startDate && endDate) return `${startDate} → ${endDate}`
-  if (startDate) return `From ${startDate}`
-  if (endDate) return `Until ${endDate}`
-  return 'Date range unavailable'
-}
-
 const ArchivedDataSet: React.FC = () => {
   const { activePracticeId, activePractice } = useActivePractice()
 
@@ -284,7 +277,6 @@ const ArchivedDataSet: React.FC = () => {
     )
   }
 
-  const latestExport = data[0]
   const practiceName = activePractice?.practice_name || 'this practice'
 
   return (
@@ -341,12 +333,6 @@ const ArchivedDataSet: React.FC = () => {
                 <Stack spacing={0.25}>
                   <Typography fontWeight={800}>
                     Latest export available
-                  </Typography>
-                  <Typography variant='body2' color='text.secondary'>
-                    {formatRange(
-                      latestExport.start_date,
-                      latestExport.end_date
-                    )}
                   </Typography>
                 </Stack>
               </Stack>
@@ -427,10 +413,6 @@ const ArchivedDataSet: React.FC = () => {
                             sx={statusChip.sx}
                           />
                         </Stack>
-
-                        <Typography variant='body2' color='text.secondary'>
-                          {formatRange(item.start_date, item.end_date)}
-                        </Typography>
 
                         <Typography variant='body2' color='text.secondary'>
                           {typeof item.total_records === 'number'
