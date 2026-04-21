@@ -198,7 +198,7 @@ function ExpandableRow({
       maximumFractionDigits: 0
     })
     if (percent) {
-      return `${formatted} (${Number(percent).toFixed(1)}%)`
+      return `${formatted} (${Number(percent).toFixed(2)}%)`
     }
     return formatted
   }
