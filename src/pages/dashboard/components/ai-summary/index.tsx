@@ -5,9 +5,15 @@ import aiIcon from 'src/assets/ai-icon.svg'
 import { useFetchAIInsights } from 'src/hooks/useFetchAIInsights'
 import { useAuth } from 'src/context/AuthProvider'
 
-const AiSummary = () => {
+interface Props {
+  granularity: string
+  year: number
+  month: any
+}
+
+const AiSummary = ({ granularity, month, year }: Props) => {
   const { accessToken } = useAuth()
-  const { data } = useFetchAIInsights(!!accessToken)
+  const { data } = useFetchAIInsights(!!accessToken, month, year, granularity)
   return (
     <Box
       sx={{

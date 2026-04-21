@@ -290,7 +290,7 @@ const MainDashboard = () => {
       </Stack>
       <Stack spacing={2.4} ref={feedbackRef}>
         {/* AI INSIGHTS */}
-        <AiSummary />
+        <AiSummary granularity={granularity} month={month} year={year} />
         <SubmitFeedback />
       </Stack>
     </Box>

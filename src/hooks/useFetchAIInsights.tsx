@@ -3,22 +3,32 @@ import { useActivePractice } from 'src/hooks/useActivePractice'
 import apiClient from 'src/services/api-client'
 import { endpoints } from 'src/services/backendUrl'
 
-export const useFetchAIInsights = (enabled: boolean) => {
+export const useFetchAIInsights = (
+  enabled: boolean,
+  month?: number | null,
+  year?: number,
+  granularity?: string
+) => {
   const { activePracticeId } = useActivePractice()
-  //   const canViewAndEditTeamMembers = useHasPermission('integrations.manage')
   const queryClient = useQueryClient()
 
   return useQuery({
-    queryKey: ['AIInsightsSummary', activePracticeId],
+    queryKey: ['AIInsightsSummary', activePracticeId, month, year, granularity],
     queryFn: async () => {
-      //   if (!canViewAndEditTeamMembers) return null
       try {
         const { data } = await apiClient.get(
-          endpoints.documents.dashboardAiSummary(activePracticeId ?? '')
+          endpoints.documents.dashboardAiSummary(activePracticeId ?? ''),
+          {
+            params: { month, year, granularity }
+          }
         )
+
         return data?.data ?? null
       } catch (error: any) {
-        queryClient.setQueryData(['AIInsightsSummary', activePracticeId], null)
+        queryClient.setQueryData(
+          ['AIInsightsSummary', activePracticeId, month, year, granularity],
+          null
+        )
 
         if (error.response?.status === 404) {
           return null
