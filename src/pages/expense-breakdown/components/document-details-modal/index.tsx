@@ -35,6 +35,7 @@ interface DocumentDetailsModalProps {
   documentsPage?: number
   documentsPageSize?: number
   documentsTotal?: number
+  module: string
 
   // manual entries have a different shape (array of entries with supporting_docs)
   manualEntries: DocumentItem[]
@@ -74,7 +75,8 @@ const DocumentDetailsModal: React.FC<DocumentDetailsModalProps> = React.memo(
 
     onFetchDocumentsPage,
     onFetchManualPage,
-    onFetchAggregatorPage
+    onFetchAggregatorPage,
+    module
   }) => {
     const { activePracticeId } = useActivePractice()
     const [downloadingKey, setDownloadingKey] = useState<string | null>(null)
@@ -199,6 +201,7 @@ const DocumentDetailsModal: React.FC<DocumentDetailsModalProps> = React.memo(
               onPageChange={onFetchDocumentsPage}
               onDownload={downloadFile}
               closeParent={onClose}
+              module={module}
             />
 
             <ManualListColumn

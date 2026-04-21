@@ -589,6 +589,7 @@ const ExpandableRow: React.FC<ExpandableRowProps> = ({
         onFetchDocumentsPage={onFetchDocumentsPage}
         onFetchManualPage={onFetchManualPage}
         onFetchAggregatorPage={onFetchAggregatorPage}
+        module={'expense'}
       />
     </>
   )

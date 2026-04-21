@@ -269,30 +269,27 @@ const RevenueExpandableRow: React.FC<RevenueExpandableRowProps> = ({
   }
 
   const fetchAggregator = async (page = 1, page_size = 10, subCat?: string) => {
-    console.warn(page)
-    console.warn(page_size)
-    console.warn(subCat)
-    // try {
-    //   const response = await apiClient.get(
-    //     endpoints.documents.expenseBreakdownAggregatorDocuments(
-    //       activePracticeId ?? ''
-    //     ),
-    //     {
-    //       params: {
-    //         start_date: toApiDate(dateRange?.start ?? null),
-    //         end_date: toApiDate(dateRange?.end ?? null),
-    //         sub_cat: subCat ?? currentSubCat,
-    //         cat: 'Revenue',
-    //         page,
-    //         page_size
-    //       }
-    //     }
-    //   )
-    //   const { results, total } = extractListResponse(response)
-    //   setAggregatorState({ items: results, page, page_size, total })
-    // } catch {
-    //   setAggregatorState({ items: [], page, page_size, total: 0 })
-    // }
+    try {
+      const response = await apiClient.get(
+        endpoints.documents.expenseBreakdownAggregatorDocuments(
+          activePracticeId ?? ''
+        ),
+        {
+          params: {
+            start_date: toApiDate(dateRange?.start ?? null),
+            end_date: toApiDate(dateRange?.end ?? null),
+            sub_cat: subCat ?? currentSubCat,
+            cat: 'Revenue',
+            page,
+            page_size
+          }
+        }
+      )
+      const { results, total } = extractListResponse(response)
+      setAggregatorState({ items: results, page, page_size, total })
+    } catch {
+      setAggregatorState({ items: [], page, page_size, total: 0 })
+    }
   }
 
   const handleDocumentDetails = (subCat: string) => {
@@ -590,6 +587,7 @@ const RevenueExpandableRow: React.FC<RevenueExpandableRowProps> = ({
         onFetchDocumentsPage={onFetchDocumentsPage}
         onFetchManualPage={onFetchManualPage}
         onFetchAggregatorPage={onFetchAggregatorPage}
+        module={'revenue'}
       />
     </>
   )
