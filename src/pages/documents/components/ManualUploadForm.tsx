@@ -23,7 +23,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
 import {
-  getDocumentSubtypes,
+  getDocumentSubtypesForManualEntries,
   category,
   getFilteredDocumentTypes,
   getDocumentLineItems,
@@ -97,7 +97,7 @@ const ManualEntryForm: React.FC = () => {
   const isRevenue = formData.category === category.revenue
 
   const subtypes = formData.type
-    ? getDocumentSubtypes(formData.type, accountingBasis)
+    ? getDocumentSubtypesForManualEntries(formData.type, accountingBasis)
     : []
 
   const lineItems =

@@ -100,6 +100,30 @@ export const getDocumentSubtypes = (
   // Special logic for Income & Revenue
   if (type === 'Income & Revenue') {
     if (method === 'CASH') {
+      return ['Subletting or rental income evidence']
+    }
+
+    if (method === 'ACCRUAL') {
+      return [
+        'Practice management reports',
+        'NHS BSA PAYMENT',
+        'Subletting or rental income evidence'
+      ]
+    }
+  }
+
+  return Object.keys(documentMapping[type])
+}
+
+export const getDocumentSubtypesForManualEntries = (
+  type: string,
+  method?: string
+): string[] => {
+  if (!documentMapping[type]) return []
+
+  // Special logic for Income & Revenue
+  if (type === 'Income & Revenue') {
+    if (method === 'CASH') {
       return ['Bank statements', 'Subletting or rental income evidence']
     }
 
