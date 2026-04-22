@@ -49,6 +49,8 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
 import { notify } from 'src/components/notistack/NotificationProvider'
+import { clearAccountingBasisSwitchData } from 'src/store/slices/accountingBasisSwitchSlice'
+import { clearPendingPracticePayload } from 'src/store/slices/practiceAccountingBasisSlice'
 
 interface PracticeDetailsCardProps {
   status?: 'active' | 'inactive' | 'archived'
@@ -103,12 +105,12 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
         queryKey: ['listAllPracticesData']
       })
 
-      handleSwitchToPractice(practice?.id)
-      navigate(paths.dashboard)
       const token = await getAccessTokenSilently({
         cacheMode: 'off'
       })
       apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
+      handleSwitchToPractice(practice?.id)
+      navigate(paths.dashboard)
     } catch (error) {
       console.error('Failed to invalidate queries:', error)
     } finally {
@@ -217,6 +219,10 @@ const PracticeDetailsCard: React.FC<PracticeDetailsCardProps> = ({
 
       // remove mannual entries
       dispatch(resetPresignResponse())
+
+      // remove accounting basis
+      dispatch(clearPendingPracticePayload())
+      dispatch(clearAccountingBasisSwitchData())
     },
     [practice, setActiveById, allPractices, dispatch]
   )

@@ -11,6 +11,8 @@ import { clearAllBankStatements } from 'src/store/slices/bankStatementUploadSlic
 import { clearProcessing as clearBankStatementProcessing } from 'src/store/slices/bankstatementProcessingSlice'
 import { clearPresignStatementsData } from 'src/store/slices/presignedBankstatementsSlice'
 import { resetPresignResponse } from 'src/store/slices/manualEntryFilesSlice'
+import { clearAccountingBasisSwitchData } from 'src/store/slices/accountingBasisSwitchSlice'
+import { clearPendingPracticePayload } from 'src/store/slices/practiceAccountingBasisSlice'
 
 export const useLogout = () => {
   const store = useStore()
@@ -28,6 +30,8 @@ export const useLogout = () => {
       store.dispatch(clearBankStatementProcessing())
       store.dispatch(clearPresignStatementsData())
       store.dispatch(resetPresignResponse())
+      store.dispatch(clearPendingPracticePayload())
+      store.dispatch(clearAccountingBasisSwitchData())
       logout({
         logoutParams: {
           returnTo: redirectTo ?? window.location.origin

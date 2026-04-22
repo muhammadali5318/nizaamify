@@ -7,6 +7,7 @@ import {
   Tooltip,
   Typography
 } from '@mui/material'
+import { flushSync } from 'react-dom'
 import { useTheme } from '@mui/material/styles'
 import { DataGrid, GridRowSelectionModel, GridRowId } from '@mui/x-data-grid'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
@@ -245,6 +246,9 @@ const TransactionsTable = () => {
     setModalInitial(null)
   }
 
+  const getLastValidPage = (count: number) =>
+    Math.max(0, Math.ceil(count / DEFAULT_PAGE_SIZE) - 1)
+
   const handleUpdateAll = useCallback(async () => {
     if (isCategorising || selectedCount === 0) return
 
@@ -277,6 +281,7 @@ const TransactionsTable = () => {
             is_verified: true
           }
         }
+
         return null
       })
       .filter(Boolean)
@@ -286,8 +291,14 @@ const TransactionsTable = () => {
       return
     }
 
+    const currentTotalCount = data?.count ?? 0
+    const nextTotalCount = Math.max(0, currentTotalCount - transactions.length)
+    const lastValidPage = getLastValidPage(nextTotalCount)
+    const nextPage = Math.min(page, lastValidPage)
+
     try {
       setIsCategorising(true)
+
       await apiClient.post(
         endpoints.bankIntegrator.uncategorisedTransactionsUpdate(
           activePracticeId ?? ''
@@ -295,11 +306,17 @@ const TransactionsTable = () => {
         { transactions }
       )
 
+      // move page first if current page became invalid
+      if (nextPage !== page) {
+        flushSync(() => {
+          setPage(nextPage)
+        })
+      }
+
       await queryClient.invalidateQueries({
         queryKey: ['uncategorisedTransactions']
       })
 
-      // Reset after successful update
       dispatch(clearCategories())
       setRowSelectionModel({ type: 'include', ids: new Set() })
       setSelectedRowCache({})
@@ -314,14 +331,17 @@ const TransactionsTable = () => {
       setIsCategorising(false)
     }
   }, [
+    isCategorising,
+    selectedCount,
     rowSelectionModel,
     categories,
     selectedRowCache,
     rows,
+    data?.count,
+    page,
     activePracticeId,
     dispatch,
-    isCategorising,
-    selectedCount
+    setPage
   ])
 
   const TablePaginationActions = useCallback(
@@ -475,6 +495,7 @@ const TransactionsTable = () => {
           onSave={handleSaveCategory}
           row={selectedRow}
           initial={modalInitial ?? undefined}
+          showDatePicker={false}
         />
       </Box>
     </Box>

@@ -13,9 +13,10 @@ import {
 } from '../store/slices/pollingJobBankStatementSlice'
 import { deleteBatchDocuments } from 'src/services/apis/deleteBatchDocuments'
 import { endpoints } from 'src/services/backendUrl'
+import { notify } from 'src/components/notistack/NotificationProvider'
 
 const activeJobs = new Set<string>()
-const DOC_TIMEOUT_MS = 180000
+const DOC_TIMEOUT_MS = 3 * 60 * 1000
 
 export const pollBatchStatusUntilComplete = async (
   batchId: string,
@@ -137,14 +138,31 @@ export const pollBatchStatusUntilComplete = async (
     throw err
   } finally {
     try {
-      await apiClient.get(
+      const response = await apiClient.get(
         endpoints.bankIntegrator.documentStatus(
           practiceId ?? '',
           triggerRes.data.document.document_id
         )
       )
+
+      if (
+        response?.data?.data?.error_message?.includes(
+          'Duplicate transactions detected'
+        )
+      ) {
+        await deleteBatchDocuments(
+          practiceId,
+          batchId,
+          [],
+          [triggerRes.data.document.document_id]
+        )
+
+        notify.error(
+          `${response?.data?.data?.file_name} was deleted because duplicate transactions were detected.`
+        )
+      }
     } catch (error: any) {
-      if (error?.message == 'The document does not exist.') {
+      if (error?.message !== null) {
         await deleteBatchDocuments(
           practiceId,
           batchId,

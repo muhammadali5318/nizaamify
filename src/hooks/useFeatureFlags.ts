@@ -9,8 +9,11 @@ import { useUserDetailsInActivePractice } from './useUserDetailsInActivePractice
 
 export function useFeatureFlags(userContext: UserContext) {
   const permissionsByCategory = useSelector(selectPermissionsByCategory)
-  const { isOnboardingCompleted, isActivePracticeSubscribed } =
-    useActivePractice()
+  const {
+    isOnboardingCompleted,
+    isActivePracticeSubscribed,
+    hasActivePracticeType
+  } = useActivePractice()
   const { userDetails } = useUserDetailsInActivePractice()
   const userRole = userDetails?.user_role
   const modulePermissions = useMemo(() => {
@@ -60,7 +63,8 @@ export function useFeatureFlags(userContext: UserContext) {
         const featureContext: UserContext = {
           onboardingCompleted: isOnboardingCompleted,
           subscriptionActive: isActivePracticeSubscribed,
-          role: userRole
+          role: userRole,
+          hasActivePracticeType: hasActivePracticeType
         }
 
         for (const ruleId of moduleConfig.requiredRules) {

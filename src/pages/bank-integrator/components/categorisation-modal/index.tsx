@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import dayjs, { Dayjs } from 'dayjs'
 import {
   Dialog,
   DialogTitle,
@@ -13,16 +14,24 @@ import {
   Stack,
   SelectChangeEvent
 } from '@mui/material'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 import {
   getFilteredDocumentTypes,
   getDocumentSubtypes,
-  getExpenseSubcategories,
+  getDocumentLineItems,
+  getSubtypeForLineItem,
   category as categoryConstants
 } from 'src/utils/documentMapping'
 
+type ModalType = 'uncategorisedRevenue' | string
+
 type CategorisationModalProps = {
   open: boolean
+  showDatePicker?: boolean
+  modalType?: ModalType
   onClose: () => void
   onSave?: (
     payload: {
@@ -30,6 +39,7 @@ type CategorisationModalProps = {
       type: string
       subtype: string
       lineItem: string
+      transaction_posting_date: string
     },
     row: any
   ) => void
@@ -38,8 +48,17 @@ type CategorisationModalProps = {
     type?: string
     subtype?: string
     lineItem?: string
+    transaction_posting_date?: string
   }
   row?: any
+}
+
+const FIXED_REVENUE_TYPE = 'Owner, Tax & Capital Movement'
+
+const getCategoryFromType = (type: string): string => {
+  if (type === 'Income & Revenue') return categoryConstants.revenue
+  if (type) return categoryConstants.expense
+  return categoryConstants.expense
 }
 
 const CategorisationModal: React.FC<CategorisationModalProps> = ({
@@ -47,102 +66,150 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
   onClose,
   onSave,
   initial,
-  row
+  row,
+  showDatePicker = true,
+  modalType
 }) => {
-  /**
-   * Local state
-   */
+  const isUncategorisedRevenue = modalType === 'uncategorisedRevenue'
+
   const [category, setCategory] = useState<string>(categoryConstants.expense)
   const [type, setType] = useState<string>('')
   const [subtype, setSubtype] = useState<string>('')
   const [lineItem, setLineItem] = useState<string>('')
+  const [transactionDate, setTransactionDate] = useState<Dayjs | null>(null)
 
-  /**
-   * Flag to prevent dependent reset during initialization
-   */
-  const isInitializingRef = useRef(false)
-
-  /**
-   * Populate values when modal opens
-   */
   useEffect(() => {
     if (!open) return
 
-    isInitializingRef.current = true
+    // Special flow for uncategorised revenue
+    if (isUncategorisedRevenue) {
+      const nextSubtype =
+        initial?.subtype &&
+        getDocumentSubtypes(FIXED_REVENUE_TYPE).includes(initial.subtype)
+          ? initial.subtype
+          : ''
 
-    setCategory(initial?.category ?? categoryConstants.expense)
-    setType(initial?.type ?? '')
-    setSubtype(initial?.subtype ?? '')
-    setLineItem(initial?.lineItem ?? '')
+      setCategory(categoryConstants.revenue)
+      setType(FIXED_REVENUE_TYPE)
+      setSubtype(nextSubtype)
+      setLineItem(initial?.lineItem ?? '')
+      setTransactionDate(
+        initial?.transaction_posting_date
+          ? dayjs(initial.transaction_posting_date)
+          : null
+      )
+      return
+    }
 
-    // allow next render cycle to finish before enabling resets
-    setTimeout(() => {
-      isInitializingRef.current = false
-    }, 0)
-  }, [open, initial])
+    // Existing behaviour for all other modal types
+    const initialType = initial?.type ?? ''
 
-  const types = useMemo(() => {
-    const filtered = getFilteredDocumentTypes(category)
-    return filtered
-  }, [category])
+    const initialCategory = initialType
+      ? getCategoryFromType(initialType)
+      : (initial?.category ?? categoryConstants.expense)
+
+    const availableTypes = getFilteredDocumentTypes(initialCategory)
+
+    const nextType =
+      initialType && availableTypes.includes(initialType) ? initialType : ''
+
+    const nextSubtypes = nextType ? getDocumentSubtypes(nextType) : []
+
+    const nextSubtype =
+      initial?.subtype && nextSubtypes.includes(initial.subtype)
+        ? initial.subtype
+        : ''
+
+    const nextLineItem =
+      initial?.lineItem && nextType && nextType !== 'Income & Revenue'
+        ? initial.lineItem
+        : ''
+
+    setCategory(initialCategory)
+    setType(nextType)
+    setSubtype(nextSubtype)
+    setLineItem(nextLineItem)
+    setTransactionDate(
+      initial?.transaction_posting_date
+        ? dayjs(initial.transaction_posting_date)
+        : null
+    )
+  }, [open, initial, isUncategorisedRevenue])
+
+  const selectedType = isUncategorisedRevenue ? FIXED_REVENUE_TYPE : type
+  const selectedCategory = isUncategorisedRevenue
+    ? categoryConstants.revenue
+    : category
+
+  const types = useMemo(
+    () => getFilteredDocumentTypes(selectedCategory),
+    [selectedCategory]
+  )
 
   const subtypes = useMemo(() => {
-    return getDocumentSubtypes(type)
-  }, [type])
+    if (!selectedType) return []
+    return getDocumentSubtypes(selectedType)
+  }, [selectedType])
 
-  const lineItems = useMemo(() => {
-    if (!type || !subtype) return []
-    return getExpenseSubcategories(type, subtype)
-  }, [type, subtype])
+  const availableLineItems = useMemo(() => {
+    if (!selectedType || selectedType === 'Income & Revenue') return []
+    return getDocumentLineItems(selectedType, subtype || undefined)
+  }, [selectedType, subtype])
 
-  /**
-   * Reset dependent fields ONLY when user changes manually
-   */
-  useEffect(() => {
-    if (isInitializingRef.current) return
+  const handleCategoryChange = (value: string) => {
+    const nextTypes = getFilteredDocumentTypes(value)
+    const autoSelectedType = nextTypes[0] || ''
 
-    setType('')
+    setCategory(value)
+    setType(autoSelectedType)
     setSubtype('')
     setLineItem('')
-  }, [category])
+  }
 
-  useEffect(() => {
-    if (isInitializingRef.current) return
+  const handleTypeChange = (value: string) => {
+    if (isUncategorisedRevenue) return
 
+    setType(value)
+    setCategory(getCategoryFromType(value))
     setSubtype('')
     setLineItem('')
-  }, [type])
+  }
 
-  useEffect(() => {
-    if (isInitializingRef.current) return
-
+  const handleSubtypeChange = (value: string) => {
+    setSubtype(value)
     setLineItem('')
-  }, [subtype])
+  }
 
-  /**
-   * Validation
-   */
+  const handleLineItemChange = (value: string) => {
+    const matchedSubtype = getSubtypeForLineItem(selectedType, value)
+
+    setLineItem(value)
+    if (matchedSubtype) {
+      setSubtype(matchedSubtype)
+    }
+  }
+
   const isValid =
-    Boolean(category) &&
-    Boolean(type) &&
-    (type === 'Income & Revenue' || (Boolean(subtype) && Boolean(lineItem)))
+    Boolean(selectedCategory) &&
+    Boolean(selectedType) &&
+    (selectedType === 'Income & Revenue' ||
+      (Boolean(subtype) && Boolean(lineItem)))
 
-  /**
-   * Save handler
-   */
   const handleSave = () => {
     if (!isValid) return
 
-    onSave?.(
-      {
-        category,
-        type,
-        subtype,
-        lineItem
-      },
-      row
-    )
+    const payload: any = {
+      category: selectedCategory,
+      type: selectedType,
+      subtype,
+      lineItem
+    }
 
+    if (transactionDate) {
+      payload.transaction_posting_date = transactionDate.format('YYYY-MM-DD')
+    }
+
+    onSave?.(payload, row)
     onClose()
   }
 
@@ -172,58 +239,64 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
 
       <DialogContent sx={{ p: 0, mt: 2 }}>
         <Stack spacing={2} mt={2}>
-          {/* CATEGORY */}
-          <FormControl fullWidth>
-            <InputLabel>Type *</InputLabel>
-            <Select
-              disabled
-              value={category}
-              label='Type *'
-              MenuProps={menuProps}
-              onChange={(e: SelectChangeEvent<string>) =>
-                setCategory(e.target.value)
-              }
-            >
-              <MenuItem value={categoryConstants.expense}>
-                {categoryConstants.expense}
-              </MenuItem>
-              <MenuItem value={categoryConstants.revenue}>
-                {categoryConstants.revenue}
-              </MenuItem>
-              <MenuItem value={categoryConstants.unknown}>
-                {categoryConstants.unknown}
-              </MenuItem>
-            </Select>
-          </FormControl>
-
-          {/* TYPE */}
-          <FormControl fullWidth disabled={!category}>
-            <InputLabel>Category *</InputLabel>
-            <Select
-              value={type}
-              label='Category *'
-              MenuProps={menuProps}
-              onChange={(e) => setType(e.target.value)}
-            >
-              {types.map((t) => (
-                <MenuItem key={t} value={t}>
-                  {t}
+          {!isUncategorisedRevenue && (
+            <FormControl fullWidth>
+              <InputLabel>Type *</InputLabel>
+              <Select
+                value={category}
+                label='Type *'
+                disabled
+                MenuProps={menuProps}
+                onChange={(e: SelectChangeEvent<string>) =>
+                  handleCategoryChange(e.target.value)
+                }
+              >
+                <MenuItem value={categoryConstants.expense}>
+                  {categoryConstants.expense}
                 </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              </Select>
+            </FormControl>
+          )}
 
-          {/* SUBTYPE */}
           <FormControl
             fullWidth
-            disabled={!type || type === 'Income & Revenue'}
+            disabled={isUncategorisedRevenue || !selectedCategory}
+          >
+            <InputLabel>Category *</InputLabel>
+            <Select
+              value={selectedType}
+              label='Category *'
+              MenuProps={menuProps}
+              onChange={(e: SelectChangeEvent<string>) =>
+                handleTypeChange(e.target.value)
+              }
+            >
+              {isUncategorisedRevenue ? (
+                <MenuItem value={FIXED_REVENUE_TYPE}>
+                  {FIXED_REVENUE_TYPE}
+                </MenuItem>
+              ) : (
+                types.map((t) => (
+                  <MenuItem key={t} value={t}>
+                    {t}
+                  </MenuItem>
+                ))
+              )}
+            </Select>
+          </FormControl>
+
+          <FormControl
+            fullWidth
+            disabled={!selectedType || selectedType === 'Income & Revenue'}
           >
             <InputLabel>Subcategory *</InputLabel>
             <Select
               value={subtype}
               label='Subcategory *'
               MenuProps={menuProps}
-              onChange={(e) => setSubtype(e.target.value)}
+              onChange={(e: SelectChangeEvent<string>) =>
+                handleSubtypeChange(e.target.value)
+              }
             >
               {subtypes.map((s) => (
                 <MenuItem key={s} value={s}>
@@ -233,20 +306,21 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
             </Select>
           </FormControl>
 
-          {/* LINE ITEM */}
           <FormControl
             fullWidth
-            disabled={!subtype || type === 'Income & Revenue'}
+            disabled={!selectedType || selectedType === 'Income & Revenue'}
           >
             <InputLabel>Line Item *</InputLabel>
             <Select
               value={lineItem}
               label='Line Item *'
               MenuProps={menuProps}
-              onChange={(e) => setLineItem(e.target.value)}
+              onChange={(e: SelectChangeEvent<string>) =>
+                handleLineItemChange(e.target.value)
+              }
             >
-              {lineItems.length > 0 ? (
-                lineItems.map((li) => (
+              {availableLineItems.length > 0 ? (
+                availableLineItems.map((li) => (
                   <MenuItem key={li} value={li}>
                     {li}
                   </MenuItem>
@@ -258,6 +332,26 @@ const CategorisationModal: React.FC<CategorisationModalProps> = ({
               )}
             </Select>
           </FormControl>
+
+          {showDatePicker && (
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label='Transaction posting date'
+                value={transactionDate}
+                onChange={(newValue) => setTransactionDate(newValue)}
+                format='DD-MM-YYYY'
+                disableFuture
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    sx: {
+                      '& .MuiPickersInputBase-root': { borderRadius: '12px' }
+                    }
+                  }
+                }}
+              />
+            </LocalizationProvider>
+          )}
         </Stack>
       </DialogContent>
 

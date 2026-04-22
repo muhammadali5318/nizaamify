@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { GridColDef, GridCellParams } from '@mui/x-data-grid'
 import { Box, Button, Chip, Typography } from '@mui/material'
-import { toTitleCase } from 'src/utils/stringUtils'
+import { formatAmountWithCommas, toTitleCase } from 'src/utils/stringUtils'
 import dayjs from 'dayjs'
 
 type UseTransactionsColumns = (
@@ -88,7 +88,9 @@ export const useTransactionsColumns: UseTransactionsColumns = (
         sortable: true,
         renderCell: (params: GridCellParams) => (
           <Typography variant='body2'>
-            {params?.row?.amount ? `£${Math.abs(params?.row?.amount)}` : '-'}
+            {params?.row?.amount
+              ? `£${formatAmountWithCommas(Math.abs(params?.row?.amount))}`
+              : '-'}
           </Typography>
         )
       },

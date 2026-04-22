@@ -35,9 +35,10 @@ interface DocumentDetailsModalProps {
   documentsPage?: number
   documentsPageSize?: number
   documentsTotal?: number
+  module: string
 
   // manual entries have a different shape (array of entries with supporting_docs)
-  manualEntries: any[]
+  manualEntries: DocumentItem[]
   manualPage?: number
   manualPageSize?: number
   manualTotal?: number
@@ -74,7 +75,8 @@ const DocumentDetailsModal: React.FC<DocumentDetailsModalProps> = React.memo(
 
     onFetchDocumentsPage,
     onFetchManualPage,
-    onFetchAggregatorPage
+    onFetchAggregatorPage,
+    module
   }) => {
     const { activePracticeId } = useActivePractice()
     const [downloadingKey, setDownloadingKey] = useState<string | null>(null)
@@ -199,13 +201,14 @@ const DocumentDetailsModal: React.FC<DocumentDetailsModalProps> = React.memo(
               onPageChange={onFetchDocumentsPage}
               onDownload={downloadFile}
               closeParent={onClose}
+              module={module}
             />
 
             <ManualListColumn
               title='Manual Entries'
               docs={manualEntries}
               downloadingKey={downloadingKey}
-              listKey='manual'
+              listKey='manual_entries'
               page={manualPage}
               pageSize={manualPageSize}
               total={manualTotal}
@@ -218,7 +221,7 @@ const DocumentDetailsModal: React.FC<DocumentDetailsModalProps> = React.memo(
               title='Bank Connector'
               docs={aggregators}
               downloadingKey={downloadingKey}
-              listKey={'docs'}
+              listKey={'bank_aggregator'}
               page={aggregatorPage}
               pageSize={aggregatorPageSize}
               total={aggregatorTotal}

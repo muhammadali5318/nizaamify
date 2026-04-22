@@ -10,8 +10,16 @@ export const bankingTabsData = [
   {
     key: 1,
     label: 'Transactions',
-    activeIcon: '/assets/active-document.svg',
-    inactiveIcon: '/assets/inactive-document.svg'
+    activeIcon: '/assets/active-wallet.svg',
+    inactiveIcon: '/assets/expense-inactive.svg'
+  },
+  {
+    key: 3,
+    label: 'Revenue',
+    activeIcon: '/assets/active-billing.svg',
+    inactiveIcon: '/assets/inactive-billing.svg',
+    count: 0,
+    countTotal: 0
   },
   {
     key: 2,
@@ -20,13 +28,13 @@ export const bankingTabsData = [
     inactiveIcon: '/assets/in-active-union.svg',
     count: 0,
     countTotal: 0
-  },
-  {
-    key: 3,
-    label: 'Invoice Upload History',
-    activeIcon: '/assets/history.svg',
-    inactiveIcon: '/assets/history-icon.svg'
   }
+  // {
+  //   key: 3,
+  //   label: 'Invoice Upload History',
+  //   activeIcon: '/assets/history.svg',
+  //   inactiveIcon: '/assets/history-icon.svg'
+  // }
 ]
 
 export const uploadCsvBreads = [

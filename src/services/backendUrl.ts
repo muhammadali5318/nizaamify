@@ -41,6 +41,10 @@ export const endpoints = {
       `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/unverified-transactions/${transactionId}/reconcile/`,
     uncategorisedTransactions: (practiceId: string) =>
       `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/uncategorised-transactions/`,
+    revenueTransactions: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/uncategorised-revenue-transactions/`,
+    revenueTransactionsCategorise: (practiceId: string) =>
+      `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/uncategorised-revenue-transactions/categorise/`,
     categorisedTransactions: (practiceId: string) =>
       `${API_BASE_BANK_INTEGRATOR}/practices/${practiceId}/categorised-transactions/`,
     uploadCategorisedTransactionsInvoice: (
@@ -107,6 +111,7 @@ export const endpoints = {
     `${API_BASE}/practices/${orgId}/users/${userId}/deactivate/`,
   approveOrRejectTeamMember: (orgId: string, userId: string | undefined) =>
     `${API_BASE}/practices/${orgId}/users/${userId}/requests/status/`,
+  resetMFA: (userId: string) => `${API_BASE}/users/${userId}/mfa/reset/`,
   documents: {
     uploadedDocumentList: (id: string) =>
       `/${API_BASE_DOCUMENTS}/practices/${id}/documents/`,
@@ -118,6 +123,8 @@ export const endpoints = {
       `/${API_BASE_DOCUMENTS}/practices/${id}/documents/${documentId}/post-date/`,
     expenseBreakdown: (practiceId: string) =>
       `/${API_BASE_DOCUMENTS}/practices/${practiceId}/expense-breakdown-detail/`,
+    nonPLBreakDown: (practiceId: string) =>
+      `/${API_BASE_DOCUMENTS}/practices/${practiceId}/non-pl-expense-breakdown/`,
     expenseBreakdownDocuments: (practiceId: string) =>
       `/${API_BASE_DOCUMENTS}/practices/${practiceId}/expense-breakdown-documents/`,
     expenseBreakdownManualDocuments: (practiceId: string) =>
@@ -129,6 +136,20 @@ export const endpoints = {
     deleteDocument: (id: string, documentId: string) =>
       `/${API_BASE_DOCUMENTS}/practices/${id}/document/${documentId}/`,
     documentStatus: (id: string, documentId: string) =>
-      `/${API_BASE_DOCUMENTS}/practices/${id}/document-status/${documentId}/`
+      `/${API_BASE_DOCUMENTS}/practices/${id}/document-status/${documentId}/`,
+    dashboardAiSummary: (id: string) =>
+      `${API_BASE_DOCUMENTS}/practices/${id}/dashboard/ai-summary/`
+  },
+  accountingBasis: {
+    sendOtp: (orgId: string) => `${API_BASE}/practices/${orgId}/otp/send/`,
+    exportPracticeData: (orgId: string) =>
+      `${API_BASE}/practices/${orgId}/export/`,
+    exportPracticeDataHistory: (orgId: string) =>
+      `${API_BASE}/practices/${orgId}/export/history/`,
+    exportPracticeDataStatus: (orgId: string, exportId: string) =>
+      `${API_BASE}/practices/${orgId}/export/${exportId}/status`,
+    verifyOtp: (orgId: string) => `${API_BASE}/practices/${orgId}/otp/verify/`,
+    verifyIdentity: (orgId: string) =>
+      `${API_BASE}/practices/${orgId}/identity/verify/`
   }
 }

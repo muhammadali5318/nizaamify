@@ -65,3 +65,78 @@
     }
   }
 }
+
+.accountingBasisRoot {
+  box-sizing: border-box;
+  display: flex;
+  padding: 24px 148px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  flex-shrink: 0;
+  border-radius: 24px 0 0 0;
+  background: #fff;
+
+  @media (max-width: 1200px) {
+    padding: 24px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 24px;
+    gap: 16px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 24px 18px;
+    gap: 12px;
+    border-radius: 0;
+  }
+}
+
+.container {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  box-sizing: border-box;
+
+  @media (max-width: 900px) {
+    flex-direction: column;
+    padding: 24px;
+  }
+
+  @media (max-width: 600px) {
+    padding: 16px;
+    gap: 12px;
+  }
+}
+
+.left {
+  width: 10%;
+  min-width: 150px;
+
+  @media (max-width: 900px) {
+    width: 100%;
+    min-width: unset;
+    padding: 0;
+  }
+}
+
+.right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.placeholderBox {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+
+
+

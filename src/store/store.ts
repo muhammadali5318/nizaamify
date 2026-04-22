@@ -24,6 +24,9 @@ import chatReducer from './slices/chatSlice'
 import bankStatementUploadReducer from './slices/bankStatementUploadSlice'
 import bankIntegratorTabReducer from './slices/bankIntegratorTabSlice'
 import transactionsTableReducer from './slices/transactionsTableSlice'
+import expenseBreakdownReducer from './slices/expenseBreakdownSlice'
+import practiceAccountingBasisReducer from './slices/practiceAccountingBasisSlice'
+import accountingBasisSwitchReducer from './slices/accountingBasisSwitchSlice'
 
 const rootReducer = combineReducers({
   uploads: uploadReducer,
@@ -46,7 +49,10 @@ const rootReducer = combineReducers({
   chat: chatReducer,
   bankIntegratorTab: bankIntegratorTabReducer,
   ReconciliationTabPresignData: ReconciliationTabPresignData,
-  transactionsTable: transactionsTableReducer
+  transactionsTable: transactionsTableReducer,
+  expenseBreakdown: expenseBreakdownReducer,
+  practiceAccountingBasis: practiceAccountingBasisReducer,
+  accountingBasisSwitch: accountingBasisSwitchReducer
 })
 
 const persistConfig = {

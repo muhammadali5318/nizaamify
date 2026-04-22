@@ -8,12 +8,9 @@ import ProfitMarginTrendChart from '../charts/ProfitMarginTrendChart'
 import ExpenseBreakdownChart from '../charts/ExpenseBreakdownChart'
 import ExpenseTrendChart from '../charts/ExpenseTrendChart'
 import ExpandableBenchmarkTable from '../charts/BenchmarkComparisonTable'
-import ExpenseAnalysisCard from '../insights/ExpenseAnalysisCard'
-import AISummaryCard from '../insights/AISummaryCard'
 import PeriodSelector from '../components/PeriodSelector'
 import downlaodBtn from '../../../assets/document-download-black.svg'
 import expenseIcon from '../../../assets/expense-icon.svg'
-import aiIcon from '../../../assets/ai-icon.svg'
 
 import { getExpenseData } from '../../../services/apis/expense'
 import { useActivePractice } from 'src/hooks/useActivePractice'
@@ -22,6 +19,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 import { downloadDashboardPDF } from '../utils/downloadPdf'
 import SubmitFeedback from '../components/submit-feedback'
+import AiSummary from '../components/ai-summary'
 
 const MainDashboard = () => {
   // default to Last month
@@ -292,42 +290,7 @@ const MainDashboard = () => {
       </Stack>
       <Stack spacing={2.4} ref={feedbackRef}>
         {/* AI INSIGHTS */}
-        <Box
-          sx={{
-            backgroundColor: '#FAFAFA',
-            p: 2,
-            borderRadius: '12px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-
-            // 🔒 disabled styles
-            opacity: 0.5,
-            pointerEvents: 'none',
-            filter: 'grayscale(1)',
-            userSelect: 'none'
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <img src={aiIcon} alt='AI Insights' />
-            <Typography variant='h6'>AI-Driven Insights</Typography>
-          </Box>
-
-          <Box
-            display='flex'
-            flexDirection={{ xs: 'column', md: 'row' }}
-            gap={2}
-            sx={{ width: '100%' }}
-          >
-            <Box flex={1}>
-              <ExpenseAnalysisCard />
-            </Box>
-
-            <Box flex={1}>
-              <AISummaryCard />
-            </Box>
-          </Box>
-        </Box>
+        <AiSummary granularity={granularity} month={month} year={year} />
         <SubmitFeedback />
       </Stack>
     </Box>

@@ -16,7 +16,7 @@ import { deleteBatchDocuments } from 'src/services/apis/deleteBatchDocuments'
 import { endpoints } from 'src/services/backendUrl'
 
 const activeJobs = new Set<string>()
-const DOC_TIMEOUT_MS = 35000
+const DOC_TIMEOUT = 2 * 60 * 1000 // 2 mins
 
 export const pollBatchStatusUntilComplete = async (
   batchId: string,
@@ -94,7 +94,7 @@ export const pollBatchStatusUntilComplete = async (
       )
       if (allFinished) return lastKnownBatchData
 
-      if (Date.now() - startTime >= DOC_TIMEOUT_MS) break
+      if (Date.now() - startTime >= DOC_TIMEOUT) break
 
       // eslint-disable-next-line promise/param-names
       await new Promise((r) => setTimeout(r, pollInterval))

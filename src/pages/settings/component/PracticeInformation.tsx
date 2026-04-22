@@ -1,5 +1,5 @@
 // src/components/settings/PracticeInformation.tsx
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import {
   Box,
   Stack,
@@ -16,7 +16,6 @@ import {
   Button
 } from '@mui/material'
 import { CONFIG } from 'src/config-global'
-
 import { ArrowDropDown } from '@mui/icons-material'
 import { useForm, Controller, Resolver, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -36,11 +35,20 @@ import AccountingBasisCard from './AccountingBasisInfo'
 import { ACCRUAL_BASIS_INFO, CASH_BASIS_INFO } from 'src/const'
 import { queryClient } from 'src/utils/queryClient'
 import { useActivePractice } from 'src/hooks/useActivePractice'
+import SwitchAccountingModal from './switch-accounting'
+import { useAppDispatch } from 'src/store/hooks'
+import {
+  clearPendingPracticePayload,
+  setPendingPracticePayload
+} from 'src/store/slices/practiceAccountingBasisSlice'
 
 const PracticeInformation = () => {
+  const [openModal, setOpenModal] = useState(false)
   const phoneWrapperRef = useRef<HTMLDivElement | null>(null)
-  const { activePracticeId } = useActivePractice()
+  const originalAccountingBasisRef = useRef<string>('')
 
+  const dispatch = useAppDispatch()
+  const { activePracticeId } = useActivePractice()
   const { data: practiceApi } = usePractice(activePracticeId ?? '')
   const updatePractice = useUpdatePractice(activePracticeId ?? '')
 
@@ -86,20 +94,39 @@ const PracticeInformation = () => {
     if (practiceApi) {
       const mapped = mapPracticeApiToForm(practiceApi)
       reset(mapped, { keepDefaultValues: false })
+      originalAccountingBasisRef.current = mapped.accountingBasis ?? ''
     }
   }, [practiceApi, reset])
 
+  const closeModal = () => {
+    setOpenModal(false)
+    dispatch(clearPendingPracticePayload())
+  }
+
+  const savePractice = async (values: PracticeFormValues) => {
+    await updatePractice.mutateAsync(values)
+
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['initialData'] }),
+      queryClient.invalidateQueries({ queryKey: ['listAllPracticesData'] }),
+      queryClient.invalidateQueries({
+        queryKey: ['UserWithActivePracticeData']
+      })
+    ])
+  }
+
   const onSubmit = async (values: PracticeFormValues) => {
     try {
-      await updatePractice.mutateAsync(values)
+      const accountingBasisChanged =
+        values.accountingBasis !== originalAccountingBasisRef.current
 
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['initialData'] }),
-        queryClient.invalidateQueries({ queryKey: ['listAllPracticesData'] }),
-        queryClient.invalidateQueries({
-          queryKey: ['UserWithActivePracticeData']
-        })
-      ])
+      if (accountingBasisChanged) {
+        dispatch(setPendingPracticePayload(values))
+        setOpenModal(true)
+        return
+      }
+
+      await savePractice(values)
     } catch (err) {
       notify.error('Failed to update practice information')
       throw err
@@ -132,6 +159,7 @@ const PracticeInformation = () => {
           <Typography variant='h6' className='font-weight--700'>
             Practice details
           </Typography>
+
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <Controller
               name='practiceName'
@@ -321,6 +349,7 @@ const PracticeInformation = () => {
                 {errors.practiceType?.message as React.ReactNode}
               </FormHelperText>
             </FormControl>
+
             <Controller
               name='yearsTrading'
               control={control}
@@ -466,8 +495,9 @@ const PracticeInformation = () => {
 
         <Stack spacing={2}>
           <Typography variant='h6' className='font-weight--700'>
-            Practice systems{' '}
+            Practice systems
           </Typography>
+
           <Stack spacing={2}>
             <FormControl fullWidth error={!!errors.practiceManagementSoftware}>
               <InputLabel id='practice-management-software-label'>
@@ -750,7 +780,6 @@ const PracticeInformation = () => {
             type='submit'
             size='large'
             variant='contained'
-            color='primary'
             loading={isSubmitting || updatePractice.isPending}
             disabled={!isDirty || !isValid || isSubmitting}
           >
@@ -758,6 +787,12 @@ const PracticeInformation = () => {
           </Button>
         </Box>
       </Stack>
+
+      <SwitchAccountingModal
+        open={openModal}
+        onClose={closeModal}
+        selectedAccountingBasis={accountingBasis}
+      />
     </Box>
   )
 }

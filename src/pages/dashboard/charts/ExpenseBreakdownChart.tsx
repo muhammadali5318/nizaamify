@@ -145,7 +145,7 @@ const ExpenseBreakdownChart = ({ data }: ExpenseBreakdownChartProps) => {
                 formatter={(value: string) => {
                   const entry = chartData.find((d: any) => d.name === value)
                   const percentage = entry
-                    ? Number(entry.value).toFixed(1)
+                    ? Number(entry.value).toFixed(2)
                     : '0.0'
                   return `${value} (${percentage}%)`
                 }}

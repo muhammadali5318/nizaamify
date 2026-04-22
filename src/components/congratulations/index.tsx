@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router'
 
 type CongratulationsProps = {
   title?: string
+  showDisclaimer?: boolean
   message: string
   onContinue?: () => void
 }
@@ -11,6 +12,7 @@ type CongratulationsProps = {
 const Congratulations: React.FC<CongratulationsProps> = ({
   title = 'Congratulations!',
   message,
+  showDisclaimer = false,
   onContinue
 }) => {
   const navigate = useNavigate()
@@ -60,6 +62,29 @@ const Congratulations: React.FC<CongratulationsProps> = ({
         >
           {message}
         </Typography>
+        {showDisclaimer && (
+          <Box
+            sx={{
+              mt: 2,
+              px: 2,
+              py: 1.5,
+              borderRadius: '12px',
+              backgroundColor: 'rgba(0, 0, 0, 0.03)',
+              textAlign: 'center'
+            }}
+          >
+            <Typography
+              variant='body2'
+              sx={{
+                color: 'var(--color-text-secondary)',
+                fontWeight: 500
+              }}
+            >
+              For added security, you will be prompted to set up Multi-Factor
+              Authentication (MFA) upon your first login.
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       <Box className='center-align-width--100'>

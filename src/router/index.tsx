@@ -19,6 +19,9 @@ const UploadBankStatement = lazy(
   () => import('src/pages/bank-integrator/UploadBankStatement')
 )
 const BankingAggregator = lazy(() => import('src/pages/bank-integrator'))
+const AccountingBasisFlow = lazy(
+  () => import('src/pages/settings/AccountingBasisFlow')
+)
 const Dashboard = lazy(() => import('src/pages/dashboard'))
 const Documents = lazy(() => import('src/pages/documents'))
 const Reports = lazy(() => import('src/pages/reports'))
@@ -31,7 +34,6 @@ const MemberRolesAndPermission = lazy(
 const PracticeSettings = lazy(() => import('src/pages/practice-settings'))
 // const BankIntegrator = lazy(() => import('src/pages/bank-integrator/index'))
 const ExpenseBreakdown = lazy(() => import('src/pages/expense-breakdown'))
-const NonPLItems = lazy(() => import('src/pages/non-pl-items'))
 
 const Billing = lazy(() => import('src/pages/billing'))
 const Settings = lazy(() => import('src/pages/settings'))
@@ -197,14 +199,6 @@ export function Router() {
             )
           },
           {
-            path: paths.nonPandL,
-            element: (
-              <FeatureProtectedRoute moduleId='non-pandl'>
-                <NonPLItems />
-              </FeatureProtectedRoute>
-            )
-          },
-          {
             path: paths.monaiAgent,
             element: (
               <FeatureProtectedRoute moduleId='monai-agent'>
@@ -217,6 +211,22 @@ export function Router() {
             element: (
               <FeatureProtectedRoute moduleId='settings'>
                 <Settings />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.settingsTab,
+            element: (
+              <FeatureProtectedRoute moduleId='settings'>
+                <Settings />
+              </FeatureProtectedRoute>
+            )
+          },
+          {
+            path: paths.accountingBasisSettings,
+            element: (
+              <FeatureProtectedRoute moduleId='settings'>
+                <AccountingBasisFlow />
               </FeatureProtectedRoute>
             )
           },

@@ -15,7 +15,7 @@ import {
 
 interface StepData {
   heading: string
-  subHeading: string
+  subHeading?: string
 }
 
 interface AdaptiveStepperProps {

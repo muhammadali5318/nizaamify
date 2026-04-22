@@ -20,10 +20,14 @@ import DateRangeSelector, { RangeISO } from 'src/components/date-range-selector'
 import {
   CATEGORY_OPTIONS,
   DOCUMENT_TYPE_OPTIONS,
-  CATEGORY_TYPE_MAP,
-  getDocumentSubtypes,
-  getExpenseSubcategories
+  CATEGORY_TYPE_MAP
 } from '../../config/documentsConfig'
+
+import {
+  getDocumentSubtypes,
+  getDocumentLineItems,
+  getSubtypeForLineItem
+} from 'src/utils/documentMapping'
 
 export interface FilterState {
   searchKey: string
@@ -34,10 +38,6 @@ export interface FilterState {
   docSubtype?: string[]
   lineItems?: string[]
 }
-
-/* -------------------------------------------------------------------------- */
-/*                               COMPONENT                                    */
-/* -------------------------------------------------------------------------- */
 
 const FilterBar: React.FC<{
   value: FilterState
@@ -104,12 +104,9 @@ const FilterBar: React.FC<{
   )
 
   const lineItemOptions = useMemo(() => {
-    if (!docType || docSubtype.length === 0) return []
-
-    return Array.from(
-      new Set(docSubtype.flatMap((st) => getExpenseSubcategories(docType, st)))
-    )
-  }, [docType, docSubtype])
+    if (!docType || docType === 'Income & Revenue') return []
+    return getDocumentLineItems(docType)
+  }, [docType])
 
   /* -------------------------- CATEGORY FILTERING --------------------------- */
 
@@ -123,6 +120,7 @@ const FilterBar: React.FC<{
   }, [categories])
 
   /* ------------------------------------------------------------------------ */
+
   const shouldShowLineItems = docType && docType !== 'Income & Revenue'
 
   return (
@@ -248,15 +246,17 @@ const FilterBar: React.FC<{
           multiple
           value={docSubtype}
           disabled={!docType}
-          onChange={(e) =>
+          onChange={(e) => {
+            const selectedSubtypes =
+              typeof e.target.value === 'string'
+                ? e.target.value.split(',')
+                : e.target.value
+
             onChange({
-              docSubtype:
-                typeof e.target.value === 'string'
-                  ? e.target.value.split(',')
-                  : e.target.value,
+              docSubtype: selectedSubtypes,
               lineItems: []
             })
-          }
+          }}
           renderValue={(selected) => (selected as string[]).join(', ')}
         >
           {subtypeOptions.map((st) => (
@@ -276,23 +276,40 @@ const FilterBar: React.FC<{
             label='Line Item'
             multiple
             value={lineItems}
-            disabled={lineItemOptions.length === 0}
-            onChange={(e) =>
+            disabled={!docType || docType === 'Income & Revenue'}
+            onChange={(e) => {
+              const selectedLineItems =
+                typeof e.target.value === 'string'
+                  ? e.target.value.split(',')
+                  : e.target.value
+
+              const derivedSubtypes = Array.from(
+                new Set(
+                  selectedLineItems
+                    .map((li) => getSubtypeForLineItem(docType!, li))
+                    .filter(Boolean)
+                )
+              )
+
               onChange({
-                lineItems:
-                  typeof e.target.value === 'string'
-                    ? e.target.value.split(',')
-                    : e.target.value
+                lineItems: selectedLineItems,
+                docSubtype: derivedSubtypes
               })
-            }
+            }}
             renderValue={(selected) => (selected as string[]).join(', ')}
           >
-            {lineItemOptions.map((li) => (
-              <MenuItem key={li} value={li}>
-                <Checkbox checked={lineItems.includes(li)} />
-                <ListItemText primary={li} />
+            {lineItemOptions.length > 0 ? (
+              lineItemOptions.map((li) => (
+                <MenuItem key={li} value={li}>
+                  <Checkbox checked={lineItems.includes(li)} />
+                  <ListItemText primary={li} />
+                </MenuItem>
+              ))
+            ) : (
+              <MenuItem value=''>
+                <em>No line items</em>
               </MenuItem>
-            ))}
+            )}
           </Select>
         </FormControl>
       )}

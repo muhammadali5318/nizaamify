@@ -421,11 +421,13 @@ const EmailVerification: React.FC = () => {
           <Congratulations
             title='Account created successfully'
             message='Your Monai account has been created!'
+            showDisclaimer={true}
           />
         ) : status === 'subscribed' ? (
           <Congratulations
             title='Congratulation!'
             message='Your subscription plan has been subscribed!'
+            showDisclaimer={true}
             onContinue={() =>
               navigate(accessToken ? paths.billing : '/auth/login')
             }

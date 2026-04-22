@@ -26,6 +26,7 @@ interface DocumentsListProps {
   onPageChange?: (page: number, pageSize: number) => void
   onDownload: (listKey: string, id: string, indexKey: string | number) => void
   closeParent: () => void
+  module: string
 }
 
 const DocumentsList: React.FC<DocumentsListProps> = ({
@@ -38,19 +39,21 @@ const DocumentsList: React.FC<DocumentsListProps> = ({
   total = 0,
   onPageChange,
   onDownload,
-  closeParent
+  closeParent,
+  module
 }) => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [selectedDoc, setSelectedDoc] = useState<any | null>(null)
   const [loading, setLoading] = useState(false)
   const { activePracticeId } = useActivePractice()
+  const { accountingBasis } = useActivePractice()
 
   const totalPages = Math.max(1, Math.ceil((total || 0) / (pageSize || 10)))
 
-  // const handleDeleteClick = (doc: any) => {
-  //   setSelectedDoc(doc)
-  //   setIsDeleteOpen(true)
-  // }
+  const handleDeleteClick = (doc: any) => {
+    setSelectedDoc(doc)
+    setIsDeleteOpen(true)
+  }
 
   const handleDeleteConfirm = async () => {
     if (!selectedDoc) return
@@ -74,6 +77,9 @@ const DocumentsList: React.FC<DocumentsListProps> = ({
       closeParent?.()
       await queryClient.invalidateQueries({
         queryKey: ['allExpenseBreakDown']
+      })
+      await queryClient.invalidateQueries({
+        queryKey: ['useFetchNonPL']
       })
     } catch (error) {
       console.error('Delete error:', error)
@@ -138,17 +144,24 @@ const DocumentsList: React.FC<DocumentsListProps> = ({
                   flexShrink: 0
                 }}
               >
-                <Typography
-                  variant='body2'
-                  fontWeight={700}
-                  sx={{ whiteSpace: 'nowrap' }}
-                >
-                  {doc?.amount_decimal != null
-                    ? `£${doc?.amount_decimal}`
-                    : '-'}
-                </Typography>
-
-                <Divider orientation='vertical' flexItem sx={{ height: 24 }} />
+                {!(accountingBasis === 'CASH' && module === 'revenue') && (
+                  <>
+                    <Typography
+                      variant='body2'
+                      fontWeight={700}
+                      sx={{ whiteSpace: 'nowrap' }}
+                    >
+                      {doc?.amount_decimal != null
+                        ? `£${doc?.amount_decimal}`
+                        : '-'}
+                    </Typography>
+                    <Divider
+                      orientation='vertical'
+                      flexItem
+                      sx={{ height: 24 }}
+                    />
+                  </>
+                )}
 
                 <IconButton
                   size='small'
@@ -165,7 +178,7 @@ const DocumentsList: React.FC<DocumentsListProps> = ({
                   )}
                 </IconButton>
 
-                {/* <IconButton
+                <IconButton
                   size='small'
                   aria-label={`delete ${doc.file_name}`}
                   onClick={() => handleDeleteClick(doc)}
@@ -175,7 +188,7 @@ const DocumentsList: React.FC<DocumentsListProps> = ({
                     alt='delete'
                     style={{ width: 20, height: 20, display: 'block' }}
                   />
-                </IconButton> */}
+                </IconButton>
               </Box>
             </Box>
 

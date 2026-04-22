@@ -119,3 +119,12 @@ export const formatChatDate = (isoDate?: string): string => {
 export const checkEmailEquality = (userEmail?: string, rowEmail?: string) => {
   return userEmail?.toLowerCase() === rowEmail?.toLowerCase()
 }
+
+export const getDateRangeLabel = (start: string | null, end: string | null) => {
+  const sanitize = (val: string) => val.replace(/\s+/g, '_') // Mar 2026 → Mar_2026
+
+  if (start && end) return `${sanitize(start)}_to_${sanitize(end)}`
+  if (start) return `from_${sanitize(start)}`
+  if (end) return `until_${sanitize(end)}`
+  return null
+}
