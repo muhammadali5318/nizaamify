@@ -1,11 +1,6 @@
-import { styled } from '@mui/material/styles'
 import MuiDrawer from '@mui/material/Drawer'
+import { styled } from '@mui/material/styles'
 import { paths } from 'src/paths'
-
-import { ModuleId, UserContext } from '../../types/feature-flags'
-import { featureFlagConfig } from 'src/config/feature-flag-config'
-import { FEATURE_RULE_IDS } from 'src/constants/feature-rules'
-import { FeatureFlagService } from 'src/services/FeatureFlagService'
 
 export interface MenuItemData {
   text: string
@@ -13,7 +8,7 @@ export interface MenuItemData {
   activeIcon: string
   inactiveIcon: string
   tooltipContent?: string
-  moduleId: ModuleId
+  moduleId: string
 }
 
 export const menuSections: { title: string; items: MenuItemData[] }[] = [
@@ -48,22 +43,13 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         inactiveIcon: 'expense-inactive.svg',
         moduleId: 'expenses'
       },
-      // {
-      //   text: 'Non P&L Items',
-      //   to: paths.nonPandL,
-      //   activeIcon: 'pl-Icon-active.svg',
-      //   inactiveIcon: 'pl-Icon-inactive.svg',
-      //   tooltipContent:
-      //     'Items such as owners withdrawals, capital loans/injections or tax matters which do not belong in the P&L statement are recorded here',
-      //   moduleId: 'non-pandl'
-      // },
       {
         text: 'Monai Agent',
         to: paths.monaiAgent,
         activeIcon: 'agent-active.svg',
         inactiveIcon: 'agent-inactive.svg',
         tooltipContent:
-          'Monai Agent uses guardrails to answer practice finance questions using only your real data in Monai. If the data isn’t available, it won’t guess or hallucinate.',
+          'Monai Agent uses guardrails to answer practice finance questions using only your real data in Monai. If the data is not available, it will not guess.',
         moduleId: 'monai-agent'
       }
     ]
@@ -78,7 +64,6 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
         inactiveIcon: 'inactive-settings.svg',
         moduleId: 'settings'
       },
-
       {
         text: 'Practice Settings',
         to: paths.practiceSettings,
@@ -102,7 +87,6 @@ export const menuSections: { title: string; items: MenuItemData[] }[] = [
       }
     ]
   },
-
   {
     title: 'Support',
     items: [
@@ -175,157 +159,3 @@ export const Drawer = styled(MuiDrawer, {
     }
   })
 }))
-
-type ModuleRenderState = 'hidden' | 'disabled' | 'enabled'
-
-export function evaluateModuleStateWithReason(
-  moduleId: string,
-  permissions: Record<string, any>,
-  context: UserContext
-): { state: ModuleRenderState; reason?: string } {
-  const moduleConfig = featureFlagConfig.modules.find(
-    (m) => m.id === (moduleId as any)
-  )
-  if (!moduleConfig) return { state: 'enabled' }
-
-  const requiredRules = moduleConfig.requiredRules || []
-  let sawDisable = false
-  let reason: string | undefined
-
-  // If there are no rules, still honor moduleConfig.isEnabled()
-  if (requiredRules.length === 0) {
-    if (typeof moduleConfig.isEnabled === 'function') {
-      try {
-        const enabled = moduleConfig.isEnabled(permissions, moduleConfig?.id)
-        if (!enabled) {
-          reason =
-            moduleConfig.disabledMessage ||
-            `${moduleConfig.name} is not available`
-          return { state: 'hidden', reason }
-        }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (e) {
-        reason =
-          moduleConfig.disabledMessage ||
-          `${moduleConfig.name} is not available`
-        return { state: 'hidden', reason }
-      }
-    }
-    return { state: 'enabled' }
-  }
-
-  for (const ruleId of requiredRules) {
-    const rule = FeatureFlagService.findRule(ruleId)
-
-    if (!rule) {
-      // Helpful to surface missing rules while debugging
-      // You can remove this console.warn in production if you want.
-      console.warn(`Feature rule not found: ${ruleId} for module ${moduleId}`)
-      continue
-    }
-
-    const ruleOk = FeatureFlagService.evaluateRule(ruleId, context)
-
-    if (ruleOk) {
-      // Rule passed → check module-level isEnabled (if provided).
-      if (typeof moduleConfig.isEnabled === 'function') {
-        try {
-          const enabled = moduleConfig.isEnabled(permissions, moduleConfig?.id)
-          if (!enabled) {
-            reason =
-              moduleConfig.disabledMessage ||
-              rule.description ||
-              `${moduleConfig.name} is not available`
-            return { state: 'hidden', reason }
-          }
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (e) {
-          reason =
-            moduleConfig.disabledMessage ||
-            rule.description ||
-            `${moduleConfig.name} is not available`
-          return { state: 'hidden', reason }
-        }
-      }
-      // rule passed and module enabled (or no isEnabled) → continue to next rule
-      continue
-    } else {
-      // Rule failed → disable the module (don't hide)
-      if (ruleId === FEATURE_RULE_IDS.ONBOARDING_COMPLETED) {
-        reason = 'Complete onboarding to access this module'
-      } else if (ruleId === FEATURE_RULE_IDS.IS_OWNER_OR_DIRECTOR) {
-        return { state: 'hidden', reason: 'Unauthorized role' }
-      } else {
-        reason =
-          moduleConfig.disabledMessage ||
-          rule.description ||
-          `${moduleConfig.name} is disabled`
-      }
-      sawDisable = true
-      continue
-    }
-  }
-
-  return { state: sawDisable ? 'disabled' : 'enabled', reason }
-}
-
-// src/utils/practiceSelector.ts
-export interface Practice {
-  practice_name: string
-  address?: string
-  contact_number?: string | null
-  email?: string | null
-  practice_type?: string
-  premises_ownership?: string
-  accounting_basis?: string
-  created_at?: string
-  // optional future fields
-  uuid?: string
-}
-
-export interface PracticeOption {
-  value: string // unique value used by the <Select>
-  label: string // display label (practice_name)
-  subLabel?: string // e.g. email
-  meta: Practice // original object for future use
-}
-
-/**
- * Convert raw practice array coming from backend into stable options for Select.
- * Uses uuid if present, otherwise falls back to email, then created_at+name to ensure uniqueness.
- */
-export const mapPracticesToOptions = (
-  practices: Practice[] | undefined
-): PracticeOption[] => {
-  if (!practices || !Array.isArray(practices)) return []
-
-  return practices.map((p) => {
-    const value =
-      (p as any).uuid ??
-      p.email ??
-      (p.created_at ? `${p.practice_name}_${p.created_at}` : p.practice_name)
-
-    return {
-      value,
-      label: p.practice_name,
-      subLabel: p.email ?? '',
-      meta: p
-    }
-  })
-}
-
-/**
- * Get the display label for a selected value (safely).
- */
-export const getOptionLabel = (
-  value: string | undefined,
-  options: PracticeOption[]
-) => options.find((o) => o.value === value)?.label ?? ''
-
-/**
- * Get the full Practice object for a selected value.
- */
-export const getOptionMeta = (
-  value: string | undefined,
-  options: PracticeOption[]
-) => options.find((o) => o.value === value)?.meta

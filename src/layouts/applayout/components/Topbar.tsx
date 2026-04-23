@@ -1,29 +1,26 @@
 import React, { useRef, useState } from 'react'
 import {
-  Box,
-  Typography,
   Avatar,
-  IconButton,
-  Popper,
-  Paper,
+  Box,
+  Button,
+  Chip,
   ClickAwayListener,
-  MenuList,
-  MenuItem,
   Divider,
   Grow,
-  Button,
+  IconButton,
+  MenuItem,
+  MenuList,
+  Paper,
+  Popper,
   Stack,
-  Chip,
+  Typography,
   useMediaQuery
 } from '@mui/material'
-import styles from './Topbar.module.scss'
-import { toTitleCase } from 'src/utils/stringUtils'
-import useUserDetails from 'src/hooks/useUserDetails'
-import { useLogout } from 'src/hooks/useLogout'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
+import styles from './Topbar.module.scss'
 
-type topbarProps = {
+type TopbarProps = {
   title: string
   icon: string
   rightSlot?: React.ReactNode
@@ -37,19 +34,22 @@ type ProfilePopperProps = {
   onSettings: () => void
 }
 
-// Separate function/component for the floating container
+const profile = {
+  email: 'template@starter.app',
+  userFullName: 'Template User',
+  userRole: 'Admin'
+}
+
 const ProfilePopper: React.FC<ProfilePopperProps> = ({
   anchorEl,
   open,
   onClose,
-  onLogout
+  onLogout,
+  onSettings
 }) => {
-  const navigate = useNavigate()
-  const { email, userFullName, userRole } = useUserDetails()
-
-  const handleListKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Tab' || e.key === 'Escape') {
-      e.preventDefault()
+  const handleListKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Tab' || event.key === 'Escape') {
+      event.preventDefault()
       onClose()
     }
   }
@@ -74,27 +74,29 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                 aria-label='Profile menu'
                 sx={{ p: 0 }}
               >
-                {/* Profile summary */}
                 <Box sx={{ padding: '12px 10px' }}>
                   <Stack direction='row' spacing={1.5} alignItems='start'>
-                    <Avatar alt='avatar' />
+                    <Avatar
+                      alt='Template user avatar'
+                      src='/assets/profile-avatar.svg'
+                    />
                     <Stack>
                       <Typography
                         variant='body1'
                         color='var(--color-text-primary)'
                       >
-                        {userFullName ?? '-'}
+                        {profile.userFullName}
                       </Typography>
                       <Typography
                         variant='caption'
                         color='var(--color-primary-light)'
                         className='font-weight--700'
                       >
-                        {email ?? '-'}
+                        {profile.email}
                       </Typography>
                       <Box>
                         <Chip
-                          label={toTitleCase(userRole ?? '')}
+                          label={profile.userRole}
                           size='small'
                           variant='outlined'
                           sx={{
@@ -112,10 +114,10 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
 
                 <Divider sx={{ my: '8px' }} />
 
-                <Box px={'6px'}>
+                <Box px='6px'>
                   <MenuItem
                     onClick={() => {
-                      navigate(paths.settings)
+                      onSettings()
                       onClose()
                     }}
                   >
@@ -124,22 +126,6 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                       Profile
                     </Typography>
                   </MenuItem>
-                  {/* 
-                  <MenuItem
-                    onClick={() => {
-                      onSettings()
-                      onClose()
-                    }}
-                  >
-                    <img
-                      src='/assets/settings-greyed.svg'
-                      alt='settings icon'
-                    />
-
-                    <Typography variant='body2' color='text.primary' pl={1}>
-                      Account Settings
-                    </Typography>
-                  </MenuItem> */}
                 </Box>
 
                 <Divider sx={{ my: '8px' }} />
@@ -148,7 +134,7 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
                   <Button
                     fullWidth
                     variant='outlined'
-                    onClick={() => onLogout()}
+                    onClick={onLogout}
                     aria-label='Logout'
                     sx={{
                       display: 'flex',
@@ -180,12 +166,12 @@ const ProfilePopper: React.FC<ProfilePopperProps> = ({
   )
 }
 
-const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
-  const { handleLogout } = useLogout()
+const Topbar: React.FC<TopbarProps> = ({ title, icon, rightSlot }) => {
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const anchorRef = useRef<HTMLButtonElement | null>(null)
   const isMobile = useMediaQuery('(max-width:600px)')
-  const { userRole, userFullName } = useUserDetails()
+
   const handleToggle = () => {
     setOpen((prev) => !prev)
   }
@@ -196,6 +182,12 @@ const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
 
   const handleSettings = () => {
     setOpen(false)
+    navigate(paths.settings)
+  }
+
+  const handleLogout = () => {
+    setOpen(false)
+    navigate(paths.dashboard)
   }
 
   return (
@@ -244,30 +236,28 @@ const Topbar: React.FC<topbarProps> = ({ title, icon, rightSlot }) => {
           }}
         >
           <Typography variant='body1' className='font-weight--700'>
-            {userFullName ?? '-'}
+            {profile.userFullName}
           </Typography>
           <Typography
             variant='caption'
             color='var(--color-primary-light)'
             className='font-weight--700'
           >
-            {toTitleCase(userRole ?? '-')}
+            {profile.userRole}
           </Typography>
         </Box>
 
-        {/* Avatar button (anchor for the floating container) */}
         <IconButton
           ref={anchorRef}
           onClick={handleToggle}
-          aria-controls={open ? 'profile-menu' : undefined}
-          aria-haspopup='true'
-          aria-expanded={open ? 'true' : undefined}
           size='small'
+          aria-label='Open profile menu'
         >
-          <Avatar alt='profile avatar' />
+          <Avatar src='/assets/profile-avatar.svg'>
+            {profile.userFullName[0]}
+          </Avatar>
         </IconButton>
 
-        {/* Use the separate ProfilePopper function/component */}
         <ProfilePopper
           anchorEl={anchorRef.current}
           open={open}

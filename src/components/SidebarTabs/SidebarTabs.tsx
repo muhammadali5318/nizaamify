@@ -11,32 +11,27 @@ import {
 } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import {
-  evaluateIsModuleEnabled,
-  useHasPermission
-} from 'src/config/module-permissions'
-import { selectPermissionsByCategory } from 'src/store/slices/userDetailsInActivePracticeSlice'
-import { useSelector } from 'react-redux'
+
+type SidebarTabItem = {
+  id: string
+  label: string
+  disabled?: boolean
+}
 
 type SidebarTabsProps = {
-  menu: any[]
+  menu: SidebarTabItem[]
   activeId: string
   onChange: (id: string) => void
-  userData?: any
-  onboardingCompleted?: boolean
   width?: { xs: string; sm: number | string }
   flex?: { xs: string; sm: string }
   header?: string
   scrollAmount?: number
 }
 
-const PRACTICE_DEPENDENT_TABS = ['practice', 'archivedDataSet']
-
 const SidebarTabs: React.FC<SidebarTabsProps> = ({
   menu,
   activeId,
   onChange,
-  onboardingCompleted = true,
   width = { xs: '100%', sm: 180 },
   flex = { xs: '0 0 auto', sm: '0 0 180px' },
   header,
@@ -47,14 +42,6 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const [showLeft, setShowLeft] = useState(false)
   const [showRight, setShowRight] = useState(false)
-
-  const canEditPractice = useHasPermission('user.edit_practice_profile')
-  const permissionsByCategory = useSelector(selectPermissionsByCategory)
-
-  const canViewSubscription = evaluateIsModuleEnabled(
-    permissionsByCategory,
-    'billing'
-  )
 
   const updateArrows = () => {
     const el = scrollRef.current
@@ -183,14 +170,7 @@ const SidebarTabs: React.FC<SidebarTabsProps> = ({
           }}
         >
           {menu.map((m) => {
-            const isPracticeLikeTab = PRACTICE_DEPENDENT_TABS.includes(m.id)
-            const isSubscriptionTab = m.id === 'billing'
-
-            const isDisabled = isPracticeLikeTab
-              ? !onboardingCompleted || !canEditPractice
-              : isSubscriptionTab
-                ? !canViewSubscription
-                : false
+            const isDisabled = Boolean(m.disabled)
 
             return (
               <ListItemButton

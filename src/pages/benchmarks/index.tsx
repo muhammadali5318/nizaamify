@@ -1,7 +1,11 @@
 import Placeholder from 'src/components/common/Placeholder'
 
-const Benchmarks = () => {
-  return <Placeholder title='Benchmarks' />
+export default function BenchmarksPage() {
+  return (
+    <Placeholder
+      title='Benchmarks'
+      description='Benchmark data integrations have been removed. Use this page as a starting point for your own comparison tools.'
+      icon='/assets/active-benchmarks.svg'
+    />
+  )
 }
-
-export default Benchmarks

@@ -1,11 +1,11 @@
-import TrainingModule from '../dashboard/components/monai-training-module/index'
-import { Box } from '@mui/material'
-const HelpAndSupport = () => {
+import Placeholder from 'src/components/common/Placeholder'
+
+export default function HelpAndSupportPage() {
   return (
-    <Box sx={{ p: 1, ml: 1 }}>
-      <TrainingModule />
-    </Box>
+    <Placeholder
+      title='Help & Support'
+      description='Support integrations and contact workflows have been removed, leaving a reusable module entry point.'
+      icon='/assets/active-help-support.svg'
+    />
   )
 }
-
-export default HelpAndSupport

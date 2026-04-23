@@ -1,20 +1,11 @@
-import { Stack } from '@mui/material'
-import AuditLogsContent from './components/audit-logs-content'
-import styles from './auditLogs.module.scss'
-import PageHeader from 'src/components/page-header'
+import Placeholder from 'src/components/common/Placeholder'
 
-const AuditLogs = () => {
+export default function AuditLogsPage() {
   return (
-    <Stack className={styles.auditLogsRoot}>
-      <PageHeader
-        title='Monai Tech Logs'
-        description='Platform activity logs for document processing, financial updates, and user actions.'
-        logo='/assets/team-management.svg'
-        isDividerVisible={false}
-      />
-      <AuditLogsContent />
-    </Stack>
+    <Placeholder
+      title='Audit Logs'
+      description='Audit log fetching has been removed. This placeholder preserves the route for future activity history features.'
+      icon='/assets/audit-active.svg'
+    />
   )
 }
-
-export default AuditLogs

@@ -1,106 +1,45 @@
-import { lazy, Suspense } from 'react'
-import { Outlet } from 'react-router'
-import RedirectAuthGuard from 'src/auth/RedirectAuthGuard'
-import { SplashScreen } from 'src/components/common/SplashScreen'
-import AuthLayout from 'src/layouts/AuthLayout'
-
-const AuthPages = {
-  Login: lazy(() => import('src/auth/Login')),
-  Logout: lazy(() => import('src/auth/Logout')),
-  Signup: lazy(() => import('src/pages/signup')),
-  AgreementContent: lazy(() => import('src/components/agreements-content')),
-  InvitedUserOnboarding: lazy(() => import('src/pages/invited-user')),
-  EmailVerification: lazy(
-    () => import('src/pages/signup/components/EmailVerification')
-  ),
-  CreatePassword: lazy(
-    () => import('src/pages/invited-user/components/CreatePassword')
-  )
-}
+import { Navigate } from 'react-router'
+import { paths } from 'src/paths'
 
 export const authRoutes = [
   {
     path: '/auth',
-    element: (
-      <Suspense fallback={<SplashScreen />}>
-        <RedirectAuthGuard>
-          <Outlet />
-        </RedirectAuthGuard>
-      </Suspense>
-    ),
-    children: [
-      {
-        path: 'login',
-        element: (
-          <AuthLayout>
-            <AuthPages.Login />
-          </AuthLayout>
-        )
-      },
-      {
-        path: 'logout',
-        element: (
-          <AuthLayout>
-            <AuthPages.Logout />
-          </AuthLayout>
-        )
-      },
-      {
-        path: 'signup',
-        element: (
-          <AuthLayout>
-            <AuthPages.Signup />
-          </AuthLayout>
-        )
-      },
-      {
-        path: 'verify-email',
-        element: (
-          <AuthLayout>
-            <AuthPages.EmailVerification />
-          </AuthLayout>
-        )
-      },
-      {
-        path: 'subscribed',
-        element: (
-          <AuthLayout>
-            <AuthPages.EmailVerification />
-          </AuthLayout>
-        )
-      },
-      {
-        path: 'subscription-failed',
-        element: (
-          <AuthLayout>
-            <AuthPages.EmailVerification />
-          </AuthLayout>
-        )
-      },
-      {
-        path: 'invite-user',
-        element: (
-          <AuthLayout>
-            <AuthPages.InvitedUserOnboarding />
-          </AuthLayout>
-        )
-      },
-      {
-        path: 'access-request',
-        element: (
-          <AuthLayout>
-            <AuthPages.InvitedUserOnboarding />
-          </AuthLayout>
-        )
-      },
-      {
-        path: 'signup/agreements',
-        element: (
-          <AuthLayout>
-            <AuthPages.AgreementContent />
-          </AuthLayout>
-        )
-      }
-    ]
+    element: <Navigate to={paths.dashboard} replace />
+  },
+  {
+    path: '/auth/login',
+    element: <Navigate to={paths.dashboard} replace />
+  },
+  {
+    path: '/auth/logout',
+    element: <Navigate to={paths.dashboard} replace />
+  },
+  {
+    path: '/auth/signup',
+    element: <Navigate to={paths.dashboard} replace />
+  },
+  {
+    path: '/auth/verify-email',
+    element: <Navigate to={paths.dashboard} replace />
+  },
+  {
+    path: '/auth/subscribed',
+    element: <Navigate to={paths.dashboard} replace />
+  },
+  {
+    path: '/auth/subscription-failed',
+    element: <Navigate to={paths.dashboard} replace />
+  },
+  {
+    path: '/auth/invite-user',
+    element: <Navigate to={paths.dashboard} replace />
+  },
+  {
+    path: '/auth/access-request',
+    element: <Navigate to={paths.dashboard} replace />
+  },
+  {
+    path: '/auth/signup/agreements',
+    element: <Navigate to={paths.dashboard} replace />
   }
 ]

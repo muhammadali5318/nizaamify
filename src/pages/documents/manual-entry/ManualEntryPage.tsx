@@ -1,14 +1,11 @@
-import { Box } from '@mui/material'
-import ManualEntryForm from '../components/ManualUploadForm'
+import Placeholder from 'src/components/common/Placeholder'
 
-const ManualEntryPage = () => {
+export default function ManualEntryPage() {
   return (
-    <>
-      <Box sx={{ width: '100%' }}>
-        <ManualEntryForm />
-      </Box>
-    </>
+    <Placeholder
+      title='Manual Entry'
+      description='Manual entry logic has been stripped out. This route remains in place for future document input flows.'
+      icon='/assets/manual-upload.svg'
+    />
   )
 }
-
-export default ManualEntryPage
