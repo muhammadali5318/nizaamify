@@ -61,9 +61,19 @@ body {
   min-height: 100vh;
 }
 
-/* 3. Define global font family */
-body {
-  font-family: 'Roboto';
+/* 3. Global font family — token-driven, scoped per language. */
+html {
+  font-family: var(--font-sans-en);
+}
+
+html[lang='ur'] {
+  font-family: var(--font-sans-ur);
+}
+
+html[lang='ur'] h1,
+html[lang='ur'] h2,
+html[lang='ur'] .display {
+  font-family: var(--font-display-ur);
 }
 
 /* 4. Make sure buttons, inputs, etc. inherit */
@@ -186,7 +196,6 @@ select {
   font-feature-settings:
     'liga' off,
     'clig' off;
-  font-family: Roboto;
   font-size: 16px;
   font-style: normal;
   font-weight: 700;
