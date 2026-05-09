@@ -1,16 +1,6 @@
-import {
-  Box,
-  CircularProgress,
-  Paper,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography
-} from '@mui/material'
+import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import { formatPKR } from 'src/features/subscription/env'
 import { useOutstanding } from 'src/features/khata/hooks'
@@ -19,6 +9,28 @@ import {
   useExpenseBreakdownThisMonth,
   useMonthlySummaryLast6
 } from './hooks'
+import {
+  Card,
+  DataTable,
+  EmptyState,
+  type DataTableColumn
+} from 'src/components/ui'
+import { PageHeader } from 'src/components/layout'
+
+type DailyRow = { date: string; total: number }
+type MonthlyRow = {
+  month?: string | null
+  total_sales?: number | string | null
+  gross_profit?: number | string | null
+  total_expenses?: number | string | null
+}
+type BreakdownRow = { category: string; amount: number | string }
+type OutstandingRow = {
+  customer_id?: string | null
+  name: string
+  phone: string
+  outstanding?: number | string | null
+}
 
 export default function ReportsPage() {
   const { t, i18n } = useTranslation(['reports', 'common', 'expenses'])
@@ -29,182 +41,182 @@ export default function ReportsPage() {
   const breakdown = useExpenseBreakdownThisMonth()
   const outstanding = useOutstanding({ onlyOutstanding: true })
 
+  const dailyRows = (daily.data ?? []) as DailyRow[]
+  const dailyHasData = dailyRows.some((d) => d.total !== 0)
+  const dailyColumns: DataTableColumn<DailyRow>[] = [
+    {
+      id: 'date',
+      header: t('reports:fields.date'),
+      cardRole: 'heading',
+      cell: (d) =>
+        new Intl.DateTimeFormat(locale, {
+          weekday: 'short',
+          day: '2-digit',
+          month: '2-digit'
+        }).format(new Date(d.date))
+    },
+    {
+      id: 'sales',
+      header: t('reports:fields.sales'),
+      align: 'end',
+      cell: (d) => formatPKR(d.total, locale)
+    }
+  ]
+
+  const monthlyRows = (monthly.data ?? []) as MonthlyRow[]
+  const monthlyColumns: DataTableColumn<MonthlyRow>[] = [
+    {
+      id: 'month',
+      header: t('reports:fields.month'),
+      cardRole: 'heading',
+      cell: (m) =>
+        m.month
+          ? new Intl.DateTimeFormat(locale, {
+              month: 'short',
+              year: 'numeric'
+            }).format(new Date(m.month))
+          : '—'
+    },
+    {
+      id: 'sales',
+      header: t('reports:fields.sales'),
+      align: 'end',
+      cell: (m) => formatPKR(Number(m.total_sales ?? 0), locale)
+    },
+    {
+      id: 'gross_profit',
+      header: t('reports:fields.gross_profit'),
+      align: 'end',
+      hideOnMobile: true,
+      cell: (m) => formatPKR(Number(m.gross_profit ?? 0), locale)
+    },
+    {
+      id: 'expenses',
+      header: t('reports:fields.expenses'),
+      align: 'end',
+      hideOnMobile: true,
+      cell: (m) => formatPKR(Number(m.total_expenses ?? 0), locale)
+    },
+    {
+      id: 'net_profit',
+      header: t('reports:fields.net_profit'),
+      align: 'end',
+      cell: (m) => {
+        const gross = Number(m.gross_profit ?? 0)
+        const exp = Number(m.total_expenses ?? 0)
+        const net = gross - exp
+        return (
+          <Box
+            component='span'
+            sx={{
+              fontWeight: 700,
+              color:
+                net >= 0 ? 'var(--status-success-text)' : 'var(--error-700)'
+            }}
+          >
+            {formatPKR(net, locale)}
+          </Box>
+        )
+      }
+    }
+  ]
+
+  const breakdownRows = (breakdown.data ?? []) as BreakdownRow[]
+  const breakdownColumns: DataTableColumn<BreakdownRow>[] = [
+    {
+      id: 'category',
+      header: t('reports:fields.category'),
+      cardRole: 'heading',
+      cell: (b) =>
+        t(`expenses:categories.${b.category}`, { defaultValue: b.category })
+    },
+    {
+      id: 'amount',
+      header: t('reports:fields.amount'),
+      align: 'end',
+      cell: (b) => formatPKR(Number(b.amount), locale)
+    }
+  ]
+
+  const outstandingRows = (outstanding.data ?? []) as OutstandingRow[]
+  const outstandingColumns: DataTableColumn<OutstandingRow>[] = [
+    {
+      id: 'customer',
+      header: 'Customer',
+      cardRole: 'heading',
+      cell: (c) => `${c.name} — ${c.phone}`
+    },
+    {
+      id: 'outstanding',
+      header: 'Outstanding',
+      align: 'end',
+      cell: (c) => formatPKR(Number(c.outstanding ?? 0), locale)
+    }
+  ]
+
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
-      <Typography variant='h5' fontWeight={700} mb={2}>
-        {t('reports:title')}
-      </Typography>
+    <Box sx={{ maxWidth: 1280, mx: 'auto', width: '100%' }}>
+      <PageHeader title={t('reports:title')} />
 
       <Stack spacing={2}>
         <Section title={t('reports:sections.daily_sales')}>
-          {daily.isLoading ? (
-            <Loading />
-          ) : !daily.data || daily.data.every((d) => d.total === 0) ? (
-            <Empty />
-          ) : (
-            <TableContainer>
-              <Table size='small'>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t('reports:fields.date')}</TableCell>
-                    <TableCell align='right'>
-                      {t('reports:fields.sales')}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {daily.data.map((d) => (
-                    <TableRow key={d.date}>
-                      <TableCell>
-                        {new Intl.DateTimeFormat(locale, {
-                          weekday: 'short',
-                          day: '2-digit',
-                          month: '2-digit'
-                        }).format(new Date(d.date))}
-                      </TableCell>
-                      <TableCell align='right'>
-                        {formatPKR(d.total, locale)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
+          <DataTable
+            columns={dailyColumns}
+            rows={dailyHasData ? dailyRows : []}
+            getRowId={(d) => d.date}
+            loading={daily.isLoading}
+            empty={
+              <Box sx={{ py: 4 }}>
+                <EmptyState title={t('reports:no_data')} />
+              </Box>
+            }
+            ariaLabel={t('reports:sections.daily_sales')}
+          />
         </Section>
 
         <Section title={t('reports:sections.monthly_summary')}>
-          {monthly.isLoading ? (
-            <Loading />
-          ) : !monthly.data || monthly.data.length === 0 ? (
-            <Empty />
-          ) : (
-            <TableContainer>
-              <Table size='small'>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t('reports:fields.month')}</TableCell>
-                    <TableCell align='right'>
-                      {t('reports:fields.sales')}
-                    </TableCell>
-                    <TableCell align='right'>
-                      {t('reports:fields.gross_profit')}
-                    </TableCell>
-                    <TableCell align='right'>
-                      {t('reports:fields.expenses')}
-                    </TableCell>
-                    <TableCell align='right'>
-                      {t('reports:fields.net_profit')}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {monthly.data.map((m) => {
-                    const sales = Number(m.total_sales ?? 0)
-                    const gross = Number(m.gross_profit ?? 0)
-                    const exp = Number(m.total_expenses ?? 0)
-                    const net = gross - exp
-                    return (
-                      <TableRow key={m.month ?? ''}>
-                        <TableCell>
-                          {m.month
-                            ? new Intl.DateTimeFormat(locale, {
-                                month: 'short',
-                                year: 'numeric'
-                              }).format(new Date(m.month))
-                            : '—'}
-                        </TableCell>
-                        <TableCell align='right'>
-                          {formatPKR(sales, locale)}
-                        </TableCell>
-                        <TableCell align='right'>
-                          {formatPKR(gross, locale)}
-                        </TableCell>
-                        <TableCell align='right'>
-                          {formatPKR(exp, locale)}
-                        </TableCell>
-                        <TableCell
-                          align='right'
-                          sx={{
-                            color: net >= 0 ? 'success.main' : 'error.main',
-                            fontWeight: 700
-                          }}
-                        >
-                          {formatPKR(net, locale)}
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
+          <DataTable
+            columns={monthlyColumns}
+            rows={monthlyRows}
+            getRowId={(m) => m.month ?? ''}
+            loading={monthly.isLoading}
+            empty={
+              <Box sx={{ py: 4 }}>
+                <EmptyState title={t('reports:no_data')} />
+              </Box>
+            }
+            ariaLabel={t('reports:sections.monthly_summary')}
+          />
         </Section>
 
         <Section title={t('reports:sections.expense_breakdown')}>
-          {breakdown.isLoading ? (
-            <Loading />
-          ) : !breakdown.data || breakdown.data.length === 0 ? (
-            <Empty />
-          ) : (
-            <TableContainer>
-              <Table size='small'>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t('reports:fields.category')}</TableCell>
-                    <TableCell align='right'>
-                      {t('reports:fields.amount')}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {breakdown.data.map((b) => (
-                    <TableRow key={b.category}>
-                      <TableCell>
-                        {t(`expenses:categories.${b.category}`, {
-                          defaultValue: b.category
-                        })}
-                      </TableCell>
-                      <TableCell align='right'>
-                        {formatPKR(b.amount, locale)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
+          <DataTable
+            columns={breakdownColumns}
+            rows={breakdownRows}
+            getRowId={(b) => b.category}
+            loading={breakdown.isLoading}
+            empty={
+              <Box sx={{ py: 4 }}>
+                <EmptyState title={t('reports:no_data')} />
+              </Box>
+            }
+            ariaLabel={t('reports:sections.expense_breakdown')}
+          />
         </Section>
 
         <Section title={t('reports:sections.outstanding')}>
-          {outstanding.isLoading ? (
-            <Loading />
-          ) : !outstanding.data || outstanding.data.length === 0 ? (
-            <Empty />
-          ) : (
-            <TableContainer>
-              <Table size='small'>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Customer</TableCell>
-                    <TableCell align='right'>Outstanding</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {outstanding.data.map((c) => (
-                    <TableRow key={c.customer_id ?? ''}>
-                      <TableCell>
-                        {c.name} — {c.phone}
-                      </TableCell>
-                      <TableCell align='right'>
-                        {formatPKR(c.outstanding ?? 0, locale)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
+          <DataTable
+            columns={outstandingColumns}
+            rows={outstandingRows}
+            getRowId={(c) => c.customer_id ?? c.name}
+            loading={outstanding.isLoading}
+            empty={
+              <Box sx={{ py: 4 }}>
+                <EmptyState title={t('reports:no_data')} />
+              </Box>
+            }
+            ariaLabel={t('reports:sections.outstanding')}
+          />
         </Section>
       </Stack>
     </Box>
@@ -219,32 +231,11 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <Paper variant='outlined' sx={{ borderRadius: 2 }}>
-      <Box sx={{ p: 2 }}>
-        <Typography variant='subtitle1' fontWeight={700}>
-          {title}
-        </Typography>
+    <Card noPadding>
+      <Box sx={{ p: 2, borderBottom: '1px solid var(--border-subtle)' }}>
+        <Typography variant='h3'>{title}</Typography>
       </Box>
-      {children}
-    </Paper>
-  )
-}
-
-function Loading() {
-  return (
-    <Box sx={{ p: 4, textAlign: 'center' }}>
-      <CircularProgress size={24} />
-    </Box>
-  )
-}
-
-function Empty() {
-  const { t } = useTranslation('reports')
-  return (
-    <Box sx={{ p: 4, textAlign: 'center' }}>
-      <Typography variant='body2' color='text.secondary'>
-        {t('no_data')}
-      </Typography>
-    </Box>
+      <Box sx={{ p: 2 }}>{children}</Box>
+    </Card>
   )
 }
