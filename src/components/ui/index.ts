@@ -8,3 +8,4 @@ export {
   type ButtonVariant,
   type ButtonSize
 } from './Button'
+export { Field, type FieldProps } from './Field'
