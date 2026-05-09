@@ -30,3 +30,10 @@ export {
   type DataTableMenuAction,
   type ColumnAlign
 } from './DataTable'
+export {
+  Dialog,
+  ConfirmDialog,
+  type DialogProps,
+  type ConfirmDialogProps
+} from './Dialog'
+export { Drawer, type DrawerProps } from './Drawer'
