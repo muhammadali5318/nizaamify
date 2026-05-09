@@ -11,3 +11,4 @@ export {
 export { Field, type FieldProps } from './Field'
 export { Input, type InputProps, type InputSize } from './Input'
 export { Textarea, type TextareaProps } from './Textarea'
+export { Badge, type BadgeProps, type BadgeVariant } from './Badge'
