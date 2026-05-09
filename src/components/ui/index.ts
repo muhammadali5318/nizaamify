@@ -21,3 +21,4 @@ export {
   type SkeletonProps,
   type TableRowSkeletonProps
 } from './Skeleton'
+export { Pagination, type PaginationProps } from './Pagination'
