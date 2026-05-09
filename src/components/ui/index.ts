@@ -37,3 +37,4 @@ export {
   type ConfirmDialogProps
 } from './Dialog'
 export { Drawer, type DrawerProps } from './Drawer'
+export { Combobox, type ComboboxProps } from './Combobox'
