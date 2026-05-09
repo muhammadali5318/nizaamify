@@ -1,4 +1,7 @@
-import { Box, Button, Divider, Paper, Stack, Typography } from '@mui/material'
+import Box from '@mui/material/Box'
+import Divider from '@mui/material/Divider'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import WhatsAppIcon from '@mui/icons-material/WhatsApp'
 import EmailIcon from '@mui/icons-material/Email'
 import PhoneIcon from '@mui/icons-material/Phone'
@@ -8,6 +11,8 @@ import {
   whatsappLink,
   formatPKR
 } from 'src/features/subscription/env'
+import { Button, Card } from 'src/components/ui'
+import { PageHeader } from 'src/components/layout'
 
 function getLocale(lng: string) {
   return lng === 'ur' ? 'ur-PK' : 'en-PK'
@@ -18,11 +23,12 @@ export default function SupportPage() {
   const locale = getLocale(i18n.language)
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
-      <Paper sx={{ p: { xs: 3, sm: 4 }, borderRadius: 3 }}>
+    <Box sx={{ maxWidth: 672, mx: 'auto', width: '100%' }}>
+      <PageHeader title={t('subscription:expired.support_title')} />
+      <Card>
         <Stack spacing={3}>
           <Box>
-            <Typography variant='subtitle1' fontWeight={700} mb={1}>
+            <Typography variant='h3' sx={{ mb: 1.5 }}>
               {t('subscription:expired.payment_instructions_title')}
             </Typography>
             <Stack spacing={1.5}>
@@ -44,9 +50,9 @@ export default function SupportPage() {
               />
             </Stack>
           </Box>
-          <Divider />
+          <Divider sx={{ borderColor: 'var(--border-subtle)' }} />
           <Box>
-            <Typography variant='subtitle1' fontWeight={700} mb={1}>
+            <Typography variant='h3' sx={{ mb: 1.5 }}>
               {t('subscription:expired.support_title')}
             </Typography>
             <Stack
@@ -59,7 +65,7 @@ export default function SupportPage() {
                   component='a'
                   href={`tel:${subscriptionEnv.supportPhone}`}
                   startIcon={<PhoneIcon />}
-                  variant='outlined'
+                  variant='secondary'
                 >
                   {subscriptionEnv.supportPhone}
                 </Button>
@@ -73,7 +79,7 @@ export default function SupportPage() {
                   target='_blank'
                   rel='noopener noreferrer'
                   startIcon={<WhatsAppIcon />}
-                  variant='outlined'
+                  variant='secondary'
                 >
                   {t('subscription:expired.whatsapp_label')}
                 </Button>
@@ -83,7 +89,7 @@ export default function SupportPage() {
                   component='a'
                   href={`mailto:${subscriptionEnv.supportEmail}`}
                   startIcon={<EmailIcon />}
-                  variant='outlined'
+                  variant='secondary'
                 >
                   {subscriptionEnv.supportEmail}
                 </Button>
@@ -91,7 +97,7 @@ export default function SupportPage() {
             </Stack>
           </Box>
         </Stack>
-      </Paper>
+      </Card>
     </Box>
   )
 }
@@ -104,10 +110,10 @@ function Row({ label, value }: { label: string; value: string }) {
       alignItems={{ sm: 'center' }}
       spacing={0.5}
     >
-      <Typography variant='body2' color='text.secondary'>
+      <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
         {label}
       </Typography>
-      <Typography variant='body2' fontWeight={700}>
+      <Typography variant='body1' sx={{ fontWeight: 600 }}>
         {value || '—'}
       </Typography>
     </Stack>
