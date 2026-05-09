@@ -1,15 +1,10 @@
 import { useState } from 'react'
-import {
-  Alert,
-  Box,
-  Button,
-  IconButton,
-  MenuItem,
-  Paper,
-  Stack,
-  TextField,
-  Typography
-} from '@mui/material'
+import Box from '@mui/material/Box'
+import IconButton from '@mui/material/IconButton'
+import MenuItem from '@mui/material/MenuItem'
+import Stack from '@mui/material/Stack'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { useTranslation } from 'react-i18next'
@@ -19,6 +14,8 @@ import { useRecordPurchase } from './hooks'
 import { useNotifier } from 'src/components/notistack/NotificationProvider'
 import { paths } from 'src/paths'
 import { formatPKR } from 'src/features/subscription/env'
+import { Banner, Button, Card, Field, Input, Textarea } from 'src/components/ui'
+import { PageHeader } from 'src/components/layout'
 
 type LineState = {
   product_id: string
@@ -112,63 +109,59 @@ export default function NewPurchasePage() {
 
   if (!productsLoading && (!products || products.length === 0)) {
     return (
-      <Box sx={{ p: { xs: 2, sm: 3 } }}>
-        <Paper sx={{ p: 4, borderRadius: 3, maxWidth: 640 }}>
-          <Typography variant='h6' fontWeight={700} mb={1}>
-            {t('purchases:add_purchase')}
-          </Typography>
-          <Alert severity='info' sx={{ mb: 2 }}>
-            {t('purchases:errors.no_products')}
-          </Alert>
-          <Button
-            onClick={() => navigate(paths.newProduct)}
-            variant='contained'
-          >
-            {t('purchases:actions.back')}
-          </Button>
-        </Paper>
+      <Box sx={{ maxWidth: 672, mx: 'auto', width: '100%' }}>
+        <PageHeader title={t('purchases:add_purchase')} />
+        <Card>
+          <Stack spacing={2}>
+            <Banner variant='info'>{t('purchases:errors.no_products')}</Banner>
+            <Box>
+              <Button
+                variant='primary'
+                onClick={() => navigate(paths.newProduct)}
+              >
+                {t('purchases:actions.back')}
+              </Button>
+            </Box>
+          </Stack>
+        </Card>
       </Box>
     )
   }
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
-      <Paper sx={{ p: { xs: 3, sm: 4 }, borderRadius: 3, maxWidth: 880 }}>
-        <Typography variant='h5' fontWeight={700} mb={3}>
-          {t('purchases:add_purchase')}
-        </Typography>
-
-        <Stack spacing={2}>
-          {error && <Alert severity='error'>{error}</Alert>}
+    <Box sx={{ maxWidth: 880, mx: 'auto', width: '100%' }}>
+      <PageHeader title={t('purchases:add_purchase')} />
+      <Card>
+        <Stack spacing={2.5}>
+          {error && <Banner variant='error'>{error}</Banner>}
 
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-            <TextField
-              label={t('purchases:fields.purchase_date')}
-              type='date'
-              value={purchaseDate}
-              onChange={(e) => setPurchaseDate(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-            />
-            <TextField
-              label={t('purchases:fields.source')}
-              value={source}
-              onChange={(e) => setSource(e.target.value)}
-              fullWidth
-            />
+            <Field label={t('purchases:fields.purchase_date')}>
+              <Input
+                type='date'
+                value={purchaseDate}
+                onChange={(e) => setPurchaseDate(e.target.value)}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </Field>
+            <Field label={t('purchases:fields.source')}>
+              <Input
+                value={source}
+                onChange={(e) => setSource(e.target.value)}
+              />
+            </Field>
           </Stack>
 
-          <TextField
-            label={t('purchases:fields.note')}
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            multiline
-            minRows={2}
-            fullWidth
-          />
+          <Field label={t('purchases:fields.note')}>
+            <Textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              minRows={2}
+            />
+          </Field>
 
           <Box>
-            <Typography variant='subtitle1' fontWeight={700} mb={1}>
+            <Typography variant='h3' sx={{ mb: 1.5 }}>
               {t('purchases:fields.product')}
             </Typography>
             <Stack spacing={1.5}>
@@ -198,7 +191,7 @@ export default function NewPurchasePage() {
                   <TextField
                     label={t('purchases:fields.qty')}
                     type='number'
-                    inputProps={{ min: 1, step: 1 }}
+                    inputProps={{ min: 1, step: 1, inputMode: 'numeric' }}
                     value={ln.qty}
                     onChange={(e) => updateLine(i, { qty: e.target.value })}
                     sx={{ width: { xs: '100%', sm: 110 } }}
@@ -206,13 +199,13 @@ export default function NewPurchasePage() {
                   <TextField
                     label={t('purchases:fields.cost')}
                     type='number'
-                    inputProps={{ min: 0, step: '0.01' }}
+                    inputProps={{ min: 0, step: '0.01', inputMode: 'numeric' }}
                     value={ln.cost}
                     onChange={(e) => updateLine(i, { cost: e.target.value })}
                     sx={{ width: { xs: '100%', sm: 160 } }}
                   />
                   <IconButton
-                    aria-label='remove'
+                    aria-label={t('common:actions.remove', 'Remove')}
                     onClick={() => removeLine(i)}
                     disabled={lines.length === 1}
                   >
@@ -221,6 +214,8 @@ export default function NewPurchasePage() {
                 </Stack>
               ))}
               <Button
+                variant='ghost'
+                size='sm'
                 startIcon={<AddIcon />}
                 onClick={addLine}
                 sx={{ alignSelf: 'flex-start' }}
@@ -235,32 +230,34 @@ export default function NewPurchasePage() {
             justifyContent='space-between'
             alignItems='center'
             mt={1}
+            pt={2}
+            sx={{ borderTop: '1px solid var(--border-subtle)' }}
           >
-            <Typography variant='body2' color='text.secondary'>
+            <Typography variant='body1' sx={{ color: 'var(--text-muted)' }}>
               {t('purchases:fields.total')}
             </Typography>
-            <Typography variant='h6' fontWeight={700}>
+            <Typography variant='h2' component='span'>
               {formatPKR(total, locale)}
             </Typography>
           </Stack>
 
-          <Stack direction='row' spacing={1} justifyContent='flex-end'>
+          <Stack direction='row' spacing={1.5} justifyContent='flex-end'>
             <Button
-              variant='outlined'
+              variant='secondary'
               onClick={() => navigate(paths.purchases)}
             >
               {t('purchases:actions.back')}
             </Button>
             <Button
-              variant='contained'
+              variant='primary'
               onClick={submit}
-              disabled={record.isPending}
+              loading={record.isPending}
             >
               {t('purchases:actions.submit')}
             </Button>
           </Stack>
         </Stack>
-      </Paper>
+      </Card>
     </Box>
   )
 }
