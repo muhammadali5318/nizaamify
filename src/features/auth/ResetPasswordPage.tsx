@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, Stack, TextField } from '@mui/material'
+import Stack from '@mui/material/Stack'
 import { useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { resetSchema, type ResetValues } from './schemas'
 import { supabase } from 'src/lib/supabase'
 import { paths } from 'src/paths'
 import AuthLayout from './AuthLayout'
+import { Banner, Button, Field, Input } from 'src/components/ui'
 
 export default function ResetPasswordPage() {
   const { t } = useTranslation(['auth', 'common'])
@@ -19,11 +20,11 @@ export default function ResetPasswordPage() {
   // a temporary session via detectSessionInUrl: true (set in supabase client).
   useEffect(() => {
     if (!success) return
-    const t = window.setTimeout(
+    const tid = window.setTimeout(
       () => navigate(paths.login, { replace: true }),
       2000
     )
-    return () => window.clearTimeout(t)
+    return () => window.clearTimeout(tid)
   }, [success, navigate])
 
   const {
@@ -65,34 +66,37 @@ export default function ResetPasswordPage() {
       subtitle={t('auth:reset.subtitle')}
     >
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <Stack spacing={2}>
-          {serverError && <Alert severity='error'>{serverError}</Alert>}
+        <Stack spacing={2.5}>
+          {serverError && <Banner variant='error'>{serverError}</Banner>}
 
-          <TextField
+          <Field
             label={t('auth:reset.password_label')}
-            type='password'
-            autoComplete='new-password'
-            fullWidth
-            {...register('password')}
-            error={!!errors.password}
-            helperText={errors.password?.message}
-          />
+            error={errors.password?.message}
+          >
+            <Input
+              type='password'
+              autoComplete='new-password'
+              {...register('password')}
+            />
+          </Field>
 
-          <TextField
+          <Field
             label={t('auth:reset.confirm_password_label')}
-            type='password'
-            autoComplete='new-password'
-            fullWidth
-            {...register('confirmPassword')}
-            error={!!errors.confirmPassword}
-            helperText={errors.confirmPassword?.message}
-          />
+            error={errors.confirmPassword?.message}
+          >
+            <Input
+              type='password'
+              autoComplete='new-password'
+              {...register('confirmPassword')}
+            />
+          </Field>
 
           <Button
             type='submit'
-            variant='contained'
-            size='large'
-            disabled={isSubmitting}
+            variant='primary'
+            size='lg'
+            fullWidth
+            loading={isSubmitting}
           >
             {t('auth:reset.submit')}
           </Button>
