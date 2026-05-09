@@ -1,30 +1,30 @@
 import { useState } from 'react'
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
-  Paper,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography
-} from '@mui/material'
+import Box from '@mui/material/Box'
+import MenuItem from '@mui/material/MenuItem'
+import Stack from '@mui/material/Stack'
+import TextField from '@mui/material/TextField'
 import AddIcon from '@mui/icons-material/Add'
 import { useTranslation } from 'react-i18next'
-import { EXPENSE_CATEGORIES, useCreateExpense, useExpenses } from './hooks'
+import {
+  EXPENSE_CATEGORIES,
+  useCreateExpense,
+  useExpenses,
+  type Expense
+} from './hooks'
 import { useNotifier } from 'src/components/notistack/NotificationProvider'
 import { formatPKR } from 'src/features/subscription/env'
+import {
+  Banner,
+  Button,
+  DataTable,
+  Dialog,
+  EmptyState,
+  Field,
+  Input,
+  Textarea,
+  type DataTableColumn
+} from 'src/components/ui'
+import { PageHeader } from 'src/components/layout'
 
 const todayISO = () => new Date().toISOString().slice(0, 10)
 
@@ -66,93 +66,100 @@ export default function ExpensesPage() {
     }
   }
 
-  return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
-      <Stack
-        direction='row'
-        alignItems='center'
-        justifyContent='space-between'
-        mb={2}
-      >
-        <Typography variant='h5' fontWeight={700}>
-          {t('expenses:title')}
-        </Typography>
-        <Button
-          variant='contained'
-          startIcon={<AddIcon />}
-          onClick={() => setOpen(true)}
-        >
-          {t('expenses:add')}
-        </Button>
-      </Stack>
+  const rows = data ?? []
 
-      <Paper variant='outlined' sx={{ borderRadius: 2 }}>
-        {isLoading ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <CircularProgress size={24} />
+  const columns: DataTableColumn<Expense>[] = [
+    {
+      id: 'date',
+      header: t('expenses:fields.expense_date'),
+      cardRole: 'heading',
+      cell: (e) =>
+        new Intl.DateTimeFormat(locale, {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        }).format(new Date(e.expense_date))
+    },
+    {
+      id: 'category',
+      header: t('expenses:fields.category'),
+      cell: (e) =>
+        t(`expenses:categories.${e.category}`, { defaultValue: e.category })
+    },
+    {
+      id: 'note',
+      header: t('expenses:fields.note'),
+      hideOnMobile: true,
+      cell: (e) => e.note ?? ''
+    },
+    {
+      id: 'amount',
+      header: t('expenses:fields.amount'),
+      align: 'end',
+      cell: (e) => (
+        <Box component='span' sx={{ fontWeight: 600 }}>
+          {formatPKR(e.amount, locale)}
+        </Box>
+      )
+    }
+  ]
+
+  return (
+    <Box sx={{ maxWidth: 1280, mx: 'auto', width: '100%' }}>
+      <PageHeader
+        title={t('expenses:title')}
+        actions={
+          <Button
+            variant='primary'
+            startIcon={<AddIcon />}
+            onClick={() => setOpen(true)}
+          >
+            {t('expenses:add')}
+          </Button>
+        }
+      />
+
+      <DataTable
+        columns={columns}
+        rows={rows}
+        getRowId={(e) => e.id}
+        loading={isLoading}
+        empty={
+          <Box sx={{ py: 4 }}>
+            <EmptyState title={t('expenses:empty')} />
           </Box>
-        ) : !data || data.length === 0 ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <Typography variant='body2' color='text.secondary'>
-              {t('expenses:empty')}
-            </Typography>
-          </Box>
-        ) : (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>{t('expenses:fields.expense_date')}</TableCell>
-                  <TableCell>{t('expenses:fields.category')}</TableCell>
-                  <TableCell>{t('expenses:fields.note')}</TableCell>
-                  <TableCell align='right'>
-                    {t('expenses:fields.amount')}
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {data.map((e) => (
-                  <TableRow key={e.id}>
-                    <TableCell>
-                      {new Intl.DateTimeFormat(locale, {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                      }).format(new Date(e.expense_date))}
-                    </TableCell>
-                    <TableCell>
-                      {t(`expenses:categories.${e.category}`, {
-                        defaultValue: e.category
-                      })}
-                    </TableCell>
-                    <TableCell>{e.note ?? ''}</TableCell>
-                    <TableCell align='right'>
-                      {formatPKR(e.amount, locale)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </Paper>
+        }
+        ariaLabel={t('expenses:title')}
+      />
 
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
-        fullWidth
-        maxWidth='xs'
+        title={t('expenses:add')}
+        actions={
+          <>
+            <Button variant='ghost' onClick={() => setOpen(false)}>
+              {t('common:actions.cancel')}
+            </Button>
+            <Button
+              variant='primary'
+              onClick={submit}
+              loading={create.isPending}
+            >
+              {t('expenses:actions.save')}
+            </Button>
+          </>
+        }
       >
-        <DialogTitle>{t('expenses:add')}</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} mt={1}>
-            {error && <Alert severity='error'>{error}</Alert>}
+        <Stack spacing={2.5} mt={1}>
+          {error && <Banner variant='error'>{error}</Banner>}
+
+          <Field label={t('expenses:fields.category')}>
             <TextField
               select
-              label={t('expenses:fields.category')}
+              fullWidth
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              fullWidth
             >
               {EXPENSE_CATEGORIES.map((c) => (
                 <MenuItem key={c} value={c}>
@@ -160,44 +167,34 @@ export default function ExpensesPage() {
                 </MenuItem>
               ))}
             </TextField>
-            <TextField
-              label={t('expenses:fields.amount')}
+          </Field>
+
+          <Field label={t('expenses:fields.amount')}>
+            <Input
               type='number'
-              inputProps={{ min: 0, step: '0.01' }}
+              inputProps={{ min: 0, step: '0.01', inputMode: 'numeric' }}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              fullWidth
             />
-            <TextField
-              label={t('expenses:fields.expense_date')}
+          </Field>
+
+          <Field label={t('expenses:fields.expense_date')}>
+            <Input
               type='date'
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              fullWidth
+              slotProps={{ inputLabel: { shrink: true } }}
             />
-            <TextField
-              label={t('expenses:fields.note')}
+          </Field>
+
+          <Field label={t('expenses:fields.note')}>
+            <Textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              multiline
               minRows={2}
-              fullWidth
             />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>
-            {t('common:actions.cancel')}
-          </Button>
-          <Button
-            variant='contained'
-            onClick={submit}
-            disabled={create.isPending}
-          >
-            {t('expenses:actions.save')}
-          </Button>
-        </DialogActions>
+          </Field>
+        </Stack>
       </Dialog>
     </Box>
   )
