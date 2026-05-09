@@ -223,14 +223,20 @@ function CreateForm({
               />
             </Field>
 
-            <Divider textAlign='left'>
+            <Box>
               <Typography
                 variant='overline'
-                sx={{ color: 'var(--text-muted)' }}
+                sx={{
+                  color: 'var(--text-muted)',
+                  display: 'block',
+                  mb: 1,
+                  textAlign: 'start'
+                }}
               >
                 {t('products:fields.opening_stock')}
               </Typography>
-            </Divider>
+              <Divider sx={{ borderColor: 'var(--border-subtle)' }} />
+            </Box>
 
             <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
               {t('products:fields.opening_help')}

@@ -7,6 +7,7 @@ import {
   type OptionsObject,
   type SnackbarKey
 } from 'notistack'
+import { useTranslation } from 'react-i18next'
 import StyledMaterialDesignContent from '../notistack/StyledMaterialDesignContent'
 import CloseIcon from '@mui/icons-material/Close'
 import IconButton from '@mui/material/IconButton'
@@ -161,10 +162,15 @@ export const useNotifier = () => {
 const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   children
 }) => {
+  // Mirror toast position in RTL so it appears at the trailing edge in
+  // both languages. Reads i18n direction at render time so it stays in
+  // sync with language toggles without rebuilding the provider tree.
+  const { i18n } = useTranslation()
+  const horizontal: 'left' | 'right' = i18n.dir() === 'rtl' ? 'left' : 'right'
   return (
     <SnackbarProvider
       maxSnack={3}
-      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      anchorOrigin={{ vertical: 'top', horizontal }}
       autoHideDuration={5000}
       iconVariant={{
         error: (

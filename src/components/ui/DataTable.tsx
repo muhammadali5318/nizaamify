@@ -14,6 +14,7 @@ import MenuItem from '@mui/material/MenuItem'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import type { Theme } from '@mui/material/styles'
+import { useTheme } from '@mui/material/styles'
 import { TableRowSkeleton } from './Skeleton'
 import { EmptyState } from './EmptyState'
 import { Card } from './Card'
@@ -294,6 +295,11 @@ function RowActionsMenu<T>({
   actions: DataTableMenuAction<T>[]
 }) {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
+  const { direction } = useTheme()
+  // The kebab sits at the trailing edge of the row (column align='end' →
+  // right in LTR, left in RTL). Menu's anchorOrigin must mirror so it
+  // grows toward the leading edge instead of off-screen.
+  const horizontal: 'left' | 'right' = direction === 'rtl' ? 'left' : 'right'
   return (
     <>
       <IconButton
@@ -310,8 +316,8 @@ function RowActionsMenu<T>({
         anchorEl={anchor}
         open={Boolean(anchor)}
         onClose={() => setAnchor(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal }}
+        transformOrigin={{ vertical: 'top', horizontal }}
       >
         {actions.map((a, i) => (
           <MenuItem

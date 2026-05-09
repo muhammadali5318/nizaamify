@@ -8,6 +8,7 @@ import {
   InputAdornment,
   IconButton
 } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar'
@@ -39,6 +40,7 @@ const DateRangeSelector: React.FC<Props> = ({
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [tempStart, setTempStart] = useState<Dayjs | null>(toDayjs(value.start))
   const [tempEnd, setTempEnd] = useState<Dayjs | null>(toDayjs(value.end))
+  const { direction } = useTheme()
 
   const minDayjs = toDayjs(minDate)
   const maxDayjs = toDayjs(maxDate)
@@ -223,7 +225,10 @@ const DateRangeSelector: React.FC<Props> = ({
           open={open}
           anchorEl={anchorEl}
           onClose={handleClose}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: direction === 'rtl' ? 'right' : 'left'
+          }}
         >
           <Box>
             <DateCalendar
