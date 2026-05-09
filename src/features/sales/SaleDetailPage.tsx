@@ -1,28 +1,38 @@
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Paper,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography
-} from '@mui/material'
+import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router'
 import { paths } from 'src/paths'
 import { useSale } from './hooks'
 import { formatPKR } from 'src/features/subscription/env'
+import {
+  Badge,
+  type BadgeVariant,
+  Banner,
+  Button,
+  Card,
+  DataTable,
+  FullPageSpinner,
+  type DataTableColumn
+} from 'src/components/ui'
 
-type ChipColor = 'success' | 'warning' | 'info' | 'default'
+type SaleItem = {
+  id: string
+  qty: number
+  price_at_sale: number | string
+  cost_at_sale: number | string
+  product?: { name?: string } | null
+}
 
-const paymentChipColor: Record<string, ChipColor> = {
+type LedgerRow = {
+  id: string
+  type: 'debit' | 'credit'
+  amount: number | string
+  created_at: string
+}
+
+const paymentBadgeVariant: Record<string, BadgeVariant> = {
   cash: 'success',
   credit: 'warning',
   partial: 'info'
@@ -35,19 +45,17 @@ export default function SaleDetailPage() {
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
   const { data: sale, isLoading, error } = useSale(id)
 
-  if (isLoading) {
-    return (
-      <Box sx={{ p: 4, textAlign: 'center' }}>
-        <CircularProgress size={24} />
-      </Box>
-    )
-  }
+  if (isLoading) return <FullPageSpinner />
 
   if (error || !sale) {
     return (
-      <Box sx={{ p: { xs: 2, sm: 3 } }}>
-        <Alert severity='error'>{t('sales:detail.not_found')}</Alert>
-        <Button onClick={() => navigate(paths.sales)} sx={{ mt: 2 }}>
+      <Box sx={{ maxWidth: 1024, mx: 'auto', width: '100%' }}>
+        <Banner variant='error'>{t('sales:detail.not_found')}</Banner>
+        <Button
+          variant='secondary'
+          onClick={() => navigate(paths.sales)}
+          sx={{ mt: 2 }}
+        >
           {t('sales:detail.back')}
         </Button>
       </Box>
@@ -74,13 +82,102 @@ export default function SaleDetailPage() {
         ? t('sales:filters.credit')
         : t('sales:filters.partial')
 
+  const itemColumns: DataTableColumn<SaleItem>[] = [
+    {
+      id: 'product',
+      header: t('sales:detail.product'),
+      cardRole: 'heading',
+      cell: (it) => it.product?.name ?? t('sales:detail.deleted_product')
+    },
+    {
+      id: 'qty',
+      header: t('sales:detail.qty'),
+      align: 'end',
+      cell: (it) => it.qty
+    },
+    {
+      id: 'unit_price',
+      header: t('sales:detail.unit_price'),
+      align: 'end',
+      cell: (it) => formatPKR(Number(it.price_at_sale), locale)
+    },
+    {
+      id: 'unit_cost',
+      header: t('sales:detail.unit_cost'),
+      align: 'end',
+      hideOnMobile: true,
+      cell: (it) => formatPKR(Number(it.cost_at_sale), locale)
+    },
+    {
+      id: 'line_total',
+      header: t('sales:detail.line_total'),
+      align: 'end',
+      cell: (it) => formatPKR(Number(it.price_at_sale) * it.qty, locale)
+    },
+    {
+      id: 'line_profit',
+      header: t('sales:detail.line_profit'),
+      align: 'end',
+      hideOnMobile: true,
+      cell: (it) => {
+        const profit =
+          (Number(it.price_at_sale) - Number(it.cost_at_sale)) * it.qty
+        return (
+          <Box
+            component='span'
+            sx={{
+              color:
+                profit < 0 ? 'var(--error-700)' : 'var(--status-success-text)',
+              fontWeight: 500
+            }}
+          >
+            {formatPKR(profit, locale)}
+          </Box>
+        )
+      }
+    }
+  ]
+
+  const ledgerColumns: DataTableColumn<LedgerRow>[] = [
+    {
+      id: 'date',
+      header: t('khata:history.date'),
+      cardRole: 'heading',
+      cell: (l) =>
+        new Intl.DateTimeFormat(locale, {
+          dateStyle: 'short',
+          timeStyle: 'short'
+        }).format(new Date(l.created_at))
+    },
+    {
+      id: 'type',
+      header: t('khata:history.type'),
+      cell: (l) =>
+        l.type === 'debit' ? (
+          <Badge variant='warning' label={t('khata:history.debit')} />
+        ) : (
+          <Badge variant='success' label={t('khata:history.credit')} />
+        )
+    },
+    {
+      id: 'amount',
+      header: t('khata:history.amount'),
+      align: 'end',
+      cell: (l) => formatPKR(Number(l.amount), locale)
+    }
+  ]
+
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
-      <Button onClick={() => navigate(paths.sales)} sx={{ mb: 1 }}>
+    <Box sx={{ maxWidth: 1024, mx: 'auto', width: '100%' }}>
+      <Button
+        variant='ghost'
+        onClick={() => navigate(paths.sales)}
+        sx={{ mb: 1 }}
+      >
         {t('sales:detail.back')}
       </Button>
 
-      <Paper sx={{ p: 3, borderRadius: 3, mb: 2 }}>
+      <Card sx={{ mb: 2 }}>
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           justifyContent='space-between'
@@ -88,34 +185,33 @@ export default function SaleDetailPage() {
           spacing={2}
         >
           <Box>
-            <Typography variant='h5' fontWeight={700}>
+            <Typography variant='display' component='h1'>
               {t('sales:detail.title', { shortId })}
             </Typography>
-            <Typography variant='body2' color='text.secondary'>
+            <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
               {new Intl.DateTimeFormat(locale, {
                 dateStyle: 'medium',
                 timeStyle: 'short'
               }).format(new Date(sale.created_at))}
             </Typography>
           </Box>
-          <Chip
+          <Badge
+            variant={paymentBadgeVariant[sale.payment_type] ?? 'neutral'}
             label={paymentLabel}
-            color={paymentChipColor[sale.payment_type] ?? 'default'}
           />
         </Stack>
         <Stack direction='row' spacing={3} mt={2} flexWrap='wrap' rowGap={2}>
           <Box>
-            <Typography variant='caption' color='text.secondary'>
+            <Typography variant='overline' sx={{ color: 'var(--text-muted)' }}>
               {t('sales:columns.customer')}
             </Typography>
             <Typography variant='body1'>
               {sale.customer ? (
                 <Button
-                  size='small'
+                  variant='link'
                   onClick={() =>
                     navigate(paths.gotoCustomer(sale.customer!.id))
                   }
-                  sx={{ p: 0, minWidth: 0 }}
                 >
                   {sale.customer.name}
                 </Button>
@@ -125,7 +221,7 @@ export default function SaleDetailPage() {
             </Typography>
           </Box>
           <Box>
-            <Typography variant='caption' color='text.secondary'>
+            <Typography variant='overline' sx={{ color: 'var(--text-muted)' }}>
               {t('sales:detail.cashier')}
             </Typography>
             <Typography variant='body1'>
@@ -136,7 +232,7 @@ export default function SaleDetailPage() {
 
         {sale.notes && (
           <Box sx={{ mt: 2 }}>
-            <Typography variant='caption' color='text.secondary'>
+            <Typography variant='overline' sx={{ color: 'var(--text-muted)' }}>
               {t('sales:detail.notes_label')}
             </Typography>
             <Typography
@@ -147,94 +243,45 @@ export default function SaleDetailPage() {
             </Typography>
           </Box>
         )}
-      </Paper>
+      </Card>
 
-      <Paper variant='outlined' sx={{ borderRadius: 2, mb: 2 }}>
-        <Box sx={{ p: 2 }}>
-          <Typography variant='subtitle1' fontWeight={700}>
-            {t('sales:detail.items')}
-          </Typography>
+      <Card sx={{ mb: 2 }} noPadding>
+        <Box sx={{ p: 2, borderBottom: '1px solid var(--border-subtle)' }}>
+          <Typography variant='h3'>{t('sales:detail.items')}</Typography>
         </Box>
         {sale.items.length === 0 ? (
           <Box sx={{ p: 4, textAlign: 'center' }}>
-            <Typography variant='body2' color='text.secondary'>
+            <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
               {t('sales:detail.service_only')}
             </Typography>
           </Box>
         ) : (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>{t('sales:detail.product')}</TableCell>
-                  <TableCell align='right'>{t('sales:detail.qty')}</TableCell>
-                  <TableCell align='right'>
-                    {t('sales:detail.unit_price')}
-                  </TableCell>
-                  <TableCell align='right'>
-                    {t('sales:detail.unit_cost')}
-                  </TableCell>
-                  <TableCell align='right'>
-                    {t('sales:detail.line_total')}
-                  </TableCell>
-                  <TableCell align='right'>
-                    {t('sales:detail.line_profit')}
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {sale.items.map((it) => {
-                  const price = Number(it.price_at_sale)
-                  const cost = Number(it.cost_at_sale)
-                  const lineTotal = price * it.qty
-                  const profit = (price - cost) * it.qty
-                  return (
-                    <TableRow key={it.id}>
-                      <TableCell>
-                        {it.product?.name ?? t('sales:detail.deleted_product')}
-                      </TableCell>
-                      <TableCell align='right'>{it.qty}</TableCell>
-                      <TableCell align='right'>
-                        {formatPKR(price, locale)}
-                      </TableCell>
-                      <TableCell align='right'>
-                        {formatPKR(cost, locale)}
-                      </TableCell>
-                      <TableCell align='right'>
-                        {formatPKR(lineTotal, locale)}
-                      </TableCell>
-                      <TableCell
-                        align='right'
-                        sx={{
-                          color: profit < 0 ? 'error.main' : 'success.main'
-                        }}
-                      >
-                        {formatPKR(profit, locale)}
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <Box sx={{ p: 2 }}>
+            <DataTable
+              columns={itemColumns}
+              rows={sale.items as SaleItem[]}
+              getRowId={(it) => it.id}
+              ariaLabel={t('sales:detail.items')}
+            />
+          </Box>
         )}
         <Stack
           direction='row'
           justifyContent='flex-end'
           spacing={4}
-          sx={{ p: 2 }}
+          sx={{ p: 2, borderTop: '1px solid var(--border-subtle)' }}
         >
           <Box sx={{ minWidth: 240 }}>
             <Stack direction='row' justifyContent='space-between'>
-              <Typography variant='body2' color='text.secondary'>
+              <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
                 {t('sales:detail.subtotal')}
               </Typography>
               <Typography variant='body2'>
                 {formatPKR(subtotal, locale)}
               </Typography>
             </Stack>
-            <Stack direction='row' justifyContent='space-between'>
-              <Typography variant='body2' color='text.secondary'>
+            <Stack direction='row' justifyContent='space-between' mt={0.5}>
+              <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
                 {t('sales:columns.service_charge')}
               </Typography>
               <Typography variant='body2'>
@@ -246,17 +293,17 @@ export default function SaleDetailPage() {
               justifyContent='space-between'
               mt={1}
               pt={1}
-              sx={{ borderTop: 1, borderColor: 'divider' }}
+              sx={{ borderTop: '1px solid var(--border-default)' }}
             >
-              <Typography variant='subtitle1' fontWeight={700}>
+              <Typography variant='h3' component='span'>
                 {t('sales:columns.total')}
               </Typography>
-              <Typography variant='h6' fontWeight={700}>
+              <Typography variant='h2' component='span'>
                 {formatPKR(total, locale)}
               </Typography>
             </Stack>
             <Stack direction='row' justifyContent='space-between' mt={1}>
-              <Typography variant='body2' color='text.secondary'>
+              <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
                 {t('sales:detail.amount_paid_cash')}
               </Typography>
               <Typography variant='body2'>
@@ -265,24 +312,28 @@ export default function SaleDetailPage() {
             </Stack>
             {onCredit > 0 && (
               <Stack direction='row' justifyContent='space-between' mt={0.5}>
-                <Typography variant='body2' color='warning.main'>
+                <Typography
+                  variant='body2'
+                  sx={{ color: 'var(--warning-700)' }}
+                >
                   {t('sales:detail.on_credit')}
                 </Typography>
                 <Stack direction='row' spacing={1} alignItems='center'>
                   <Typography
                     variant='body2'
-                    fontWeight={700}
-                    color='warning.main'
+                    sx={{
+                      fontWeight: 600,
+                      color: 'var(--warning-700)'
+                    }}
                   >
                     {formatPKR(onCredit, locale)}
                   </Typography>
                   {sale.customer && (
                     <Button
-                      size='small'
+                      variant='link'
                       onClick={() =>
                         navigate(paths.gotoCustomer(sale.customer!.id))
                       }
-                      sx={{ p: 0, minWidth: 0 }}
                     >
                       {t('sales:detail.view_khata')}
                     </Button>
@@ -292,79 +343,45 @@ export default function SaleDetailPage() {
             )}
           </Box>
         </Stack>
-      </Paper>
+      </Card>
 
       {isCreditish && sale.customer && (
-        <Paper variant='outlined' sx={{ borderRadius: 2 }}>
-          <Box sx={{ p: 2 }}>
-            <Stack
-              direction='row'
-              justifyContent='space-between'
-              alignItems='center'
+        <Card noPadding>
+          <Stack
+            direction='row'
+            justifyContent='space-between'
+            alignItems='center'
+            sx={{ p: 2, borderBottom: '1px solid var(--border-subtle)' }}
+          >
+            <Typography variant='h3'>
+              {t('sales:detail.khata_panel_title')}
+            </Typography>
+            <Button
+              variant='link'
+              onClick={() => navigate(paths.gotoCustomer(sale.customer!.id))}
             >
-              <Typography variant='subtitle1' fontWeight={700}>
-                {t('sales:detail.khata_panel_title')}
-              </Typography>
-              <Button
-                size='small'
-                onClick={() => navigate(paths.gotoCustomer(sale.customer!.id))}
-              >
-                {t('sales:detail.view_customer_khata')}
-              </Button>
-            </Stack>
+              {t('sales:detail.view_customer_khata')}
+            </Button>
+          </Stack>
+          <Box sx={{ p: 2 }}>
+            <DataTable
+              columns={ledgerColumns}
+              rows={linkedLedger as LedgerRow[]}
+              getRowId={(l) => l.id}
+              empty={
+                <Box sx={{ py: 2 }}>
+                  <Typography
+                    variant='body2'
+                    sx={{ color: 'var(--text-muted)', textAlign: 'center' }}
+                  >
+                    {t('sales:detail.no_khata_entries')}
+                  </Typography>
+                </Box>
+              }
+              ariaLabel={t('sales:detail.khata_panel_title')}
+            />
           </Box>
-          {linkedLedger.length === 0 ? (
-            <Box sx={{ p: 2 }}>
-              <Typography variant='body2' color='text.secondary'>
-                {t('sales:detail.no_khata_entries')}
-              </Typography>
-            </Box>
-          ) : (
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t('khata:history.date')}</TableCell>
-                    <TableCell>{t('khata:history.type')}</TableCell>
-                    <TableCell align='right'>
-                      {t('khata:history.amount')}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {linkedLedger.map((l) => (
-                    <TableRow key={l.id}>
-                      <TableCell>
-                        {new Intl.DateTimeFormat(locale, {
-                          dateStyle: 'short',
-                          timeStyle: 'short'
-                        }).format(new Date(l.created_at))}
-                      </TableCell>
-                      <TableCell>
-                        {l.type === 'debit' ? (
-                          <Chip
-                            size='small'
-                            label={t('khata:history.debit')}
-                            color='warning'
-                          />
-                        ) : (
-                          <Chip
-                            size='small'
-                            label={t('khata:history.credit')}
-                            color='success'
-                          />
-                        )}
-                      </TableCell>
-                      <TableCell align='right'>
-                        {formatPKR(l.amount, locale)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </Paper>
+        </Card>
       )}
     </Box>
   )
