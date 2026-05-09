@@ -1,81 +1,62 @@
-// src/theme/muiTheme.ts
-import { createTheme } from '@mui/material/styles'
+import { createTheme, type Theme } from '@mui/material/styles'
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#231F20',
-      light: '#4d4d4d',
-      dark: '#1C191A',
-      contrastText: '#fff'
-    }
-  },
-  typography: {
-    fontFamily: 'Roboto, Arial, sans-serif'
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12,
-          textTransform: 'none' as const
-        }
+export function getTheme(direction: 'ltr' | 'rtl'): Theme {
+  return createTheme({
+    direction,
+    palette: {
+      primary: {
+        main: '#231F20',
+        light: '#4d4d4d',
+        dark: '#1C191A',
+        contrastText: '#fff'
       }
     },
-
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12
-        }
-      }
+    typography: {
+      fontFamily: 'Roboto, Arial, sans-serif'
     },
-
-    MuiOutlinedInput: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12
-        },
-        notchedOutline: {
-          borderRadius: 12
-        },
-        input: {
-          borderRadius: 12
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 12,
+            textTransform: 'none' as const
+          }
         }
-      }
-    },
-
-    MuiInputBase: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12
+      },
+      MuiTextField: {
+        styleOverrides: {
+          root: { borderRadius: 12 }
         }
-      }
-    },
-    MuiSelect: {
-      styleOverrides: {
-        outlined: {
-          borderRadius: 12
+      },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: { borderRadius: 12 },
+          notchedOutline: { borderRadius: 12 },
+          input: { borderRadius: 12 }
         }
-      }
-    },
-
-    MuiMenu: {
-      styleOverrides: {
-        paper: {
-          borderRadius: 12
+      },
+      MuiInputBase: {
+        styleOverrides: {
+          root: { borderRadius: 12 }
         }
-      }
-    },
-
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12
+      },
+      MuiSelect: {
+        styleOverrides: {
+          outlined: { borderRadius: 12 }
+        }
+      },
+      MuiMenu: {
+        styleOverrides: {
+          paper: { borderRadius: 12 }
+        }
+      },
+      MuiPaper: {
+        styleOverrides: {
+          root: { borderRadius: 12 }
         }
       }
     }
-  }
-})
+  })
+}
 
-export default theme
+export default getTheme('ltr')

@@ -1,0 +1,44 @@
+{
+  "title": "گاہک",
+  "add_customer": "گاہک شامل کریں",
+  "edit_customer": "گاہک میں ترمیم کریں",
+  "search_placeholder": "گاہک کو نام یا فون سے تلاش کریں…",
+  "empty": "ابھی تک کوئی گاہک نہیں۔ اپنا پہلا گاہک شامل کریں۔",
+  "outstanding": "بقایا",
+  "show_more_fields": "پتہ اور نوٹس شامل کریں",
+  "fields": {
+    "name": "نام",
+    "phone": "فون",
+    "address": "پتہ",
+    "notes": "نوٹس",
+    "address_optional": "پتہ (اختیاری)",
+    "notes_optional": "نوٹس (اختیاری)",
+    "last_activity": "آخری سرگرمی"
+  },
+  "actions": {
+    "save": "محفوظ کریں",
+    "back": "گاہک پر واپس جائیں",
+    "view_history": "تاریخ دیکھیں",
+    "edit": "ترمیم کریں",
+    "delete": "حذف کریں",
+    "delete_blocked": "حذف ممکن نہیں — گاہک کے پاس فروخت یا کھاتہ تاریخ ہے",
+    "confirm_delete_title": "گاہک حذف کریں؟",
+    "confirm_delete_body": "یہ {{name}} کو ہمیشہ کے لیے ہٹا دے گا۔ یہ واپس نہیں ہو گا۔",
+    "confirm_delete_cancel": "منسوخ کریں",
+    "confirm_delete_ok": "حذف کریں"
+  },
+  "errors": {
+    "name_required": "نام ضروری ہے",
+    "phone_required": "فون نمبر ضروری ہے",
+    "phone_invalid": "درست پاکستانی فون نمبر درج کریں",
+    "phone_taken": "اس فون نمبر کے ساتھ پہلے سے گاہک موجود ہے",
+    "phone_duplicate": "آپ کی دکان میں اس فون نمبر کے ساتھ پہلے سے گاہک موجود ہے",
+    "save_failed": "گاہک محفوظ نہیں ہو سکا۔ دوبارہ کوشش کریں۔",
+    "not_found": "گاہک نہیں ملا۔",
+    "delete_failed": "گاہک حذف نہیں ہو سکا۔ دوبارہ کوشش کریں۔"
+  },
+  "messages": {
+    "saved": "گاہک محفوظ ہو گیا",
+    "deleted": "گاہک حذف ہو گیا"
+  }
+}

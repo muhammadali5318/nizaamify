@@ -1,0 +1,21 @@
+{
+  "title": "Dashboard",
+  "today": "Today",
+  "today_sales": "Today's sales",
+  "outstanding_total": "Total outstanding",
+  "mtd_sales": "Sales this month",
+  "mtd_gross_profit": "Gross profit (MTD)",
+  "mtd_expenses": "Expenses (MTD)",
+  "mtd_net_profit": "Net profit (MTD)",
+  "target_progress": "Target progress",
+  "of_target": "of target {{target}}",
+  "no_target": "No target set for this month.",
+  "set_target": "Set target",
+  "quick_actions": {
+    "title": "Quick actions",
+    "new_sale": "New sale",
+    "new_purchase": "New stock-in",
+    "add_expense": "Add expense",
+    "view_khata": "View Khata"
+  }
+}

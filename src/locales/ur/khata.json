@@ -1,0 +1,81 @@
+{
+  "title": "کھاتہ",
+  "subtitle": "وہ گاہک جن کی ادھار تاریخ موجود ہے۔",
+  "all_clear": "سب صاف — اس وقت کسی گاہک پر کوئی بقایا نہیں۔",
+  "fields": {
+    "customer": "گاہک",
+    "phone": "فون",
+    "outstanding": "بقایا",
+    "last_activity": "آخری سرگرمی",
+    "entries": "اندراجات"
+  },
+  "list": {
+    "filter_label": "دکھائیں",
+    "filter_open": "کھلے کھاتے",
+    "filter_closed": "بند کھاتے",
+    "filter_all": "تمام",
+    "search_placeholder": "نام یا فون سے تلاش کریں",
+    "empty_open": "کوئی کھلا کھاتہ نہیں",
+    "empty_closed": "ابھی تک کوئی بند کھاتہ نہیں",
+    "empty_all": "ابھی تک کوئی کھاتہ والے گاہک نہیں",
+    "view_history": "تاریخ دیکھیں"
+  },
+  "history": {
+    "title": "اکاؤنٹ کی تاریخ",
+    "empty": "اس گاہک کی ابھی کوئی سرگرمی نہیں۔",
+    "date": "تاریخ",
+    "type": "قسم",
+    "amount": "رقم",
+    "reference": "حوالہ",
+    "debit": "فروخت (ادھار)",
+    "credit": "ادائیگی موصول",
+    "for": "برائے",
+    "notes": "نوٹس",
+    "actions": "عمل"
+  },
+  "entry": {
+    "for_label": "برائے",
+    "products_summary_more": "{{first}} + {{count}} مزید",
+    "service": "سروس",
+    "payment_received": "ادائیگی موصول",
+    "balance_after": "بعد بقایا",
+    "reversal_badge": "الٹ",
+    "reversed_badge": "الٹا گیا",
+    "reverse_action": "الٹ کریں",
+    "reverse_confirm_title": "اس اندراج کو الٹ کریں؟",
+    "reverse_confirm_body": "مخالف قسم کا ایک نیا اندراج شامل ہو گا۔ اصل اندراج آڈٹ کے لیے قابل دیکھ رہے گا۔",
+    "reverse_confirm_notes_label": "اختیاری الٹ نوٹ",
+    "reverse_confirm_cta": "اندراج الٹ کریں"
+  },
+  "transactions": {
+    "linked_invoice": "منسلک فروخت",
+    "running_balance": "بقایا بعد",
+    "no_link": "—"
+  },
+  "receive_payment": {
+    "open": "ادائیگی وصول کریں",
+    "title": "ادائیگی وصول کریں",
+    "amount": "رقم (روپے)",
+    "submit": "ادائیگی محفوظ کریں",
+    "amount_max_customer": "زیادہ سے زیادہ: {{max}} (گاہک کا بقایا)",
+    "notes_label": "نوٹس (اختیاری)",
+    "notes_placeholder": "مثلاً 'بینک ٹرانسفر ref #1234'",
+    "errors": {
+      "amount_invalid": "0 سے زیادہ درست رقم درج کریں",
+      "save_failed": "ادائیگی محفوظ نہیں ہو سکی۔ دوبارہ کوشش کریں۔"
+    },
+    "saved": "ادائیگی ریکارڈ ہو گئی"
+  },
+  "errors": {
+    "overpayment_customer": "رقم گاہک کے بقایا ({{max}}) سے زیادہ نہیں ہو سکتی۔",
+    "amount_must_be_positive": "رقم صفر سے زیادہ ہونی چاہیے۔",
+    "customer_not_in_shop": "گاہک نہیں ملا۔",
+    "cannot_reverse_a_reversal": "الٹ اندراجات خود الٹے نہیں جا سکتے۔",
+    "entry_already_reversed": "یہ اندراج پہلے ہی الٹ دیا گیا ہے۔",
+    "entry_not_in_shop": "اندراج نہیں ملا۔",
+    "reverse_failed": "اندراج الٹ نہیں ہو سکا۔ دوبارہ کوشش کریں۔"
+  },
+  "messages": {
+    "reversed": "اندراج الٹ دیا گیا"
+  }
+}

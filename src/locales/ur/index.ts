@@ -1,0 +1,31 @@
+import common from './common.json'
+import auth from './auth.json'
+import onboarding from './onboarding.json'
+import subscription from './subscription.json'
+import products from './products.json'
+import purchases from './purchases.json'
+import pos from './pos.json'
+import customers from './customers.json'
+import khata from './khata.json'
+import expenses from './expenses.json'
+import targets from './targets.json'
+import dashboard from './dashboard.json'
+import reports from './reports.json'
+import sales from './sales.json'
+
+export default {
+  common,
+  auth,
+  onboarding,
+  subscription,
+  products,
+  purchases,
+  pos,
+  customers,
+  khata,
+  expenses,
+  targets,
+  dashboard,
+  reports,
+  sales
+}

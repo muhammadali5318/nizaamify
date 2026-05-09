@@ -1,0 +1,20 @@
+{
+  "title": "Reports",
+  "sections": {
+    "daily_sales": "Last 7 days",
+    "monthly_summary": "Last 6 months",
+    "expense_breakdown": "Expenses this month",
+    "outstanding": "Outstanding balances"
+  },
+  "fields": {
+    "date": "Date",
+    "month": "Month",
+    "sales": "Sales",
+    "gross_profit": "Gross profit",
+    "expenses": "Expenses",
+    "net_profit": "Net profit",
+    "category": "Category",
+    "amount": "Amount"
+  },
+  "no_data": "No data yet."
+}

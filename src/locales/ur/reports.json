@@ -1,0 +1,20 @@
+{
+  "title": "رپورٹس",
+  "sections": {
+    "daily_sales": "گزشتہ 7 دن",
+    "monthly_summary": "گزشتہ 6 مہینے",
+    "expense_breakdown": "اس مہینے کے اخراجات",
+    "outstanding": "بقایا رقوم"
+  },
+  "fields": {
+    "date": "تاریخ",
+    "month": "مہینہ",
+    "sales": "فروخت",
+    "gross_profit": "مجموعی منافع",
+    "expenses": "اخراجات",
+    "net_profit": "خالص منافع",
+    "category": "زمرہ",
+    "amount": "رقم"
+  },
+  "no_data": "ابھی کوئی ڈیٹا نہیں۔"
+}

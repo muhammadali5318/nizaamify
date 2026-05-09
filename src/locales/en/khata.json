@@ -1,0 +1,81 @@
+{
+  "title": "Khata",
+  "subtitle": "Customers with credit history.",
+  "all_clear": "All caught up — no customers owe anything right now.",
+  "fields": {
+    "customer": "Customer",
+    "phone": "Phone",
+    "outstanding": "Outstanding",
+    "last_activity": "Last activity",
+    "entries": "Entries"
+  },
+  "list": {
+    "filter_label": "Show",
+    "filter_open": "Open khata",
+    "filter_closed": "Closed khata",
+    "filter_all": "All",
+    "search_placeholder": "Search by name or phone",
+    "empty_open": "No open khata",
+    "empty_closed": "No closed khata yet",
+    "empty_all": "No khata customers yet",
+    "view_history": "View history"
+  },
+  "history": {
+    "title": "Account history",
+    "empty": "No activity yet for this customer.",
+    "date": "Date",
+    "type": "Type",
+    "amount": "Amount",
+    "reference": "Reference",
+    "debit": "Sale (credit)",
+    "credit": "Payment received",
+    "for": "For",
+    "notes": "Notes",
+    "actions": "Actions"
+  },
+  "entry": {
+    "for_label": "For",
+    "products_summary_more": "{{first}} + {{count}} more",
+    "service": "Service",
+    "payment_received": "Payment received",
+    "balance_after": "Balance after",
+    "reversal_badge": "Reversal",
+    "reversed_badge": "Reversed",
+    "reverse_action": "Reverse",
+    "reverse_confirm_title": "Reverse this entry?",
+    "reverse_confirm_body": "A new entry of the opposite type will be added. The original entry will remain visible for audit.",
+    "reverse_confirm_notes_label": "Optional reversal note",
+    "reverse_confirm_cta": "Reverse entry"
+  },
+  "transactions": {
+    "linked_invoice": "Linked sale",
+    "running_balance": "Balance after",
+    "no_link": "—"
+  },
+  "receive_payment": {
+    "open": "Receive payment",
+    "title": "Receive payment",
+    "amount": "Amount (PKR)",
+    "submit": "Save payment",
+    "amount_max_customer": "Max: {{max}} (customer outstanding)",
+    "notes_label": "Notes (optional)",
+    "notes_placeholder": "e.g. 'Bank transfer ref #1234'",
+    "errors": {
+      "amount_invalid": "Enter a valid amount greater than 0",
+      "save_failed": "Could not save payment. Please try again."
+    },
+    "saved": "Payment recorded"
+  },
+  "errors": {
+    "overpayment_customer": "Amount cannot exceed the customer's outstanding balance ({{max}}).",
+    "amount_must_be_positive": "Amount must be greater than zero.",
+    "customer_not_in_shop": "Customer not found.",
+    "cannot_reverse_a_reversal": "Reversal entries cannot themselves be reversed.",
+    "entry_already_reversed": "This entry has already been reversed.",
+    "entry_not_in_shop": "Entry not found.",
+    "reverse_failed": "Could not reverse the entry. Please try again."
+  },
+  "messages": {
+    "reversed": "Entry reversed"
+  }
+}

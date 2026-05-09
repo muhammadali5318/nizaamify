@@ -1,0 +1,51 @@
+{
+  "title": "Stock-in",
+  "subtitle": "Record purchases from suppliers. Stock and cost update automatically.",
+  "add_purchase": "New stock-in",
+  "empty": "No purchases recorded yet.",
+  "fields": {
+    "source": "Supplier / source",
+    "note": "Note (optional)",
+    "purchase_date": "Purchase date",
+    "product": "Product",
+    "qty": "Quantity",
+    "cost": "Unit cost (PKR)",
+    "total": "Total"
+  },
+  "list": {
+    "date": "Date",
+    "source": "Source",
+    "items": "Items",
+    "total": "Total cost"
+  },
+  "actions": {
+    "submit": "Save stock-in",
+    "add_line": "Add another item",
+    "remove_line": "Remove",
+    "back": "Back to stock-in"
+  },
+  "errors": {
+    "items_required": "Add at least one item",
+    "qty_invalid": "Quantity must be at least 1",
+    "cost_invalid": "Unit cost must be 0 or greater",
+    "product_required": "Pick a product",
+    "submit_failed": "Could not save the stock-in. Please try again.",
+    "no_products": "Add a product first before recording stock-in.",
+    "not_found": "Stock-in not found."
+  },
+  "messages": {
+    "saved": "Stock-in recorded"
+  },
+  "detail": {
+    "title": "Stock-in #{{shortId}}",
+    "recorded_by": "Recorded by",
+    "cost_at_purchase": "Cost at purchase",
+    "totals_mismatch": "Item totals don't match the stored total cost — possible data drift.",
+    "effect_on_inventory": "Effect on inventory",
+    "effect_caveat": "Avg before / after is shown only for the most recent stock-in per product.",
+    "avg_before": "Avg before",
+    "avg_after": "Avg after",
+    "not_available": "—",
+    "deleted_product": "(deleted product)"
+  }
+}

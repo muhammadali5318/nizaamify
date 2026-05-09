@@ -1,0 +1,25 @@
+# Architectural Decision Records (ADRs)
+
+One file per decision. Numeric prefix preserves ordering. Each ADR has four sections:
+
+- **Context** — why this came up
+- **Decision** — what was chosen
+- **Alternatives considered** — what was rejected and why
+- **Consequences** — what this locks in
+
+Granularity: one ADR per *reversal of a PRD assumption* or *cross-cutting architectural choice*. Skip small CSS / naming decisions.
+
+## Index
+
+- [0001 — Stack overrides vs PRD](./0001-stack-overrides.md)
+- [0002 — React Router v7 declarative mode](./0002-router-v7-declarative.md)
+- [0003 — MUI RTL pipeline](./0003-mui-rtl-pipeline.md)
+- [0004 — Supabase Auth replaces Auth0](./0004-supabase-auth-replaces-auth0.md)
+- [0005 — RLS enabled in same migration as table](./0005-rls-enabled-with-table.md)
+- [0006 — Subscription enforcement in client only](./0006-subscription-enforcement-client-only.md)
+- [0007 — record_sale and record_purchase as SQL functions](./0007-sale-purchase-sql-functions.md)
+- [0008 — No Zustand for now](./0008-no-zustand-for-now.md)
+- [0009 — Decision log structure (this folder)](./0009-decision-log-format.md)
+- [0010 — Admin runbook for manual subscription activation](./0010-admin-runbook.md)
+- [0011 — Intentional SECURITY DEFINER RPCs](./0011-intentional-security-definer-rpcs.md)
+- [0012 — M8 RTL audit status](./0012-m8-rtl-audit-status.md)

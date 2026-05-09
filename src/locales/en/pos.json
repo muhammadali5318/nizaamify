@@ -1,0 +1,99 @@
+{
+  "title": "POS",
+  "search_placeholder": "Search products by name or type",
+  "empty_catalog": "No active products. Add products before making a sale.",
+  "no_results": "No products match your search",
+  "picker": {
+    "add_to_cart": "Add to cart",
+    "stock_in": "{{count}} in stock",
+    "low_stock": "Only {{count}} left",
+    "out_of_stock": "Out of stock",
+    "stock_capped": "Cannot add more — only {{count}} in stock"
+  },
+  "cart": {
+    "title": "Cart",
+    "empty_title": "Cart is empty",
+    "empty_help": "Pick products from the left to start a sale.",
+    "empty_help_mobile": "Tap a product above to start a sale.",
+    "service_charge": "Service charge",
+    "subtotal": "Subtotal",
+    "subtotal_products": "Subtotal (products)",
+    "total": "Total",
+    "qty": "Qty",
+    "qty_label": "Quantity",
+    "unit_price": "Unit price",
+    "line_total": "Line total",
+    "modified_price_badge": "Modified",
+    "was_price": "was {{price}}",
+    "below_avg_cost_warning": "Below average cost — selling at a loss.",
+    "stock_remaining": "Stock: {{count}} left",
+    "remove_line": "Remove"
+  },
+  "payment": {
+    "title": "Payment",
+    "cash": "Cash",
+    "credit": "Credit (Khata)",
+    "customer": "Customer",
+    "select_customer": "Select customer",
+    "add_customer": "Add new customer",
+    "subtotal": "Subtotal",
+    "service_charge": "Service charge",
+    "total": "Total",
+    "amount_paid": "Amount paid",
+    "on_credit": "On credit",
+    "pay_full": "Pay full",
+    "pay_nothing": "Pay nothing",
+    "notes_placeholder": "Optional notes (e.g., service performed)"
+  },
+  "customer": {
+    "walk_in": "Walk-in (no customer)",
+    "required_for_credit": "Required for credit or partial sales",
+    "add_new": "+ Add new customer",
+    "no_results": "No customers found",
+    "load_more": "Load more"
+  },
+  "submit": {
+    "cash": "Complete cash sale",
+    "credit": "Complete credit sale",
+    "partial": "Complete partial sale ({{paid}} paid, {{credit}} credit)"
+  },
+  "actions": {
+    "complete_sale": "Complete sale",
+    "remove": "Remove",
+    "new_sale": "New sale",
+    "print": "Print",
+    "close": "Close",
+    "view_cart": "View cart ({{count}} items, {{total}})"
+  },
+  "receipt": {
+    "title": "Receipt",
+    "invoice": "Invoice",
+    "date": "Date",
+    "item": "Item",
+    "price": "Price",
+    "total": "Total",
+    "paid": "Paid in cash",
+    "credit": "On credit",
+    "partial": "Partial payment",
+    "amount_paid": "Amount paid",
+    "on_credit_amount": "On credit",
+    "notes": "Notes"
+  },
+  "pagination": {
+    "showing": "Showing {{from}}–{{to}} of {{total}}",
+    "page": "Page {{page}} of {{totalPages}}",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "errors": {
+    "credit_needs_customer": "Pick a customer for credit sales",
+    "stock_insufficient": "Not enough stock for one of the items",
+    "submit_failed": "Could not complete the sale. Please try again.",
+    "empty_sale": "Sale must have at least one item or a service charge",
+    "amount_exceeds_total": "Amount paid cannot exceed total",
+    "customer_required": "Customer is required for credit or partial sales"
+  },
+  "messages": {
+    "saved": "Sale completed"
+  }
+}

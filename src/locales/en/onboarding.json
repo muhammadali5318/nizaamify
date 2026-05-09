@@ -1,0 +1,40 @@
+{
+  "title": "Set up your shop",
+  "subtitle": "We need a few details before you can start.",
+  "welcome": "Welcome, {{email}}",
+  "step": {
+    "shop": "Shop details",
+    "owner": "Owner details"
+  },
+  "shop": {
+    "section_title": "Shop details",
+    "name_label": "Shop name",
+    "address_label": "Shop address",
+    "phone_label": "Shop phone",
+    "type_label": "Shop type (optional)",
+    "type_placeholder": "e.g. Mobile shop, Auto parts"
+  },
+  "owner": {
+    "section_title": "Owner details",
+    "name_label": "Owner name",
+    "phone_label": "Owner phone",
+    "cnic_label": "Owner CNIC (optional)",
+    "cnic_placeholder": "12345-1234567-1",
+    "address_label": "Owner address"
+  },
+  "actions": {
+    "next": "Next",
+    "back": "Back",
+    "submit": "Complete setup"
+  },
+  "errors": {
+    "name_min": "Name must be at least 2 characters",
+    "name_max": "Name must be 100 characters or fewer",
+    "address_min": "Address must be at least 5 characters",
+    "address_max": "Address must be 250 characters or fewer",
+    "phone_required": "Phone is required",
+    "phone_invalid": "Enter a valid Pakistani phone number (+92 or 0)",
+    "cnic_invalid": "Enter CNIC as XXXXX-XXXXXXX-X",
+    "submit_failed": "Could not complete setup. Please try again."
+  }
+}

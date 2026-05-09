@@ -1,0 +1,19 @@
+{
+  "title": "Monthly targets",
+  "subtitle": "Set targets for the current month. Updated as the month progresses.",
+  "fields": {
+    "month": "Month",
+    "target_sale": "Target sales (PKR)",
+    "target_gross_profit": "Target gross profit (PKR)",
+    "target_net_profit": "Target net profit (PKR)"
+  },
+  "actions": {
+    "save": "Save targets"
+  },
+  "errors": {
+    "save_failed": "Could not save targets. Please try again."
+  },
+  "messages": {
+    "saved": "Targets saved"
+  }
+}

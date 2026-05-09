@@ -1,0 +1,52 @@
+{
+  "title": "Sales",
+  "empty": "No sales in this date range.",
+  "walk_in": "Walk-in",
+  "filters": {
+    "start_date": "From",
+    "end_date": "To",
+    "payment_type": "Payment",
+    "all": "All",
+    "cash": "Cash",
+    "credit": "Credit",
+    "partial": "Partial",
+    "customer": "Customer"
+  },
+  "columns": {
+    "datetime": "Date & time",
+    "customer": "Customer",
+    "payment_type": "Payment",
+    "items": "Items",
+    "service_charge": "Service",
+    "total": "Total",
+    "notes": "Notes"
+  },
+  "partial_breakdown": "{{paid}} paid · {{credit}} on credit",
+  "has_notes_tooltip": "Has notes",
+  "detail": {
+    "title": "Sale #{{shortId}}",
+    "back": "Back to sales",
+    "not_found": "Sale not found.",
+    "items": "Items",
+    "totals": "Totals",
+    "subtotal": "Subtotal",
+    "amount_paid": "Amount paid",
+    "amount_paid_cash": "Amount paid (cash)",
+    "on_credit": "On credit",
+    "view_khata": "View customer khata",
+    "product": "Product",
+    "qty": "Qty",
+    "unit_price": "Unit price",
+    "unit_cost": "Unit cost",
+    "line_total": "Line total",
+    "line_profit": "Profit",
+    "cashier": "Cashier",
+    "deleted_product": "(deleted product)",
+    "khata_panel_title": "Khata entries",
+    "view_customer_khata": "View customer khata",
+    "no_khata_entries": "No linked khata entries.",
+    "service_only": "No products — service charge only",
+    "notes_label": "Notes",
+    "below_avg_cost_warning": "This price is below average cost. Selling at a loss."
+  }
+}

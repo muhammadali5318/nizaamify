@@ -1,0 +1,26 @@
+{
+  "app_name": "نظامیفائی",
+  "app_tagline": "دکان مینیجر",
+  "actions": {
+    "save": "محفوظ کریں",
+    "cancel": "منسوخ کریں",
+    "delete": "حذف کریں",
+    "edit": "ترمیم کریں",
+    "back": "واپس",
+    "next": "آگے",
+    "submit": "جمع کریں",
+    "confirm": "تصدیق کریں",
+    "logout": "لاگ آؤٹ",
+    "refresh": "تازہ کریں"
+  },
+  "language": {
+    "english": "English",
+    "urdu": "اردو",
+    "select_language": "زبان"
+  },
+  "loading": "لوڈ ہو رہا ہے…",
+  "errors": {
+    "generic": "کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔",
+    "network": "نیٹ ورک کی خرابی۔ اپنا کنکشن چیک کریں۔"
+  }
+}

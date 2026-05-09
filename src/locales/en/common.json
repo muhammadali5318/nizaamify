@@ -1,0 +1,26 @@
+{
+  "app_name": "Nizaamify",
+  "app_tagline": "Shop Manager",
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "logout": "Logout",
+    "refresh": "Refresh"
+  },
+  "language": {
+    "english": "English",
+    "urdu": "اردو",
+    "select_language": "Language"
+  },
+  "loading": "Loading…",
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Check your connection."
+  }
+}

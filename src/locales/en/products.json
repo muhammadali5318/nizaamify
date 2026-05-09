@@ -1,0 +1,74 @@
+{
+  "title": "Products",
+  "search_placeholder": "Search products by name or type",
+  "add_product": "Add product",
+  "new_product": "+ New product",
+  "edit_product": "Edit product",
+  "archived_only": "Show archived",
+  "empty": "No products yet — add your first product to get started.",
+  "no_results": "No products match your search",
+  "fields": {
+    "name": "Name",
+    "type": "Type",
+    "type_placeholder": "e.g. LCD Panel, Battery, Charging Cable",
+    "type_hint": "Used together with the name to uniquely identify the product",
+    "description": "Description",
+    "description_optional": "Description (optional)",
+    "description_placeholder": "Optional notes about this product",
+    "price": "Selling price (PKR)",
+    "selling_price": "Selling price",
+    "cost": "Cost (PKR)",
+    "initial_cost": "Initial cost (PKR)",
+    "avg_cost": "Avg cost",
+    "last_purchase_cost": "Last purchase",
+    "stock": "Stock",
+    "active": "Active",
+    "opening_stock": "Opening stock (optional)",
+    "opening_qty": "Opening quantity",
+    "opening_cost": "Opening cost per unit",
+    "opening_help": "Use this to seed your initial inventory without recording a purchase."
+  },
+  "badges": {
+    "low_stock": "Low",
+    "out_of_stock": "Out",
+    "default_type_warning": "Type was set to 'General' during migration — please review"
+  },
+  "helpers": {
+    "cost_readonly": "Average cost updates automatically when you record a stock-in.",
+    "stock_readonly": "Stock changes via stock-in and sales.",
+    "name_normalized": "Names are matched case-insensitively and ignoring extra spaces."
+  },
+  "tooltip": {
+    "avg_cost_explainer": "Weighted average cost across all stock-ins. Updates automatically when you record a stock-in."
+  },
+  "actions": {
+    "save": "Save",
+    "archive": "Archive",
+    "restore": "Restore",
+    "back": "Back to products",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "errors": {
+    "name_required": "Product name is required",
+    "type_required": "Product type is required",
+    "price_invalid": "Selling price must be 0 or greater",
+    "cost_invalid": "Cost must be 0 or greater",
+    "stock_invalid": "Stock must be 0 or greater",
+    "opening_stock_invalid": "Opening quantity must be 0 or greater",
+    "opening_cost_invalid": "Opening cost must be 0 or greater",
+    "duplicate_name_type": "A product with this name and type already exists.",
+    "save_failed": "Could not save product. Please try again."
+  },
+  "messages": {
+    "saved": "Product saved",
+    "archived": "Product archived",
+    "restored": "Product restored"
+  },
+  "pagination": {
+    "showing": "Showing {{from}}–{{to}} of {{total}}",
+    "page": "Page {{page}} of {{totalPages}}",
+    "previous": "Previous",
+    "next": "Next"
+  }
+}

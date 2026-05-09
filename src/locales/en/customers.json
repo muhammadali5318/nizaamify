@@ -1,0 +1,44 @@
+{
+  "title": "Customers",
+  "add_customer": "Add customer",
+  "edit_customer": "Edit customer",
+  "search_placeholder": "Search customers by name or phone…",
+  "empty": "No customers yet. Add your first customer.",
+  "outstanding": "Outstanding",
+  "show_more_fields": "Add address & notes",
+  "fields": {
+    "name": "Name",
+    "phone": "Phone",
+    "address": "Address",
+    "notes": "Notes",
+    "address_optional": "Address (optional)",
+    "notes_optional": "Notes (optional)",
+    "last_activity": "Last activity"
+  },
+  "actions": {
+    "save": "Save",
+    "back": "Back to customers",
+    "view_history": "View history",
+    "edit": "Edit",
+    "delete": "Delete",
+    "delete_blocked": "Cannot delete — customer has sales or ledger history",
+    "confirm_delete_title": "Delete customer?",
+    "confirm_delete_body": "This will permanently remove {{name}}. This cannot be undone.",
+    "confirm_delete_cancel": "Cancel",
+    "confirm_delete_ok": "Delete"
+  },
+  "errors": {
+    "name_required": "Name is required",
+    "phone_required": "Phone is required",
+    "phone_invalid": "Enter a valid Pakistani phone number",
+    "phone_taken": "A customer with this phone already exists",
+    "phone_duplicate": "A customer with this phone already exists in your shop",
+    "save_failed": "Could not save customer. Please try again.",
+    "not_found": "Customer not found.",
+    "delete_failed": "Could not delete customer. Please try again."
+  },
+  "messages": {
+    "saved": "Customer saved",
+    "deleted": "Customer deleted"
+  }
+}

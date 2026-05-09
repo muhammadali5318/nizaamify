@@ -1,0 +1,31 @@
+{
+  "title": "Expenses",
+  "add": "Add expense",
+  "empty": "No expenses recorded yet.",
+  "fields": {
+    "category": "Category",
+    "amount": "Amount (PKR)",
+    "expense_date": "Date",
+    "note": "Note (optional)"
+  },
+  "categories": {
+    "rent": "Rent",
+    "electricity": "Electricity",
+    "internet": "Internet",
+    "salary": "Salary",
+    "fuel": "Fuel",
+    "other": "Other"
+  },
+  "actions": {
+    "save": "Save",
+    "back": "Back to expenses"
+  },
+  "errors": {
+    "amount_invalid": "Enter a valid amount greater than 0",
+    "category_required": "Pick a category",
+    "save_failed": "Could not save expense. Please try again."
+  },
+  "messages": {
+    "saved": "Expense saved"
+  }
+}

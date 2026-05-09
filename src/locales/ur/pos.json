@@ -1,0 +1,99 @@
+{
+  "title": "پی او ایس",
+  "search_placeholder": "نام یا قسم سے مصنوعات تلاش کریں",
+  "empty_catalog": "کوئی فعال مصنوعات نہیں۔ فروخت سے پہلے مصنوعات شامل کریں۔",
+  "no_results": "آپ کی تلاش سے کوئی مصنوعات میل نہیں کھاتیں",
+  "picker": {
+    "add_to_cart": "کارٹ میں شامل کریں",
+    "stock_in": "{{count}} اسٹاک میں",
+    "low_stock": "صرف {{count}} باقی",
+    "out_of_stock": "اسٹاک ختم",
+    "stock_capped": "مزید نہیں — اسٹاک میں صرف {{count}}"
+  },
+  "cart": {
+    "title": "کارٹ",
+    "empty_title": "کارٹ خالی ہے",
+    "empty_help": "فروخت شروع کرنے کے لیے بائیں جانب سے مصنوعات منتخب کریں۔",
+    "empty_help_mobile": "فروخت شروع کرنے کے لیے اوپر کسی مصنوعات پر ٹیپ کریں۔",
+    "service_charge": "سروس چارج",
+    "subtotal": "ذیلی کل",
+    "subtotal_products": "ذیلی کل (مصنوعات)",
+    "total": "کل",
+    "qty": "مقدار",
+    "qty_label": "مقدار",
+    "unit_price": "فی یونٹ قیمت",
+    "line_total": "لائن کل",
+    "modified_price_badge": "ترمیم شدہ",
+    "was_price": "پہلے {{price}}",
+    "below_avg_cost_warning": "اوسط لاگت سے کم — نقصان پر فروخت۔",
+    "stock_remaining": "اسٹاک: {{count}} باقی",
+    "remove_line": "ہٹائیں"
+  },
+  "payment": {
+    "title": "ادائیگی",
+    "cash": "نقد",
+    "credit": "ادھار (کھاتہ)",
+    "customer": "گاہک",
+    "select_customer": "گاہک منتخب کریں",
+    "add_customer": "نیا گاہک شامل کریں",
+    "subtotal": "ذیلی کل",
+    "service_charge": "سروس چارج",
+    "total": "کل",
+    "amount_paid": "ادا شدہ رقم",
+    "on_credit": "ادھار پر",
+    "pay_full": "پوری ادائیگی",
+    "pay_nothing": "کوئی ادائیگی نہیں",
+    "notes_placeholder": "اختیاری نوٹس (مثلاً، انجام دی گئی سروس)"
+  },
+  "customer": {
+    "walk_in": "واک ان (کوئی گاہک نہیں)",
+    "required_for_credit": "ادھار یا جزوی فروخت کے لیے ضروری",
+    "add_new": "+ نیا گاہک شامل کریں",
+    "no_results": "کوئی گاہک نہیں ملا",
+    "load_more": "مزید لوڈ کریں"
+  },
+  "submit": {
+    "cash": "نقد فروخت مکمل کریں",
+    "credit": "ادھار فروخت مکمل کریں",
+    "partial": "جزوی فروخت مکمل کریں ({{paid}} ادا، {{credit}} ادھار)"
+  },
+  "actions": {
+    "complete_sale": "فروخت مکمل کریں",
+    "remove": "ہٹائیں",
+    "new_sale": "نئی فروخت",
+    "print": "پرنٹ",
+    "close": "بند کریں",
+    "view_cart": "کارٹ دیکھیں ({{count}} اشیاء، {{total}})"
+  },
+  "receipt": {
+    "title": "رسید",
+    "invoice": "انوائس",
+    "date": "تاریخ",
+    "item": "آئٹم",
+    "price": "قیمت",
+    "total": "کل",
+    "paid": "نقد ادائیگی",
+    "credit": "ادھار پر",
+    "partial": "جزوی ادائیگی",
+    "amount_paid": "ادا شدہ رقم",
+    "on_credit_amount": "ادھار پر",
+    "notes": "نوٹس"
+  },
+  "pagination": {
+    "showing": "{{total}} میں سے {{from}}–{{to}} دکھایا جا رہا ہے",
+    "page": "صفحہ {{page}} از {{totalPages}}",
+    "previous": "پچھلا",
+    "next": "اگلا"
+  },
+  "errors": {
+    "credit_needs_customer": "ادھار فروخت کے لیے گاہک منتخب کریں",
+    "stock_insufficient": "کسی آئٹم کے لیے کافی اسٹاک نہیں ہے",
+    "submit_failed": "فروخت مکمل نہیں ہو سکی۔ دوبارہ کوشش کریں۔",
+    "empty_sale": "فروخت میں کم از کم ایک آئٹم یا سروس چارج ہونا چاہیے",
+    "amount_exceeds_total": "ادا شدہ رقم کل سے زیادہ نہیں ہو سکتی",
+    "customer_required": "ادھار یا جزوی فروخت کے لیے گاہک ضروری ہے"
+  },
+  "messages": {
+    "saved": "فروخت مکمل ہو گئی"
+  }
+}

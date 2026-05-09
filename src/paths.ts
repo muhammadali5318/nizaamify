@@ -1,37 +1,50 @@
-// src/paths.ts
 export const paths = {
   root: '/',
+
+  login: '/login',
+  signup: '/signup',
+  forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
+  verifyEmail: '/verify-email',
+
+  onboarding: '/onboarding',
+  subscriptionExpired: '/subscription/expired',
+
   dashboard: '/dashboard',
-  practiceOnboarding: '/practice-onboarding',
-  agreements: '/agreements',
-  practiceOnboardingStepper: '/practice-onboarding/stepper',
-  documents: '/documents',
-  expense: '/expense-breakdown',
-  nonPandL: '/non-pl-items',
-  monaiAgent: '/monai-agent',
+
+  pos: '/pos',
+
+  products: '/products',
+  newProduct: '/products/new',
+  productDetail: '/products/:id',
+  gotoProduct: (id: string) => `/products/${id}`,
+
+  customers: '/customers',
+  newCustomer: '/customers/new',
+  customerDetail: '/customers/:id',
+  customerEdit: '/customers/:id/edit',
+  gotoCustomer: (id: string) => `/customers/${id}`,
+  gotoCustomerEdit: (id: string) => `/customers/${id}/edit`,
+
+  khata: '/khata',
+
+  purchases: '/purchases',
+  newPurchase: '/purchases/new',
+  purchaseDetail: '/purchases/:id',
+  gotoPurchase: (id: string) => `/purchases/${id}`,
+
+  sales: '/sales',
+  saleDetail: '/sales/:id',
+  gotoSale: (id: string) => `/sales/${id}`,
+
+  expenses: '/expenses',
+
+  targets: '/targets',
+
   reports: '/reports',
-  benchmarks: '/benchmarks',
-  teamManagement: {
-    root: '/team-management',
-    specificTeamMember: '/team-management/members/:id',
-    gotoSpecificTeamMember: (id: string) => `/team-management/members/${id}`
-  },
-  practiceSettings: '/practice-settings',
-  billing: '/billing',
+
   settings: '/settings',
-  settingsTab: '/settings/:tabId',
-  gotoSettingsTab: (tabId: string) => `/settings/${tabId}`,
-  accountingBasisSettings: '/settings/accounting-basis',
-  auditLogs: '/audit-logs',
-  bankIntegrator: '/bank-integrator',
-  uploadBankStatement: '/bank-integrator/upload-bank-statement',
-  helpAndSupport: '/help-and-support',
-  auth1: {
-    login: '/login'
-  },
-  auth: {
-    login: '/auth/login',
-    logout: '/auth/logout'
-  },
-  page404: '/404'
+  support: '/settings/support',
+
+  notFound: '/404'
 }

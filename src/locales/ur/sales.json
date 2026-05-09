@@ -1,0 +1,52 @@
+{
+  "title": "فروخت",
+  "empty": "اس تاریخ کی حد میں کوئی فروخت نہیں۔",
+  "walk_in": "واک ان",
+  "filters": {
+    "start_date": "سے",
+    "end_date": "تک",
+    "payment_type": "ادائیگی",
+    "all": "تمام",
+    "cash": "نقد",
+    "credit": "ادھار",
+    "partial": "جزوی",
+    "customer": "گاہک"
+  },
+  "columns": {
+    "datetime": "تاریخ اور وقت",
+    "customer": "گاہک",
+    "payment_type": "ادائیگی",
+    "items": "اشیاء",
+    "service_charge": "سروس",
+    "total": "کل",
+    "notes": "نوٹس"
+  },
+  "partial_breakdown": "{{paid}} ادا · {{credit}} ادھار",
+  "has_notes_tooltip": "نوٹس موجود ہیں",
+  "detail": {
+    "title": "فروخت #{{shortId}}",
+    "back": "فروخت پر واپس جائیں",
+    "not_found": "فروخت نہیں ملی۔",
+    "items": "اشیاء",
+    "totals": "کل",
+    "subtotal": "ذیلی کل",
+    "amount_paid": "ادا شدہ رقم",
+    "amount_paid_cash": "ادا شدہ رقم (نقد)",
+    "on_credit": "ادھار پر",
+    "view_khata": "گاہک کا کھاتہ دیکھیں",
+    "product": "مصنوعات",
+    "qty": "مقدار",
+    "unit_price": "فی یونٹ قیمت",
+    "unit_cost": "فی یونٹ لاگت",
+    "line_total": "لائن کل",
+    "line_profit": "منافع",
+    "cashier": "کیشئر",
+    "deleted_product": "(حذف شدہ مصنوعات)",
+    "khata_panel_title": "کھاتہ اندراجات",
+    "view_customer_khata": "گاہک کا کھاتہ دیکھیں",
+    "no_khata_entries": "کوئی منسلک کھاتہ اندراج نہیں۔",
+    "service_only": "کوئی مصنوعات نہیں — صرف سروس چارج",
+    "notes_label": "نوٹس",
+    "below_avg_cost_warning": "یہ قیمت اوسط لاگت سے کم ہے۔ نقصان پر فروخت۔"
+  }
+}

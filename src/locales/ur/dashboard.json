@@ -1,0 +1,21 @@
+{
+  "title": "ڈیش بورڈ",
+  "today": "آج",
+  "today_sales": "آج کی فروخت",
+  "outstanding_total": "کل بقایا",
+  "mtd_sales": "اس مہینے کی فروخت",
+  "mtd_gross_profit": "مجموعی منافع (مہینے میں)",
+  "mtd_expenses": "اخراجات (مہینے میں)",
+  "mtd_net_profit": "خالص منافع (مہینے میں)",
+  "target_progress": "ہدف کی پیش رفت",
+  "of_target": "ہدف {{target}} میں سے",
+  "no_target": "اس مہینے کے لیے کوئی ہدف سیٹ نہیں ہے۔",
+  "set_target": "ہدف سیٹ کریں",
+  "quick_actions": {
+    "title": "فوری اقدامات",
+    "new_sale": "نئی فروخت",
+    "new_purchase": "نیا اسٹاک ان",
+    "add_expense": "خرچ شامل کریں",
+    "view_khata": "کھاتہ دیکھیں"
+  }
+}

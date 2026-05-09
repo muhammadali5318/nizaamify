@@ -84,11 +84,26 @@ export const notify = {
     })
 }
 
-// Hook alternative
+// Hook alternative — matches the singleton `notify` API so call sites can
+// use `const notify = useNotifier(); notify.success(...)` interchangeably.
 export const useNotifier = () => {
   const { enqueueSnackbar } = useSnackbar()
-  return React.useMemo(
-    () => ({
+  return React.useMemo(() => {
+    const enqueue =
+      (variant: 'default' | 'success' | 'error' | 'warning' | 'info') =>
+      (msg: React.ReactNode, options?: NotifyOptions) =>
+        enqueueSnackbar(msg, {
+          variant,
+          ...options,
+          action: getCloseAction(options?.persist)
+        })
+    return {
+      success: enqueue('success'),
+      error: enqueue('error'),
+      warning: enqueue('warning'),
+      info: enqueue('info'),
+      default: enqueue('default'),
+      // Keep the legacy variant-as-arg API for any older call sites.
       notify: (
         msg: React.ReactNode,
         variant:
@@ -98,15 +113,9 @@ export const useNotifier = () => {
           | 'warning'
           | 'info' = 'default',
         options?: NotifyOptions
-      ) =>
-        enqueueSnackbar(msg, {
-          variant,
-          ...options,
-          action: getCloseAction(options?.persist)
-        })
-    }),
-    [enqueueSnackbar]
-  )
+      ) => enqueue(variant)(msg, options)
+    }
+  }, [enqueueSnackbar])
 }
 
 // Provider component

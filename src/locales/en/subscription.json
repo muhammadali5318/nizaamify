@@ -1,0 +1,46 @@
+{
+  "expired": {
+    "title": "Your subscription has ended",
+    "body": "To continue using {{appName}}, please complete your monthly payment using the details below and contact support.",
+    "monthly_price": "Monthly price",
+    "last_payment": "Last payment: {{date}}",
+    "no_payment": "No previous payment on record.",
+    "current_status": "Current status: {{status}}",
+    "refresh": "Refresh status",
+    "logout": "Logout",
+    "payment_instructions_title": "Payment instructions",
+    "bank_label": "Bank",
+    "account_name_label": "Account title",
+    "account_number_label": "Account number",
+    "support_title": "Contact support",
+    "phone_label": "Phone",
+    "whatsapp_label": "WhatsApp",
+    "email_label": "Email",
+    "whatsapp_message": "Hello, I have made a payment for my Nizaamify subscription."
+  },
+  "status": {
+    "trial": "Trial",
+    "active": "Active",
+    "expired": "Expired",
+    "suspended": "Suspended"
+  },
+  "banner": {
+    "trial_reminder_one": "Your free trial ends in {{daysLeft}} day. View payment options.",
+    "trial_reminder_other": "Your free trial ends in {{daysLeft}} days. View payment options.",
+    "trial_ending_soon_one": "Your free trial ends in {{daysLeft}} day. Please pay to keep using the app.",
+    "trial_ending_soon_other": "Your free trial ends in {{daysLeft}} days. Please pay to keep using the app.",
+    "subscription_renewal_reminder_one": "Your subscription renews in {{daysLeft}} day.",
+    "subscription_renewal_reminder_other": "Your subscription renews in {{daysLeft}} days.",
+    "subscription_renewal_due_one": "Your subscription is due in {{daysLeft}} day. Renew to avoid interruption.",
+    "subscription_renewal_due_other": "Your subscription is due in {{daysLeft}} days. Renew to avoid interruption.",
+    "subscription_expired": "Your subscription has expired. Pay now to restore access.",
+    "subscription_suspended": "Your account is suspended. Contact support.",
+    "actions": {
+      "view_payment": "View payment options",
+      "pay_now": "Pay now",
+      "renew": "Renew",
+      "renew_early": "Renew early",
+      "contact_support": "Contact support"
+    }
+  }
+}

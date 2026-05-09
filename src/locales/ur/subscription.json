@@ -1,0 +1,46 @@
+{
+  "expired": {
+    "title": "آپ کی سبسکرپشن ختم ہو گئی ہے",
+    "body": "{{appName}} کا استعمال جاری رکھنے کے لیے، براہ کرم نیچے دی گئی تفصیلات کا استعمال کرتے ہوئے ماہانہ ادائیگی مکمل کریں اور سپورٹ سے رابطہ کریں۔",
+    "monthly_price": "ماہانہ قیمت",
+    "last_payment": "آخری ادائیگی: {{date}}",
+    "no_payment": "کوئی پچھلی ادائیگی موجود نہیں۔",
+    "current_status": "موجودہ حیثیت: {{status}}",
+    "refresh": "حیثیت تازہ کریں",
+    "logout": "لاگ آؤٹ",
+    "payment_instructions_title": "ادائیگی کی ہدایات",
+    "bank_label": "بینک",
+    "account_name_label": "اکاؤنٹ کا نام",
+    "account_number_label": "اکاؤنٹ نمبر",
+    "support_title": "سپورٹ سے رابطہ کریں",
+    "phone_label": "فون",
+    "whatsapp_label": "واٹس ایپ",
+    "email_label": "ای میل",
+    "whatsapp_message": "السلام علیکم، میں نے اپنی نظامیفائی سبسکرپشن کے لیے ادائیگی کر دی ہے۔"
+  },
+  "status": {
+    "trial": "ٹرائل",
+    "active": "فعال",
+    "expired": "ختم شدہ",
+    "suspended": "معطل"
+  },
+  "banner": {
+    "trial_reminder_one": "آپ کا مفت ٹرائل {{daysLeft}} دن میں ختم ہو جائے گا۔ ادائیگی کے اختیارات دیکھیں۔",
+    "trial_reminder_other": "آپ کا مفت ٹرائل {{daysLeft}} دنوں میں ختم ہو جائے گا۔ ادائیگی کے اختیارات دیکھیں۔",
+    "trial_ending_soon_one": "آپ کا مفت ٹرائل {{daysLeft}} دن میں ختم ہو جائے گا۔ ایپ کا استعمال جاری رکھنے کے لیے ادائیگی کریں۔",
+    "trial_ending_soon_other": "آپ کا مفت ٹرائل {{daysLeft}} دنوں میں ختم ہو جائے گا۔ ایپ کا استعمال جاری رکھنے کے لیے ادائیگی کریں۔",
+    "subscription_renewal_reminder_one": "آپ کی سبسکرپشن {{daysLeft}} دن میں رینیو ہوگی۔",
+    "subscription_renewal_reminder_other": "آپ کی سبسکرپشن {{daysLeft}} دنوں میں رینیو ہوگی۔",
+    "subscription_renewal_due_one": "آپ کی سبسکرپشن {{daysLeft}} دن میں واجب الادا ہے۔ تعطل سے بچنے کے لیے رینیو کریں۔",
+    "subscription_renewal_due_other": "آپ کی سبسکرپشن {{daysLeft}} دنوں میں واجب الادا ہے۔ تعطل سے بچنے کے لیے رینیو کریں۔",
+    "subscription_expired": "آپ کی سبسکرپشن ختم ہو گئی ہے۔ رسائی بحال کرنے کے لیے ابھی ادائیگی کریں۔",
+    "subscription_suspended": "آپ کا اکاؤنٹ معطل ہے۔ سپورٹ سے رابطہ کریں۔",
+    "actions": {
+      "view_payment": "ادائیگی کے اختیارات دیکھیں",
+      "pay_now": "ابھی ادائیگی کریں",
+      "renew": "رینیو کریں",
+      "renew_early": "جلد رینیو کریں",
+      "contact_support": "سپورٹ سے رابطہ کریں"
+    }
+  }
+}
