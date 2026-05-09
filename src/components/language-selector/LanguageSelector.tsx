@@ -43,6 +43,14 @@ export function LanguageSelector({
       sx={{
         minWidth: 100,
         color: 'inherit',
+        // The global MuiOutlinedInput theme override paints a white
+        // background on every Select. That's right inside light cards
+        // but becomes white-on-white when LanguageSelector sits on the
+        // dark TopBar (where text inherits to white). Force transparent
+        // so the parent surface always shows through, and the inherited
+        // text color stays readable in both contexts.
+        backgroundColor: 'transparent',
+        '& .MuiSelect-select': { color: 'inherit' },
         '& .MuiSelect-icon': { color: 'inherit' },
         '& .MuiOutlinedInput-notchedOutline': {
           borderColor: 'currentColor',
