@@ -1,47 +1,59 @@
+/*
+ * Legacy aliases — kept so existing `var(--color-*)` / `var(--grey-*)`
+ * references in components and utility classes continue to work without
+ * a global rewrite. Each redirects to a v1.7 design token from tokens.css.
+ * New code SHOULD use the v1.7 semantic tokens directly.
+ */
 :root {
-  --color-text-primary: rgba(0, 0, 0, 0.8);
-  --color-text-secondary: rgba(0, 0, 0, 0.6);
-  --color-text-disabled: rgba(0, 0, 0, 0.38);
+  /* Text — redirect to v1.7 semantic text tokens. */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-disabled: var(--text-disabled);
 
-  --color-primary-black: #000;
-  --color-primary-main: #231f20;
-  --color-primary-light: #4d4d4d;
-  --color-primary-dark: #1c191a;
-  --color-primary-contrast-text: #ffffff;
+  /* Primary — was #231F20 black-grey; now mapped to new action-primary (brand-700). */
+  --color-primary-black: var(--neutral-900);
+  --color-primary-main: var(--action-primary);
+  --color-primary-light: var(--neutral-500);
+  --color-primary-dark: var(--action-primary-press);
+  --color-primary-contrast-text: var(--text-inverse);
 
-  --color-secondary-main: #9c27b0;
-  --color-secondary-light: #ba68c8;
-  --color-secondary-dark: #7b1fa2;
-  --color-secondary-contrast: #ffffff;
+  /* Secondary — pre-v1.7 was MUI default purple; map to brand accent (mint). */
+  --color-secondary-main: var(--action-accent);
+  --color-secondary-light: var(--brand-300);
+  --color-secondary-dark: var(--action-accent-hover);
+  --color-secondary-contrast: var(--action-accent-text);
 
-  --color-success-main: #2e7d32;
-  --color-success-light: #4caf50;
-  --color-success-dark: #1b5e20;
-  --color-success-contrast: #ffffff;
+  /* Status. */
+  --color-success-main: var(--success-500);
+  --color-success-light: var(--success-100);
+  --color-success-dark: var(--success-700);
+  --color-success-contrast: var(--neutral-0);
 
-  --color-info-main: #0288d1;
-  --color-info-light: #03a9f4;
-  --color-info-dark: #01579b;
-  --color-info-contrast: #ffffff;
+  --color-info-main: var(--info-500);
+  --color-info-light: var(--info-100);
+  --color-info-dark: var(--info-700);
+  --color-info-contrast: var(--neutral-0);
 
-  --color-warning-main: #ef6c00;
-  --color-warning-light: #ff9800;
-  --color-warning-dark: #ef6c00;
-  --color-warning-contrast: #ffffff;
+  --color-warning-main: var(--warning-500);
+  --color-warning-light: var(--warning-100);
+  --color-warning-dark: var(--warning-700);
+  --color-warning-contrast: var(--neutral-900);
 
-  --color-error-main: #d32f2f;
-  --color-error-light: #ef5350;
-  --color-error-dark: #c62828;
-  --color-error-contrast: #ffffff;
+  --color-error-main: var(--error-500);
+  --color-error-light: var(--error-100);
+  --color-error-dark: var(--error-700);
+  --color-error-contrast: var(--neutral-0);
 
-  --grey-100: #f5f5f5;
-  --grey-200: #eee;
-  --grey-300: #e0e0e0;
-  --grey-border: #f7f7f7;
+  /* Greys / borders — collapse onto neutral scale. */
+  --grey-100: var(--neutral-100);
+  --grey-200: var(--neutral-100);
+  --grey-300: var(--neutral-200);
+  --grey-border: var(--neutral-100);
 
-  --components-stepper-connector: #bdbdbd;
-  --_components-alert-info-color: #014361;
-  --primary-_states-outlinedBorder: rgba(0, 0, 0, 0.2);
+  /* Bespoke (not part of v1.7 token system). */
+  --components-stepper-connector: var(--neutral-300);
+  --_components-alert-info-color: var(--info-700);
+  --primary-_states-outlinedBorder: var(--border-default);
 
   --footer-height: 70px;
 }
