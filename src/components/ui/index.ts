@@ -15,3 +15,9 @@ export { Badge, type BadgeProps, type BadgeVariant } from './Badge'
 export { Card, type CardProps, type CardVariant } from './Card'
 export { Banner, type BannerProps, type BannerVariant } from './Banner'
 export { EmptyState, type EmptyStateProps } from './EmptyState'
+export {
+  Skeleton,
+  TableRowSkeleton,
+  type SkeletonProps,
+  type TableRowSkeletonProps
+} from './Skeleton'
