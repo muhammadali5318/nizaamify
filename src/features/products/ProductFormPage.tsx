@@ -1,18 +1,10 @@
 import { useEffect, useState } from 'react'
-import {
-  Alert,
-  Autocomplete,
-  Box,
-  Button,
-  Divider,
-  FormControlLabel,
-  Paper,
-  Stack,
-  Switch,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material'
+import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
+import Divider from '@mui/material/Divider'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Switch from '@mui/material/Switch'
+import Typography from '@mui/material/Typography'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -33,6 +25,17 @@ import {
 } from './hooks'
 import { paths } from 'src/paths'
 import { formatPKR } from 'src/features/subscription/env'
+import {
+  Banner,
+  Button,
+  Card,
+  Combobox,
+  Field,
+  Input,
+  Textarea,
+  Tooltip
+} from 'src/components/ui'
+import { PageHeader } from 'src/components/layout'
 
 type SupabaseLikeError = {
   code?: string
@@ -159,121 +162,117 @@ function CreateForm({
   })
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
-      <Paper sx={{ p: { xs: 3, sm: 4 }, borderRadius: 3, maxWidth: 720 }}>
-        <Typography variant='h5' fontWeight={700} mb={3}>
-          {t('products:add_product')}
-        </Typography>
+    <Box sx={{ maxWidth: 672, mx: 'auto', width: '100%' }}>
+      <PageHeader title={t('products:add_product')} />
 
+      <Card>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <Stack spacing={2}>
+          <Stack spacing={2.5}>
             {duplicateError && (
-              <Alert severity='error'>
+              <Banner variant='error'>
                 {t('products:errors.duplicate_name_type')}
-              </Alert>
+              </Banner>
             )}
 
-            <TextField
+            <Field
               label={t('products:fields.name')}
-              fullWidth
-              {...register('name')}
-              error={!!errors.name}
-              helperText={
-                errors.name?.message ?? t('products:helpers.name_normalized')
-              }
-            />
+              hint={t('products:helpers.name_normalized')}
+              error={errors.name?.message}
+            >
+              <Input {...register('name')} />
+            </Field>
 
             <Controller
               control={control}
               name='type'
               render={({ field }) => (
-                <Autocomplete
-                  freeSolo
-                  options={existingTypes}
-                  value={field.value}
-                  inputValue={field.value}
-                  onInputChange={(_, v) => field.onChange(v)}
-                  onChange={(_, v) => field.onChange(v ?? '')}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label={t('products:fields.type')}
-                      placeholder={t('products:fields.type_placeholder')}
-                      error={!!errors.type}
-                      helperText={
-                        errors.type?.message ?? t('products:fields.type_hint')
-                      }
-                    />
-                  )}
-                />
+                <Field
+                  label={t('products:fields.type')}
+                  hint={t('products:fields.type_hint')}
+                  error={errors.type?.message}
+                >
+                  <Combobox
+                    freeSolo
+                    options={existingTypes}
+                    value={field.value}
+                    inputValue={field.value}
+                    onInputChange={(_, v) => field.onChange(v)}
+                    onChange={(_, v) => field.onChange(v ?? '')}
+                    placeholder={t('products:fields.type_placeholder')}
+                  />
+                </Field>
               )}
             />
 
-            <TextField
-              label={t('products:fields.description_optional')}
-              placeholder={t('products:fields.description_placeholder')}
-              fullWidth
-              multiline
-              minRows={2}
-              inputProps={{ maxLength: 1000 }}
-              {...register('description')}
-            />
+            <Field label={t('products:fields.description_optional')}>
+              <Textarea
+                placeholder={t('products:fields.description_placeholder')}
+                inputProps={{ maxLength: 1000 }}
+                {...register('description')}
+              />
+            </Field>
 
-            <TextField
+            <Field
               label={t('products:fields.selling_price')}
-              fullWidth
-              type='number'
-              inputProps={{ step: '0.01', min: 0 }}
-              {...register('price', { valueAsNumber: true })}
-              error={!!errors.price}
-              helperText={errors.price?.message}
-            />
+              error={errors.price?.message}
+            >
+              <Input
+                type='number'
+                inputProps={{ step: '0.01', min: 0, inputMode: 'numeric' }}
+                {...register('price', { valueAsNumber: true })}
+              />
+            </Field>
 
             <Divider textAlign='left'>
-              <Typography variant='caption' color='text.secondary'>
+              <Typography
+                variant='overline'
+                sx={{ color: 'var(--text-muted)' }}
+              >
                 {t('products:fields.opening_stock')}
               </Typography>
             </Divider>
 
-            <Typography variant='caption' color='text.secondary'>
+            <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
               {t('products:fields.opening_help')}
             </Typography>
 
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <TextField
+              <Field
                 label={t('products:fields.opening_qty')}
-                fullWidth
-                type='number'
-                inputProps={{ step: '1', min: 0 }}
-                {...register('opening_stock', { valueAsNumber: true })}
-                error={!!errors.opening_stock}
-                helperText={errors.opening_stock?.message}
-              />
-              <TextField
+                error={errors.opening_stock?.message}
+              >
+                <Input
+                  type='number'
+                  inputProps={{ step: '1', min: 0, inputMode: 'numeric' }}
+                  {...register('opening_stock', { valueAsNumber: true })}
+                />
+              </Field>
+              <Field
                 label={t('products:fields.opening_cost')}
-                fullWidth
-                type='number'
-                inputProps={{ step: '0.01', min: 0 }}
-                {...register('opening_cost', { valueAsNumber: true })}
-                error={!!errors.opening_cost}
-                helperText={errors.opening_cost?.message}
-              />
+                error={errors.opening_cost?.message}
+              >
+                <Input
+                  type='number'
+                  inputProps={{ step: '0.01', min: 0, inputMode: 'numeric' }}
+                  {...register('opening_cost', { valueAsNumber: true })}
+                />
+              </Field>
             </Stack>
 
-            <Stack direction='row' spacing={1} justifyContent='flex-end'>
+            <Stack direction='row' spacing={1.5} justifyContent='flex-end'>
               <Button
-                variant='outlined'
+                variant='secondary'
                 onClick={() => navigate(paths.products)}
               >
                 {t('products:actions.back')}
               </Button>
-              <Button type='submit' variant='contained' disabled={isSubmitting}>
+              <Button type='submit' variant='primary' loading={isSubmitting}>
                 {t('products:actions.save')}
               </Button>
             </Stack>
           </Stack>
         </form>
-      </Paper>
+      </Card>
     </Box>
   )
 }
@@ -338,75 +337,66 @@ function EditForm({
   }, [existing, reset])
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
-      <Paper sx={{ p: { xs: 3, sm: 4 }, borderRadius: 3, maxWidth: 720 }}>
-        <Typography variant='h5' fontWeight={700} mb={3}>
-          {t('products:edit_product')}
-        </Typography>
+    <Box sx={{ maxWidth: 672, mx: 'auto', width: '100%' }}>
+      <PageHeader title={t('products:edit_product')} />
 
+      <Card>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <Stack spacing={2}>
+          <Stack spacing={2.5}>
             {duplicateError && (
-              <Alert severity='error'>
+              <Banner variant='error'>
                 {t('products:errors.duplicate_name_type')}
-              </Alert>
+              </Banner>
             )}
 
-            <TextField
+            <Field
               label={t('products:fields.name')}
-              fullWidth
-              {...register('name')}
-              error={!!errors.name}
-              helperText={
-                errors.name?.message ?? t('products:helpers.name_normalized')
-              }
-            />
+              hint={t('products:helpers.name_normalized')}
+              error={errors.name?.message}
+            >
+              <Input {...register('name')} />
+            </Field>
 
             <Controller
               control={control}
               name='type'
               render={({ field }) => (
-                <Autocomplete
-                  freeSolo
-                  options={existingTypes}
-                  value={field.value}
-                  inputValue={field.value}
-                  onInputChange={(_, v) => field.onChange(v)}
-                  onChange={(_, v) => field.onChange(v ?? '')}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label={t('products:fields.type')}
-                      placeholder={t('products:fields.type_placeholder')}
-                      error={!!errors.type}
-                      helperText={
-                        errors.type?.message ?? t('products:fields.type_hint')
-                      }
-                    />
-                  )}
-                />
+                <Field
+                  label={t('products:fields.type')}
+                  hint={t('products:fields.type_hint')}
+                  error={errors.type?.message}
+                >
+                  <Combobox
+                    freeSolo
+                    options={existingTypes}
+                    value={field.value}
+                    inputValue={field.value}
+                    onInputChange={(_, v) => field.onChange(v)}
+                    onChange={(_, v) => field.onChange(v ?? '')}
+                    placeholder={t('products:fields.type_placeholder')}
+                  />
+                </Field>
               )}
             />
 
-            <TextField
-              label={t('products:fields.description_optional')}
-              placeholder={t('products:fields.description_placeholder')}
-              fullWidth
-              multiline
-              minRows={2}
-              inputProps={{ maxLength: 1000 }}
-              {...register('description')}
-            />
+            <Field label={t('products:fields.description_optional')}>
+              <Textarea
+                placeholder={t('products:fields.description_placeholder')}
+                inputProps={{ maxLength: 1000 }}
+                {...register('description')}
+              />
+            </Field>
 
-            <TextField
+            <Field
               label={t('products:fields.selling_price')}
-              fullWidth
-              type='number'
-              inputProps={{ step: '0.01', min: 0 }}
-              {...register('price', { valueAsNumber: true })}
-              error={!!errors.price}
-              helperText={errors.price?.message}
-            />
+              error={errors.price?.message}
+            >
+              <Input
+                type='number'
+                inputProps={{ step: '0.01', min: 0, inputMode: 'numeric' }}
+                {...register('price', { valueAsNumber: true })}
+              />
+            </Field>
 
             {existing && (
               <Stack
@@ -416,21 +406,27 @@ function EditForm({
               >
                 <Box sx={{ flex: 1 }}>
                   <Stack direction='row' spacing={0.5} alignItems='center'>
-                    <Typography variant='caption' color='text.secondary'>
+                    <Typography
+                      variant='overline'
+                      sx={{ color: 'var(--text-muted)' }}
+                    >
                       {t('products:fields.avg_cost')}
                     </Typography>
                     <Tooltip title={t('products:tooltip.avg_cost_explainer')}>
                       <InfoOutlinedIcon
-                        sx={{ fontSize: 14, color: 'text.secondary' }}
+                        sx={{ fontSize: 14, color: 'var(--text-muted)' }}
                       />
                     </Tooltip>
                   </Stack>
-                  <Typography variant='body1' fontWeight={700}>
+                  <Typography variant='body1' sx={{ fontWeight: 600 }}>
                     {formatPKR(existing.avg_cost, locale)}
                   </Typography>
                 </Box>
                 <Box sx={{ flex: 1 }}>
-                  <Typography variant='caption' color='text.secondary'>
+                  <Typography
+                    variant='overline'
+                    sx={{ color: 'var(--text-muted)' }}
+                  >
                     {t('products:fields.last_purchase_cost')}
                   </Typography>
                   <Typography variant='body1'>
@@ -441,10 +437,13 @@ function EditForm({
                   </Typography>
                 </Box>
                 <Box sx={{ flex: 1 }}>
-                  <Typography variant='caption' color='text.secondary'>
+                  <Typography
+                    variant='overline'
+                    sx={{ color: 'var(--text-muted)' }}
+                  >
                     {t('products:fields.stock')}
                   </Typography>
-                  <Typography variant='body1' fontWeight={700}>
+                  <Typography variant='body1' sx={{ fontWeight: 600 }}>
                     {(existing as { stock?: number }).stock ?? '—'}
                   </Typography>
                 </Box>
@@ -467,20 +466,20 @@ function EditForm({
               )}
             />
 
-            <Stack direction='row' spacing={1} justifyContent='flex-end'>
+            <Stack direction='row' spacing={1.5} justifyContent='flex-end'>
               <Button
-                variant='outlined'
+                variant='secondary'
                 onClick={() => navigate(paths.products)}
               >
                 {t('products:actions.back')}
               </Button>
-              <Button type='submit' variant='contained' disabled={isSubmitting}>
+              <Button type='submit' variant='primary' loading={isSubmitting}>
                 {t('products:actions.save')}
               </Button>
             </Stack>
           </Stack>
         </form>
-      </Paper>
+      </Card>
     </Box>
   )
 }
