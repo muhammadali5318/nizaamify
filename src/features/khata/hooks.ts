@@ -189,6 +189,7 @@ export function classifyReceivePaymentError(err: unknown): ReceivePaymentError {
 
 export type ReverseError =
   | { kind: 'cannot_reverse_a_reversal' }
+  | { kind: 'cannot_reverse_invoice_tied_debit' }
   | { kind: 'entry_already_reversed' }
   | { kind: 'entry_not_in_shop' }
   | { kind: 'unknown'; message: string }
@@ -200,6 +201,8 @@ export function classifyReverseError(err: unknown): ReverseError {
       : ''
   if (message.includes('cannot_reverse_a_reversal'))
     return { kind: 'cannot_reverse_a_reversal' }
+  if (message.includes('cannot_reverse_invoice_tied_debit'))
+    return { kind: 'cannot_reverse_invoice_tied_debit' }
   if (message.includes('entry_already_reversed'))
     return { kind: 'entry_already_reversed' }
   if (message.includes('entry_not_in_shop'))

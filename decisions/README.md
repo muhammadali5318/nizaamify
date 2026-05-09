@@ -25,3 +25,4 @@ Granularity: one ADR per *reversal of a PRD assumption* or *cross-cutting archit
 - [0012 — M8 RTL audit status](./0012-m8-rtl-audit-status.md)
 - [0013 — v1.7 RTL audit residuals](./0013-v17-rtl-residuals.md)
 - [0014 — v1.7 design system acceptance](./0014-v17-design-system-acceptance.md)
+- [0015 — v1.8 database hardening](./0015-v18-database-hardening.md)

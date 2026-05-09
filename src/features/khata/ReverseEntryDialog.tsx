@@ -45,6 +45,9 @@ export default function ReverseEntryDialog({ open, onClose, entry }: Props) {
         case 'cannot_reverse_a_reversal':
           setError(t('khata:errors.cannot_reverse_a_reversal'))
           break
+        case 'cannot_reverse_invoice_tied_debit':
+          setError(t('khata:errors.cannot_reverse_invoice_tied_debit'))
+          break
         case 'entry_already_reversed':
           setError(t('khata:errors.entry_already_reversed'))
           break
