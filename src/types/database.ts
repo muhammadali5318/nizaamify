@@ -399,22 +399,31 @@ export type Database = {
       }
       purchase_items: {
         Row: {
+          avg_cost_after: number | null
+          avg_cost_before: number | null
           cost_at_purchase: number
           id: string
+          overhead_per_unit: number
           product_id: string
           purchase_id: string
           qty: number
         }
         Insert: {
+          avg_cost_after?: number | null
+          avg_cost_before?: number | null
           cost_at_purchase: number
           id?: string
+          overhead_per_unit?: number
           product_id: string
           purchase_id: string
           qty: number
         }
         Update: {
+          avg_cost_after?: number | null
+          avg_cost_before?: number | null
           cost_at_purchase?: number
           id?: string
+          overhead_per_unit?: number
           product_id?: string
           purchase_id?: string
           qty?: number
@@ -436,16 +445,54 @@ export type Database = {
           }
         ]
       }
+      purchase_overhead_items: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          purchase_id: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          purchase_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          purchase_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'purchase_overhead_items_purchase_id_fkey'
+            columns: ['purchase_id']
+            isOneToOne: false
+            referencedRelation: 'purchases'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       purchases: {
         Row: {
           cashier_id: string
           created_at: string
           id: string
           is_opening: boolean
+          items_subtotal: number
           note: string | null
+          overhead_subtotal: number
           purchase_date: string
           shop_id: string
           source: string | null
+          supplier_id: string | null
           total_cost: number
         }
         Insert: {
@@ -453,10 +500,13 @@ export type Database = {
           created_at?: string
           id?: string
           is_opening?: boolean
+          items_subtotal?: number
           note?: string | null
+          overhead_subtotal?: number
           purchase_date?: string
           shop_id: string
           source?: string | null
+          supplier_id?: string | null
           total_cost: number
         }
         Update: {
@@ -464,10 +514,13 @@ export type Database = {
           created_at?: string
           id?: string
           is_opening?: boolean
+          items_subtotal?: number
           note?: string | null
+          overhead_subtotal?: number
           purchase_date?: string
           shop_id?: string
           source?: string | null
+          supplier_id?: string | null
           total_cost?: number
         }
         Relationships: [
@@ -483,6 +536,13 @@ export type Database = {
             columns: ['shop_id']
             isOneToOne: false
             referencedRelation: 'shops'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'purchases_supplier_id_fkey'
+            columns: ['supplier_id']
+            isOneToOne: false
+            referencedRelation: 'suppliers'
             referencedColumns: ['id']
           }
         ]
@@ -660,6 +720,50 @@ export type Database = {
             columns: ['user_id']
             isOneToOne: true
             referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      suppliers: {
+        Row: {
+          address: string | null
+          contact: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          shop_id: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          contact?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          shop_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          contact?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          shop_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'suppliers_shop_id_fkey'
+            columns: ['shop_id']
+            isOneToOne: false
+            referencedRelation: 'shops'
             referencedColumns: ['id']
           }
         ]
@@ -881,6 +985,15 @@ export type Database = {
         }
         Returns: string
       }
+      create_supplier_inline: {
+        Args: {
+          p_address?: string
+          p_contact?: string
+          p_name: string
+          p_notes?: string
+        }
+        Returns: string
+      }
       current_shop_id: { Args: never; Returns: string }
       expire_subscriptions: { Args: never; Returns: undefined }
       list_customers: {
@@ -911,13 +1024,35 @@ export type Database = {
           phone: string
         }[]
       }
+      recent_purchase_products: {
+        Args: { p_limit?: number }
+        Returns: {
+          avg_cost: number
+          id: string
+          last_used_at: string
+          name: string
+          price: number
+          stock: number
+          type: string
+        }[]
+      }
+      recent_suppliers: {
+        Args: { p_limit?: number }
+        Returns: {
+          contact: string
+          id: string
+          last_used_at: string
+          name: string
+        }[]
+      }
       record_purchase: {
         Args: {
           p_is_opening?: boolean
-          p_items: Json
-          p_note: string
-          p_purchase_date: string
-          p_source: string
+          p_items?: Json
+          p_note?: string
+          p_overhead_items?: Json
+          p_purchase_date?: string
+          p_supplier_id?: string
         }
         Returns: string
       }
@@ -979,6 +1114,49 @@ export type Database = {
       search_products_count: {
         Args: { p_only_in_stock?: boolean; p_query?: string }
         Returns: number
+      }
+      search_purchases: {
+        Args: {
+          p_from?: string
+          p_include_opening?: boolean
+          p_limit?: number
+          p_offset?: number
+          p_supplier_id?: string
+          p_to?: string
+        }
+        Returns: {
+          id: string
+          is_opening: boolean
+          items_count: number
+          items_subtotal: number
+          note: string
+          overhead_subtotal: number
+          purchase_date: string
+          source: string
+          supplier_id: string
+          supplier_name: string
+          total_cost: number
+        }[]
+      }
+      search_purchases_count: {
+        Args: {
+          p_from?: string
+          p_include_opening?: boolean
+          p_supplier_id?: string
+          p_to?: string
+        }
+        Returns: number
+      }
+      search_suppliers: {
+        Args: { p_limit?: number; p_offset?: number; p_query?: string }
+        Returns: {
+          address: string
+          contact: string
+          id: string
+          is_active: boolean
+          name: string
+          total_count: number
+        }[]
       }
     }
     Enums: {

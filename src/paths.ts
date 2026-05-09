@@ -26,6 +26,11 @@ export const paths = {
   gotoCustomer: (id: string) => `/customers/${id}`,
   gotoCustomerEdit: (id: string) => `/customers/${id}/edit`,
 
+  suppliers: '/suppliers',
+  newSupplier: '/suppliers/new',
+  supplierEdit: '/suppliers/:id/edit',
+  gotoSupplierEdit: (id: string) => `/suppliers/${id}/edit`,
+
   khata: '/khata',
 
   purchases: '/purchases',

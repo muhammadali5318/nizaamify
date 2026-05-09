@@ -108,8 +108,47 @@ There is no payment gateway. Admins flip `subscriptions.status` via SQL — exac
 - **0006** — subscription gating is client-only (see above)
 - **0007** — `record_sale` / `record_purchase` are SQL functions, not client transactions
 - **0011** — three RPCs are deliberately `SECURITY DEFINER` callable by `authenticated`; advisor warnings are accepted
+- **0015** — v1.8 database hardening: views must use `security_invoker = true`, append-only triggers extended to all financial tables, RPC grants follow `revoke from public + anon; grant to authenticated`
+- **0016** — v1.9 stock-in: suppliers as a first-class entity, landed-cost pro-rata-by-value allocation, snapshot `avg_cost_before/after` on `purchase_items`
 
 When making a decision that reverses the PRD or affects multiple layers, write a new ADR (numeric prefix, four sections: Context / Decision / Alternatives / Consequences).
+
+## Versioned PRDs (build trail)
+
+- **v1.2** — baseline: auth, onboarding, subscription, i18n
+- **v1.3** — WAC, sales module, khata view enhancements
+- **v1.4** — partial payments, customer expansion, walk-ins
+- **v1.5** — product type uniqueness, opening stock, fuzzy search, POS redesign
+- **v1.6** — ledger hardening: stored balance, reversals, occurred_at, append-only
+- **v1.7** — design system revamp (mint→navy palette, Urdu font fix, DataTable primitive)
+- **v1.8** — db hardening: RLS audit, search_path, FK indexes, locks, money precision, view security_invoker, append-only across financial tables
+- **v1.9** — stock-in hardening: suppliers, landed-cost pro-rata allocation, bidirectional cost calc, searchable product/supplier comboboxes, MTD-default list with pagination, Effect-on-Inventory snapshot fix
+
+## Open ToDos / Known gaps
+
+- Supabase free tier: no PITR backups; move to Pro before any real customer goes live (hard requirement before launch)
+- Toggle leaked-password-protection + email-confirmation in Supabase auth dashboard (Pro tier required for HIBP)
+- `void_sale` RPC for full sale reversal (reverse debit + restock + voided flag) — deferred from v1.8
+- `purchase_overhead_items` append-only enforcement is in v1.9; per-supplier comparison reports UI is a future ticket
+- Drop legacy `products.cost` column (deferred from v1.5; `avg_cost` and `last_purchase_cost` are the source of truth)
+- Drop legacy `ledger_entries.paid_at` (deferred from v1.6)
+- Advance payments (customer credit balance) — deferred from v1.4
+- Returns / refunds — deferred since v1.2
+- Weekly `pg_dump` GitHub Action — recommended in v1.8 post-mortem; still pending
+
+## Gotchas / hard-earned lessons
+
+- **`pg_trgm` set_limit** is per-statement, not persistent — set it inside each search function via `perform extensions.set_limit(0.2)`.
+- **`pg_trgm` lives in `extensions` schema** (moved in v1.8). Functions that use the `%` operator, `similarity()`, or `set_limit()` need `set search_path = public, extensions, pg_catalog`.
+- **Append-only triggers block backfill UPDATEs.** When a v1.9-style migration adds a column with a default of 0 and needs to backfill existing rows from another column, you must `ALTER TABLE … DISABLE TRIGGER <name>` for the duration of the UPDATE, then re-enable. See §B of `0024_v19_suppliers_landed_cost.sql`.
+- **Postgres unique indexes** need `WHERE is_active = true` to allow re-using a name after archiving — used on suppliers and products.
+- **`record_sale` and `record_purchase` lock** product rows with `FOR UPDATE` before reading stock and avg_cost; concurrent stock-ins on the same product are race-safe.
+- **RLS `auth.uid()` should always be `(select auth.uid())`** so the planner caches it per query (v1.8).
+- **Supabase auto-grants EXECUTE explicitly** to `anon`, `authenticated`, and `service_role` on every newly created function — `revoke from public` alone is a no-op for anon. The pattern is: `revoke … from public, anon; grant … to authenticated;` (caught in v1.8a / v1.9a).
+- **`SECURITY DEFINER` trigger functions** (e.g. `products_normalize_trigger`) needed when the trigger calls another helper that authenticated doesn't have EXECUTE on (caught in v1.8b).
+- **`reverse_ledger_entry` blocks sale-tied debits** — entries with `invoice_id IS NOT NULL` raise `cannot_reverse_invoice_tied_debit` so callers go through `receive_payment` (or future `void_sale`) instead.
+- **`create or replace view`** cannot change column types. When casting a computed sum to `numeric(12,2)` you must `drop view; create view`.
+- **Landed-cost allocation** (v1.9): overhead is distributed pro-rata by line value into `purchase_items.overhead_per_unit`. `avg_cost` uses the effective unit cost (= `cost_at_purchase + overhead_per_unit`); `last_purchase_cost` stays at the supplier's quoted unit cost. Don't conflate the two.
 
 ## Lint / test gotchas
 
