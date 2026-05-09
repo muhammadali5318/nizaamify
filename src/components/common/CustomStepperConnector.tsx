@@ -31,7 +31,7 @@ export const CustomStepperConnector = styled(StepConnector, {
             marginTop: 0
           }
         : {
-            marginLeft: 10,
+            marginInlineStart: 10,
             marginTop: 0
           })
     },

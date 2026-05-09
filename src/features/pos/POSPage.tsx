@@ -377,8 +377,7 @@ export default function POSPage() {
           <Box
             sx={{
               position: 'fixed',
-              left: 0,
-              right: 0,
+              insetInline: 0,
               bottom: 0,
               height: 64,
               backgroundColor: 'var(--surface-base)',

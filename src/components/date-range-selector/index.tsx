@@ -120,7 +120,9 @@ const DateRangeSelector: React.FC<Props> = ({
               color: theme.palette.text.primary
             }),
 
-            // ✅ Start date
+            // ✅ Start date — range fill is anchored to the trailing edge
+            // (logical inset-inline-end) so the bar visually flows toward
+            // the end date in both LTR and RTL.
             ...(isSelectedStart && {
               backgroundColor: primary,
               color: contrast,
@@ -131,8 +133,8 @@ const DateRangeSelector: React.FC<Props> = ({
                 position: 'absolute',
                 top: 0,
                 bottom: 0,
-                left: 0,
-                right: '100%',
+                insetInlineStart: 0,
+                insetInlineEnd: '100%',
                 backgroundColor: grey,
                 zIndex: -1
               },
@@ -141,14 +143,15 @@ const DateRangeSelector: React.FC<Props> = ({
                 position: 'absolute',
                 top: 0,
                 bottom: 0,
-                left: '50%',
-                right: '0%',
+                insetInlineStart: '50%',
+                insetInlineEnd: '0%',
                 backgroundColor: grey,
                 zIndex: -2
               }
             }),
 
-            // ✅ End date
+            // ✅ End date — symmetric to Start, anchored to leading edge
+            // (logical inset-inline-start).
             ...(isSelectedEnd && {
               backgroundColor: primary,
               color: contrast,
@@ -159,8 +162,8 @@ const DateRangeSelector: React.FC<Props> = ({
                 position: 'absolute',
                 top: 0,
                 bottom: 0,
-                right: '50%',
-                left: 0,
+                insetInlineEnd: '50%',
+                insetInlineStart: 0,
                 backgroundColor: grey,
                 zIndex: -1
               },
@@ -169,8 +172,8 @@ const DateRangeSelector: React.FC<Props> = ({
                 position: 'absolute',
                 top: 0,
                 bottom: 0,
-                right: '100%',
-                left: 0,
+                insetInlineEnd: '100%',
+                insetInlineStart: 0,
                 backgroundColor: grey,
                 zIndex: -2
               }

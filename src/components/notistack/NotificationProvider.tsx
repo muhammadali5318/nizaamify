@@ -169,14 +169,14 @@ const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
       iconVariant={{
         error: (
           <img
-            style={{ paddingRight: 12 }}
+            style={{ paddingInlineEnd: 12 }}
             src={'/assets/ErrorOutline.svg'}
             alt={'Error'}
           />
         ),
         success: (
           <img
-            style={{ paddingRight: 12 }}
+            style={{ paddingInlineEnd: 12 }}
             src={'/assets/verify-icon.svg'}
             alt={'success'}
           />
