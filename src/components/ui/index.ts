@@ -39,3 +39,10 @@ export {
 export { Drawer, type DrawerProps } from './Drawer'
 export { Combobox, type ComboboxProps } from './Combobox'
 export { Tabs, type TabsProps, type TabItem, type TabKey } from './Tabs'
+export { Tooltip, type TooltipProps } from './Tooltip'
+export {
+  Spinner,
+  FullPageSpinner,
+  type SpinnerProps,
+  type SpinnerSize
+} from './Spinner'

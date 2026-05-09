@@ -1,19 +1,2 @@
-import { Box, CircularProgress } from '@mui/material'
-
-export function FullPageSpinner() {
-  return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}
-    >
-      <CircularProgress />
-    </Box>
-  )
-}
-
-export default FullPageSpinner
+// Backwards-compatible re-export. Prefer `import { FullPageSpinner } from 'src/components/ui'` in new code.
+export { FullPageSpinner, default } from 'src/components/ui/Spinner'
