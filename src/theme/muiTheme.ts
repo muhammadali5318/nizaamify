@@ -27,6 +27,41 @@ declare module '@mui/material/Typography' {
 
 const v = (token: string) => `var(${token})`
 
+// Palette values must be literal (#hex / rgb / hsl) because MUI runs
+// `alpha()` and `decomposeColor()` on them when computing hover, focus,
+// and disabled states (e.g. inside MuiIconButtonRoot). CSS variables fail
+// at runtime there. These constants mirror tokens.css 1:1 and must be
+// kept in sync if a token's value changes. Component-level styleOverrides
+// and any `sx` styling can still consume `var(--token)` freely — those are
+// just CSS strings, never parsed.
+const HEX = {
+  brand300: '#86E0A4',
+  brand400: '#67C090',
+  brand500: '#4A9D88',
+  brand700: '#215B63',
+  brand800: '#184E68',
+  brand900: '#124170',
+  brand950: '#0A2A4A',
+  neutral0: '#FFFFFF',
+  neutral50: '#F8FAFA',
+  neutral200: '#E2E7E8',
+  neutral400: '#9AA4A8',
+  neutral700: '#363D40',
+  neutral900: '#13171A',
+  success100: '#DCFCE7',
+  success500: '#16A34A',
+  success700: '#166534',
+  warning100: '#FEF3C7',
+  warning500: '#F59E0B',
+  warning700: '#B45309',
+  error100: '#FEE2E2',
+  error500: '#DC2626',
+  error700: '#991B1B',
+  info100: '#DBEAFE',
+  info500: '#2563EB',
+  info700: '#1E40AF'
+} as const
+
 export function getTheme(direction: 'ltr' | 'rtl'): Theme {
   return createTheme({
     direction,
@@ -36,52 +71,52 @@ export function getTheme(direction: 'ltr' | 'rtl'): Theme {
     palette: {
       mode: 'light',
       primary: {
-        main: v('--action-primary'),
-        dark: v('--action-primary-hover'),
-        light: v('--brand-500'),
-        contrastText: v('--action-primary-text')
+        main: HEX.brand700,
+        dark: HEX.brand800,
+        light: HEX.brand500,
+        contrastText: HEX.neutral0
       },
       secondary: {
-        main: v('--action-accent'),
-        dark: v('--action-accent-hover'),
-        light: v('--brand-300'),
-        contrastText: v('--action-accent-text')
+        main: HEX.brand400,
+        dark: HEX.brand500,
+        light: HEX.brand300,
+        contrastText: HEX.brand900
       },
       error: {
-        main: v('--error-500'),
-        dark: v('--error-700'),
-        light: v('--error-100'),
-        contrastText: v('--neutral-0')
+        main: HEX.error500,
+        dark: HEX.error700,
+        light: HEX.error100,
+        contrastText: HEX.neutral0
       },
       warning: {
-        main: v('--warning-500'),
-        dark: v('--warning-700'),
-        light: v('--warning-100'),
-        contrastText: v('--neutral-900')
+        main: HEX.warning500,
+        dark: HEX.warning700,
+        light: HEX.warning100,
+        contrastText: HEX.neutral900
       },
       success: {
-        main: v('--success-500'),
-        dark: v('--success-700'),
-        light: v('--success-100'),
-        contrastText: v('--neutral-0')
+        main: HEX.success500,
+        dark: HEX.success700,
+        light: HEX.success100,
+        contrastText: HEX.neutral0
       },
       info: {
-        main: v('--info-500'),
-        dark: v('--info-700'),
-        light: v('--info-100'),
-        contrastText: v('--neutral-0')
+        main: HEX.info500,
+        dark: HEX.info700,
+        light: HEX.info100,
+        contrastText: HEX.neutral0
       },
       background: {
-        default: v('--surface-subtle'),
-        paper: v('--surface-base')
+        default: HEX.neutral50,
+        paper: HEX.neutral0
       },
       text: {
-        primary: v('--text-primary'),
-        secondary: v('--text-secondary'),
-        disabled: v('--text-disabled')
+        primary: HEX.neutral900,
+        secondary: HEX.neutral700,
+        disabled: HEX.neutral400
       },
-      divider: v('--border-default'),
-      common: { black: '#000', white: v('--neutral-0') }
+      divider: HEX.neutral200,
+      common: { black: '#000', white: HEX.neutral0 }
     },
     shape: { borderRadius: 8 },
     typography: {
