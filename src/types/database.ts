@@ -898,11 +898,7 @@ export type Database = {
       }
       normalize_product_text: { Args: { s: string }; Returns: string }
       receive_payment: {
-        Args: {
-          p_amount: number
-          p_customer_id: string
-          p_notes?: string
-        }
+        Args: { p_amount: number; p_customer_id: string; p_notes?: string }
         Returns: string
       }
       recent_customers: {
@@ -984,8 +980,6 @@ export type Database = {
         Args: { p_only_in_stock?: boolean; p_query?: string }
         Returns: number
       }
-      show_limit: { Args: never; Returns: number }
-      show_trgm: { Args: { '': string }; Returns: string[] }
     }
     Enums: {
       subscription_status: 'trial' | 'active' | 'expired' | 'suspended'

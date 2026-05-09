@@ -71,6 +71,7 @@
     "amount_must_be_positive": "Amount must be greater than zero.",
     "customer_not_in_shop": "Customer not found.",
     "cannot_reverse_a_reversal": "Reversal entries cannot themselves be reversed.",
+    "cannot_reverse_invoice_tied_debit": "This entry is tied to a sale and can't be reversed directly. If the customer paid, use Receive payment instead.",
     "entry_already_reversed": "This entry has already been reversed.",
     "entry_not_in_shop": "Entry not found.",
     "reverse_failed": "Could not reverse the entry. Please try again."
