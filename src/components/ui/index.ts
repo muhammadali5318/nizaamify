@@ -2,5 +2,9 @@
 // Each export becomes available as: import { X } from 'src/components/ui'.
 
 // Phase C primitives are added file-by-file. As each lands it appears here.
-// Until then, this file is intentionally empty.
-export {}
+export {
+  Button,
+  type ButtonProps,
+  type ButtonVariant,
+  type ButtonSize
+} from './Button'
