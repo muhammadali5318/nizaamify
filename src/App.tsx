@@ -12,6 +12,7 @@ import { AuthProvider } from './features/auth/AuthProvider'
 import { Router } from './router'
 import ErrorBoundary from './components/common/error-boundary'
 import NotificationProvider from './components/notistack/NotificationProvider'
+import './styles/tokens.css'
 import './styles/global.scss'
 
 function ThemedShell(): JSX.Element {

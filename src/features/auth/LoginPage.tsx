@@ -1,13 +1,21 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, Stack, TextField, Typography } from '@mui/material'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import { Link as RouterLink, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { loginSchema, type LoginValues } from './schemas'
 import { supabase } from 'src/lib/supabase'
 import { paths } from 'src/paths'
 import AuthLayout from './AuthLayout'
+import { Banner, Button, Field, Input } from 'src/components/ui'
+
+const linkStyle: React.CSSProperties = {
+  color: 'var(--text-brand)',
+  fontWeight: 600,
+  textDecoration: 'none'
+}
 
 export default function LoginPage() {
   const { t } = useTranslation(['auth', 'common'])
@@ -42,34 +50,33 @@ export default function LoginPage() {
       subtitle={t('auth:login.subtitle')}
     >
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <Stack spacing={2}>
-          {serverError && <Alert severity='error'>{serverError}</Alert>}
+        <Stack spacing={2.5}>
+          {serverError && <Banner variant='error'>{serverError}</Banner>}
 
-          <TextField
+          <Field
             label={t('auth:login.email_label')}
-            type='email'
-            autoComplete='email'
-            fullWidth
-            {...register('email')}
-            error={!!errors.email}
-            helperText={errors.email?.message}
-          />
+            error={errors.email?.message}
+          >
+            <Input type='email' autoComplete='email' {...register('email')} />
+          </Field>
 
-          <TextField
+          <Field
             label={t('auth:login.password_label')}
-            type='password'
-            autoComplete='current-password'
-            fullWidth
-            {...register('password')}
-            error={!!errors.password}
-            helperText={errors.password?.message}
-          />
+            error={errors.password?.message}
+          >
+            <Input
+              type='password'
+              autoComplete='current-password'
+              {...register('password')}
+            />
+          </Field>
 
           <Button
             type='submit'
-            variant='contained'
-            size='large'
-            disabled={isSubmitting}
+            variant='primary'
+            size='lg'
+            fullWidth
+            loading={isSubmitting}
           >
             {t('auth:login.submit')}
           </Button>
@@ -83,16 +90,13 @@ export default function LoginPage() {
           >
             <RouterLink
               to={paths.forgotPassword}
-              style={{ color: 'inherit', fontSize: '0.875rem' }}
+              style={{ ...linkStyle, fontSize: '0.875rem' }}
             >
               {t('auth:login.forgot')}
             </RouterLink>
             <Typography variant='body2'>
               {t('auth:login.no_account')}{' '}
-              <RouterLink
-                to={paths.signup}
-                style={{ color: 'inherit', fontWeight: 600 }}
-              >
+              <RouterLink to={paths.signup} style={linkStyle}>
                 {t('auth:login.signup_link')}
               </RouterLink>
             </Typography>

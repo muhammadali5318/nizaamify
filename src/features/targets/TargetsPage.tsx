@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react'
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Paper,
-  Stack,
-  TextField,
-  Typography
-} from '@mui/material'
+import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
 import { useTranslation } from 'react-i18next'
 import { currentMonthISO, useTargetForMonth, useUpsertTarget } from './hooks'
 import { useNotifier } from 'src/components/notistack/NotificationProvider'
+import {
+  Banner,
+  Button,
+  Card,
+  Field,
+  FullPageSpinner,
+  Input
+} from 'src/components/ui'
+import { PageHeader } from 'src/components/layout'
 
 export default function TargetsPage() {
   const { t } = useTranslation(['targets', 'common'])
@@ -48,70 +49,55 @@ export default function TargetsPage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <Box sx={{ p: 4, textAlign: 'center' }}>
-        <CircularProgress size={24} />
-      </Box>
-    )
-  }
+  if (isLoading) return <FullPageSpinner />
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
-      <Paper sx={{ p: { xs: 3, sm: 4 }, borderRadius: 3, maxWidth: 720 }}>
-        <Stack mb={3}>
-          <Typography variant='h5' fontWeight={700}>
-            {t('targets:title')}
-          </Typography>
-          <Typography variant='body2' color='text.secondary'>
-            {t('targets:subtitle')}
-          </Typography>
-        </Stack>
+    <Box sx={{ maxWidth: 672, mx: 'auto', width: '100%' }}>
+      <PageHeader title={t('targets:title')} subtitle={t('targets:subtitle')} />
 
-        <Stack spacing={2}>
-          {error && <Alert severity='error'>{error}</Alert>}
+      <Card>
+        <Stack spacing={2.5}>
+          {error && <Banner variant='error'>{error}</Banner>}
 
-          <TextField
-            label={t('targets:fields.month')}
-            value={month}
-            disabled
-            fullWidth
-          />
-          <TextField
-            label={t('targets:fields.target_sale')}
-            type='number'
-            inputProps={{ min: 0, step: '0.01' }}
-            value={sale}
-            onChange={(e) => setSale(e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label={t('targets:fields.target_gross_profit')}
-            type='number'
-            inputProps={{ min: 0, step: '0.01' }}
-            value={gross}
-            onChange={(e) => setGross(e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label={t('targets:fields.target_net_profit')}
-            type='number'
-            inputProps={{ min: 0, step: '0.01' }}
-            value={net}
-            onChange={(e) => setNet(e.target.value)}
-            fullWidth
-          />
+          <Field label={t('targets:fields.month')}>
+            <Input value={month} disabled />
+          </Field>
+          <Field label={t('targets:fields.target_sale')}>
+            <Input
+              type='number'
+              inputProps={{ min: 0, step: '0.01', inputMode: 'numeric' }}
+              value={sale}
+              onChange={(e) => setSale(e.target.value)}
+            />
+          </Field>
+          <Field label={t('targets:fields.target_gross_profit')}>
+            <Input
+              type='number'
+              inputProps={{ min: 0, step: '0.01', inputMode: 'numeric' }}
+              value={gross}
+              onChange={(e) => setGross(e.target.value)}
+            />
+          </Field>
+          <Field label={t('targets:fields.target_net_profit')}>
+            <Input
+              type='number'
+              inputProps={{ min: 0, step: '0.01', inputMode: 'numeric' }}
+              value={net}
+              onChange={(e) => setNet(e.target.value)}
+            />
+          </Field>
+
           <Stack direction='row' justifyContent='flex-end'>
             <Button
-              variant='contained'
+              variant='primary'
               onClick={submit}
-              disabled={upsert.isPending}
+              loading={upsert.isPending}
             >
               {t('targets:actions.save')}
             </Button>
           </Stack>
         </Stack>
-      </Paper>
+      </Card>
     </Box>
   )
 }

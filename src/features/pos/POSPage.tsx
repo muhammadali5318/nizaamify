@@ -1,17 +1,12 @@
 import { useEffect, useMemo, useReducer, useState } from 'react'
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  Divider,
-  IconButton,
-  Paper,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material'
+import Box from '@mui/material/Box'
+import Divider from '@mui/material/Divider'
+import IconButton from '@mui/material/IconButton'
+import Stack from '@mui/material/Stack'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
+import useMediaQuery from '@mui/material/useMediaQuery'
+import { useTheme } from '@mui/material/styles'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
@@ -27,6 +22,18 @@ import { useNotifier } from 'src/components/notistack/NotificationProvider'
 import { supabase } from 'src/lib/supabase'
 import CustomerPicker from 'src/features/customers/CustomerPicker'
 import { useCustomer } from 'src/features/customers/hooks'
+import {
+  Badge,
+  Banner,
+  Button,
+  Card,
+  Drawer,
+  Field,
+  Input,
+  Textarea,
+  Tooltip
+} from 'src/components/ui'
+import { PageHeader } from 'src/components/layout'
 
 type CartItem = {
   product_id: string
@@ -101,6 +108,8 @@ export default function POSPage() {
   const { t, i18n } = useTranslation(['pos', 'common'])
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
   const notify = useNotifier()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   const { data: shopName } = useShopName()
   const recordSale = useRecordSale()
@@ -110,6 +119,7 @@ export default function POSPage() {
   const [amountPaidStr, setAmountPaidStr] = useState('0')
   const [customerId, setCustomerId] = useState<string | null>(null)
   const [notes, setNotes] = useState('')
+  const [cartOpen, setCartOpen] = useState(false)
   const [receipt, setReceipt] = useState<{
     open: boolean
     invoiceId: string
@@ -140,6 +150,7 @@ export default function POSPage() {
   const total = subtotal + service
   const amountPaid = Math.min(Math.max(0, Number(amountPaidStr) || 0), total)
   const onCredit = Math.max(0, total - amountPaid)
+  const itemCount = cart.reduce((s, c) => s + c.qty, 0)
 
   // Default amount_paid to total when total changes (sane "cash" default).
   useEffect(() => {
@@ -167,6 +178,25 @@ export default function POSPage() {
     amountPaid >= 0 &&
     amountPaid <= total &&
     (!customerRequired || !!customerId)
+
+  // Surfaces *why* submit is disabled, inline above the button (spec §7.2).
+  const submitDisabledReason = useMemo(() => {
+    if (recordSale.isPending) return null
+    if (cart.length === 0 && service === 0) return t('pos:errors.empty_sale')
+    if (amountPaid > total) return t('pos:errors.amount_exceeds_total')
+    if (customerRequired && !customerId)
+      return t('pos:customer.required_for_credit')
+    return null
+  }, [
+    recordSale.isPending,
+    cart.length,
+    service,
+    amountPaid,
+    total,
+    customerRequired,
+    customerId,
+    t
+  ])
 
   const handleAddProduct = (row: ProductSearchRow) => {
     if (row.stock <= 0) return
@@ -238,6 +268,7 @@ export default function POSPage() {
       setServiceCharge('0')
       setCustomerId(null)
       setNotes('')
+      setCartOpen(false)
       notify.success(t('pos:messages.saved'))
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : ''
@@ -255,11 +286,40 @@ export default function POSPage() {
     }
   }
 
+  const cartPanel = (
+    <CartPanel
+      cart={cart}
+      dispatch={dispatch}
+      subtotal={subtotal}
+      total={total}
+      onCredit={onCredit}
+      service={service}
+      serviceCharge={serviceCharge}
+      setServiceCharge={setServiceCharge}
+      amountPaidStr={amountPaidStr}
+      setAmountPaidStr={setAmountPaidStr}
+      customerId={customerId}
+      setCustomerId={setCustomerId}
+      customerRequired={customerRequired}
+      notes={notes}
+      setNotes={setNotes}
+      submitLabel={submitLabel}
+      submit={submit}
+      submitting={recordSale.isPending}
+      isSubmittable={isSubmittable}
+      submitDisabledReason={submitDisabledReason}
+      error={error}
+      locale={locale}
+      isMobile={isMobile}
+      onAtMaxAttempt={(stock) =>
+        notify.warning(t('pos:picker.stock_capped', { count: stock }))
+      }
+    />
+  )
+
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
-      <Typography variant='h5' fontWeight={700} mb={2}>
-        {t('pos:title')}
-      </Typography>
+    <Box>
+      <PageHeader title={t('pos:title')} />
 
       <Stack
         direction={{ xs: 'column', md: 'row' }}
@@ -274,14 +334,23 @@ export default function POSPage() {
               <Tooltip title={t('pos:picker.add_to_cart')}>
                 <span>
                   <IconButton
-                    color='primary'
                     onClick={() => handleAddProduct(row)}
                     disabled={row.stock <= 0}
                     sx={{
                       width: 40,
                       height: 40,
-                      border: '1px solid',
-                      borderColor: 'primary.main'
+                      backgroundColor: 'var(--action-accent)',
+                      color: 'var(--action-accent-text)',
+                      transition:
+                        'transform var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out)',
+                      '&:hover': {
+                        backgroundColor: 'var(--action-accent-hover)'
+                      },
+                      '&:active': { transform: 'scale(0.98)' },
+                      '&.Mui-disabled': {
+                        backgroundColor: 'var(--neutral-200)',
+                        color: 'var(--text-disabled)'
+                      }
                     }}
                     aria-label={t('pos:picker.add_to_cart')}
                   >
@@ -293,311 +362,75 @@ export default function POSPage() {
           />
         </Box>
 
-        <Box sx={{ width: { xs: '100%', md: 420 }, flexShrink: 0 }}>
-          <Paper variant='outlined' sx={{ p: 2, borderRadius: 2 }}>
-            <Typography variant='h6' fontWeight={700} mb={1}>
-              {t('pos:cart.title')}
-            </Typography>
-
-            {cart.length === 0 ? (
-              <Box sx={{ py: 4, textAlign: 'center' }}>
-                <ShoppingCartIcon
-                  sx={{ fontSize: 48, color: 'text.disabled' }}
-                />
-                <Typography variant='subtitle1' fontWeight={600} mt={1}>
-                  {t('pos:cart.empty_title')}
-                </Typography>
-                <Typography
-                  variant='body2'
-                  color='text.secondary'
-                  sx={{ display: { xs: 'none', md: 'block' } }}
-                >
-                  {t('pos:cart.empty_help')}
-                </Typography>
-                <Typography
-                  variant='body2'
-                  color='text.secondary'
-                  sx={{ display: { xs: 'block', md: 'none' } }}
-                >
-                  {t('pos:cart.empty_help_mobile')}
-                </Typography>
-              </Box>
-            ) : (
-              <Stack spacing={2} mb={2}>
-                {cart.map((c) => {
-                  const modified = Math.abs(c.price - c.default_price) > 0.001
-                  const belowCost = c.price < c.avg_cost
-                  return (
-                    <Box key={c.product_id}>
-                      <Stack
-                        direction='row'
-                        spacing={1}
-                        alignItems='flex-start'
-                      >
-                        <Tooltip title={t('pos:cart.remove_line')}>
-                          <IconButton
-                            size='small'
-                            onClick={() =>
-                              dispatch({
-                                type: 'remove',
-                                product_id: c.product_id
-                              })
-                            }
-                            aria-label={t('pos:cart.remove_line')}
-                            sx={{ width: 32, height: 32 }}
-                          >
-                            <CloseIcon fontSize='small' />
-                          </IconButton>
-                        </Tooltip>
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Stack
-                            direction='row'
-                            spacing={0.5}
-                            alignItems='center'
-                            flexWrap='wrap'
-                          >
-                            <Typography variant='body2' fontWeight={700} noWrap>
-                              {c.name}
-                            </Typography>
-                            <Chip
-                              label={c.type}
-                              size='small'
-                              variant='outlined'
-                              sx={{ height: 18, fontSize: 10 }}
-                            />
-                            {modified && (
-                              <Chip
-                                label={t('pos:cart.modified_price_badge')}
-                                size='small'
-                                color='info'
-                                sx={{ height: 18, fontSize: 10 }}
-                              />
-                            )}
-                          </Stack>
-                          <Typography variant='caption' color='text.secondary'>
-                            {t('pos:cart.stock_remaining', {
-                              count: c.stock - c.qty
-                            })}
-                          </Typography>
-                        </Box>
-                      </Stack>
-
-                      <Stack
-                        direction='row'
-                        spacing={1}
-                        alignItems='center'
-                        mt={1}
-                        flexWrap='wrap'
-                      >
-                        <QtyStepper
-                          value={c.qty}
-                          min={1}
-                          max={c.stock}
-                          onChange={(qty) =>
-                            dispatch({
-                              type: 'set_qty',
-                              product_id: c.product_id,
-                              qty
-                            })
-                          }
-                          onAtMaxAttempt={() =>
-                            notify.warning(
-                              t('pos:picker.stock_capped', { count: c.stock })
-                            )
-                          }
-                          ariaLabel={t('pos:cart.qty_label')}
-                        />
-                        <TextField
-                          size='small'
-                          type='number'
-                          inputProps={{ step: '0.01', min: 0 }}
-                          value={c.price}
-                          onChange={(e) => {
-                            const v = Number(e.target.value)
-                            if (Number.isFinite(v) && v >= 0) {
-                              dispatch({
-                                type: 'set_price',
-                                product_id: c.product_id,
-                                price: v
-                              })
-                            }
-                          }}
-                          sx={{ width: 110 }}
-                          label={t('pos:cart.unit_price')}
-                        />
-                        <Box sx={{ flex: 1, textAlign: 'end' }}>
-                          <Typography variant='caption' color='text.secondary'>
-                            {t('pos:cart.line_total')}
-                          </Typography>
-                          <Typography variant='body2' fontWeight={700}>
-                            {formatPKR(c.price * c.qty, locale)}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                      {modified && (
-                        <Typography
-                          variant='caption'
-                          color='text.secondary'
-                          mt={0.5}
-                        >
-                          {t('pos:cart.was_price', {
-                            price: formatPKR(c.default_price, locale)
-                          })}
-                        </Typography>
-                      )}
-                      {belowCost && (
-                        <Alert severity='warning' sx={{ mt: 0.5, py: 0.25 }}>
-                          {t('pos:cart.below_avg_cost_warning')}
-                        </Alert>
-                      )}
-                    </Box>
-                  )
-                })}
-              </Stack>
-            )}
-
-            {/* Subtotal first, service charge second, then total — per spec §1.7 */}
-            <Stack
-              direction='row'
-              justifyContent='space-between'
-              alignItems='center'
-              mb={1}
-            >
-              <Typography variant='body2' color='text.secondary'>
-                {t('pos:cart.subtotal_products')}
-              </Typography>
-              <Typography variant='body2'>
-                {formatPKR(subtotal, locale)}
-              </Typography>
-            </Stack>
-
-            <TextField
-              label={t('pos:cart.service_charge')}
-              fullWidth
-              size='small'
-              type='number'
-              inputProps={{ min: 0, step: '0.01' }}
-              value={serviceCharge}
-              onChange={(e) => setServiceCharge(e.target.value)}
-              sx={{ mb: 1 }}
-            />
-
-            <Divider sx={{ my: 1 }} />
-
-            <Stack
-              direction='row'
-              justifyContent='space-between'
-              alignItems='center'
-              mb={1.5}
-            >
-              <Typography variant='subtitle1' fontWeight={700}>
-                {t('pos:cart.total')}
-              </Typography>
-              <Typography variant='h6' fontWeight={700}>
-                {formatPKR(total, locale)}
-              </Typography>
-            </Stack>
-
-            <Divider sx={{ my: 1.5 }} />
-
-            <Typography variant='subtitle2' mb={1}>
-              {t('pos:payment.title')}
-            </Typography>
-
-            <TextField
-              label={t('pos:payment.amount_paid')}
-              fullWidth
-              size='small'
-              type='number'
-              inputProps={{ min: 0, max: total, step: '0.01' }}
-              value={amountPaidStr}
-              onChange={(e) => setAmountPaidStr(e.target.value)}
-              sx={{ mb: 1 }}
-            />
-            <Stack direction='row' spacing={1} mb={1.5}>
-              <Button
-                size='small'
-                variant='outlined'
-                onClick={() => setAmountPaidStr(total.toFixed(2))}
-              >
-                {t('pos:payment.pay_full')}
-              </Button>
-              <Button
-                size='small'
-                variant='outlined'
-                onClick={() => setAmountPaidStr('0')}
-              >
-                {t('pos:payment.pay_nothing')}
-              </Button>
-            </Stack>
-
-            <Stack
-              direction='row'
-              justifyContent='space-between'
-              alignItems='center'
-              mb={1.5}
-            >
-              <Typography variant='body2' color='text.secondary'>
-                {t('pos:payment.on_credit')}
-              </Typography>
-              <Typography
-                variant='body2'
-                fontWeight={700}
-                color={onCredit > 0 ? 'warning.main' : 'text.disabled'}
-              >
-                {formatPKR(onCredit, locale)}
-              </Typography>
-            </Stack>
-
-            <Box sx={{ mb: 1.5 }}>
-              <CustomerPicker
-                value={customerId}
-                onChange={setCustomerId}
-                required={customerRequired}
-                clearable={!customerRequired}
-                label={
-                  customerRequired
-                    ? t('pos:payment.customer')
-                    : t('pos:customer.walk_in')
-                }
-                errorText={
-                  customerRequired && !customerId
-                    ? t('pos:customer.required_for_credit')
-                    : undefined
-                }
-              />
-            </Box>
-
-            <TextField
-              label={t('pos:payment.notes_placeholder')}
-              fullWidth
-              size='small'
-              multiline
-              minRows={2}
-              inputProps={{ maxLength: 1000 }}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              sx={{ mb: 1.5 }}
-            />
-
-            {error && (
-              <Alert severity='error' sx={{ mb: 1.5 }}>
-                {error}
-              </Alert>
-            )}
-
-            <Button
-              variant='contained'
-              fullWidth
-              size='large'
-              disabled={!isSubmittable}
-              onClick={submit}
-            >
-              {submitLabel}
-            </Button>
-          </Paper>
-        </Box>
+        {!isMobile && (
+          <Box sx={{ width: 420, flexShrink: 0 }}>
+            <Card variant='elevated' noPadding>
+              <Box sx={{ p: 2 }}>{cartPanel}</Box>
+            </Card>
+          </Box>
+        )}
       </Stack>
+
+      {/* Mobile bottom-sheet cart per spec §7.2 mobile POS */}
+      {isMobile && (
+        <>
+          <Box
+            sx={{
+              position: 'fixed',
+              insetInline: 0,
+              bottom: 0,
+              height: 64,
+              backgroundColor: 'var(--surface-base)',
+              borderTop: '1px solid var(--border-default)',
+              boxShadow: 'var(--shadow-md)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              px: 2,
+              zIndex: 1100
+            }}
+          >
+            <Button
+              variant='primary'
+              size='lg'
+              startIcon={<ShoppingCartIcon />}
+              onClick={() => setCartOpen(true)}
+              sx={{ marginInlineEnd: 'auto' }}
+            >
+              {t('pos:cart.title')}
+              {itemCount > 0 && (
+                <Box
+                  component='span'
+                  sx={{
+                    marginInlineStart: 1,
+                    px: 1,
+                    borderRadius: 'var(--radius-full)',
+                    backgroundColor: 'var(--action-accent)',
+                    color: 'var(--action-accent-text)',
+                    fontSize: '0.75rem',
+                    fontWeight: 600
+                  }}
+                >
+                  {itemCount}
+                </Box>
+              )}
+            </Button>
+            <Typography variant='h3' component='span'>
+              {formatPKR(total, locale)}
+            </Typography>
+          </Box>
+          <Drawer
+            anchor='bottom'
+            open={cartOpen}
+            onClose={() => setCartOpen(false)}
+            title={t('pos:cart.title')}
+          >
+            <Box sx={{ p: 2, pb: 4 }}>{cartPanel}</Box>
+          </Drawer>
+          {/* Spacer so the fixed bottom bar doesn't cover the product table */}
+          <Box sx={{ height: 80 }} />
+        </>
+      )}
 
       <Receipt
         open={receipt.open}
@@ -615,5 +448,378 @@ export default function POSPage() {
         notes={receipt.notes}
       />
     </Box>
+  )
+}
+
+type CartPanelProps = {
+  cart: CartItem[]
+  dispatch: React.Dispatch<CartAction>
+  subtotal: number
+  total: number
+  onCredit: number
+  service: number
+  serviceCharge: string
+  setServiceCharge: (s: string) => void
+  amountPaidStr: string
+  setAmountPaidStr: (s: string) => void
+  customerId: string | null
+  setCustomerId: (id: string | null) => void
+  customerRequired: boolean
+  notes: string
+  setNotes: (s: string) => void
+  submitLabel: string
+  submit: () => void
+  submitting: boolean
+  isSubmittable: boolean
+  submitDisabledReason: string | null
+  error: string | null
+  locale: string
+  isMobile: boolean
+  onAtMaxAttempt: (stock: number) => void
+}
+
+function CartPanel({
+  cart,
+  dispatch,
+  subtotal,
+  total,
+  onCredit,
+  serviceCharge,
+  setServiceCharge,
+  amountPaidStr,
+  setAmountPaidStr,
+  customerId,
+  setCustomerId,
+  customerRequired,
+  notes,
+  setNotes,
+  submitLabel,
+  submit,
+  submitting,
+  isSubmittable,
+  submitDisabledReason,
+  error,
+  locale,
+  onAtMaxAttempt
+}: CartPanelProps) {
+  const { t } = useTranslation(['pos', 'common'])
+
+  return (
+    <>
+      {cart.length === 0 ? (
+        <Box sx={{ py: 4, textAlign: 'center' }}>
+          <ShoppingCartIcon
+            sx={{ fontSize: 48, color: 'var(--text-disabled)' }}
+          />
+          <Typography variant='h3' sx={{ mt: 1, color: 'var(--text-primary)' }}>
+            {t('pos:cart.empty_title')}
+          </Typography>
+          <Typography
+            variant='body2'
+            sx={{
+              color: 'var(--text-muted)',
+              display: { xs: 'none', md: 'block' }
+            }}
+          >
+            {t('pos:cart.empty_help')}
+          </Typography>
+          <Typography
+            variant='body2'
+            sx={{
+              color: 'var(--text-muted)',
+              display: { xs: 'block', md: 'none' }
+            }}
+          >
+            {t('pos:cart.empty_help_mobile')}
+          </Typography>
+        </Box>
+      ) : (
+        <Stack mb={2} divider={<Divider />}>
+          {cart.map((c) => {
+            const modified = Math.abs(c.price - c.default_price) > 0.001
+            const belowCost = c.price < c.avg_cost
+            return (
+              <Box key={c.product_id} sx={{ py: 1.5 }}>
+                <Stack direction='row' spacing={1} alignItems='flex-start'>
+                  <Tooltip title={t('pos:cart.remove_line')}>
+                    <IconButton
+                      size='small'
+                      onClick={() =>
+                        dispatch({
+                          type: 'remove',
+                          product_id: c.product_id
+                        })
+                      }
+                      aria-label={t('pos:cart.remove_line')}
+                      sx={{ width: 32, height: 32 }}
+                    >
+                      <CloseIcon fontSize='small' />
+                    </IconButton>
+                  </Tooltip>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Stack
+                      direction='row'
+                      spacing={0.5}
+                      alignItems='center'
+                      flexWrap='wrap'
+                    >
+                      <Typography
+                        variant='body1'
+                        sx={{ fontWeight: 600 }}
+                        noWrap
+                      >
+                        {c.name}
+                      </Typography>
+                      <Badge variant='neutral' label={c.type} />
+                      {modified && (
+                        <Badge
+                          variant='info'
+                          label={t('pos:cart.modified_price_badge')}
+                        />
+                      )}
+                    </Stack>
+                    <Typography
+                      variant='caption'
+                      sx={{ color: 'var(--text-muted)' }}
+                    >
+                      {t('pos:cart.stock_remaining', {
+                        count: c.stock - c.qty
+                      })}
+                    </Typography>
+                  </Box>
+                </Stack>
+
+                <Stack
+                  direction='row'
+                  spacing={1}
+                  alignItems='center'
+                  mt={1}
+                  flexWrap='wrap'
+                >
+                  <QtyStepper
+                    value={c.qty}
+                    min={1}
+                    max={c.stock}
+                    onChange={(qty) =>
+                      dispatch({
+                        type: 'set_qty',
+                        product_id: c.product_id,
+                        qty
+                      })
+                    }
+                    onAtMaxAttempt={() => onAtMaxAttempt(c.stock)}
+                    ariaLabel={t('pos:cart.qty_label')}
+                  />
+                  <TextField
+                    size='small'
+                    type='number'
+                    inputProps={{ step: '0.01', min: 0, inputMode: 'numeric' }}
+                    value={c.price}
+                    onChange={(e) => {
+                      const v = Number(e.target.value)
+                      if (Number.isFinite(v) && v >= 0) {
+                        dispatch({
+                          type: 'set_price',
+                          product_id: c.product_id,
+                          price: v
+                        })
+                      }
+                    }}
+                    sx={{ width: 110 }}
+                    label={t('pos:cart.unit_price')}
+                  />
+                  <Box sx={{ flex: 1, textAlign: 'end' }}>
+                    <Typography
+                      variant='overline'
+                      sx={{ color: 'var(--text-muted)', display: 'block' }}
+                    >
+                      {t('pos:cart.line_total')}
+                    </Typography>
+                    <Typography variant='h3' component='span'>
+                      {formatPKR(c.price * c.qty, locale)}
+                    </Typography>
+                  </Box>
+                </Stack>
+                {modified && (
+                  <Typography
+                    variant='caption'
+                    sx={{
+                      color: 'var(--text-muted)',
+                      display: 'block',
+                      mt: 0.5
+                    }}
+                  >
+                    {t('pos:cart.was_price', {
+                      price: formatPKR(c.default_price, locale)
+                    })}
+                  </Typography>
+                )}
+                {belowCost && (
+                  <Box sx={{ mt: 0.75 }}>
+                    <Banner variant='warning'>
+                      {t('pos:cart.below_avg_cost_warning')}
+                    </Banner>
+                  </Box>
+                )}
+              </Box>
+            )
+          })}
+        </Stack>
+      )}
+
+      {/* Subtotal first, service charge second, then total — per spec §7.2 */}
+      <Stack
+        direction='row'
+        justifyContent='space-between'
+        alignItems='center'
+        mb={1}
+      >
+        <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
+          {t('pos:cart.subtotal_products')}
+        </Typography>
+        <Typography variant='body2'>{formatPKR(subtotal, locale)}</Typography>
+      </Stack>
+
+      <Field label={t('pos:cart.service_charge')}>
+        <Input
+          type='number'
+          inputProps={{ min: 0, step: '0.01', inputMode: 'numeric' }}
+          value={serviceCharge}
+          onChange={(e) => setServiceCharge(e.target.value)}
+        />
+      </Field>
+
+      <Divider sx={{ my: 1.5 }} />
+
+      <Stack
+        direction='row'
+        justifyContent='space-between'
+        alignItems='center'
+        mb={1.5}
+      >
+        <Typography variant='h3' component='span'>
+          {t('pos:cart.total')}
+        </Typography>
+        <Typography variant='h2' component='span'>
+          {formatPKR(total, locale)}
+        </Typography>
+      </Stack>
+
+      <Divider sx={{ my: 1.5 }} />
+
+      <Typography variant='h3' sx={{ mb: 1 }}>
+        {t('pos:payment.title')}
+      </Typography>
+
+      <Field label={t('pos:payment.amount_paid')}>
+        <Input
+          type='number'
+          inputProps={{
+            min: 0,
+            max: total,
+            step: '0.01',
+            inputMode: 'numeric'
+          }}
+          value={amountPaidStr}
+          onChange={(e) => setAmountPaidStr(e.target.value)}
+        />
+      </Field>
+      <Stack direction='row' spacing={1} mt={1} mb={1.5}>
+        <Button
+          variant='secondary'
+          size='sm'
+          onClick={() => setAmountPaidStr(total.toFixed(2))}
+        >
+          {t('pos:payment.pay_full')}
+        </Button>
+        <Button
+          variant='secondary'
+          size='sm'
+          onClick={() => setAmountPaidStr('0')}
+        >
+          {t('pos:payment.pay_nothing')}
+        </Button>
+      </Stack>
+
+      <Stack
+        direction='row'
+        justifyContent='space-between'
+        alignItems='center'
+        mb={1.5}
+      >
+        <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
+          {t('pos:payment.on_credit')}
+        </Typography>
+        <Typography
+          variant='body1'
+          sx={{
+            fontWeight: 700,
+            color: onCredit > 0 ? 'var(--warning-700)' : 'var(--text-disabled)'
+          }}
+        >
+          {formatPKR(onCredit, locale)}
+        </Typography>
+      </Stack>
+
+      <Box sx={{ mb: 1.5 }}>
+        <CustomerPicker
+          value={customerId}
+          onChange={setCustomerId}
+          required={customerRequired}
+          clearable={!customerRequired}
+          label={
+            customerRequired
+              ? t('pos:payment.customer')
+              : t('pos:customer.walk_in')
+          }
+          errorText={
+            customerRequired && !customerId
+              ? t('pos:customer.required_for_credit')
+              : undefined
+          }
+        />
+      </Box>
+
+      <Field label={t('pos:payment.notes_placeholder')}>
+        <Textarea
+          minRows={2}
+          inputProps={{ maxLength: 1000 }}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
+      </Field>
+
+      {error && (
+        <Box sx={{ mt: 1.5 }}>
+          <Banner variant='error'>{error}</Banner>
+        </Box>
+      )}
+
+      {submitDisabledReason && !error && (
+        <Typography
+          variant='caption'
+          sx={{
+            display: 'block',
+            mt: 1.5,
+            textAlign: 'center',
+            color: 'var(--text-muted)'
+          }}
+        >
+          {submitDisabledReason}
+        </Typography>
+      )}
+
+      <Button
+        variant='primary'
+        size='lg'
+        fullWidth
+        disabled={!isSubmittable}
+        loading={submitting}
+        onClick={submit}
+        sx={{ mt: 1.5 }}
+      >
+        {submitLabel}
+      </Button>
+    </>
   )
 }

@@ -1,14 +1,7 @@
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  LinearProgress,
-  Paper,
-  Stack,
-  Typography
-} from '@mui/material'
+import Box from '@mui/material/Box'
+import LinearProgress from '@mui/material/LinearProgress'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
 import LocalShippingIcon from '@mui/icons-material/LocalShipping'
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'
@@ -19,6 +12,8 @@ import { paths } from 'src/paths'
 import { useMonthlySummary, useTodaySales, useTotalOutstanding } from './hooks'
 import { useTargetForMonth, currentMonthISO } from 'src/features/targets/hooks'
 import { formatPKR } from 'src/features/subscription/env'
+import { Button, Card, Spinner } from 'src/components/ui'
+import { PageHeader } from 'src/components/layout'
 
 function StatCard({
   label,
@@ -32,24 +27,27 @@ function StatCard({
   loading?: boolean
 }) {
   return (
-    <Card variant='outlined' sx={{ flex: 1, minWidth: 180 }}>
-      <CardContent>
-        <Typography variant='caption' color='text.secondary'>
-          {label}
+    <Card sx={{ flex: 1, minWidth: 180 }}>
+      <Typography variant='overline' sx={{ color: 'var(--text-muted)' }}>
+        {label}
+      </Typography>
+      {loading ? (
+        <Box sx={{ mt: 1 }}>
+          <Spinner size='inline' />
+        </Box>
+      ) : (
+        <Typography variant='h2' component='div' sx={{ mt: 0.5 }}>
+          {value}
         </Typography>
-        {loading ? (
-          <CircularProgress size={20} sx={{ mt: 1 }} />
-        ) : (
-          <Typography variant='h6' fontWeight={700} sx={{ mt: 0.5 }}>
-            {value}
-          </Typography>
-        )}
-        {helper && (
-          <Typography variant='caption' color='text.secondary'>
-            {helper}
-          </Typography>
-        )}
-      </CardContent>
+      )}
+      {helper && (
+        <Typography
+          variant='caption'
+          sx={{ color: 'var(--text-muted)', display: 'block', mt: 0.5 }}
+        >
+          {helper}
+        </Typography>
+      )}
     </Card>
   )
 }
@@ -69,14 +67,21 @@ function TargetBar({
     <Box>
       <Stack direction='row' justifyContent='space-between' mb={0.5}>
         <Typography variant='body2'>{label}</Typography>
-        <Typography variant='body2' fontWeight={700}>
+        <Typography variant='body2' sx={{ fontWeight: 600 }}>
           {pct}%
         </Typography>
       </Stack>
       <LinearProgress
         variant='determinate'
         value={pct}
-        sx={{ height: 8, borderRadius: 1 }}
+        sx={{
+          height: 8,
+          borderRadius: 'var(--radius-sm)',
+          backgroundColor: 'var(--surface-muted)',
+          '& .MuiLinearProgress-bar': {
+            borderRadius: 'var(--radius-sm)'
+          }
+        }}
       />
     </Box>
   )
@@ -97,10 +102,8 @@ export default function DashboardPage() {
   const netProfit = grossProfit - totalExpenses
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
-      <Typography variant='h5' fontWeight={700} mb={2}>
-        {t('dashboard:title')}
-      </Typography>
+    <Box sx={{ maxWidth: 1280, mx: 'auto', width: '100%' }}>
+      <PageHeader title={t('dashboard:title')} />
 
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
@@ -134,25 +137,22 @@ export default function DashboardPage() {
       </Stack>
 
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-        <Paper
-          variant='outlined'
-          sx={{ p: 3, borderRadius: 3, flex: 1, minWidth: 280 }}
-        >
-          <Typography variant='subtitle1' fontWeight={700} mb={2}>
+        <Card sx={{ flex: 1, minWidth: 280 }}>
+          <Typography variant='h3' sx={{ mb: 2 }}>
             {t('dashboard:target_progress')}
           </Typography>
           {target.isLoading ? (
-            <CircularProgress size={20} />
+            <Spinner size='inline' />
           ) : !target.data ? (
-            <Stack spacing={1}>
-              <Typography variant='body2' color='text.secondary'>
+            <Stack spacing={1.5}>
+              <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
                 {t('dashboard:no_target')}
               </Typography>
               <Button
                 component={RouterLink}
                 to={paths.targets}
-                variant='outlined'
-                size='small'
+                variant='secondary'
+                size='sm'
                 sx={{ alignSelf: 'flex-start' }}
               >
                 {t('dashboard:set_target')}
@@ -177,20 +177,17 @@ export default function DashboardPage() {
               />
             </Stack>
           )}
-        </Paper>
+        </Card>
 
-        <Paper
-          variant='outlined'
-          sx={{ p: 3, borderRadius: 3, flex: 1, minWidth: 280 }}
-        >
-          <Typography variant='subtitle1' fontWeight={700} mb={2}>
+        <Card sx={{ flex: 1, minWidth: 280 }}>
+          <Typography variant='h3' sx={{ mb: 2 }}>
             {t('dashboard:quick_actions.title')}
           </Typography>
           <Stack direction='row' spacing={1.5} flexWrap='wrap' useFlexGap>
             <Button
               component={RouterLink}
               to={paths.pos}
-              variant='contained'
+              variant='primary'
               startIcon={<PointOfSaleIcon />}
             >
               {t('dashboard:quick_actions.new_sale')}
@@ -198,7 +195,7 @@ export default function DashboardPage() {
             <Button
               component={RouterLink}
               to={paths.newPurchase}
-              variant='outlined'
+              variant='secondary'
               startIcon={<LocalShippingIcon />}
             >
               {t('dashboard:quick_actions.new_purchase')}
@@ -206,7 +203,7 @@ export default function DashboardPage() {
             <Button
               component={RouterLink}
               to={paths.expenses}
-              variant='outlined'
+              variant='secondary'
               startIcon={<ReceiptLongIcon />}
             >
               {t('dashboard:quick_actions.add_expense')}
@@ -214,13 +211,13 @@ export default function DashboardPage() {
             <Button
               component={RouterLink}
               to={paths.khata}
-              variant='outlined'
+              variant='secondary'
               startIcon={<AccountBalanceWalletIcon />}
             >
               {t('dashboard:quick_actions.view_khata')}
             </Button>
           </Stack>
-        </Paper>
+        </Card>
       </Stack>
     </Box>
   )

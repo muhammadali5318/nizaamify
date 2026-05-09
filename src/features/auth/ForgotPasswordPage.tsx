@@ -1,13 +1,21 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, Stack, TextField, Typography } from '@mui/material'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import { Link as RouterLink } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { forgotSchema, type ForgotValues } from './schemas'
 import { supabase } from 'src/lib/supabase'
 import { paths } from 'src/paths'
 import AuthLayout from './AuthLayout'
+import { Banner, Button, Field, Input } from 'src/components/ui'
+
+const linkStyle: React.CSSProperties = {
+  color: 'var(--text-brand)',
+  fontWeight: 600,
+  textDecoration: 'none'
+}
 
 export default function ForgotPasswordPage() {
   const { t } = useTranslation(['auth', 'common'])
@@ -43,7 +51,7 @@ export default function ForgotPasswordPage() {
         subtitle={t('auth:forgot.sent_body', { email: sentEmail })}
       >
         <Stack alignItems='center'>
-          <RouterLink to={paths.login} style={{ color: 'inherit' }}>
+          <RouterLink to={paths.login} style={linkStyle}>
             {t('auth:forgot.back_to_login')}
           </RouterLink>
         </Stack>
@@ -57,30 +65,28 @@ export default function ForgotPasswordPage() {
       subtitle={t('auth:forgot.subtitle')}
     >
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <Stack spacing={2}>
-          {serverError && <Alert severity='error'>{serverError}</Alert>}
+        <Stack spacing={2.5}>
+          {serverError && <Banner variant='error'>{serverError}</Banner>}
 
-          <TextField
+          <Field
             label={t('auth:forgot.email_label')}
-            type='email'
-            autoComplete='email'
-            fullWidth
-            {...register('email')}
-            error={!!errors.email}
-            helperText={errors.email?.message}
-          />
+            error={errors.email?.message}
+          >
+            <Input type='email' autoComplete='email' {...register('email')} />
+          </Field>
 
           <Button
             type='submit'
-            variant='contained'
-            size='large'
-            disabled={isSubmitting}
+            variant='primary'
+            size='lg'
+            fullWidth
+            loading={isSubmitting}
           >
             {t('auth:forgot.submit')}
           </Button>
 
           <Typography variant='body2' textAlign='center'>
-            <RouterLink to={paths.login} style={{ color: 'inherit' }}>
+            <RouterLink to={paths.login} style={linkStyle}>
               {t('auth:forgot.back_to_login')}
             </RouterLink>
           </Typography>

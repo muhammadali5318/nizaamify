@@ -1,25 +1,19 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import {
-  Box,
-  Chip,
-  CircularProgress,
-  Pagination,
-  Paper,
-  Skeleton,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography
-} from '@mui/material'
+import { useEffect, useState, type ReactNode } from 'react'
+import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import { useSearchProducts, type ProductSearchRow } from './hooks'
 import { formatPKR } from 'src/features/subscription/env'
+import {
+  Badge,
+  DataTable,
+  EmptyState,
+  Input,
+  Pagination,
+  type DataTableColumn
+} from 'src/components/ui'
 
 export type ProductTableProps = {
   renderActions: (row: ProductSearchRow) => ReactNode
@@ -83,7 +77,7 @@ export default function ProductTable({
     }
   }, [debounced, page, syncUrl, params, setParams])
 
-  const { data, isLoading, isFetching } = useSearchProducts({
+  const { data, isLoading } = useSearchProducts({
     query: debounced,
     page,
     pageSize,
@@ -92,223 +86,146 @@ export default function ProductTable({
 
   const rows = data?.rows ?? []
   const total = data?.total ?? 0
-  const totalPages = Math.max(1, Math.ceil(total / pageSize))
-  const from = total === 0 ? 0 : page * pageSize + 1
-  const to = Math.min(total, (page + 1) * pageSize)
 
   const isEmpty = !isLoading && rows.length === 0
   const isSearchingButEmpty = isEmpty && debounced.length > 0
-  const emptyMsg = useMemo(() => {
-    if (isSearchingButEmpty) {
-      return {
-        title: t('products:no_results'),
-        help: ''
-      }
-    }
-    return {
-      title: emptyTitle ?? t('products:empty'),
-      help: emptyHelp ?? ''
-    }
-  }, [isSearchingButEmpty, emptyTitle, emptyHelp, t])
+  const emptyMessage = isSearchingButEmpty
+    ? t('products:no_results')
+    : (emptyTitle ?? t('products:empty'))
+  const emptyHelper = isSearchingButEmpty ? '' : (emptyHelp ?? '')
+
+  const columns: DataTableColumn<ProductSearchRow>[] = [
+    {
+      id: 'actions',
+      header: '',
+      width: 96,
+      cardRole: 'actions',
+      cell: (row) => renderActions(row)
+    },
+    {
+      id: 'name',
+      header: t('products:fields.name'),
+      cardRole: 'heading',
+      cell: (row) => (
+        <Stack spacing={0.5}>
+          <Typography variant='body1' sx={{ fontWeight: 600 }} noWrap>
+            {row.name}
+          </Typography>
+          <Stack direction='row' spacing={0.5} alignItems='center'>
+            <Badge variant='neutral' label={row.type} />
+            {row.type === 'General' && (
+              <Badge
+                variant='warning'
+                label={t('products:badges.default_type_warning')}
+              />
+            )}
+          </Stack>
+        </Stack>
+      )
+    },
+    {
+      id: 'stock',
+      header: t('products:fields.stock'),
+      align: 'end',
+      cell: (row) => (
+        <Stack
+          direction='row'
+          spacing={0.75}
+          justifyContent='flex-end'
+          alignItems='center'
+        >
+          <Typography variant='body1'>{row.stock}</Typography>
+          {row.stock === 0 ? (
+            <Badge
+              variant='neutral'
+              label={t('products:badges.out_of_stock')}
+            />
+          ) : row.stock <= 5 ? (
+            <Badge variant='warning' label={t('products:badges.low_stock')} />
+          ) : null}
+        </Stack>
+      )
+    },
+    {
+      id: 'price',
+      header: t('products:fields.selling_price'),
+      align: 'end',
+      cell: (row) => formatPKR(Number(row.price), locale)
+    },
+    ...(showAvgCost
+      ? [
+          {
+            id: 'avg_cost',
+            header: t('products:fields.avg_cost'),
+            align: 'end' as const,
+            hideOnMobile: true,
+            cell: (row: ProductSearchRow) => (
+              <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
+                {formatPKR(Number(row.avg_cost), locale)}
+              </Typography>
+            )
+          }
+        ]
+      : []),
+    ...(showLastPurchase
+      ? [
+          {
+            id: 'last_purchase',
+            header: t('products:fields.last_purchase_cost'),
+            align: 'end' as const,
+            hideOnMobile: true,
+            cell: (row: ProductSearchRow) => (
+              <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
+                {row.last_purchase_cost === null
+                  ? '—'
+                  : formatPKR(Number(row.last_purchase_cost), locale)}
+              </Typography>
+            )
+          }
+        ]
+      : [])
+  ]
 
   return (
     <Stack spacing={2}>
       {showSearch && (
-        <TextField
-          fullWidth
-          size='small'
+        <Input
           placeholder={t('products:search_placeholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           autoComplete='off'
-          inputProps={{
-            'aria-label': t('products:search_placeholder')
+          slotProps={{
+            input: {
+              'aria-label': t('products:search_placeholder')
+            } as React.InputHTMLAttributes<HTMLInputElement>
           }}
         />
       )}
 
-      <Paper variant='outlined' sx={{ borderRadius: 2 }}>
-        {isLoading ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <CircularProgress size={24} />
+      <DataTable
+        columns={columns}
+        rows={rows}
+        getRowId={(row) => row.id}
+        loading={isLoading}
+        empty={
+          <Box sx={{ py: 4 }}>
+            <EmptyState
+              title={emptyMessage}
+              description={emptyHelper || undefined}
+            />
           </Box>
-        ) : isEmpty ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <Typography variant='body2' color='text.secondary'>
-              {emptyMsg.title}
-            </Typography>
-            {emptyMsg.help && (
-              <Typography variant='caption' color='text.secondary'>
-                {emptyMsg.help}
-              </Typography>
-            )}
-          </Box>
-        ) : (
-          <>
-            <TableContainer>
-              <Table size='small'>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ width: 64 }} />
-                    <TableCell>{t('products:fields.name')}</TableCell>
-                    <TableCell align='right'>
-                      {t('products:fields.stock')}
-                    </TableCell>
-                    <TableCell align='right'>
-                      {t('products:fields.selling_price')}
-                    </TableCell>
-                    {showAvgCost && (
-                      <TableCell
-                        align='right'
-                        sx={{ display: { xs: 'none', sm: 'table-cell' } }}
-                      >
-                        {t('products:fields.avg_cost')}
-                      </TableCell>
-                    )}
-                    {showLastPurchase && (
-                      <TableCell
-                        align='right'
-                        sx={{ display: { xs: 'none', md: 'table-cell' } }}
-                      >
-                        {t('products:fields.last_purchase_cost')}
-                      </TableCell>
-                    )}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {isFetching && rows.length === 0
-                    ? Array.from({ length: 5 }).map((_, i) => (
-                        <TableRow key={`sk-${i}`}>
-                          <TableCell colSpan={5}>
-                            <Skeleton height={28} />
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    : rows.map((row) => (
-                        <TableRow key={row.id} hover>
-                          <TableCell>{renderActions(row)}</TableCell>
-                          <TableCell>
-                            <Stack spacing={0.25}>
-                              <Typography
-                                variant='body2'
-                                fontWeight={700}
-                                noWrap
-                              >
-                                {row.name}
-                              </Typography>
-                              <Stack
-                                direction='row'
-                                spacing={0.5}
-                                alignItems='center'
-                              >
-                                <Chip
-                                  label={row.type}
-                                  size='small'
-                                  variant='outlined'
-                                  sx={{ height: 20, fontSize: 11 }}
-                                />
-                                {row.type === 'General' && (
-                                  <Chip
-                                    label={t(
-                                      'products:badges.default_type_warning'
-                                    )}
-                                    size='small'
-                                    color='warning'
-                                    variant='outlined'
-                                    sx={{ height: 20, fontSize: 10 }}
-                                  />
-                                )}
-                              </Stack>
-                            </Stack>
-                          </TableCell>
-                          <TableCell align='right'>
-                            <Stack
-                              spacing={0.25}
-                              direction='row'
-                              justifyContent='flex-end'
-                              alignItems='center'
-                            >
-                              <Typography variant='body2'>
-                                {row.stock}
-                              </Typography>
-                              {row.stock === 0 ? (
-                                <Chip
-                                  size='small'
-                                  color='default'
-                                  label={t('products:badges.out_of_stock')}
-                                  sx={{ height: 18, fontSize: 10 }}
-                                />
-                              ) : row.stock <= 5 ? (
-                                <Chip
-                                  size='small'
-                                  color='warning'
-                                  label={t('products:badges.low_stock')}
-                                  sx={{ height: 18, fontSize: 10 }}
-                                />
-                              ) : null}
-                            </Stack>
-                          </TableCell>
-                          <TableCell align='right'>
-                            {formatPKR(Number(row.price), locale)}
-                          </TableCell>
-                          {showAvgCost && (
-                            <TableCell
-                              align='right'
-                              sx={{ display: { xs: 'none', sm: 'table-cell' } }}
-                            >
-                              <Typography
-                                variant='caption'
-                                color='text.secondary'
-                              >
-                                {formatPKR(Number(row.avg_cost), locale)}
-                              </Typography>
-                            </TableCell>
-                          )}
-                          {showLastPurchase && (
-                            <TableCell
-                              align='right'
-                              sx={{ display: { xs: 'none', md: 'table-cell' } }}
-                            >
-                              <Typography
-                                variant='caption'
-                                color='text.secondary'
-                              >
-                                {row.last_purchase_cost === null
-                                  ? '—'
-                                  : formatPKR(
-                                      Number(row.last_purchase_cost),
-                                      locale
-                                    )}
-                              </Typography>
-                            </TableCell>
-                          )}
-                        </TableRow>
-                      ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+        }
+        ariaLabel={t('products:title')}
+      />
 
-            <Stack
-              direction={{ xs: 'column', sm: 'row' }}
-              alignItems={{ sm: 'center' }}
-              justifyContent='space-between'
-              sx={{ p: 1.5, gap: 1 }}
-            >
-              <Typography variant='caption' color='text.secondary'>
-                {t('products:pagination.showing', { from, to, total })}
-              </Typography>
-              {totalPages > 1 && (
-                <Pagination
-                  count={totalPages}
-                  page={page + 1}
-                  onChange={(_, p) => setPage(p - 1)}
-                  size='small'
-                />
-              )}
-            </Stack>
-          </>
-        )}
-      </Paper>
+      {total > pageSize && (
+        <Pagination
+          page={page + 1}
+          total={total}
+          pageSize={pageSize}
+          onChange={(p) => setPage(p - 1)}
+        />
+      )}
     </Stack>
   )
 }

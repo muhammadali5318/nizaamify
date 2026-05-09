@@ -1,9 +1,12 @@
 import { useState } from 'react'
-import { Alert, Button, Stack } from '@mui/material'
+import IconButton from '@mui/material/IconButton'
+import Stack from '@mui/material/Stack'
+import CloseIcon from '@mui/icons-material/Close'
 import { Link as RouterLink } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useEffectiveSubscription } from 'src/features/auth/hooks'
 import { paths } from 'src/paths'
+import { Banner, type BannerVariant, Button } from 'src/components/ui'
 
 type BannerKind =
   | 'subscription_suspended'
@@ -14,10 +17,7 @@ type BannerKind =
   | 'subscription_renewal_reminder'
   | null
 
-const SEVERITY: Record<
-  Exclude<BannerKind, null>,
-  'error' | 'warning' | 'info'
-> = {
+const VARIANT: Record<Exclude<BannerKind, null>, BannerVariant> = {
   subscription_suspended: 'error',
   subscription_expired: 'error',
   trial_ending_soon: 'warning',
@@ -81,8 +81,8 @@ export default function DashboardBanner() {
 
   if (!kind || dismissed) return null
 
-  const severity = SEVERITY[kind]
-  const dismissible = severity === 'info'
+  const variant = VARIANT[kind]
+  const dismissible = variant === 'info'
 
   const message = (() => {
     if (kind === 'subscription_suspended' || kind === 'subscription_expired') {
@@ -92,7 +92,7 @@ export default function DashboardBanner() {
   })()
 
   let actionLabel: string | null = null
-  let actionTo = paths.subscriptionExpired
+  let actionTo: string = paths.subscriptionExpired
   if (kind === 'subscription_suspended') {
     actionLabel = t('banner.actions.contact_support')
     actionTo = paths.support
@@ -120,27 +120,34 @@ export default function DashboardBanner() {
   }
 
   return (
-    <Alert
-      severity={severity}
-      onClose={dismissible ? onDismiss : undefined}
-      sx={{ borderRadius: 0 }}
+    <Banner
+      variant={variant}
       action={
-        actionLabel ? (
-          <Stack direction='row' spacing={1} alignItems='center'>
+        <Stack direction='row' spacing={1} alignItems='center'>
+          {actionLabel && (
             <Button
+              variant='secondary'
+              size='sm'
               component={RouterLink}
               to={actionTo}
-              size='small'
-              color='inherit'
-              variant='outlined'
             >
               {actionLabel}
             </Button>
-          </Stack>
-        ) : undefined
+          )}
+          {dismissible && (
+            <IconButton
+              aria-label='Dismiss'
+              size='small'
+              onClick={onDismiss}
+              sx={{ color: 'inherit' }}
+            >
+              <CloseIcon fontSize='small' />
+            </IconButton>
+          )}
+        </Stack>
       }
     >
       {message}
-    </Alert>
+    </Banner>
   )
 }

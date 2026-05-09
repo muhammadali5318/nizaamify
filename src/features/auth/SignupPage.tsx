@@ -1,13 +1,21 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, Stack, TextField, Typography } from '@mui/material'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import { Link as RouterLink, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { signupSchema, type SignupValues } from './schemas'
 import { supabase } from 'src/lib/supabase'
 import { paths } from 'src/paths'
 import AuthLayout from './AuthLayout'
+import { Banner, Button, Field, Input } from 'src/components/ui'
+
+const linkStyle: React.CSSProperties = {
+  color: 'var(--text-brand)',
+  fontWeight: 600,
+  textDecoration: 'none'
+}
 
 export default function SignupPage() {
   const { t } = useTranslation(['auth', 'common'])
@@ -47,54 +55,51 @@ export default function SignupPage() {
       subtitle={t('auth:signup.subtitle')}
     >
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <Stack spacing={2}>
-          {serverError && <Alert severity='error'>{serverError}</Alert>}
+        <Stack spacing={2.5}>
+          {serverError && <Banner variant='error'>{serverError}</Banner>}
 
-          <TextField
+          <Field
             label={t('auth:signup.email_label')}
-            type='email'
-            autoComplete='email'
-            fullWidth
-            {...register('email')}
-            error={!!errors.email}
-            helperText={errors.email?.message}
-          />
+            error={errors.email?.message}
+          >
+            <Input type='email' autoComplete='email' {...register('email')} />
+          </Field>
 
-          <TextField
+          <Field
             label={t('auth:signup.password_label')}
-            type='password'
-            autoComplete='new-password'
-            fullWidth
-            {...register('password')}
-            error={!!errors.password}
-            helperText={errors.password?.message}
-          />
+            error={errors.password?.message}
+          >
+            <Input
+              type='password'
+              autoComplete='new-password'
+              {...register('password')}
+            />
+          </Field>
 
-          <TextField
+          <Field
             label={t('auth:signup.confirm_password_label')}
-            type='password'
-            autoComplete='new-password'
-            fullWidth
-            {...register('confirmPassword')}
-            error={!!errors.confirmPassword}
-            helperText={errors.confirmPassword?.message}
-          />
+            error={errors.confirmPassword?.message}
+          >
+            <Input
+              type='password'
+              autoComplete='new-password'
+              {...register('confirmPassword')}
+            />
+          </Field>
 
           <Button
             type='submit'
-            variant='contained'
-            size='large'
-            disabled={isSubmitting}
+            variant='primary'
+            size='lg'
+            fullWidth
+            loading={isSubmitting}
           >
             {t('auth:signup.submit')}
           </Button>
 
           <Typography variant='body2' textAlign='center'>
             {t('auth:signup.have_account')}{' '}
-            <RouterLink
-              to={paths.login}
-              style={{ color: 'inherit', fontWeight: 600 }}
-            >
+            <RouterLink to={paths.login} style={linkStyle}>
               {t('auth:signup.login_link')}
             </RouterLink>
           </Typography>

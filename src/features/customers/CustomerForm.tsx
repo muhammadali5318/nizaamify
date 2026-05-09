@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Alert, Box, Button, Collapse, Stack, TextField } from '@mui/material'
+import Box from '@mui/material/Box'
+import Collapse from '@mui/material/Collapse'
+import Stack from '@mui/material/Stack'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import { Controller, useForm } from 'react-hook-form'
@@ -7,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
+import { Banner, Button, Field, Input, Textarea } from 'src/components/ui'
 
 const PK_PHONE_RE = /^(\+92|0)[0-9]{10}$/
 
@@ -37,7 +40,7 @@ type Props = {
   onCancel?: () => void
   submitLabel?: string
   cancelLabel?: string
-  /** Top-level error (e.g. unique-violation), rendered as inline Alert. */
+  /** Top-level error (e.g. unique-violation), rendered as inline Banner. */
   topError?: string | null
 }
 
@@ -70,20 +73,19 @@ export default function CustomerForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      <Stack spacing={2}>
-        {topError && <Alert severity='error'>{topError}</Alert>}
+      <Stack spacing={2.5}>
+        {topError && <Banner variant='error'>{topError}</Banner>}
 
         <Controller
           control={control}
           name='name'
           render={({ field }) => (
-            <TextField
-              {...field}
+            <Field
               label={t('customers:fields.name')}
-              fullWidth
-              error={!!errors.name}
-              helperText={errors.name?.message}
-            />
+              error={errors.name?.message}
+            >
+              <Input {...field} />
+            </Field>
           )}
         />
 
@@ -91,24 +93,23 @@ export default function CustomerForm({
           control={control}
           name='phone'
           render={({ field }) => (
-            <TextField
-              {...field}
+            <Field
               label={t('customers:fields.phone')}
-              placeholder='+92xxxxxxxxxx'
-              fullWidth
-              error={!!errors.phone}
-              helperText={errors.phone?.message}
-            />
+              error={errors.phone?.message}
+            >
+              <Input {...field} placeholder='+92xxxxxxxxxx' />
+            </Field>
           )}
         />
 
         {compact && (
           <Box>
             <Button
-              size='small'
+              variant='ghost'
+              size='sm'
               onClick={() => setShowMore((v) => !v)}
               startIcon={showMore ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-              sx={{ ps: 0 }}
+              sx={{ paddingInlineStart: 0 }}
             >
               {t('customers:show_more_fields')}
             </Button>
@@ -116,47 +117,45 @@ export default function CustomerForm({
         )}
 
         <Collapse in={showMore} unmountOnExit>
-          <Stack spacing={2}>
+          <Stack spacing={2.5}>
             <Controller
               control={control}
               name='address'
               render={({ field }) => (
-                <TextField
-                  {...field}
+                <Field
                   label={t('customers:fields.address_optional')}
-                  fullWidth
-                  multiline
-                  minRows={2}
-                  error={!!errors.address}
-                  helperText={errors.address?.message}
-                />
+                  error={errors.address?.message}
+                >
+                  <Textarea {...field} minRows={2} />
+                </Field>
               )}
             />
             <Controller
               control={control}
               name='notes'
               render={({ field }) => (
-                <TextField
-                  {...field}
+                <Field
                   label={t('customers:fields.notes_optional')}
-                  fullWidth
-                  multiline
-                  minRows={2}
-                  error={!!errors.notes}
-                  helperText={errors.notes?.message}
-                />
+                  error={errors.notes?.message}
+                >
+                  <Textarea {...field} minRows={2} />
+                </Field>
               )}
             />
           </Stack>
         </Collapse>
 
-        <Stack direction='row' spacing={1} justifyContent='flex-end'>
+        <Stack direction='row' spacing={1.5} justifyContent='flex-end'>
           {onCancel && (
-            <Button onClick={onCancel} disabled={submitting}>
+            <Button
+              variant='secondary'
+              onClick={onCancel}
+              disabled={submitting}
+            >
               {cancelLabel ?? t('common:actions.cancel')}
             </Button>
           )}
-          <Button type='submit' variant='contained' disabled={submitting}>
+          <Button type='submit' variant='primary' loading={submitting}>
             {submitLabel ?? t('customers:actions.save')}
           </Button>
         </Stack>

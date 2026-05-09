@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Dialog, DialogContent, DialogTitle } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useCreateCustomer } from 'src/features/customers/hooks'
 import CustomerForm, {
@@ -7,6 +6,7 @@ import CustomerForm, {
   type CustomerFormValues
 } from 'src/features/customers/CustomerForm'
 import { useNotifier } from 'src/components/notistack/NotificationProvider'
+import { Dialog } from 'src/components/ui'
 
 type Props = {
   open: boolean
@@ -50,23 +50,19 @@ export default function AddCustomerDialog({ open, onClose, onCreated }: Props) {
           onClose()
         }
       }}
-      fullWidth
-      maxWidth='xs'
+      title={t('customers:add_customer')}
     >
-      <DialogTitle>{t('customers:add_customer')}</DialogTitle>
-      <DialogContent>
-        <CustomerForm
-          mode='create'
-          compact
-          submitting={create.isPending}
-          onSubmit={handleSubmit}
-          onCancel={() => {
-            setTopError(null)
-            onClose()
-          }}
-          topError={topError}
-        />
-      </DialogContent>
+      <CustomerForm
+        mode='create'
+        compact
+        submitting={create.isPending}
+        onSubmit={handleSubmit}
+        onCancel={() => {
+          setTopError(null)
+          onClose()
+        }}
+        topError={topError}
+      />
     </Dialog>
   )
 }

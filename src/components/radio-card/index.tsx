@@ -61,7 +61,7 @@ const RadioCard: React.FC<{
       <CardActionArea
         onClick={() => onSelect(value)}
         sx={{
-          textAlign: 'left',
+          textAlign: 'start',
           alignItems: 'stretch',
           display: 'block',
           px: 2.5,

@@ -15,10 +15,9 @@ export function SplashScreen({
     <Box sx={{ overflow: 'hidden' }}>
       <Box
         sx={{
-          right: 0,
-          width: 1,
-          bottom: 0,
-          height: 1,
+          // inset:0 pins to all four edges; logical, RTL-safe, replaces
+          // the old right/bottom + width:1 + height:1 fullscreen recipe.
+          inset: 0,
           zIndex: 9998,
           display: 'flex',
           position: 'fixed',

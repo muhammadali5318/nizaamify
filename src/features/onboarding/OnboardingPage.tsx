@@ -1,17 +1,11 @@
 import { useState } from 'react'
-import {
-  Alert,
-  Box,
-  Button,
-  Container,
-  Paper,
-  Stack,
-  Step,
-  StepLabel,
-  Stepper,
-  TextField,
-  Typography
-} from '@mui/material'
+import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
+import Stack from '@mui/material/Stack'
+import Step from '@mui/material/Step'
+import StepLabel from '@mui/material/StepLabel'
+import Stepper from '@mui/material/Stepper'
+import Typography from '@mui/material/Typography'
 import StorefrontIcon from '@mui/icons-material/Storefront'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -27,6 +21,7 @@ import {
   shopStepSchema,
   type OnboardingValues
 } from './schemas'
+import { Banner, Button, Card, Field, Input, Textarea } from 'src/components/ui'
 
 const STEPS = ['shop', 'owner'] as const
 
@@ -91,26 +86,29 @@ export default function OnboardingPage() {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: 'var(--surface-subtle)' }}>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
         <LanguageSelector />
       </Box>
       <Container maxWidth='sm' sx={{ py: 2 }}>
-        <Paper elevation={2} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 3 }}>
+        <Card variant='elevated' sx={{ p: { xs: 3, sm: 4 } }}>
           <Stack spacing={1.5} alignItems='center' mb={3}>
-            <StorefrontIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-            <Typography variant='h5' fontWeight={700} textAlign='center'>
+            <StorefrontIcon sx={{ fontSize: 40, color: 'var(--text-brand)' }} />
+            <Typography
+              variant='display'
+              component='h1'
+              sx={{ textAlign: 'center', color: 'var(--text-primary)' }}
+            >
               {t('onboarding:title')}
             </Typography>
             <Typography
-              variant='body2'
-              color='text.secondary'
-              textAlign='center'
+              variant='body1'
+              sx={{ textAlign: 'center', color: 'var(--text-secondary)' }}
             >
               {t('onboarding:subtitle')}
             </Typography>
             {user?.email && (
-              <Typography variant='caption' color='text.secondary'>
+              <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
                 {t('onboarding:welcome', { email: user.email })}
               </Typography>
             )}
@@ -125,102 +123,98 @@ export default function OnboardingPage() {
           </Stepper>
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            <Stack spacing={2}>
-              {serverError && <Alert severity='error'>{serverError}</Alert>}
+            <Stack spacing={2.5}>
+              {serverError && <Banner variant='error'>{serverError}</Banner>}
 
               {activeStep === 0 && (
                 <>
-                  <Typography variant='subtitle1' fontWeight={700}>
+                  <Typography variant='h3'>
                     {t('onboarding:shop.section_title')}
                   </Typography>
-                  <TextField
+                  <Field
                     label={t('onboarding:shop.name_label')}
-                    fullWidth
-                    {...register('shop_name')}
-                    error={!!errors.shop_name}
-                    helperText={errors.shop_name?.message}
-                  />
-                  <TextField
+                    error={errors.shop_name?.message}
+                  >
+                    <Input {...register('shop_name')} />
+                  </Field>
+                  <Field
                     label={t('onboarding:shop.address_label')}
-                    fullWidth
-                    multiline
-                    minRows={2}
-                    {...register('shop_address')}
-                    error={!!errors.shop_address}
-                    helperText={errors.shop_address?.message}
-                  />
-                  <TextField
+                    error={errors.shop_address?.message}
+                  >
+                    <Textarea {...register('shop_address')} minRows={2} />
+                  </Field>
+                  <Field
                     label={t('onboarding:shop.phone_label')}
-                    fullWidth
-                    placeholder='+92xxxxxxxxxx'
-                    {...register('shop_phone')}
-                    error={!!errors.shop_phone}
-                    helperText={errors.shop_phone?.message}
-                  />
-                  <TextField
+                    error={errors.shop_phone?.message}
+                  >
+                    <Input
+                      placeholder='+92xxxxxxxxxx'
+                      {...register('shop_phone')}
+                    />
+                  </Field>
+                  <Field
                     label={t('onboarding:shop.type_label')}
-                    fullWidth
-                    placeholder={t('onboarding:shop.type_placeholder')}
-                    {...register('shop_type')}
-                    error={!!errors.shop_type}
-                    helperText={errors.shop_type?.message}
-                  />
+                    error={errors.shop_type?.message}
+                  >
+                    <Input
+                      placeholder={t('onboarding:shop.type_placeholder')}
+                      {...register('shop_type')}
+                    />
+                  </Field>
                 </>
               )}
 
               {activeStep === 1 && (
                 <>
-                  <Typography variant='subtitle1' fontWeight={700}>
+                  <Typography variant='h3'>
                     {t('onboarding:owner.section_title')}
                   </Typography>
-                  <TextField
+                  <Field
                     label={t('onboarding:owner.name_label')}
-                    fullWidth
-                    {...register('owner_name')}
-                    error={!!errors.owner_name}
-                    helperText={errors.owner_name?.message}
-                  />
-                  <TextField
+                    error={errors.owner_name?.message}
+                  >
+                    <Input {...register('owner_name')} />
+                  </Field>
+                  <Field
                     label={t('onboarding:owner.phone_label')}
-                    fullWidth
-                    placeholder='+92xxxxxxxxxx'
-                    {...register('owner_phone')}
-                    error={!!errors.owner_phone}
-                    helperText={errors.owner_phone?.message}
-                  />
-                  <TextField
+                    error={errors.owner_phone?.message}
+                  >
+                    <Input
+                      placeholder='+92xxxxxxxxxx'
+                      {...register('owner_phone')}
+                    />
+                  </Field>
+                  <Field
                     label={t('onboarding:owner.cnic_label')}
-                    fullWidth
-                    placeholder={t('onboarding:owner.cnic_placeholder')}
-                    {...register('owner_cnic')}
-                    error={!!errors.owner_cnic}
-                    helperText={
+                    error={
                       errors.owner_cnic
                         ? t('onboarding:errors.cnic_invalid')
                         : undefined
                     }
-                  />
-                  <TextField
+                  >
+                    <Input
+                      placeholder={t('onboarding:owner.cnic_placeholder')}
+                      {...register('owner_cnic')}
+                    />
+                  </Field>
+                  <Field
                     label={t('onboarding:owner.address_label')}
-                    fullWidth
-                    multiline
-                    minRows={2}
-                    {...register('owner_address')}
-                    error={!!errors.owner_address}
-                    helperText={errors.owner_address?.message}
-                  />
+                    error={errors.owner_address?.message}
+                  >
+                    <Textarea {...register('owner_address')} minRows={2} />
+                  </Field>
                 </>
               )}
 
               <Stack
                 direction='row'
-                spacing={1}
+                spacing={1.5}
                 justifyContent='flex-end'
                 mt={1}
               >
                 {activeStep > 0 && (
                   <Button
-                    variant='outlined'
+                    variant='secondary'
                     onClick={() => setActiveStep((s) => s - 1)}
                     disabled={isSubmitting}
                   >
@@ -228,14 +222,14 @@ export default function OnboardingPage() {
                   </Button>
                 )}
                 {activeStep < STEPS.length - 1 ? (
-                  <Button variant='contained' onClick={handleNext}>
+                  <Button variant='primary' onClick={handleNext}>
                     {t('onboarding:actions.next')}
                   </Button>
                 ) : (
                   <Button
                     type='submit'
-                    variant='contained'
-                    disabled={isSubmitting}
+                    variant='primary'
+                    loading={isSubmitting}
                   >
                     {t('onboarding:actions.submit')}
                   </Button>
@@ -243,7 +237,7 @@ export default function OnboardingPage() {
               </Stack>
             </Stack>
           </form>
-        </Paper>
+        </Card>
       </Container>
     </Box>
   )

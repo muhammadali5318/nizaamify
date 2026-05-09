@@ -1,8 +1,12 @@
-import { Box, Container, Paper, Stack, Typography } from '@mui/material'
+import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import StorefrontIcon from '@mui/icons-material/Storefront'
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import LanguageSelector from 'src/components/language-selector/LanguageSelector'
+import { Card } from 'src/components/ui'
 
 type Props = {
   title: string
@@ -10,6 +14,7 @@ type Props = {
   children: ReactNode
 }
 
+/** Centered single-card layout used by every /auth/* screen. */
 export function AuthLayout({ title, subtitle, children }: Props) {
   const { t } = useTranslation('common')
 
@@ -19,16 +24,10 @@ export function AuthLayout({ title, subtitle, children }: Props) {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        bgcolor: 'background.default'
+        backgroundColor: 'var(--surface-subtle)'
       }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          p: 2
-        }}
-      >
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
         <LanguageSelector />
       </Box>
 
@@ -42,34 +41,34 @@ export function AuthLayout({ title, subtitle, children }: Props) {
           py: 4
         }}
       >
-        <Paper
-          elevation={2}
-          sx={{
-            width: '100%',
-            p: { xs: 3, sm: 5 },
-            borderRadius: 3
-          }}
-        >
+        <Card variant='elevated' sx={{ width: '100%', p: { xs: 3, sm: 5 } }}>
           <Stack spacing={1.5} alignItems='center' mb={3}>
-            <StorefrontIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-            <Typography variant='h6' fontWeight={700}>
+            <StorefrontIcon sx={{ fontSize: 40, color: 'var(--text-brand)' }} />
+            <Typography variant='h3' sx={{ color: 'var(--text-primary)' }}>
               {t('app_name')}
             </Typography>
-            <Typography variant='h5' fontWeight={700} textAlign='center'>
+            <Typography
+              variant='display'
+              component='h1'
+              sx={{ textAlign: 'center', color: 'var(--text-primary)' }}
+            >
               {title}
             </Typography>
             {subtitle && (
               <Typography
-                variant='body2'
-                color='text.secondary'
-                textAlign='center'
+                variant='body1'
+                sx={{
+                  textAlign: 'center',
+                  color: 'var(--text-secondary)',
+                  maxWidth: '52ch'
+                }}
               >
                 {subtitle}
               </Typography>
             )}
           </Stack>
           {children}
-        </Paper>
+        </Card>
       </Container>
     </Box>
   )

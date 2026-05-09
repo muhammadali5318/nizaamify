@@ -1,95 +1,18 @@
+/*
+ * SCSS-side helpers. The v1.7 design tokens live in src/styles/tokens.css
+ * and the MUI theme (src/theme/muiTheme.ts) owns the typography scale.
+ * Anything here is for legacy SCSS reference only — prefer
+ * `var(--token)` references in component styles instead.
+ */
+
 :root {
-  // Spacing
+  // Bespoke spacing aliases used by older SCSS modules. New code should
+  // use Tailwind-style px multiples (gap-4 = 16px etc.) via MUI sx.
   --spacing-3: 24px;
   --spacing-25: 20px;
-  --spacing-125: 10px;
   --spacing-2: 16px;
-
-  // Typography
-  --text-secondary: #637381;
-  --text-primary: #1c252e;
-  --text-white: #fff;
-  --text-secondary-light: #919eab;
-  --body1-family: 'Lato', sans-serif;
-  --body1-size: 16px;
-  --body1-weight: 400;
-  --body1-line-height: 24px;
-  --body1-letter-spacing: 0px;
-  --h4-size: 24px;
-  --h4-family: 'Public Sans';
-  --h4-weight: 700;
-  --h4-line-height: 36px;
-  --h4-letter-spacing: 0px;
-  --secondary-font: 'Barlow', sans-serif;
+  --spacing-125: 10px;
 }
 
-// Border Radius
+// Border radius (kept; matches --radius-default in tokens.css).
 $button-radius: 8px;
-
-// Colors
-$colors: (
-  primary: (
-    lighter: #c8fad6,
-    light: #5be49b,
-    main: #00a76f,
-    dark: #007867,
-    darker: #004b50,
-    contrast-text: #ffffff
-  ),
-  secondary: (
-    lighter: #efd6ff,
-    light: #c684ff,
-    main: #8e33ff,
-    dark: #5119b7,
-    darker: #27097a,
-    contrast-text: #ffffff
-  ),
-  info: (
-    lighter: #cafdf5,
-    light: #61f3f3,
-    main: #00b8d9,
-    dark: #006c9c,
-    darker: #003768,
-    contrast-text: #ffffff
-  ),
-  success: (
-    lighter: #d3fcd2,
-    light: #77ed8b,
-    main: #22c55e,
-    dark: #118d57,
-    darker: #065e49,
-    contrast-text: #ffffff
-  ),
-  warning: (
-    lighter: #fff5cc,
-    light: #ffd666,
-    main: #ffab00,
-    dark: #b76e00,
-    darker: #7a4100,
-    contrast-text: #1c252e
-  ),
-  error: (
-    lighter: #ffe9d5,
-    light: #ffac82,
-    main: #ff5630,
-    dark: #b71d18,
-    darker: #7a0916,
-    contrast-text: #ffffff
-  ),
-  grey: (
-    50: #fcfdfd,
-    100: #f9fafb,
-    200: #f4f6f8,
-    300: #dfe3e8,
-    400: #c4cdd5,
-    500: #919eab,
-    600: #637381,
-    700: #454f5b,
-    800: #1c252e,
-    900: #141a21
-  ),
-  common: (
-    black: #000000,
-    white: #ffffff
-  )
-);

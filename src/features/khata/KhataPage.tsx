@@ -1,31 +1,37 @@
 import { useEffect, useState } from 'react'
-import {
-  Box,
-  Button,
-  CircularProgress,
-  MenuItem,
-  Pagination,
-  Paper,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography
-} from '@mui/material'
+import Box from '@mui/material/Box'
+import MenuItem from '@mui/material/MenuItem'
+import Stack from '@mui/material/Stack'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router'
 import { paths } from 'src/paths'
 import { useSearchKhataCustomers, type KhataStatus } from './hooks'
 import { formatPKR } from 'src/features/subscription/env'
+import {
+  Button,
+  DataTable,
+  EmptyState,
+  Input,
+  Pagination,
+  type DataTableColumn
+} from 'src/components/ui'
+import { PageHeader } from 'src/components/layout'
 
 const PAGE_SIZE = 50
 
 const isStatus = (s: string | null): s is KhataStatus =>
   s === 'open' || s === 'closed' || s === 'all'
+
+type KhataRow = {
+  id: string
+  name: string
+  phone: string
+  outstanding_balance: number | string
+  last_activity_at: string | null
+  entry_count: number | string
+}
 
 export default function KhataPage() {
   const { t, i18n } = useTranslation(['khata', 'common'])
@@ -75,9 +81,8 @@ export default function KhataPage() {
     pageSize: PAGE_SIZE
   })
 
-  const rows = data?.rows ?? []
+  const rows = (data?.rows ?? []) as KhataRow[]
   const total = data?.total ?? 0
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   const emptyKey =
     status === 'closed'
@@ -86,16 +91,87 @@ export default function KhataPage() {
         ? 'khata:list.empty_all'
         : 'khata:list.empty_open'
 
+  const columns: DataTableColumn<KhataRow>[] = [
+    {
+      id: 'customer',
+      header: t('khata:fields.customer'),
+      cardRole: 'heading',
+      cell: (c) => (
+        <Stack spacing={0.25}>
+          <Typography variant='body1' sx={{ fontWeight: 600 }}>
+            {c.name}
+          </Typography>
+          <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
+            {c.phone}
+          </Typography>
+        </Stack>
+      )
+    },
+    {
+      id: 'last_activity',
+      header: t('khata:fields.last_activity'),
+      hideOnMobile: true,
+      cell: (c) => (
+        <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
+          {c.last_activity_at
+            ? new Intl.DateTimeFormat(locale, { dateStyle: 'short' }).format(
+                new Date(c.last_activity_at)
+              )
+            : '—'}
+        </Typography>
+      )
+    },
+    {
+      id: 'entries',
+      header: t('khata:fields.entries'),
+      align: 'end',
+      hideOnMobile: true,
+      cell: (c) => (
+        <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
+          {Number(c.entry_count)}
+        </Typography>
+      )
+    },
+    {
+      id: 'outstanding',
+      header: t('khata:fields.outstanding'),
+      align: 'end',
+      cell: (c) => {
+        const balance = Number(c.outstanding_balance)
+        const color =
+          balance > 0
+            ? 'var(--warning-700)'
+            : balance < 0
+              ? 'var(--error-700)'
+              : 'var(--text-muted)'
+        return (
+          <Typography variant='body1' sx={{ fontWeight: 700, color }}>
+            {formatPKR(balance, locale)}
+          </Typography>
+        )
+      }
+    },
+    {
+      id: 'actions',
+      header: '',
+      align: 'end',
+      width: 140,
+      cardRole: 'actions',
+      cell: (c) => (
+        <Button
+          variant='link'
+          size='sm'
+          onClick={() => navigate(paths.gotoCustomer(c.id))}
+        >
+          {t('khata:list.view_history')}
+        </Button>
+      )
+    }
+  ]
+
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
-      <Stack mb={2}>
-        <Typography variant='h5' fontWeight={700}>
-          {t('khata:title')}
-        </Typography>
-        <Typography variant='body2' color='text.secondary'>
-          {t('khata:subtitle')}
-        </Typography>
-      </Stack>
+    <Box sx={{ maxWidth: 1280, mx: 'auto', width: '100%' }}>
+      <PageHeader title={t('khata:title')} subtitle={t('khata:subtitle')} />
 
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
@@ -115,9 +191,7 @@ export default function KhataPage() {
           <MenuItem value='closed'>{t('khata:list.filter_closed')}</MenuItem>
           <MenuItem value='all'>{t('khata:list.filter_all')}</MenuItem>
         </TextField>
-        <TextField
-          fullWidth
-          size='small'
+        <Input
           placeholder={t('khata:list.search_placeholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -125,114 +199,27 @@ export default function KhataPage() {
         />
       </Stack>
 
-      <Paper variant='outlined' sx={{ borderRadius: 2 }}>
-        {isLoading ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <CircularProgress size={24} />
+      <DataTable
+        columns={columns}
+        rows={rows}
+        getRowId={(c) => c.id}
+        loading={isLoading}
+        empty={
+          <Box sx={{ py: 4 }}>
+            <EmptyState title={t(emptyKey)} />
           </Box>
-        ) : rows.length === 0 ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <Typography variant='body2' color='text.secondary'>
-              {t(emptyKey)}
-            </Typography>
-          </Box>
-        ) : (
-          <>
-            <TableContainer>
-              <Table size='small'>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t('khata:fields.customer')}</TableCell>
-                    <TableCell>{t('khata:fields.last_activity')}</TableCell>
-                    <TableCell align='right'>
-                      {t('khata:fields.entries')}
-                    </TableCell>
-                    <TableCell align='right'>
-                      {t('khata:fields.outstanding')}
-                    </TableCell>
-                    <TableCell align='right' />
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((c) => {
-                    const balance = Number(c.outstanding_balance)
-                    return (
-                      <TableRow key={c.id} hover>
-                        <TableCell>
-                          <Stack spacing={0.25}>
-                            <Typography variant='body2' fontWeight={700}>
-                              {c.name}
-                            </Typography>
-                            <Typography
-                              variant='caption'
-                              color='text.secondary'
-                            >
-                              {c.phone}
-                            </Typography>
-                          </Stack>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant='caption' color='text.secondary'>
-                            {c.last_activity_at
-                              ? new Intl.DateTimeFormat(locale, {
-                                  dateStyle: 'short'
-                                }).format(new Date(c.last_activity_at))
-                              : '—'}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align='right'>
-                          <Typography variant='caption' color='text.secondary'>
-                            {Number(c.entry_count)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align='right'>
-                          <Typography
-                            variant='body2'
-                            fontWeight={700}
-                            color={
-                              balance > 0
-                                ? 'warning.main'
-                                : balance < 0
-                                  ? 'error.main'
-                                  : 'text.secondary'
-                            }
-                          >
-                            {formatPKR(balance, locale)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align='right'>
-                          <Button
-                            size='small'
-                            onClick={() => navigate(paths.gotoCustomer(c.id))}
-                          >
-                            {t('khata:list.view_history')}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            {totalPages > 1 && (
-              <Box
-                sx={{
-                  p: 1.5,
-                  display: 'flex',
-                  justifyContent: 'center'
-                }}
-              >
-                <Pagination
-                  count={totalPages}
-                  page={page + 1}
-                  onChange={(_, p) => setPage(p - 1)}
-                  size='small'
-                />
-              </Box>
-            )}
-          </>
-        )}
-      </Paper>
+        }
+        ariaLabel={t('khata:title')}
+      />
+
+      {total > PAGE_SIZE && (
+        <Pagination
+          page={page + 1}
+          total={total}
+          pageSize={PAGE_SIZE}
+          onChange={(p) => setPage(p - 1)}
+        />
+      )}
     </Box>
   )
 }

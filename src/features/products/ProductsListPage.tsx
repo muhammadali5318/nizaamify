@@ -1,17 +1,7 @@
 import { useState } from 'react'
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  IconButton,
-  Stack,
-  Tooltip,
-  Typography
-} from '@mui/material'
+import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
+import IconButton from '@mui/material/IconButton'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import ArchiveIcon from '@mui/icons-material/Archive'
@@ -20,6 +10,8 @@ import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
 import { useArchiveProduct, type ProductSearchRow } from './hooks'
 import { useNotifier } from 'src/components/notistack/NotificationProvider'
+import { Button, ConfirmDialog, Tooltip } from 'src/components/ui'
+import { PageHeader } from 'src/components/layout'
 import ProductTable from './ProductTable'
 
 export default function ProductsListPage() {
@@ -41,26 +33,19 @@ export default function ProductsListPage() {
   }
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
-      <Stack
-        direction='row'
-        alignItems='center'
-        justifyContent='space-between'
-        mb={2}
-        flexWrap='wrap'
-        gap={1}
-      >
-        <Typography variant='h5' fontWeight={700}>
-          {t('products:title')}
-        </Typography>
-        <Button
-          variant='contained'
-          startIcon={<AddIcon />}
-          onClick={() => navigate(paths.newProduct)}
-        >
-          {t('products:new_product')}
-        </Button>
-      </Stack>
+    <Box sx={{ maxWidth: 1280, mx: 'auto', width: '100%' }}>
+      <PageHeader
+        title={t('products:title')}
+        actions={
+          <Button
+            variant='primary'
+            startIcon={<AddIcon />}
+            onClick={() => navigate(paths.newProduct)}
+          >
+            {t('products:new_product')}
+          </Button>
+        }
+      />
 
       <ProductTable
         showAvgCost
@@ -89,25 +74,17 @@ export default function ProductsListPage() {
         )}
       />
 
-      <Dialog open={!!confirm} onClose={() => setConfirm(null)}>
-        <DialogTitle>{t('products:actions.archive')}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>{confirm?.name}</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirm(null)} disabled={archive.isPending}>
-            {t('products:actions.back')}
-          </Button>
-          <Button
-            color='warning'
-            variant='contained'
-            onClick={onArchive}
-            disabled={archive.isPending}
-          >
-            {t('products:actions.archive')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ConfirmDialog
+        open={!!confirm}
+        onClose={() => setConfirm(null)}
+        onConfirm={onArchive}
+        title={t('products:actions.archive')}
+        description={confirm?.name}
+        confirmLabel={t('products:actions.archive')}
+        cancelLabel={t('products:actions.back')}
+        loading={archive.isPending}
+        destructive
+      />
     </Box>
   )
 }

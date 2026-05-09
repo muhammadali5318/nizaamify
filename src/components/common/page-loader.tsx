@@ -28,10 +28,7 @@ const PageLoader: React.FC<ChildrenProp> = () => {
             justifyContent: 'center',
             alignItems: 'center',
             position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
+            inset: 0,
             backgroundColor: 'white', // Optional: overlay background
             zIndex: 10
           }}

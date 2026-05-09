@@ -1,12 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import {
-  Autocomplete,
-  Box,
-  CircularProgress,
-  Stack,
-  TextField,
-  Typography
-} from '@mui/material'
+import Autocomplete from '@mui/material/Autocomplete'
+import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
 import AddIcon from '@mui/icons-material/Add'
 import { useTranslation } from 'react-i18next'
 import {
@@ -16,6 +13,7 @@ import {
   type RecentCustomer
 } from './hooks'
 import AddCustomerDialog from 'src/features/pos/AddCustomerDialog'
+import { Spinner } from 'src/components/ui'
 
 const PAGE_SIZE = 10
 const ADD_NEW_ID = '__add_new'
@@ -42,6 +40,12 @@ type Props = {
 const truncate = (s: string, n = 40) =>
   s.length > n ? `${s.slice(0, n - 1)}…` : s
 
+/**
+ * Customer picker. Built on MUI Autocomplete directly (not ui/Combobox) so
+ * we can inject a loading-state Spinner into the input adornment, which
+ * Combobox's auto-rendered TextField doesn't expose. Visually identical
+ * to a Combobox via shared theme overrides.
+ */
 export default function CustomerPicker({
   value,
   onChange,
@@ -205,27 +209,31 @@ export default function CustomerPicker({
                     width: '100%',
                     color:
                       option.id === ADD_NEW_ID
-                        ? 'primary.main'
-                        : 'text.secondary',
+                        ? 'var(--text-brand)'
+                        : 'var(--text-muted)',
                     fontWeight: 600
                   }}
                 >
                   {option.id === ADD_NEW_ID && <AddIcon fontSize='small' />}
-                  <Typography variant='body2'>{option.name}</Typography>
+                  <Typography variant='body2' sx={{ color: 'inherit' }}>
+                    {option.name}
+                  </Typography>
                 </Stack>
               ) : (
                 <Box sx={{ width: '100%' }}>
-                  <Typography variant='body2' fontWeight={700}>
+                  <Typography variant='body1' sx={{ fontWeight: 600 }}>
                     {option.name}
                   </Typography>
-                  <Typography variant='caption' color='text.secondary'>
+                  <Typography
+                    variant='caption'
+                    sx={{ color: 'var(--text-muted)' }}
+                  >
                     {option.phone}
                   </Typography>
                   {option.address && (
                     <Typography
                       variant='caption'
-                      color='text.secondary'
-                      display='block'
+                      sx={{ color: 'var(--text-muted)', display: 'block' }}
                     >
                       {truncate(option.address, 40)}
                     </Typography>
@@ -242,16 +250,16 @@ export default function CustomerPicker({
             required={required}
             error={!!errorText}
             helperText={errorText}
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {isLoading ? (
-                    <CircularProgress color='inherit' size={16} />
-                  ) : null}
-                  {params.InputProps.endAdornment}
-                </>
-              )
+            slotProps={{
+              input: {
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {isLoading ? <Spinner size='inline' /> : null}
+                    {params.InputProps.endAdornment}
+                  </>
+                )
+              }
             }}
           />
         )}

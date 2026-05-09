@@ -1,37 +1,32 @@
 import { useMemo, useState } from 'react'
-import {
-  Box,
-  Chip,
-  CircularProgress,
-  MenuItem,
-  Pagination,
-  Paper,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material'
+import Box from '@mui/material/Box'
+import MenuItem from '@mui/material/MenuItem'
+import Stack from '@mui/material/Stack'
+import TextField from '@mui/material/TextField'
 import StickyNote2OutlinedIcon from '@mui/icons-material/StickyNote2Outlined'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
-import { useSales, type SalesFilters } from './hooks'
+import { useSales, type SaleListRow, type SalesFilters } from './hooks'
 import { useCustomers } from 'src/features/customers/hooks'
 import { formatPKR } from 'src/features/subscription/env'
+import {
+  Badge,
+  type BadgeVariant,
+  Card,
+  DataTable,
+  EmptyState,
+  Pagination,
+  Tooltip,
+  type DataTableColumn
+} from 'src/components/ui'
+import { PageHeader } from 'src/components/layout'
 
 const PAGE_SIZE = 25
 
 const toIsoDate = (d: Date) => d.toISOString().slice(0, 10)
 
-type ChipColor = 'success' | 'warning' | 'info' | 'default'
-
-const paymentChipColor: Record<string, ChipColor> = {
+const paymentBadgeVariant: Record<string, BadgeVariant> = {
   cash: 'success',
   credit: 'warning',
   partial: 'info'
@@ -69,7 +64,6 @@ export default function SalesListPage() {
   const { data, isLoading } = useSales(filters)
   const rows = data?.rows ?? []
   const total = data?.total ?? 0
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   const onChangeFilter = () => setPage(0)
 
@@ -80,13 +74,95 @@ export default function SalesListPage() {
     return pt
   }
 
-  return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
-      <Typography variant='h5' fontWeight={700} mb={2}>
-        {t('sales:title')}
-      </Typography>
+  const columns: DataTableColumn<SaleListRow>[] = [
+    {
+      id: 'datetime',
+      header: t('sales:columns.datetime'),
+      cardRole: 'heading',
+      cell: (r) =>
+        new Intl.DateTimeFormat(locale, {
+          dateStyle: 'short',
+          timeStyle: 'short'
+        }).format(new Date(r.created_at))
+    },
+    {
+      id: 'customer',
+      header: t('sales:columns.customer'),
+      cell: (r) => r.customer?.name ?? t('sales:walk_in')
+    },
+    {
+      id: 'payment_type',
+      header: t('sales:columns.payment_type'),
+      cell: (r) => {
+        const isPartial = r.payment_type === 'partial'
+        const paid = Number(r.amount_paid ?? 0)
+        const credit = Math.max(0, Number(r.total) - paid)
+        const badge = (
+          <Badge
+            variant={paymentBadgeVariant[r.payment_type] ?? 'neutral'}
+            label={labelForPaymentType(r.payment_type)}
+          />
+        )
+        return isPartial ? (
+          <Tooltip
+            title={t('sales:partial_breakdown', {
+              paid: formatPKR(paid, locale),
+              credit: formatPKR(credit, locale)
+            })}
+          >
+            <span>{badge}</span>
+          </Tooltip>
+        ) : (
+          badge
+        )
+      }
+    },
+    {
+      id: 'items',
+      header: t('sales:columns.items'),
+      align: 'end',
+      hideOnMobile: true,
+      cell: (r) => r.sale_items?.length ?? 0
+    },
+    {
+      id: 'service_charge',
+      header: t('sales:columns.service_charge'),
+      align: 'end',
+      hideOnMobile: true,
+      cell: (r) => formatPKR(r.service_charge, locale)
+    },
+    {
+      id: 'total',
+      header: t('sales:columns.total'),
+      align: 'end',
+      cell: (r) => (
+        <Box component='span' sx={{ fontWeight: 600 }}>
+          {formatPKR(r.total, locale)}
+        </Box>
+      )
+    },
+    {
+      id: 'notes',
+      header: t('sales:columns.notes'),
+      align: 'center',
+      width: 56,
+      cell: (r) =>
+        r.notes ? (
+          <Tooltip title={t('sales:has_notes_tooltip')}>
+            <StickyNote2OutlinedIcon
+              fontSize='small'
+              sx={{ color: 'var(--text-muted)' }}
+            />
+          </Tooltip>
+        ) : null
+    }
+  ]
 
-      <Paper variant='outlined' sx={{ p: 2, borderRadius: 2, mb: 2 }}>
+  return (
+    <Box sx={{ maxWidth: 1280, mx: 'auto', width: '100%' }}>
+      <PageHeader title={t('sales:title')} />
+
+      <Card sx={{ mb: 2 }}>
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           spacing={1.5}
@@ -101,7 +177,7 @@ export default function SalesListPage() {
               setStart(e.target.value)
               onChangeFilter()
             }}
-            InputLabelProps={{ shrink: true }}
+            slotProps={{ inputLabel: { shrink: true } }}
           />
           <TextField
             label={t('sales:filters.end_date')}
@@ -112,7 +188,7 @@ export default function SalesListPage() {
               setEnd(e.target.value)
               onChangeFilter()
             }}
-            InputLabelProps={{ shrink: true }}
+            slotProps={{ inputLabel: { shrink: true } }}
           />
           <TextField
             select
@@ -149,121 +225,30 @@ export default function SalesListPage() {
             ))}
           </TextField>
         </Stack>
-      </Paper>
+      </Card>
 
-      <Paper variant='outlined' sx={{ borderRadius: 2 }}>
-        {isLoading ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <CircularProgress size={24} />
+      <DataTable
+        columns={columns}
+        rows={rows}
+        getRowId={(r) => r.id}
+        loading={isLoading}
+        onRowClick={(r) => navigate(paths.gotoSale(r.id))}
+        empty={
+          <Box sx={{ py: 4 }}>
+            <EmptyState title={t('sales:empty')} />
           </Box>
-        ) : rows.length === 0 ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <Typography variant='body2' color='text.secondary'>
-              {t('sales:empty')}
-            </Typography>
-          </Box>
-        ) : (
-          <>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t('sales:columns.datetime')}</TableCell>
-                    <TableCell>{t('sales:columns.customer')}</TableCell>
-                    <TableCell>{t('sales:columns.payment_type')}</TableCell>
-                    <TableCell align='right'>
-                      {t('sales:columns.items')}
-                    </TableCell>
-                    <TableCell align='right'>
-                      {t('sales:columns.service_charge')}
-                    </TableCell>
-                    <TableCell align='right'>
-                      {t('sales:columns.total')}
-                    </TableCell>
-                    <TableCell align='center'>
-                      {t('sales:columns.notes')}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((r) => {
-                    const isPartial = r.payment_type === 'partial'
-                    const paid = Number(r.amount_paid ?? 0)
-                    const credit = Math.max(0, Number(r.total) - paid)
-                    const chip = (
-                      <Chip
-                        size='small'
-                        label={labelForPaymentType(r.payment_type)}
-                        color={paymentChipColor[r.payment_type] ?? 'default'}
-                      />
-                    )
-                    return (
-                      <TableRow
-                        key={r.id}
-                        hover
-                        onClick={() => navigate(paths.gotoSale(r.id))}
-                        sx={{ cursor: 'pointer' }}
-                      >
-                        <TableCell>
-                          {new Intl.DateTimeFormat(locale, {
-                            dateStyle: 'short',
-                            timeStyle: 'short'
-                          }).format(new Date(r.created_at))}
-                        </TableCell>
-                        <TableCell>
-                          {r.customer?.name ?? t('sales:walk_in')}
-                        </TableCell>
-                        <TableCell>
-                          {isPartial ? (
-                            <Tooltip
-                              title={t('sales:partial_breakdown', {
-                                paid: formatPKR(paid, locale),
-                                credit: formatPKR(credit, locale)
-                              })}
-                            >
-                              {chip}
-                            </Tooltip>
-                          ) : (
-                            chip
-                          )}
-                        </TableCell>
-                        <TableCell align='right'>
-                          {r.sale_items?.length ?? 0}
-                        </TableCell>
-                        <TableCell align='right'>
-                          {formatPKR(r.service_charge, locale)}
-                        </TableCell>
-                        <TableCell align='right'>
-                          {formatPKR(r.total, locale)}
-                        </TableCell>
-                        <TableCell align='center'>
-                          {r.notes ? (
-                            <Tooltip title={t('sales:has_notes_tooltip')}>
-                              <StickyNote2OutlinedIcon
-                                fontSize='small'
-                                color='action'
-                              />
-                            </Tooltip>
-                          ) : null}
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            {totalPages > 1 && (
-              <Box sx={{ p: 2, display: 'flex', justifyContent: 'center' }}>
-                <Pagination
-                  count={totalPages}
-                  page={page + 1}
-                  onChange={(_, p) => setPage(p - 1)}
-                />
-              </Box>
-            )}
-          </>
-        )}
-      </Paper>
+        }
+        ariaLabel={t('sales:title')}
+      />
+
+      {total > PAGE_SIZE && (
+        <Pagination
+          page={page + 1}
+          total={total}
+          pageSize={PAGE_SIZE}
+          onChange={(p) => setPage(p - 1)}
+        />
+      )}
     </Box>
   )
 }

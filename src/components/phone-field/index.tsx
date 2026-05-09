@@ -78,7 +78,9 @@ function PhoneField<T extends FieldValues>({
                   borderRadius: '50%'
                 },
                 '& .MuiInputBase-input': {
-                  paddingLeft: '24px'
+                  // Logical: gives space for the country flag chip, which
+                  // sits at the start (left in LTR, right in RTL) edge.
+                  paddingInlineStart: '24px'
                 }
               }}
             />

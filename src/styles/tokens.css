@@ -1,0 +1,151 @@
+/* Design tokens — single source of truth.
+   Per MVP_DESIGN_SYSTEM_v1.7.md §2 (color), §3.1 (fonts), §4.2 (radii), §4.3 (shadows), §4.4 (motion).
+   Components consume the SEMANTIC tokens (surface-*, text-*, action-*, status-*).
+   Raw scales (brand-*, neutral-*, success-*, etc.) are exposed for the rare bespoke case. */
+
+:root {
+  /* ---------- Brand scale (mint → teal → navy) ---------- */
+  --brand-50:  #F0FDF4;
+  --brand-100: #DCFCE7;
+  --brand-200: #AAFFC7;   /* user anchor */
+  --brand-300: #86E0A4;
+  --brand-400: #67C090;   /* user anchor */
+  --brand-500: #4A9D88;
+  --brand-600: #357B7E;
+  --brand-700: #215B63;   /* user anchor — primary CTA */
+  --brand-800: #184E68;
+  --brand-900: #124170;   /* user anchor — heading/topbar */
+  --brand-950: #0A2A4A;
+
+  /* ---------- Neutral scale (slightly cool, ~3% toward teal) ---------- */
+  --neutral-0:   #FFFFFF;
+  --neutral-50:  #F8FAFA;
+  --neutral-100: #F1F4F4;
+  --neutral-200: #E2E7E8;
+  --neutral-300: #CBD2D4;
+  --neutral-400: #9AA4A8;
+  --neutral-500: #6B7679;
+  --neutral-600: #4D5659;
+  --neutral-700: #363D40;
+  --neutral-800: #23282A;
+  --neutral-900: #13171A;
+
+  /* ---------- Semantic scales ---------- */
+  --success-50:  #F0FDF4;
+  --success-100: #DCFCE7;
+  --success-500: #16A34A;
+  --success-600: #15803D;
+  --success-700: #166534;
+
+  --warning-50:  #FFFBEB;
+  --warning-100: #FEF3C7;
+  --warning-500: #F59E0B;
+  --warning-600: #D97706;
+  --warning-700: #B45309;
+
+  --error-50:  #FEF2F2;
+  --error-100: #FEE2E2;
+  --error-500: #DC2626;
+  --error-600: #B91C1C;
+  --error-700: #991B1B;
+
+  --info-50:  #EFF6FF;
+  --info-100: #DBEAFE;
+  --info-500: #2563EB;
+  --info-600: #1D4ED8;
+  --info-700: #1E40AF;
+
+  /* ---------- Semantic surface ---------- */
+  --surface-base:     var(--neutral-0);
+  --surface-subtle:   var(--neutral-50);
+  --surface-muted:    var(--neutral-100);
+  --surface-emphasis: var(--brand-50);
+  --surface-inverse:  var(--brand-900);
+
+  /* ---------- Semantic text ---------- */
+  --text-primary:   var(--neutral-900);
+  --text-secondary: var(--neutral-700);
+  --text-muted:     var(--neutral-500);
+  --text-disabled:  var(--neutral-400);
+  --text-inverse:   var(--neutral-0);
+  --text-brand:     var(--brand-700);
+
+  /* ---------- Semantic borders ---------- */
+  --border-subtle:  var(--neutral-100);
+  --border-default: var(--neutral-200);
+  --border-strong:  var(--neutral-300);
+  --border-brand:   var(--brand-700);
+  --border-focus:   var(--brand-700);
+
+  /* ---------- Interactive (actions) ---------- */
+  --action-primary:        var(--brand-700);
+  --action-primary-hover:  var(--brand-800);
+  --action-primary-press:  var(--brand-950);
+  --action-primary-text:   var(--neutral-0);
+
+  --action-secondary:         var(--neutral-0);
+  --action-secondary-hover:   var(--neutral-50);
+  --action-secondary-border:  var(--neutral-300);
+  --action-secondary-text:    var(--text-primary);
+
+  --action-accent:        var(--brand-400);   /* mint, sparingly */
+  --action-accent-hover:  var(--brand-500);
+  --action-accent-text:   var(--brand-900);
+
+  --action-destructive:        var(--error-600);
+  --action-destructive-hover:  var(--error-700);
+  --action-destructive-text:   var(--neutral-0);
+
+  /* ---------- Status fills (badges/banners/pills) ---------- */
+  --status-success-bg:   var(--success-100);
+  --status-success-text: var(--success-700);
+  --status-warning-bg:   var(--warning-100);
+  --status-warning-text: var(--warning-700);
+  --status-error-bg:     var(--error-100);
+  --status-error-text:   var(--error-700);
+  --status-info-bg:      var(--info-100);
+  --status-info-text:    var(--info-700);
+  --status-brand-bg:     var(--brand-100);
+  --status-brand-text:   var(--brand-800);
+
+  /* ---------- Focus ring ---------- */
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--brand-700) 40%, transparent);
+
+  /* ---------- Typography (font families per §3.1) ---------- */
+  --font-sans-en:    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-sans-ur:    'Noto Naskh Arabic', 'Noto Sans Arabic', system-ui, sans-serif;
+  --font-display-ur: 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', system-ui, sans-serif;
+
+  /* ---------- Border radii (§4.2) ---------- */
+  --radius-none: 0;
+  --radius-sm:   4px;
+  --radius:      8px;     /* default — inputs, buttons, small cards */
+  --radius-md:   10px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-full: 9999px;
+
+  /* ---------- Shadows (§4.3) ---------- */
+  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 2px 4px -1px rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 6px 12px -3px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 12px 24px -6px rgba(15, 23, 42, 0.10), 0 4px 8px -4px rgba(15, 23, 42, 0.06);
+  --shadow-xl: 0 24px 48px -12px rgba(15, 23, 42, 0.18);
+  --shadow-brand: 0 8px 20px -8px color-mix(in srgb, var(--brand-700) 40%, transparent);
+
+  /* ---------- Motion (§4.4) ---------- */
+  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

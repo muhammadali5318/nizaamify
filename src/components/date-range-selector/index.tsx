@@ -8,6 +8,7 @@ import {
   InputAdornment,
   IconButton
 } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar'
@@ -39,6 +40,7 @@ const DateRangeSelector: React.FC<Props> = ({
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [tempStart, setTempStart] = useState<Dayjs | null>(toDayjs(value.start))
   const [tempEnd, setTempEnd] = useState<Dayjs | null>(toDayjs(value.end))
+  const { direction } = useTheme()
 
   const minDayjs = toDayjs(minDate)
   const maxDayjs = toDayjs(maxDate)
@@ -120,7 +122,9 @@ const DateRangeSelector: React.FC<Props> = ({
               color: theme.palette.text.primary
             }),
 
-            // ✅ Start date
+            // ✅ Start date — range fill is anchored to the trailing edge
+            // (logical inset-inline-end) so the bar visually flows toward
+            // the end date in both LTR and RTL.
             ...(isSelectedStart && {
               backgroundColor: primary,
               color: contrast,
@@ -131,8 +135,8 @@ const DateRangeSelector: React.FC<Props> = ({
                 position: 'absolute',
                 top: 0,
                 bottom: 0,
-                left: 0,
-                right: '100%',
+                insetInlineStart: 0,
+                insetInlineEnd: '100%',
                 backgroundColor: grey,
                 zIndex: -1
               },
@@ -141,14 +145,15 @@ const DateRangeSelector: React.FC<Props> = ({
                 position: 'absolute',
                 top: 0,
                 bottom: 0,
-                left: '50%',
-                right: '0%',
+                insetInlineStart: '50%',
+                insetInlineEnd: '0%',
                 backgroundColor: grey,
                 zIndex: -2
               }
             }),
 
-            // ✅ End date
+            // ✅ End date — symmetric to Start, anchored to leading edge
+            // (logical inset-inline-start).
             ...(isSelectedEnd && {
               backgroundColor: primary,
               color: contrast,
@@ -159,8 +164,8 @@ const DateRangeSelector: React.FC<Props> = ({
                 position: 'absolute',
                 top: 0,
                 bottom: 0,
-                right: '50%',
-                left: 0,
+                insetInlineEnd: '50%',
+                insetInlineStart: 0,
                 backgroundColor: grey,
                 zIndex: -1
               },
@@ -169,8 +174,8 @@ const DateRangeSelector: React.FC<Props> = ({
                 position: 'absolute',
                 top: 0,
                 bottom: 0,
-                right: '100%',
-                left: 0,
+                insetInlineEnd: '100%',
+                insetInlineStart: 0,
                 backgroundColor: grey,
                 zIndex: -2
               }
@@ -220,7 +225,10 @@ const DateRangeSelector: React.FC<Props> = ({
           open={open}
           anchorEl={anchorEl}
           onClose={handleClose}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: direction === 'rtl' ? 'right' : 'left'
+          }}
         >
           <Box>
             <DateCalendar

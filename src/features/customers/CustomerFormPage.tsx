@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Box, Button, CircularProgress, Paper, Typography } from '@mui/material'
+import Box from '@mui/material/Box'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router'
 import { paths } from 'src/paths'
@@ -9,6 +9,8 @@ import CustomerForm, {
   isPhoneDuplicateError,
   type CustomerFormValues
 } from './CustomerForm'
+import { Banner, Button, Card, FullPageSpinner } from 'src/components/ui'
+import { PageHeader } from 'src/components/layout'
 
 export default function CustomerFormPage() {
   const { t } = useTranslation(['customers', 'common'])
@@ -21,21 +23,17 @@ export default function CustomerFormPage() {
   const { data: existing, isLoading } = useCustomer(isNew ? undefined : id)
   const [topError, setTopError] = useState<string | null>(null)
 
-  if (!isNew && isLoading) {
-    return (
-      <Box sx={{ p: 4, textAlign: 'center' }}>
-        <CircularProgress size={24} />
-      </Box>
-    )
-  }
+  if (!isNew && isLoading) return <FullPageSpinner />
 
   if (!isNew && !existing) {
     return (
-      <Box sx={{ p: { xs: 2, sm: 3 } }}>
-        <Typography variant='body1'>
-          {t('customers:errors.not_found')}
-        </Typography>
-        <Button onClick={() => navigate(paths.customers)} sx={{ mt: 2 }}>
+      <Box sx={{ maxWidth: 672, mx: 'auto', width: '100%' }}>
+        <Banner variant='error'>{t('customers:errors.not_found')}</Banner>
+        <Button
+          variant='secondary'
+          onClick={() => navigate(paths.customers)}
+          sx={{ mt: 2 }}
+        >
           {t('customers:actions.back')}
         </Button>
       </Box>
@@ -75,12 +73,13 @@ export default function CustomerFormPage() {
   }
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
-      <Paper sx={{ p: { xs: 3, sm: 4 }, borderRadius: 3, maxWidth: 640 }}>
-        <Typography variant='h5' fontWeight={700} mb={3}>
-          {isNew ? t('customers:add_customer') : t('customers:edit_customer')}
-        </Typography>
-
+    <Box sx={{ maxWidth: 672, mx: 'auto', width: '100%' }}>
+      <PageHeader
+        title={
+          isNew ? t('customers:add_customer') : t('customers:edit_customer')
+        }
+      />
+      <Card>
         <CustomerForm
           mode={isNew ? 'create' : 'edit'}
           defaultValues={
@@ -98,7 +97,7 @@ export default function CustomerFormPage() {
           onCancel={() => navigate(paths.customers)}
           topError={topError}
         />
-      </Paper>
+      </Card>
     </Box>
   )
 }

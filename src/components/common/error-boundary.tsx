@@ -146,7 +146,7 @@ export default class ErrorBoundary extends React.Component<
             <Box
               component='pre'
               sx={{
-                textAlign: 'left',
+                textAlign: 'start',
                 mt: 2,
                 p: 2,
                 borderRadius: 1,
