@@ -1,27 +1,8 @@
 import { useEffect, useState } from 'react'
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  IconButton,
-  Pagination,
-  Paper,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material'
+import Box from '@mui/material/Box'
+import IconButton from '@mui/material/IconButton'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
@@ -35,6 +16,17 @@ import {
 } from './hooks'
 import { useNotifier } from 'src/components/notistack/NotificationProvider'
 import { formatPKR } from 'src/features/subscription/env'
+import {
+  Button,
+  ConfirmDialog,
+  DataTable,
+  EmptyState,
+  Input,
+  Pagination,
+  Tooltip,
+  type DataTableColumn
+} from 'src/components/ui'
+import { PageHeader } from 'src/components/layout'
 
 const PAGE_SIZE = 25
 
@@ -69,7 +61,6 @@ export default function CustomersListPage() {
   })
   const rows = data?.rows ?? []
   const total = data?.total ?? 0
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   const onDelete = async () => {
     if (!confirm) return
@@ -82,191 +73,173 @@ export default function CustomersListPage() {
     }
   }
 
-  return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
-      <Stack
-        direction='row'
-        alignItems='center'
-        justifyContent='space-between'
-        mb={2}
-        flexWrap='wrap'
-        gap={1}
-      >
-        <Typography variant='h5' fontWeight={700}>
-          {t('customers:title')}
-        </Typography>
-        <Button
-          variant='contained'
-          startIcon={<AddIcon />}
-          onClick={() => navigate(paths.newCustomer)}
+  const columns: DataTableColumn<CustomerListRow>[] = [
+    {
+      id: 'name',
+      header: t('customers:fields.name'),
+      cardRole: 'heading',
+      cell: (c) => c.name
+    },
+    {
+      id: 'phone',
+      header: t('customers:fields.phone'),
+      cell: (c) => c.phone
+    },
+    {
+      id: 'address',
+      header: t('customers:fields.address'),
+      hideOnMobile: true,
+      cell: (c) =>
+        c.address ? (
+          <Tooltip title={c.address}>
+            <span>{truncate(c.address, 30)}</span>
+          </Tooltip>
+        ) : (
+          <Typography
+            component='span'
+            variant='caption'
+            sx={{ color: 'var(--text-muted)' }}
+          >
+            —
+          </Typography>
+        )
+    },
+    {
+      id: 'outstanding',
+      header: t('customers:outstanding'),
+      align: 'end',
+      cell: (c) => (
+        <Typography
+          variant='body1'
+          sx={{
+            fontWeight: 600,
+            color:
+              c.outstanding > 0 ? 'var(--warning-700)' : 'var(--text-muted)'
+          }}
         >
-          {t('customers:add_customer')}
-        </Button>
-      </Stack>
+          {formatPKR(c.outstanding, locale)}
+        </Typography>
+      )
+    },
+    {
+      id: 'last_activity',
+      header: t('customers:fields.last_activity'),
+      hideOnMobile: true,
+      cell: (c) => (
+        <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
+          {new Intl.DateTimeFormat(locale, { dateStyle: 'short' }).format(
+            new Date(c.last_activity_at)
+          )}
+        </Typography>
+      )
+    },
+    {
+      id: 'actions',
+      header: '',
+      align: 'end',
+      width: 200,
+      cardRole: 'actions',
+      cell: (c) => {
+        const hasHistory = c.invoice_count > 0 || c.outstanding > 0
+        return (
+          <Stack direction='row' spacing={0.5} justifyContent='flex-end'>
+            <Button
+              variant='link'
+              size='sm'
+              onClick={() => navigate(paths.gotoCustomer(c.id))}
+            >
+              {t('customers:actions.view_history')}
+            </Button>
+            <Tooltip title={t('customers:actions.edit')}>
+              <IconButton
+                size='small'
+                onClick={() => navigate(paths.gotoCustomerEdit(c.id))}
+                aria-label={t('customers:actions.edit')}
+              >
+                <EditIcon fontSize='small' />
+              </IconButton>
+            </Tooltip>
+            <Tooltip
+              title={
+                hasHistory
+                  ? t('customers:actions.delete_blocked')
+                  : t('customers:actions.delete')
+              }
+            >
+              <span>
+                <IconButton
+                  size='small'
+                  disabled={hasHistory}
+                  onClick={() => setConfirm(c)}
+                  aria-label={t('customers:actions.delete')}
+                >
+                  <DeleteOutlineIcon fontSize='small' />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Stack>
+        )
+      }
+    }
+  ]
 
-      <TextField
-        fullWidth
-        size='small'
+  return (
+    <Box sx={{ maxWidth: 1280, mx: 'auto', width: '100%' }}>
+      <PageHeader
+        title={t('customers:title')}
+        actions={
+          <Button
+            variant='primary'
+            startIcon={<AddIcon />}
+            onClick={() => navigate(paths.newCustomer)}
+          >
+            {t('customers:add_customer')}
+          </Button>
+        }
+      />
+
+      <Input
         placeholder={t('customers:search_placeholder')}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         sx={{ mb: 2 }}
       />
 
-      <Paper variant='outlined' sx={{ borderRadius: 2 }}>
-        {isLoading ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <CircularProgress size={24} />
+      <DataTable
+        columns={columns}
+        rows={rows}
+        getRowId={(c) => c.id}
+        loading={isLoading}
+        empty={
+          <Box sx={{ py: 4 }}>
+            <EmptyState title={t('customers:empty')} />
           </Box>
-        ) : rows.length === 0 ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <Typography variant='body2' color='text.secondary'>
-              {t('customers:empty')}
-            </Typography>
-          </Box>
-        ) : (
-          <>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t('customers:fields.name')}</TableCell>
-                    <TableCell>{t('customers:fields.phone')}</TableCell>
-                    <TableCell>{t('customers:fields.address')}</TableCell>
-                    <TableCell align='right'>
-                      {t('customers:outstanding')}
-                    </TableCell>
-                    <TableCell>{t('customers:fields.last_activity')}</TableCell>
-                    <TableCell align='right' />
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((c) => {
-                    const hasHistory = c.invoice_count > 0 || c.outstanding > 0
-                    return (
-                      <TableRow key={c.id} hover>
-                        <TableCell>{c.name}</TableCell>
-                        <TableCell>{c.phone}</TableCell>
-                        <TableCell>
-                          {c.address ? (
-                            <Tooltip title={c.address}>
-                              <span>{truncate(c.address, 30)}</span>
-                            </Tooltip>
-                          ) : (
-                            <Typography
-                              component='span'
-                              variant='caption'
-                              color='text.secondary'
-                            >
-                              —
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell align='right'>
-                          <Typography
-                            variant='body2'
-                            fontWeight={600}
-                            color={
-                              c.outstanding > 0
-                                ? 'warning.main'
-                                : 'text.secondary'
-                            }
-                          >
-                            {formatPKR(c.outstanding, locale)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant='caption' color='text.secondary'>
-                            {new Intl.DateTimeFormat(locale, {
-                              dateStyle: 'short'
-                            }).format(new Date(c.last_activity_at))}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align='right'>
-                          <Stack
-                            direction='row'
-                            spacing={0.5}
-                            justifyContent='flex-end'
-                          >
-                            <Button
-                              size='small'
-                              onClick={() => navigate(paths.gotoCustomer(c.id))}
-                            >
-                              {t('customers:actions.view_history')}
-                            </Button>
-                            <Tooltip title={t('customers:actions.edit')}>
-                              <IconButton
-                                size='small'
-                                onClick={() =>
-                                  navigate(paths.gotoCustomerEdit(c.id))
-                                }
-                                aria-label={t('customers:actions.edit')}
-                              >
-                                <EditIcon fontSize='small' />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip
-                              title={
-                                hasHistory
-                                  ? t('customers:actions.delete_blocked')
-                                  : t('customers:actions.delete')
-                              }
-                            >
-                              <span>
-                                <IconButton
-                                  size='small'
-                                  disabled={hasHistory}
-                                  onClick={() => setConfirm(c)}
-                                  aria-label={t('customers:actions.delete')}
-                                >
-                                  <DeleteOutlineIcon fontSize='small' />
-                                </IconButton>
-                              </span>
-                            </Tooltip>
-                          </Stack>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            {totalPages > 1 && (
-              <Box sx={{ p: 2, display: 'flex', justifyContent: 'center' }}>
-                <Pagination
-                  count={totalPages}
-                  page={page + 1}
-                  onChange={(_, p) => setPage(p - 1)}
-                />
-              </Box>
-            )}
-          </>
-        )}
-      </Paper>
+        }
+        ariaLabel={t('customers:title')}
+      />
 
-      <Dialog open={!!confirm} onClose={() => setConfirm(null)}>
-        <DialogTitle>{t('customers:actions.confirm_delete_title')}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {t('customers:actions.confirm_delete_body', {
-              name: confirm?.name ?? ''
-            })}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirm(null)} disabled={remove.isPending}>
-            {t('customers:actions.confirm_delete_cancel')}
-          </Button>
-          <Button
-            color='error'
-            variant='contained'
-            onClick={onDelete}
-            disabled={remove.isPending}
-          >
-            {t('customers:actions.confirm_delete_ok')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {total > PAGE_SIZE && (
+        <Pagination
+          page={page + 1}
+          total={total}
+          pageSize={PAGE_SIZE}
+          onChange={(p) => setPage(p - 1)}
+        />
+      )}
+
+      <ConfirmDialog
+        open={!!confirm}
+        onClose={() => setConfirm(null)}
+        onConfirm={onDelete}
+        title={t('customers:actions.confirm_delete_title')}
+        description={t('customers:actions.confirm_delete_body', {
+          name: confirm?.name ?? ''
+        })}
+        confirmLabel={t('customers:actions.confirm_delete_ok')}
+        cancelLabel={t('customers:actions.confirm_delete_cancel')}
+        loading={remove.isPending}
+        destructive
+      />
     </Box>
   )
 }
