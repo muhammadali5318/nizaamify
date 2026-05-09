@@ -22,3 +22,11 @@ export {
   type TableRowSkeletonProps
 } from './Skeleton'
 export { Pagination, type PaginationProps } from './Pagination'
+export {
+  DataTable,
+  type DataTableColumn,
+  type DataTableProps,
+  type DataTableSort,
+  type DataTableMenuAction,
+  type ColumnAlign
+} from './DataTable'
