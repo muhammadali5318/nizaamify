@@ -9,3 +9,5 @@ export {
   type ButtonSize
 } from './Button'
 export { Field, type FieldProps } from './Field'
+export { Input, type InputProps, type InputSize } from './Input'
+export { Textarea, type TextareaProps } from './Textarea'
