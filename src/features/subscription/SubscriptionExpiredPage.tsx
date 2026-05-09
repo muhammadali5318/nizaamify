@@ -1,14 +1,8 @@
-import {
-  Alert,
-  Box,
-  Button,
-  Container,
-  Divider,
-  IconButton,
-  Paper,
-  Stack,
-  Typography
-} from '@mui/material'
+import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
+import Divider from '@mui/material/Divider'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import StorefrontIcon from '@mui/icons-material/Storefront'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import LogoutIcon from '@mui/icons-material/Logout'
@@ -23,6 +17,7 @@ import { supabase } from 'src/lib/supabase'
 import { paths } from 'src/paths'
 import { subscriptionEnv, whatsappLink, formatPKR } from './env'
 import LanguageSelector from 'src/components/language-selector/LanguageSelector'
+import { Banner, Button, Card } from 'src/components/ui'
 
 function getLocale(lng: string) {
   return lng === 'ur' ? 'ur-PK' : 'en-PK'
@@ -56,21 +51,28 @@ export default function SubscriptionExpiredPage() {
     : null
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: 'var(--surface-subtle)' }}>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
         <LanguageSelector />
       </Box>
       <Container maxWidth='md' sx={{ py: 2 }}>
-        <Paper sx={{ p: { xs: 3, sm: 4 }, borderRadius: 3 }}>
+        <Card variant='elevated' sx={{ p: { xs: 3, sm: 4 } }}>
           <Stack spacing={2} alignItems='center' mb={3}>
-            <StorefrontIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-            <Typography variant='h5' fontWeight={700} textAlign='center'>
+            <StorefrontIcon sx={{ fontSize: 40, color: 'var(--text-brand)' }} />
+            <Typography
+              variant='display'
+              component='h1'
+              sx={{ textAlign: 'center', color: 'var(--text-primary)' }}
+            >
               {t('subscription:expired.title')}
             </Typography>
             <Typography
               variant='body1'
-              color='text.secondary'
-              textAlign='center'
+              sx={{
+                textAlign: 'center',
+                color: 'var(--text-secondary)',
+                maxWidth: '52ch'
+              }}
             >
               {t('subscription:expired.body', {
                 appName: t('common:app_name')
@@ -78,30 +80,32 @@ export default function SubscriptionExpiredPage() {
             </Typography>
           </Stack>
 
-          <Alert severity='warning' sx={{ mb: 3 }}>
-            <Stack spacing={0.5}>
-              <Typography variant='body2'>
-                {t('subscription:expired.current_status', {
-                  status: t(`subscription:status.${status}`)
-                })}
-              </Typography>
-              {lastPaymentDate ? (
-                <Typography variant='body2'>
-                  {t('subscription:expired.last_payment', {
-                    date: lastPaymentDate
+          <Box sx={{ mb: 3 }}>
+            <Banner variant='warning'>
+              <Stack spacing={0.5}>
+                <Typography variant='body2' sx={{ color: 'inherit' }}>
+                  {t('subscription:expired.current_status', {
+                    status: t(`subscription:status.${status}`)
                   })}
                 </Typography>
-              ) : (
-                <Typography variant='body2'>
-                  {t('subscription:expired.no_payment')}
-                </Typography>
-              )}
-            </Stack>
-          </Alert>
+                {lastPaymentDate ? (
+                  <Typography variant='body2' sx={{ color: 'inherit' }}>
+                    {t('subscription:expired.last_payment', {
+                      date: lastPaymentDate
+                    })}
+                  </Typography>
+                ) : (
+                  <Typography variant='body2' sx={{ color: 'inherit' }}>
+                    {t('subscription:expired.no_payment')}
+                  </Typography>
+                )}
+              </Stack>
+            </Banner>
+          </Box>
 
           <Stack spacing={3}>
             <Box>
-              <Typography variant='subtitle1' fontWeight={700} mb={1}>
+              <Typography variant='h3' sx={{ mb: 1.5 }}>
                 {t('subscription:expired.payment_instructions_title')}
               </Typography>
               <Stack spacing={1.5}>
@@ -124,10 +128,10 @@ export default function SubscriptionExpiredPage() {
               </Stack>
             </Box>
 
-            <Divider />
+            <Divider sx={{ borderColor: 'var(--border-subtle)' }} />
 
             <Box>
-              <Typography variant='subtitle1' fontWeight={700} mb={1}>
+              <Typography variant='h3' sx={{ mb: 1.5 }}>
                 {t('subscription:expired.support_title')}
               </Typography>
               <Stack
@@ -140,7 +144,7 @@ export default function SubscriptionExpiredPage() {
                     component='a'
                     href={`tel:${subscriptionEnv.supportPhone}`}
                     startIcon={<PhoneIcon />}
-                    variant='outlined'
+                    variant='secondary'
                   >
                     {subscriptionEnv.supportPhone}
                   </Button>
@@ -154,7 +158,7 @@ export default function SubscriptionExpiredPage() {
                     target='_blank'
                     rel='noopener noreferrer'
                     startIcon={<WhatsAppIcon />}
-                    variant='outlined'
+                    variant='secondary'
                   >
                     {t('subscription:expired.whatsapp_label')}
                   </Button>
@@ -164,7 +168,7 @@ export default function SubscriptionExpiredPage() {
                     component='a'
                     href={`mailto:${subscriptionEnv.supportEmail}`}
                     startIcon={<EmailIcon />}
-                    variant='outlined'
+                    variant='secondary'
                   >
                     {subscriptionEnv.supportEmail}
                   </Button>
@@ -172,27 +176,32 @@ export default function SubscriptionExpiredPage() {
               </Stack>
             </Box>
 
-            <Divider />
+            <Divider sx={{ borderColor: 'var(--border-subtle)' }} />
 
-            <Stack direction='row' spacing={1} justifyContent='flex-end'>
+            <Stack
+              direction={{ xs: 'column-reverse', sm: 'row' }}
+              spacing={1.5}
+              justifyContent='flex-end'
+            >
               <Button
+                variant='ghost'
                 onClick={handleRefresh}
                 startIcon={<RefreshIcon />}
                 disabled={isFetching}
+                loading={isFetching}
               >
                 {t('subscription:expired.refresh')}
               </Button>
               <Button
+                variant='primary'
                 onClick={handleLogout}
                 startIcon={<LogoutIcon />}
-                variant='contained'
-                color='inherit'
               >
                 {t('subscription:expired.logout')}
               </Button>
             </Stack>
           </Stack>
-        </Paper>
+        </Card>
       </Container>
     </Box>
   )
@@ -206,15 +215,12 @@ function Row({ label, value }: { label: string; value: string }) {
       alignItems={{ sm: 'center' }}
       spacing={0.5}
     >
-      <Typography variant='body2' color='text.secondary'>
+      <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
         {label}
       </Typography>
-      <Typography variant='body2' fontWeight={700}>
+      <Typography variant='body1' sx={{ fontWeight: 600 }}>
         {value || '—'}
       </Typography>
     </Stack>
   )
 }
-
-// Suppress unused-import warning when there's no IconButton
-void IconButton
