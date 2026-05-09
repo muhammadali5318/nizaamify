@@ -1,19 +1,18 @@
 import { useEffect, useState } from 'react'
-import {
-  Alert,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Stack,
-  TextField,
-  Typography
-} from '@mui/material'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import { classifyReceivePaymentError, useReceivePayment } from './hooks'
 import { useNotifier } from 'src/components/notistack/NotificationProvider'
 import { formatPKR } from 'src/features/subscription/env'
+import {
+  Banner,
+  Button,
+  Dialog,
+  Field,
+  Input,
+  Textarea
+} from 'src/components/ui'
 
 type Props = {
   open: boolean
@@ -95,66 +94,84 @@ export default function ReceivePaymentDialog({
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth='xs'>
-      <DialogTitle>{t('khata:receive_payment.title')}</DialogTitle>
-      <DialogContent>
-        <Stack spacing={2} mt={1}>
-          {customerName && (
-            <Typography variant='body2' color='text.secondary'>
-              {customerName}
-            </Typography>
-          )}
-          {typeof outstanding === 'number' && (
-            <Typography variant='body2'>
-              {t('khata:fields.outstanding')}:{' '}
-              <strong>{formatPKR(outstanding, locale)}</strong>
-            </Typography>
-          )}
-          {error && <Alert severity='error'>{error}</Alert>}
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title={t('khata:receive_payment.title')}
+      actions={
+        <>
+          <Button
+            variant='ghost'
+            onClick={onClose}
+            disabled={receive.isPending}
+          >
+            {t('common:actions.cancel')}
+          </Button>
+          <Button
+            variant='primary'
+            onClick={submit}
+            disabled={!submittable}
+            loading={receive.isPending}
+          >
+            {t('khata:receive_payment.submit')}
+          </Button>
+        </>
+      }
+    >
+      <Stack spacing={2.5} mt={1}>
+        {customerName && (
+          <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
+            {customerName}
+          </Typography>
+        )}
+        {typeof outstanding === 'number' && (
+          <Typography variant='body2'>
+            {t('khata:fields.outstanding')}:{' '}
+            <strong>{formatPKR(outstanding, locale)}</strong>
+          </Typography>
+        )}
+        {error && <Banner variant='error'>{error}</Banner>}
 
-          <TextField
-            label={t('khata:receive_payment.amount')}
+        <Field
+          label={t('khata:receive_payment.amount')}
+          hint={
+            cap > 0
+              ? t('khata:receive_payment.amount_max_customer', {
+                  max: formatPKR(cap, locale)
+                })
+              : undefined
+          }
+          error={
+            exceedsCap
+              ? t('khata:receive_payment.amount_max_customer', {
+                  max: formatPKR(cap, locale)
+                })
+              : undefined
+          }
+        >
+          <Input
             type='number'
             inputProps={{
               min: 0,
               max: cap > 0 ? cap : undefined,
-              step: '0.01'
+              step: '0.01',
+              inputMode: 'numeric'
             }}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            fullWidth
-            size='small'
-            error={exceedsCap}
-            helperText={
-              cap > 0
-                ? t('khata:receive_payment.amount_max_customer', {
-                    max: formatPKR(cap, locale)
-                  })
-                : undefined
-            }
           />
+        </Field>
 
-          <TextField
-            label={t('khata:receive_payment.notes_label')}
+        <Field label={t('khata:receive_payment.notes_label')}>
+          <Textarea
             placeholder={t('khata:receive_payment.notes_placeholder')}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            fullWidth
-            size='small'
-            multiline
             minRows={2}
             inputProps={{ maxLength: 1000 }}
           />
-        </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={receive.isPending}>
-          {t('common:actions.cancel')}
-        </Button>
-        <Button variant='contained' onClick={submit} disabled={!submittable}>
-          {t('khata:receive_payment.submit')}
-        </Button>
-      </DialogActions>
+        </Field>
+      </Stack>
     </Dialog>
   )
 }

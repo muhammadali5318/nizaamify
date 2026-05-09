@@ -1,15 +1,6 @@
 import { useState } from 'react'
-import {
-  Alert,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Stack,
-  TextField
-} from '@mui/material'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import { useNotifier } from 'src/components/notistack/NotificationProvider'
 import {
@@ -17,6 +8,7 @@ import {
   useReverseLedgerEntry,
   type LedgerEntryView
 } from './hooks'
+import { Banner, Button, Dialog, Field, Textarea } from 'src/components/ui'
 
 type Props = {
   open: boolean
@@ -66,38 +58,43 @@ export default function ReverseEntryDialog({ open, onClose, entry }: Props) {
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth='xs'>
-      <DialogTitle>{t('khata:entry.reverse_confirm_title')}</DialogTitle>
-      <DialogContent>
-        <Stack spacing={2} mt={1}>
-          <DialogContentText>
-            {t('khata:entry.reverse_confirm_body')}
-          </DialogContentText>
-          {error && <Alert severity='error'>{error}</Alert>}
-          <TextField
-            label={t('khata:entry.reverse_confirm_notes_label')}
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      title={t('khata:entry.reverse_confirm_title')}
+      actions={
+        <>
+          <Button
+            variant='ghost'
+            onClick={handleClose}
+            disabled={reverse.isPending}
+          >
+            {t('common:actions.cancel')}
+          </Button>
+          <Button
+            variant='destructive'
+            onClick={submit}
+            loading={reverse.isPending}
+          >
+            {t('khata:entry.reverse_confirm_cta')}
+          </Button>
+        </>
+      }
+    >
+      <Stack spacing={2.5} mt={1}>
+        <Typography variant='body2' sx={{ color: 'var(--text-secondary)' }}>
+          {t('khata:entry.reverse_confirm_body')}
+        </Typography>
+        {error && <Banner variant='error'>{error}</Banner>}
+        <Field label={t('khata:entry.reverse_confirm_notes_label')}>
+          <Textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            fullWidth
-            multiline
             minRows={2}
             inputProps={{ maxLength: 1000 }}
           />
-        </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} disabled={reverse.isPending}>
-          {t('common:actions.cancel')}
-        </Button>
-        <Button
-          variant='contained'
-          color='warning'
-          onClick={submit}
-          disabled={reverse.isPending}
-        >
-          {t('khata:entry.reverse_confirm_cta')}
-        </Button>
-      </DialogActions>
+        </Field>
+      </Stack>
     </Dialog>
   )
 }
