@@ -575,7 +575,7 @@ export default function NewPurchasePage() {
                 <Typography
                   variant='caption'
                   sx={{
-                    color: 'var(--warning-700)',
+                    color: 'var(--status-warning-text)',
                     mt: 0.5,
                     display: 'block'
                   }}

@@ -108,7 +108,10 @@ export default function PacksSection({ productId, productName }: Props) {
                   {p.is_default_purchase && (
                     <Tooltip title={t('products:packs.default_badge')}>
                       <StarIcon
-                        sx={{ fontSize: 16, color: 'var(--warning-700)' }}
+                        sx={{
+                          fontSize: 16,
+                          color: 'var(--status-warning-text)'
+                        }}
                       />
                     </Tooltip>
                   )}

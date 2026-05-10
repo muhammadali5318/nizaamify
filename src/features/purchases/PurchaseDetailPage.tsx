@@ -171,9 +171,9 @@ export default function PurchaseDetailPage() {
         const sign = delta > 0 ? '+' : ''
         const color =
           delta > 0
-            ? 'var(--warning-700)'
+            ? 'var(--status-warning-text)'
             : delta < 0
-              ? 'var(--success-700)'
+              ? 'var(--status-success-text)'
               : 'var(--text-muted)'
         return (
           <Typography variant='body2' sx={{ color, fontWeight: 600 }}>

@@ -114,7 +114,9 @@ export default function CustomersListPage() {
           sx={{
             fontWeight: 600,
             color:
-              c.outstanding > 0 ? 'var(--warning-700)' : 'var(--text-muted)'
+              c.outstanding > 0
+                ? 'var(--status-warning-text)'
+                : 'var(--text-muted)'
           }}
         >
           {formatPKR(c.outstanding, locale)}

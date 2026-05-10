@@ -508,7 +508,7 @@ export default function POSPage() {
                             },
                             '&:active': { transform: 'scale(0.98)' },
                             '&.Mui-disabled': {
-                              backgroundColor: 'var(--neutral-200)',
+                              backgroundColor: 'var(--surface-muted)',
                               color: 'var(--text-disabled)'
                             }
                           }}
@@ -880,7 +880,7 @@ function CartPanel({
                         sx={{
                           color:
                             stockLeft <= 0
-                              ? 'var(--warning-700)'
+                              ? 'var(--status-warning-text)'
                               : 'var(--text-muted)'
                         }}
                       >
@@ -923,7 +923,7 @@ function CartPanel({
                           height: 28,
                           color: 'var(--text-muted)',
                           '&:hover': {
-                            color: 'var(--error-700)',
+                            color: 'var(--status-error-text)',
                             backgroundColor: 'var(--surface-muted)'
                           }
                         }}
@@ -1187,7 +1187,10 @@ function CartPanel({
           variant='body1'
           sx={{
             fontWeight: 700,
-            color: onCredit > 0 ? 'var(--warning-700)' : 'var(--text-disabled)'
+            color:
+              onCredit > 0
+                ? 'var(--status-warning-text)'
+                : 'var(--text-disabled)'
           }}
         >
           {formatPKR(onCredit, locale)}

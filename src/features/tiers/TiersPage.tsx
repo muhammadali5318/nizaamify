@@ -166,7 +166,7 @@ export default function TiersPage() {
                       {tier.is_default ? (
                         <StarIcon
                           fontSize='small'
-                          sx={{ color: 'var(--warning-700)' }}
+                          sx={{ color: 'var(--status-warning-text)' }}
                         />
                       ) : (
                         <StarBorderIcon fontSize='small' />
