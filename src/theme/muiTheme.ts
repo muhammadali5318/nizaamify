@@ -62,14 +62,29 @@ const HEX = {
   info700: '#1E40AF'
 } as const
 
-export function getTheme(direction: 'ltr' | 'rtl'): Theme {
+export type ColorMode = 'light' | 'dark'
+
+export function getTheme(
+  direction: 'ltr' | 'rtl',
+  mode: ColorMode = 'light'
+): Theme {
+  const isDark = mode === 'dark'
+  // Background + text need different literal values for MUI's `alpha()` calcs
+  // (raw hex, not CSS variables). Token-driven CSS still flips automatically
+  // via [data-theme="dark"] in tokens.css; this map is only for MUI internals.
+  const bgDefault = isDark ? '#0F1112' : HEX.neutral50
+  const bgPaper = isDark ? '#171A1C' : HEX.neutral0
+  const textPrimary = isDark ? '#F4F5F6' : HEX.neutral900
+  const textSecondary = isDark ? '#C7CDD0' : HEX.neutral700
+  const textDisabled = isDark ? '#6B7479' : HEX.neutral400
+  const divider = isDark ? 'rgba(255,255,255,0.10)' : HEX.neutral200
   return createTheme({
     direction,
     breakpoints: {
       values: { xs: 0, sm: 640, md: 768, lg: 1024, xl: 1280 }
     },
     palette: {
-      mode: 'light',
+      mode,
       primary: {
         main: HEX.brand700,
         dark: HEX.brand800,
@@ -107,15 +122,15 @@ export function getTheme(direction: 'ltr' | 'rtl'): Theme {
         contrastText: HEX.neutral0
       },
       background: {
-        default: HEX.neutral50,
-        paper: HEX.neutral0
+        default: bgDefault,
+        paper: bgPaper
       },
       text: {
-        primary: HEX.neutral900,
-        secondary: HEX.neutral700,
-        disabled: HEX.neutral400
+        primary: textPrimary,
+        secondary: textSecondary,
+        disabled: textDisabled
       },
-      divider: HEX.neutral200,
+      divider,
       common: { black: '#000', white: HEX.neutral0 }
     },
     shape: { borderRadius: 8 },
@@ -315,4 +330,4 @@ export function getTheme(direction: 'ltr' | 'rtl'): Theme {
   })
 }
 
-export default getTheme('ltr')
+export default getTheme('ltr', 'light')
