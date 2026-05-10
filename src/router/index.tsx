@@ -25,6 +25,8 @@ import CustomersListPage from 'src/features/customers/CustomersListPage'
 import CustomerDetailPage from 'src/features/customers/CustomerDetailPage'
 import CustomerFormPage from 'src/features/customers/CustomerFormPage'
 import KhataPage from 'src/features/khata/KhataPage'
+import SuppliersListPage from 'src/features/suppliers/SuppliersListPage'
+import SupplierFormPage from 'src/features/suppliers/SupplierFormPage'
 import ExpensesPage from 'src/features/expenses/ExpensesPage'
 import TargetsPage from 'src/features/targets/TargetsPage'
 import ReportsPage from 'src/features/reports/ReportsPage'
@@ -221,6 +223,30 @@ export function Router() {
           element: (
             <RequireActiveSubscription>
               <KhataPage />
+            </RequireActiveSubscription>
+          )
+        },
+        {
+          path: paths.suppliers,
+          element: (
+            <RequireActiveSubscription>
+              <SuppliersListPage />
+            </RequireActiveSubscription>
+          )
+        },
+        {
+          path: paths.newSupplier,
+          element: (
+            <RequireActiveSubscription>
+              <SupplierFormPage />
+            </RequireActiveSubscription>
+          )
+        },
+        {
+          path: paths.supplierEdit,
+          element: (
+            <RequireActiveSubscription>
+              <SupplierFormPage />
             </RequireActiveSubscription>
           )
         },

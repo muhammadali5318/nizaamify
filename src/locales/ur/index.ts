@@ -12,6 +12,7 @@ import targets from './targets.json'
 import dashboard from './dashboard.json'
 import reports from './reports.json'
 import sales from './sales.json'
+import suppliers from './suppliers.json'
 
 export default {
   common,
@@ -27,5 +28,6 @@ export default {
   targets,
   dashboard,
   reports,
-  sales
+  sales,
+  suppliers
 }

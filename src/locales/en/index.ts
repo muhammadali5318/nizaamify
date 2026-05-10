@@ -11,6 +11,7 @@ import expenses from './expenses.json'
 import targets from './targets.json'
 import dashboard from './dashboard.json'
 import sales from './sales.json'
+import suppliers from './suppliers.json'
 
 export default {
   common,
@@ -25,5 +26,6 @@ export default {
   expenses,
   targets,
   dashboard,
-  sales
+  sales,
+  suppliers
 }

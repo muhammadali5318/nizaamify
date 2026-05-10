@@ -11,7 +11,8 @@
     "submit": "Submit",
     "confirm": "Confirm",
     "logout": "Logout",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "load_more": "Load more"
   },
   "language": {
     "english": "English",

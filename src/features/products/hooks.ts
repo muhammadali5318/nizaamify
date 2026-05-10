@@ -26,6 +26,30 @@ export type SearchProductsArgs = {
   onlyInStock?: boolean
 }
 
+export type RecentPurchaseProduct = {
+  id: string
+  name: string
+  type: string
+  price: number
+  avg_cost: number
+  stock: number
+  last_used_at: string | null
+}
+
+export function useRecentPurchaseProducts(limit = 10) {
+  return useQuery({
+    queryKey: ['products', 'recent-purchase', limit],
+    queryFn: async (): Promise<RecentPurchaseProduct[]> => {
+      const { data, error } = await supabase.rpc('recent_purchase_products', {
+        p_limit: limit
+      })
+      if (error) throw error
+      return (data ?? []) as RecentPurchaseProduct[]
+    },
+    staleTime: 30_000
+  })
+}
+
 export function useSearchProducts(args: SearchProductsArgs) {
   const { query, page, pageSize, onlyInStock = false } = args
   return useQuery({

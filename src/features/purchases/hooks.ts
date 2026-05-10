@@ -1,13 +1,120 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient
+} from '@tanstack/react-query'
 import { supabase } from 'src/lib/supabase'
 import type { Database } from 'src/types/database'
 
 export type Purchase = Database['public']['Tables']['purchases']['Row']
+export type PurchaseItem = Database['public']['Tables']['purchase_items']['Row']
+export type PurchaseOverheadItem =
+  Database['public']['Tables']['purchase_overhead_items']['Row']
 
-type PurchaseItemInput = {
-  product_id: string
-  qty: number
-  cost: number
+export type OverheadCategory =
+  | 'delivery'
+  | 'labor'
+  | 'customs'
+  | 'packaging'
+  | 'other'
+
+export type RecordPurchaseInput = {
+  supplier_id: string | null
+  purchase_date: string // YYYY-MM-DD
+  note: string | null
+  items: { product_id: string; qty: number; cost_at_purchase: number }[]
+  overhead_items: {
+    category: OverheadCategory
+    amount: number
+    description?: string | null
+  }[]
+}
+
+export function useRecordPurchase() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: RecordPurchaseInput) => {
+      const { data, error } = await supabase.rpc('record_purchase', {
+        p_supplier_id: input.supplier_id ?? undefined,
+        p_purchase_date: input.purchase_date,
+        p_note: input.note ?? undefined,
+        p_items:
+          input.items as unknown as Database['public']['Tables']['purchases']['Insert'] extends Record<
+            string,
+            unknown
+          >
+            ? object
+            : never,
+        p_overhead_items: input.overhead_items as unknown as object,
+        p_is_opening: false
+      })
+      if (error) throw error
+      return data as string
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['purchases'] })
+      void qc.invalidateQueries({ queryKey: ['purchase'] })
+      void qc.invalidateQueries({ queryKey: ['products'] })
+    }
+  })
+}
+
+export type PurchaseListRow = {
+  id: string
+  purchase_date: string
+  supplier_id: string | null
+  supplier_name: string | null
+  source: string | null
+  note: string | null
+  items_count: number
+  items_subtotal: number
+  overhead_subtotal: number
+  total_cost: number
+  is_opening: boolean
+}
+
+export function useSearchPurchases(args: {
+  from: string | null
+  to: string | null
+  supplierId: string | null
+  includeOpening: boolean
+  page: number
+  pageSize?: number
+}) {
+  const { from, to, supplierId, includeOpening, page, pageSize = 10 } = args
+  return useQuery({
+    queryKey: [
+      'purchases',
+      'search',
+      { from, to, supplierId, includeOpening, page, pageSize }
+    ],
+    placeholderData: keepPreviousData,
+    queryFn: async (): Promise<{ rows: PurchaseListRow[]; total: number }> => {
+      const [rowsRes, countRes] = await Promise.all([
+        supabase.rpc('search_purchases', {
+          p_from: from ?? undefined,
+          p_to: to ?? undefined,
+          p_supplier_id: supplierId ?? undefined,
+          p_include_opening: includeOpening,
+          p_limit: pageSize,
+          p_offset: page * pageSize
+        }),
+        supabase.rpc('search_purchases_count', {
+          p_from: from ?? undefined,
+          p_to: to ?? undefined,
+          p_supplier_id: supplierId ?? undefined,
+          p_include_opening: includeOpening
+        })
+      ])
+      if (rowsRes.error) throw rowsRes.error
+      if (countRes.error) throw countRes.error
+      return {
+        rows: (rowsRes.data ?? []) as PurchaseListRow[],
+        total: Number(countRes.data ?? 0)
+      }
+    }
+  })
 }
 
 export type PurchaseDetailItem = {
@@ -15,35 +122,27 @@ export type PurchaseDetailItem = {
   product_id: string
   qty: number
   cost_at_purchase: number
-  product: {
-    id: string
-    name: string
-    avg_cost: number
-    last_purchase_cost: number | null
-  } | null
+  overhead_per_unit: number
+  avg_cost_before: number | null
+  avg_cost_after: number | null
+  product: { id: string; name: string; type: string } | null
+}
+
+export type PurchaseDetailOverhead = {
+  id: string
+  category: OverheadCategory
+  amount: number
+  description: string | null
 }
 
 export type PurchaseDetail = Purchase & {
   cashier_email: string | null
+  supplier_name: string | null
   items: PurchaseDetailItem[]
+  overhead: PurchaseDetailOverhead[]
 }
 
-export function usePurchases() {
-  return useQuery({
-    queryKey: ['purchases'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('purchases')
-        .select('*, purchase_items(qty)')
-        .order('purchase_date', { ascending: false })
-        .limit(200)
-      if (error) throw error
-      return data
-    }
-  })
-}
-
-export function usePurchase(id: string | undefined) {
+export function usePurchaseDetail(id: string | undefined) {
   return useQuery({
     queryKey: ['purchase', id],
     enabled: !!id,
@@ -55,9 +154,14 @@ export function usePurchase(id: string | undefined) {
           `
           *,
           cashier:profiles!purchases_cashier_id_fkey ( email ),
+          supplier:suppliers ( name ),
           purchase_items (
-            id, product_id, qty, cost_at_purchase,
-            product:products ( id, name, avg_cost, last_purchase_cost )
+            id, product_id, qty, cost_at_purchase, overhead_per_unit,
+            avg_cost_before, avg_cost_after,
+            product:products ( id, name, type )
+          ),
+          purchase_overhead_items (
+            id, category, amount, description
           )
           `
         )
@@ -65,45 +169,27 @@ export function usePurchase(id: string | undefined) {
         .single()
       if (error) throw error
       const cashier = (data.cashier as { email: string } | null) ?? null
-      const items =
-        (data.purchase_items as unknown as PurchaseDetailItem[]) ?? []
+      const supplier = (data.supplier as { name: string } | null) ?? null
       return {
         id: data.id,
         shop_id: data.shop_id,
+        supplier_id: data.supplier_id,
         total_cost: data.total_cost,
+        items_subtotal: data.items_subtotal,
+        overhead_subtotal: data.overhead_subtotal,
         source: data.source,
         note: data.note,
         purchase_date: data.purchase_date,
         cashier_id: data.cashier_id,
         created_at: data.created_at,
+        is_opening: data.is_opening,
         cashier_email: cashier?.email ?? null,
-        items
+        supplier_name: supplier?.name ?? null,
+        items: (data.purchase_items as unknown as PurchaseDetailItem[]) ?? [],
+        overhead:
+          (data.purchase_overhead_items as unknown as PurchaseDetailOverhead[]) ??
+          []
       }
-    }
-  })
-}
-
-export function useRecordPurchase() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: async (args: {
-      source?: string
-      note?: string
-      purchase_date: string
-      items: PurchaseItemInput[]
-    }) => {
-      const { data, error } = await supabase.rpc('record_purchase', {
-        p_source: args.source ?? '',
-        p_note: args.note ?? '',
-        p_purchase_date: args.purchase_date,
-        p_items: args.items
-      })
-      if (error) throw error
-      return data
-    },
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['purchases'] })
-      void qc.invalidateQueries({ queryKey: ['products'] })
     }
   })
 }

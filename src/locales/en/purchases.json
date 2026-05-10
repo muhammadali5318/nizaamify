@@ -10,13 +10,61 @@
     "product": "Product",
     "qty": "Quantity",
     "cost": "Unit cost (PKR)",
-    "total": "Total"
+    "total": "Line total",
+    "category": "Category",
+    "description": "Description",
+    "amount": "Amount (PKR)"
   },
   "list": {
+    "filter": {
+      "date_range": "Date range",
+      "mtd": "This month",
+      "last_30": "Last 30 days",
+      "last_90": "Last 90 days",
+      "this_year": "This year",
+      "custom": "Custom",
+      "from": "From",
+      "to": "To",
+      "supplier": "Supplier",
+      "include_opening": "Include opening stock"
+    },
+    "columns": {
+      "date": "Date",
+      "supplier": "Supplier",
+      "items": "Items",
+      "items_subtotal": "Items subtotal",
+      "overhead": "Overhead",
+      "total": "Total",
+      "note": "Note"
+    },
     "date": "Date",
     "source": "Source",
     "items": "Items",
     "total": "Total cost"
+  },
+  "form": {
+    "details_title": "Stock-in details",
+    "items_title": "Items",
+    "supplier": "Supplier",
+    "overhead_title": "Additional costs (optional)",
+    "overhead_help": "Allocated proportionally across products by line value. Affects each product's average cost.",
+    "totals_title": "Total",
+    "items_subtotal": "Items subtotal",
+    "overhead_subtotal": "Overhead subtotal",
+    "grand_total": "Grand total",
+    "add_product": "+ Add another product",
+    "add_cost": "+ Add cost",
+    "add_new_product": "+ Create new product",
+    "category": {
+      "delivery": "Delivery",
+      "labor": "Labor",
+      "customs": "Customs",
+      "packaging": "Packaging",
+      "other": "Other"
+    },
+    "qty_must_divide_evenly": "Unit cost doesn't divide evenly into total — adjust qty or unit cost.",
+    "submit": "Save stock-in",
+    "submitting": "Saving…"
   },
   "actions": {
     "submit": "Save stock-in",
@@ -26,9 +74,15 @@
   },
   "errors": {
     "items_required": "Add at least one item",
-    "qty_invalid": "Quantity must be at least 1",
+    "qty_invalid": "Quantity must be a positive integer",
     "cost_invalid": "Unit cost must be 0 or greater",
     "product_required": "Pick a product",
+    "supplier_required": "Pick a supplier",
+    "supplier_not_in_shop": "That supplier isn't in your shop. Pick a different one.",
+    "product_not_in_shop": "One of the products isn't in your shop. Refresh and try again.",
+    "date_required": "Pick a purchase date",
+    "date_future": "Date can't be in the future",
+    "overhead_amount_invalid": "Amount must be greater than 0",
     "submit_failed": "Could not save the stock-in. Please try again.",
     "no_products": "Add a product first before recording stock-in.",
     "not_found": "Stock-in not found."
@@ -39,12 +93,18 @@
   "detail": {
     "title": "Stock-in #{{shortId}}",
     "recorded_by": "Recorded by",
+    "items": "Items",
+    "additional_costs": "Additional costs",
     "cost_at_purchase": "Cost at purchase",
+    "overhead_per_unit": "Overhead / unit",
+    "effective_cost": "Effective cost",
     "totals_mismatch": "Item totals don't match the stored total cost — possible data drift.",
     "effect_on_inventory": "Effect on inventory",
-    "effect_caveat": "Avg before / after is shown only for the most recent stock-in per product.",
+    "effect_caveat": "Each row shows the product's weighted average cost before and after this stock-in.",
     "avg_before": "Avg before",
     "avg_after": "Avg after",
+    "delta": "Δ",
+    "no_snapshot_help": "Average-cost snapshots are recorded for stock-ins from v1.9 onwards. Older entries show \"—\".",
     "not_available": "—",
     "deleted_product": "(deleted product)"
   }

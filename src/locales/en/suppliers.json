@@ -1,0 +1,34 @@
+{
+  "title": "Suppliers",
+  "subtitle": "Track who you buy from. Suppliers can be linked to stock-ins for reporting.",
+  "empty": "No suppliers yet.",
+  "no_results": "No suppliers found",
+  "search_placeholder": "Search by name or contact",
+  "fields": {
+    "name": "Name",
+    "contact": "Contact (phone)",
+    "address": "Address",
+    "notes": "Notes"
+  },
+  "actions": {
+    "new_supplier": "+ New supplier",
+    "edit_supplier": "Edit supplier",
+    "edit": "Edit",
+    "archive": "Archive",
+    "create": "Create supplier",
+    "save": "Save changes",
+    "confirm_archive_title": "Archive this supplier?",
+    "confirm_archive_body": "{{name}} will be hidden from new stock-ins. Past purchases keep their history."
+  },
+  "errors": {
+    "duplicate_name": "A supplier with this name already exists in your shop.",
+    "name_required": "Supplier name is required.",
+    "save_failed": "Could not save supplier. Please try again.",
+    "archive_failed": "Could not archive supplier. Please try again."
+  },
+  "messages": {
+    "created": "Supplier created",
+    "saved": "Supplier saved",
+    "archived": "Supplier archived"
+  }
+}

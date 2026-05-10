@@ -5,6 +5,7 @@ import Inventory2Icon from '@mui/icons-material/Inventory2'
 import GroupIcon from '@mui/icons-material/Group'
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
 import LocalShippingIcon from '@mui/icons-material/LocalShipping'
+import StoreIcon from '@mui/icons-material/Store'
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'
 import TrackChangesIcon from '@mui/icons-material/TrackChanges'
 import AssessmentIcon from '@mui/icons-material/Assessment'
@@ -37,6 +38,7 @@ export function useNavSections(): NavSection[] {
         { to: paths.sales, label: 'Sales', icon: ReceiptLongIcon },
         { to: paths.khata, label: 'Khata', icon: AccountBalanceWalletIcon },
         { to: paths.purchases, label: 'Stock-in', icon: LocalShippingIcon },
+        { to: paths.suppliers, label: 'Suppliers', icon: StoreIcon },
         { to: paths.expenses, label: 'Expenses', icon: ReceiptLongIcon },
         { to: paths.targets, label: 'Targets', icon: TrackChangesIcon },
         { to: paths.reports, label: 'Reports', icon: AssessmentIcon }
