@@ -8,6 +8,7 @@ import i18n, { getDirection } from './lib/i18n'
 import { getEmotionCache } from './lib/rtlCache'
 import { queryClient } from './lib/queryClient'
 import { getTheme } from './theme/muiTheme'
+import { ThemeModeProvider, useThemeMode } from './lib/themeMode'
 import { AuthProvider } from './features/auth/AuthProvider'
 import { Router } from './router'
 import ErrorBoundary from './components/common/error-boundary'
@@ -18,7 +19,11 @@ import './styles/global.scss'
 function ThemedShell(): JSX.Element {
   const { i18n } = useTranslation()
   const direction = getDirection(i18n.language)
-  const theme = useMemo(() => getTheme(direction), [direction])
+  const { resolved } = useThemeMode()
+  const theme = useMemo(
+    () => getTheme(direction, resolved),
+    [direction, resolved]
+  )
   const cache = useMemo(() => getEmotionCache(direction), [direction])
 
   return (
@@ -39,7 +44,9 @@ export default function App(): JSX.Element {
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
             <AuthProvider>
-              <ThemedShell />
+              <ThemeModeProvider>
+                <ThemedShell />
+              </ThemeModeProvider>
             </AuthProvider>
           </BrowserRouter>
         </QueryClientProvider>

@@ -73,6 +73,27 @@ body {
   min-height: 100vh;
 }
 
+/* Ambient sideways amber glow — fixed so it doesn't shift on scroll, sits
+   behind everything via z-index 0. The wash is nearly transparent in
+   light mode and a soft bloom in dark mode (driven by --body-glow). The
+   layout container above (#root) gets z-index 1 and a transparent
+   background so the glow can read through page padding. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: var(--body-glow);
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
 /* 3. Global font family — token-driven, scoped per language. */
 html {
   font-family: var(--font-sans-en);

@@ -15,10 +15,13 @@ import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import MenuIcon from '@mui/icons-material/Menu'
 import LogoutIcon from '@mui/icons-material/Logout'
+import LightModeIcon from '@mui/icons-material/LightModeOutlined'
+import DarkModeIcon from '@mui/icons-material/DarkModeOutlined'
 import { useTranslation } from 'react-i18next'
 import { useSession } from 'src/features/auth/AuthProvider'
 import LanguageSelector from 'src/components/language-selector/LanguageSelector'
-import { Button } from 'src/components/ui'
+import { Button, Tooltip } from 'src/components/ui'
+import { useThemeMode } from 'src/lib/themeMode'
 
 export interface TopBarProps {
   /** Width reserved for the desktop sidebar (px). Drives the AppBar offset. */
@@ -44,15 +47,27 @@ export function TopBar({
 }: TopBarProps) {
   const { t } = useTranslation('common')
   const { user } = useSession()
+  const { resolved, toggle } = useThemeMode()
   const [profileOpen, setProfileOpen] = useState(false)
   const profileAnchor = useRef<HTMLButtonElement | null>(null)
+  const isDark = resolved === 'dark'
 
   return (
     <AppBar
       position='fixed'
       sx={{
         width: { md: `calc(100% - ${sidebarWidth}px)` },
-        marginInlineStart: { md: `${sidebarWidth}px` }
+        marginInlineStart: { md: `${sidebarWidth}px` },
+        // Translucent in both modes so the body's amber wash bleeds through
+        // for that "glass over warm light" feel the inspiration screenshots
+        // have. Use color-mix on surface-base so we get an 80% opacity tint
+        // without pinning a literal rgba(...) — token-safe across themes.
+        backgroundColor:
+          'color-mix(in srgb, var(--surface-base) 80%, transparent)',
+        color: 'var(--text-primary)',
+        borderBottom: '1px solid var(--border-subtle)',
+        backdropFilter: 'saturate(180%) blur(12px)',
+        WebkitBackdropFilter: 'saturate(180%) blur(12px)'
       }}
     >
       <Toolbar
@@ -72,6 +87,34 @@ export function TopBar({
           </IconButton>
         )}
         <Box sx={{ flex: 1 }} />
+        <Tooltip
+          title={
+            isDark
+              ? t('nav.theme.switch_to_light', 'Switch to light mode')
+              : t('nav.theme.switch_to_dark', 'Switch to dark mode')
+          }
+        >
+          <IconButton
+            onClick={toggle}
+            aria-label={
+              isDark
+                ? t('nav.theme.switch_to_light', 'Switch to light mode')
+                : t('nav.theme.switch_to_dark', 'Switch to dark mode')
+            }
+            aria-pressed={isDark}
+            sx={{
+              color: 'inherit',
+              transition: 'transform var(--duration-fast) var(--ease-out)',
+              '&:hover': { transform: 'rotate(12deg)' }
+            }}
+          >
+            {isDark ? (
+              <LightModeIcon fontSize='small' />
+            ) : (
+              <DarkModeIcon fontSize='small' />
+            )}
+          </IconButton>
+        </Tooltip>
         <LanguageSelector />
         <IconButton
           ref={profileAnchor}
@@ -104,12 +147,18 @@ export function TopBar({
           {({ TransitionProps }) => (
             <Grow {...TransitionProps}>
               <Paper
-                elevation={4}
+                elevation={0}
                 sx={{
                   minWidth: 240,
                   mt: 1,
+                  borderRadius: 'var(--radius-lg)',
                   border: '1px solid var(--border-default)',
-                  boxShadow: 'var(--shadow-md)'
+                  // Match the new MuiMenu/MuiAutocomplete container — warm
+                  // surface + amber-tinted bloom — so this Popper-driven
+                  // menu doesn't read as a different component family.
+                  backgroundColor: 'var(--surface-card)',
+                  boxShadow: 'var(--shadow-card)',
+                  backgroundImage: 'none'
                 }}
               >
                 <ClickAwayListener onClickAway={() => setProfileOpen(false)}>

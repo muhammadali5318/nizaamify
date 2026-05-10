@@ -22,38 +22,36 @@ export interface BannerProps {
   dismissible?: boolean
 }
 
+// status-* tokens flip with theme via tokens.css; using them keeps banners
+// legible on both light and dark surfaces. Border = bg so the seam stays
+// soft (the bg already has appropriate alpha in dark mode).
 const VARIANTS: Record<
   BannerVariant,
-  { bg: string; border: string; fg: string; Icon: typeof InfoOutlinedIcon }
+  { bg: string; fg: string; Icon: typeof InfoOutlinedIcon }
 > = {
   info: {
-    bg: 'var(--info-50)',
-    border: 'var(--info-100)',
-    fg: 'var(--info-700)',
+    bg: 'var(--status-info-bg)',
+    fg: 'var(--status-info-text)',
     Icon: InfoOutlinedIcon
   },
   warning: {
-    bg: 'var(--warning-50)',
-    border: 'var(--warning-100)',
-    fg: 'var(--warning-700)',
+    bg: 'var(--status-warning-bg)',
+    fg: 'var(--status-warning-text)',
     Icon: WarningAmberIcon
   },
   error: {
-    bg: 'var(--error-50)',
-    border: 'var(--error-100)',
-    fg: 'var(--error-700)',
+    bg: 'var(--status-error-bg)',
+    fg: 'var(--status-error-text)',
     Icon: ErrorOutlineIcon
   },
   brand: {
-    bg: 'var(--brand-50)',
-    border: 'var(--brand-100)',
-    fg: 'var(--brand-800)',
+    bg: 'var(--status-brand-bg)',
+    fg: 'var(--status-brand-text)',
     Icon: InfoOutlinedIcon
   },
   success: {
-    bg: 'var(--success-50)',
-    border: 'var(--success-100)',
-    fg: 'var(--success-700)',
+    bg: 'var(--status-success-bg)',
+    fg: 'var(--status-success-text)',
     Icon: CheckCircleOutlineIcon
   }
 }
@@ -73,7 +71,7 @@ export function Banner({
   const [open, setOpen] = useState(true)
   if (!open) return null
 
-  const { bg, border, fg, Icon } = VARIANTS[variant]
+  const { bg, fg, Icon } = VARIANTS[variant]
 
   return (
     <Box
@@ -84,7 +82,6 @@ export function Banner({
         gap: 1.25,
         p: 1.5,
         borderRadius: 'var(--radius)',
-        border: `1px solid ${border}`,
         backgroundColor: bg,
         color: fg
       }}

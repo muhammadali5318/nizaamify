@@ -62,7 +62,10 @@ export default function AppShell() {
           flexGrow: 1,
           width: { md: `calc(100% - ${SIDEBAR_WIDTH}px)` },
           minHeight: '100vh',
-          backgroundColor: 'var(--surface-subtle)'
+          // Transparent so the body's ambient amber gradient reads through.
+          // The <body> tag already paints --surface-subtle; this Box just
+          // sits on top without occluding the glow.
+          backgroundColor: 'transparent'
         }}
       >
         {/* Spacer for the fixed AppBar — matches Toolbar min-heights. */}

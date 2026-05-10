@@ -35,18 +35,22 @@ const v = (token: string) => `var(${token})`
 // and any `sx` styling can still consume `var(--token)` freely — those are
 // just CSS strings, never parsed.
 const HEX = {
-  brand300: '#86E0A4',
-  brand400: '#67C090',
-  brand500: '#4A9D88',
-  brand700: '#215B63',
-  brand800: '#184E68',
-  brand900: '#124170',
-  brand950: '#0A2A4A',
+  // v2.4: amber brand scale (mirrors tokens.css). Component-level styling
+  // uses var(--brand-*) directly; these literals are only for MUI palette
+  // values that go through alpha()/decomposeColor().
+  brand300: '#FCD34D',
+  brand400: '#FBBF24',
+  brand500: '#F59E0B',
+  brand600: '#D97706',
+  brand700: '#B45309',
+  brand800: '#92400E',
+  brand900: '#78350F',
+  brand950: '#451A03',
   neutral0: '#FFFFFF',
-  neutral50: '#F8FAFA',
-  neutral200: '#E2E7E8',
-  neutral400: '#9AA4A8',
-  neutral700: '#363D40',
+  neutral50: '#FAFAF9',
+  neutral200: '#E5E5E2',
+  neutral400: '#9CA0A0',
+  neutral700: '#353A3D',
   neutral900: '#13171A',
   success100: '#DCFCE7',
   success500: '#16A34A',
@@ -62,25 +66,46 @@ const HEX = {
   info700: '#1E40AF'
 } as const
 
-export function getTheme(direction: 'ltr' | 'rtl'): Theme {
+export type ColorMode = 'light' | 'dark'
+
+export function getTheme(
+  direction: 'ltr' | 'rtl',
+  mode: ColorMode = 'light'
+): Theme {
+  const isDark = mode === 'dark'
+  // Background + text need different literal values for MUI's `alpha()` calcs
+  // (raw hex, not CSS variables). Token-driven CSS still flips automatically
+  // via [data-theme="dark"] in tokens.css; this map is only for MUI internals.
+  const bgDefault = isDark ? '#0F1112' : HEX.neutral50
+  const bgPaper = isDark ? '#171A1C' : HEX.neutral0
+  const textPrimary = isDark ? '#F4F5F6' : HEX.neutral900
+  const textSecondary = isDark ? '#C7CDD0' : HEX.neutral700
+  const textDisabled = isDark ? '#6B7479' : HEX.neutral400
+  const divider = isDark ? 'rgba(255,255,255,0.10)' : HEX.neutral200
   return createTheme({
     direction,
     breakpoints: {
       values: { xs: 0, sm: 640, md: 768, lg: 1024, xl: 1280 }
     },
     palette: {
-      mode: 'light',
+      mode,
+      // Bright amber (brand-500) is the primary CTA in BOTH modes — the
+      // light-mode brand-700 was too brown and muddied highlighted text.
+      // Contrast text is dark in both modes so the on-amber label reads
+      // against the bright bg. `dark` (MUI's hover/active variant) goes
+      // deeper in light mode and brighter in dark mode, since hover on a
+      // bright bg should *intensify* rather than darken.
       primary: {
-        main: HEX.brand700,
-        dark: HEX.brand800,
-        light: HEX.brand500,
-        contrastText: HEX.neutral0
+        main: HEX.brand500,
+        dark: isDark ? HEX.brand400 : HEX.brand600,
+        light: isDark ? HEX.brand300 : HEX.brand400,
+        contrastText: '#1A1308'
       },
       secondary: {
         main: HEX.brand400,
         dark: HEX.brand500,
         light: HEX.brand300,
-        contrastText: HEX.brand900
+        contrastText: '#1A1308'
       },
       error: {
         main: HEX.error500,
@@ -107,15 +132,15 @@ export function getTheme(direction: 'ltr' | 'rtl'): Theme {
         contrastText: HEX.neutral0
       },
       background: {
-        default: HEX.neutral50,
-        paper: HEX.neutral0
+        default: bgDefault,
+        paper: bgPaper
       },
       text: {
-        primary: HEX.neutral900,
-        secondary: HEX.neutral700,
-        disabled: HEX.neutral400
+        primary: textPrimary,
+        secondary: textSecondary,
+        disabled: textDisabled
       },
-      divider: HEX.neutral200,
+      divider,
       common: { black: '#000', white: HEX.neutral0 }
     },
     shape: { borderRadius: 8 },
@@ -225,12 +250,131 @@ export function getTheme(direction: 'ltr' | 'rtl'): Theme {
       MuiSelect: {
         styleOverrides: { outlined: { borderRadius: 8 } }
       },
+      // ---------- Dropdown / popover container ----------
+      // Shared styling for every popup: Select dropdowns, MenuList,
+      // profile menu Popper, etc. Larger radius matches the card
+      // language; amber-tinted shadow ties the popup to the page glow.
+      // Inner padding gives items room to breathe and rounded item
+      // pills land nicely against the edge.
       MuiMenu: {
+        defaultProps: { transitionDuration: 160 },
         styleOverrides: {
           paper: {
-            borderRadius: 10,
-            boxShadow: v('--shadow-md'),
-            border: `1px solid ${v('--border-default')}`
+            borderRadius: v('--radius-lg'),
+            border: `1px solid ${v('--border-default')}`,
+            boxShadow: v('--shadow-card'),
+            backgroundColor: v('--surface-card'),
+            backgroundImage: 'none',
+            paddingBlock: 6,
+            paddingInline: 6,
+            backdropFilter: 'saturate(160%)'
+          },
+          list: {
+            paddingBlock: 0
+          }
+        }
+      },
+      MuiMenuItem: {
+        styleOverrides: {
+          root: {
+            borderRadius: v('--radius'),
+            paddingBlock: 8,
+            paddingInline: 12,
+            marginBlock: 2,
+            fontSize: '0.9375rem',
+            transition:
+              'background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out)',
+            '&:hover': {
+              backgroundColor: v('--surface-muted')
+            },
+            '&.Mui-selected': {
+              backgroundColor: v('--status-brand-bg'),
+              color: v('--text-brand'),
+              '&:hover': { backgroundColor: v('--status-brand-bg') },
+              '& .MuiListItemIcon-root, & .MuiSvgIcon-root': {
+                color: v('--text-brand')
+              }
+            },
+            '&.Mui-focusVisible': {
+              backgroundColor: v('--surface-muted')
+            }
+          }
+        }
+      },
+      MuiAutocomplete: {
+        styleOverrides: {
+          paper: {
+            borderRadius: v('--radius-lg'),
+            border: `1px solid ${v('--border-default')}`,
+            boxShadow: v('--shadow-card'),
+            backgroundColor: v('--surface-card'),
+            backgroundImage: 'none',
+            marginBlockStart: 6,
+            overflow: 'hidden'
+          },
+          listbox: {
+            paddingBlock: 6,
+            paddingInline: 6,
+            // Custom scrollbar — translucent thumb, no track, only shown
+            // on hover. Reads cleanly against the warm surface in both
+            // modes.
+            scrollbarWidth: 'thin',
+            scrollbarColor: `${v('--border-strong')} transparent`,
+            '&::-webkit-scrollbar': { width: 8 },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: v('--border-default'),
+              borderRadius: 4
+            },
+            '&:hover::-webkit-scrollbar-thumb': {
+              backgroundColor: v('--border-strong')
+            }
+          },
+          option: {
+            borderRadius: v('--radius'),
+            marginBlock: 2,
+            paddingBlock: 8,
+            paddingInline: 12,
+            fontSize: '0.9375rem',
+            transition: 'background-color var(--duration-fast) var(--ease-out)',
+            // MUI uses two states for Autocomplete options:
+            //   data-focus="true" while keyboard / mouse traversal,
+            //   aria-selected="true" once chosen. Style both.
+            '&[data-focus="true"]': {
+              backgroundColor: v('--surface-muted')
+            },
+            '&[aria-selected="true"]': {
+              backgroundColor: v('--status-brand-bg'),
+              color: v('--text-brand'),
+              '&[data-focus="true"]': {
+                backgroundColor: v('--status-brand-bg')
+              }
+            }
+          },
+          noOptions: {
+            color: v('--text-muted'),
+            fontSize: '0.875rem',
+            paddingBlock: 14,
+            textAlign: 'center'
+          },
+          loading: {
+            color: v('--text-muted'),
+            fontSize: '0.875rem',
+            paddingBlock: 14,
+            textAlign: 'center'
+          }
+        }
+      },
+      MuiPopover: {
+        // The TopBar profile menu and a few one-off popups use Popover
+        // directly. Inherit the same surface/shadow as MuiMenu so they
+        // don't drift visually.
+        styleOverrides: {
+          paper: {
+            borderRadius: v('--radius-lg'),
+            border: `1px solid ${v('--border-default')}`,
+            boxShadow: v('--shadow-card'),
+            backgroundColor: v('--surface-card'),
+            backgroundImage: 'none'
           }
         }
       },
@@ -293,11 +437,19 @@ export function getTheme(direction: 'ltr' | 'rtl'): Theme {
       MuiTooltip: {
         defaultProps: { enterDelay: 200 },
         styleOverrides: {
+          // surface-inverse + text-inverse flip with theme so the tooltip
+          // always contrasts cleanly with the page (dark on light, light
+          // on dark).
           tooltip: {
-            backgroundColor: v('--neutral-900'),
-            color: v('--neutral-0'),
+            backgroundColor: v('--surface-inverse'),
+            color: v('--text-inverse'),
             fontSize: '0.8125rem',
-            borderRadius: 6
+            borderRadius: 6,
+            paddingInline: 8,
+            paddingBlock: 4
+          },
+          arrow: {
+            color: v('--surface-inverse')
           }
         }
       },
@@ -315,4 +467,4 @@ export function getTheme(direction: 'ltr' | 'rtl'): Theme {
   })
 }
 
-export default getTheme('ltr')
+export default getTheme('ltr', 'light')

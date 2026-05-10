@@ -24,7 +24,8 @@ export function AuthLayout({ title, subtitle, children }: Props) {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: 'var(--surface-subtle)'
+        // Transparent so the body's ambient amber wash reads through.
+        backgroundColor: 'transparent'
       }}
     >
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>

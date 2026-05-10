@@ -19,6 +19,14 @@
     "urdu": "اردو",
     "select_language": "زبان"
   },
+  "nav": {
+    "open_navigation": "نیویگیشن کھولیں",
+    "profile_menu": "پروفائل مینو",
+    "theme": {
+      "switch_to_light": "لائٹ موڈ پر سوئچ کریں",
+      "switch_to_dark": "ڈارک موڈ پر سوئچ کریں"
+    }
+  },
   "loading": "لوڈ ہو رہا ہے…",
   "errors": {
     "generic": "کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔",

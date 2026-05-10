@@ -140,9 +140,9 @@ export default function KhataPage() {
         const balance = Number(c.outstanding_balance)
         const color =
           balance > 0
-            ? 'var(--warning-700)'
+            ? 'var(--status-warning-text)'
             : balance < 0
-              ? 'var(--error-700)'
+              ? 'var(--status-error-text)'
               : 'var(--text-muted)'
         return (
           <Typography variant='body1' sx={{ fontWeight: 700, color }}>

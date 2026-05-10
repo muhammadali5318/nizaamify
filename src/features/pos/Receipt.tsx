@@ -210,12 +210,15 @@ export default function Receipt({
         </Stack>
         {onCredit > 0 && (
           <Stack direction='row' justifyContent='space-between'>
-            <Typography variant='body2' sx={{ color: 'var(--warning-700)' }}>
+            <Typography
+              variant='body2'
+              sx={{ color: 'var(--status-warning-text)' }}
+            >
               {t('pos:receipt.on_credit_amount')}
             </Typography>
             <Typography
               variant='body2'
-              sx={{ fontWeight: 600, color: 'var(--warning-700)' }}
+              sx={{ fontWeight: 600, color: 'var(--status-warning-text)' }}
             >
               {formatPKR(onCredit, locale)}
             </Typography>

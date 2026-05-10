@@ -111,7 +111,9 @@ export default function ReportsPage() {
             sx={{
               fontWeight: 700,
               color:
-                net >= 0 ? 'var(--status-success-text)' : 'var(--error-700)'
+                net >= 0
+                  ? 'var(--status-success-text)'
+                  : 'var(--status-error-text)'
             }}
           >
             {formatPKR(net, locale)}

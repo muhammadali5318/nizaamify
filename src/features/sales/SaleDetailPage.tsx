@@ -182,7 +182,9 @@ export default function SaleDetailPage() {
             component='span'
             sx={{
               color:
-                profit < 0 ? 'var(--error-700)' : 'var(--status-success-text)',
+                profit < 0
+                  ? 'var(--status-error-text)'
+                  : 'var(--status-success-text)',
               fontWeight: 500
             }}
           >
@@ -381,7 +383,7 @@ export default function SaleDetailPage() {
               <Stack direction='row' justifyContent='space-between' mt={0.5}>
                 <Typography
                   variant='body2'
-                  sx={{ color: 'var(--warning-700)' }}
+                  sx={{ color: 'var(--status-warning-text)' }}
                 >
                   {t('sales:detail.on_credit')}
                 </Typography>
@@ -390,7 +392,7 @@ export default function SaleDetailPage() {
                     variant='body2'
                     sx={{
                       fontWeight: 600,
-                      color: 'var(--warning-700)'
+                      color: 'var(--status-warning-text)'
                     }}
                   >
                     {formatPKR(onCredit, locale)}

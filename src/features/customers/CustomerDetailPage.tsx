@@ -136,7 +136,7 @@ export default function CustomerDetailPage() {
               sx={{
                 color: isCredit
                   ? 'var(--status-success-text)'
-                  : 'var(--warning-700)',
+                  : 'var(--status-warning-text)',
                 fontWeight: 600
               }}
             >
@@ -261,9 +261,9 @@ export default function CustomerDetailPage() {
                   fontWeight: 700,
                   color:
                     outstandingAmount > 0
-                      ? 'var(--warning-700)'
+                      ? 'var(--status-warning-text)'
                       : outstandingAmount < 0
-                        ? 'var(--error-700)'
+                        ? 'var(--status-error-text)'
                         : 'var(--status-success-text)'
                 }}
               >

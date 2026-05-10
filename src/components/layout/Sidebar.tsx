@@ -82,28 +82,19 @@ export function Sidebar({ width, isMobile, open, onClose }: SidebarProps) {
                       to={item.to}
                       onClick={isMobile ? onClose : undefined}
                       sx={{
-                        borderRadius: 'var(--radius)',
+                        // Pill-shaped active state, matches screenshots —
+                        // softer than the leading bar approach.
+                        borderRadius: 'var(--radius-md)',
                         my: 0.25,
-                        // Logical-property leading bar for RTL safety.
-                        position: 'relative',
+                        paddingInline: 1.25,
                         backgroundColor: active
                           ? 'var(--status-brand-bg)'
                           : 'transparent',
                         color: active
-                          ? 'var(--status-brand-text)'
+                          ? 'var(--text-brand)'
                           : 'var(--text-secondary)',
-                        '&::before': active
-                          ? {
-                              content: '""',
-                              position: 'absolute',
-                              insetInlineStart: 0,
-                              top: 6,
-                              bottom: 6,
-                              width: 3,
-                              borderRadius: 2,
-                              backgroundColor: 'var(--brand-700)'
-                            }
-                          : undefined,
+                        transition:
+                          'background-color var(--duration-fast) var(--ease-out)',
                         '&:hover': {
                           backgroundColor: active
                             ? 'var(--status-brand-bg)'
@@ -114,7 +105,10 @@ export function Sidebar({ width, isMobile, open, onClose }: SidebarProps) {
                       <ListItemIcon
                         sx={{
                           minWidth: 36,
-                          color: active ? 'var(--brand-700)' : 'inherit'
+                          // text-brand flips with mode (brand-700 light /
+                          // brand-400 dark) so the active icon stays legible
+                          // on the amber-tinted pill in either theme.
+                          color: active ? 'var(--text-brand)' : 'inherit'
                         }}
                       >
                         <Icon fontSize='small' />

@@ -252,7 +252,9 @@ function DesktopRow<T>({
         backgroundColor: active ? 'var(--status-brand-bg)' : 'transparent',
         '& > td:first-of-type': active
           ? {
-              borderInlineStart: '3px solid var(--brand-700)',
+              // text-brand flips light/dark so the active rail reads on
+              // both surfaces (was hard-coded var(--brand-700)).
+              borderInlineStart: '3px solid var(--text-brand)',
               paddingInlineStart: 'calc(16px - 3px)'
             }
           : {},
@@ -362,7 +364,7 @@ function MobileRowCard<T>({
       sx={{
         cursor: onClick ? 'pointer' : 'default',
         backgroundColor: isActive ? 'var(--status-brand-bg)' : undefined,
-        borderInlineStart: isActive ? '3px solid var(--brand-700)' : undefined
+        borderInlineStart: isActive ? '3px solid var(--text-brand)' : undefined
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
