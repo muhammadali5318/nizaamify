@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router'
 import { paths } from 'src/paths'
 import { useCustomer } from './hooks'
+import { useTiers } from 'src/features/tiers/hooks'
 import {
   useLedgerEntries,
   type LedgerEntryView
@@ -40,6 +41,10 @@ export default function CustomerDetailPage() {
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
 
   const { data: customer, isLoading: loadingCustomer } = useCustomer(id)
+  const { data: tiers = [] } = useTiers()
+  const tier = customer?.tier_id
+    ? tiers.find((tt) => tt.id === customer.tier_id)
+    : null
   const { data: entries, isLoading: loadingEntries } = useLedgerEntries(id)
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [reverseTarget, setReverseTarget] = useState<LedgerEntryView | null>(
@@ -225,9 +230,25 @@ export default function CustomerDetailPage() {
             <Typography variant='display' component='h1'>
               {customer.name}
             </Typography>
-            <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
-              {customer.phone}
-            </Typography>
+            <Stack
+              direction='row'
+              spacing={1}
+              alignItems='center'
+              flexWrap='wrap'
+            >
+              <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
+                {customer.phone}
+              </Typography>
+              {tier && (
+                <Badge
+                  variant='info'
+                  label={t('customers:tier_chip_label', {
+                    name: tier.name,
+                    percent: tier.discount_percent
+                  })}
+                />
+              )}
+            </Stack>
           </Box>
           <Stack
             direction={{ xs: 'column', sm: 'row' }}

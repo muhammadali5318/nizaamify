@@ -27,7 +27,9 @@ void i18n
       'reports',
       'settings',
       'sales',
-      'suppliers'
+      'suppliers',
+      'units',
+      'tiers'
     ],
     detection: {
       order: ['localStorage', 'navigator'],

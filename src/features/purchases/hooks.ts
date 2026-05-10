@@ -19,11 +19,27 @@ export type OverheadCategory =
   | 'packaging'
   | 'other'
 
+/**
+ * One item in a stock-in. Two valid shapes:
+ *   - Base unit:  { product_id, qty, cost_at_purchase }
+ *   - Pack:       { product_id, pack_id, pack_qty, cost_at_purchase }
+ * `record_purchase` accepts either; the pack variant is required for v2.0
+ * stock-in-only packs (price=null) where qty is in cartons not base units.
+ */
+export type PurchaseLineInput =
+  | { product_id: string; qty: number; cost_at_purchase: number }
+  | {
+      product_id: string
+      pack_id: string
+      pack_qty: number
+      cost_at_purchase: number
+    }
+
 export type RecordPurchaseInput = {
   supplier_id: string | null
   purchase_date: string // YYYY-MM-DD
   note: string | null
-  items: { product_id: string; qty: number; cost_at_purchase: number }[]
+  items: PurchaseLineInput[]
   overhead_items: {
     category: OverheadCategory
     amount: number
@@ -125,7 +141,13 @@ export type PurchaseDetailItem = {
   overhead_per_unit: number
   avg_cost_before: number | null
   avg_cost_after: number | null
+  /** v2.0 pack snapshot. Null on v1.x rows and on base-unit purchases. */
+  pack_id: string | null
+  pack_qty: number | null
+  pack_base_qty_snapshot: number | null
+  qty_in_base: number
   product: { id: string; name: string; type: string } | null
+  pack: { id: string; unit_name: string; is_active: boolean } | null
 }
 
 export type PurchaseDetailOverhead = {
@@ -158,7 +180,9 @@ export function usePurchaseDetail(id: string | undefined) {
           purchase_items (
             id, product_id, qty, cost_at_purchase, overhead_per_unit,
             avg_cost_before, avg_cost_after,
-            product:products ( id, name, type )
+            pack_id, pack_qty, pack_base_qty_snapshot, qty_in_base,
+            product:products ( id, name, type ),
+            pack:product_packs ( id, is_active, units_of_measure:unit_id ( name ) )
           ),
           purchase_overhead_items (
             id, category, amount, description
@@ -185,7 +209,26 @@ export function usePurchaseDetail(id: string | undefined) {
         is_opening: data.is_opening,
         cashier_email: cashier?.email ?? null,
         supplier_name: supplier?.name ?? null,
-        items: (data.purchase_items as unknown as PurchaseDetailItem[]) ?? [],
+        items: (
+          (data.purchase_items ?? []) as unknown as Array<
+            Omit<PurchaseDetailItem, 'pack'> & {
+              pack: {
+                id: string
+                is_active: boolean
+                units_of_measure: { name: string } | null
+              } | null
+            }
+          >
+        ).map((it) => ({
+          ...it,
+          pack: it.pack
+            ? {
+                id: it.pack.id,
+                unit_name: it.pack.units_of_measure?.name ?? '',
+                is_active: it.pack.is_active
+              }
+            : null
+        })),
         overhead:
           (data.purchase_overhead_items as unknown as PurchaseDetailOverhead[]) ??
           []

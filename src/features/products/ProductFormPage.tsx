@@ -23,6 +23,7 @@ import {
   useProduct,
   useUpdateProduct
 } from './hooks'
+import PacksSection from './PacksSection'
 import { paths } from 'src/paths'
 import { formatPKR } from 'src/features/subscription/env'
 import {
@@ -81,7 +82,8 @@ export default function ProductFormPage() {
                 : null,
               price: values.price,
               opening_stock: values.opening_stock,
-              opening_cost: values.opening_cost
+              opening_cost: values.opening_cost,
+              is_scan_only: values.is_scan_only
             })
             notify.success(t('products:messages.saved'))
             navigate(paths.products)
@@ -114,7 +116,8 @@ export default function ProductFormPage() {
             type: values.type,
             description: values.description?.trim() ? values.description : null,
             price: values.price,
-            is_active: values.is_active
+            is_active: values.is_active,
+            is_scan_only: values.is_scan_only
           })
           notify.success(t('products:messages.saved'))
           navigate(paths.products)
@@ -157,7 +160,8 @@ function CreateForm({
       description: '',
       price: 0,
       opening_stock: 0,
-      opening_cost: 0
+      opening_cost: 0,
+      is_scan_only: false
     }
   })
 
@@ -265,6 +269,24 @@ function CreateForm({
               </Field>
             </Stack>
 
+            <Controller
+              control={control}
+              name='is_scan_only'
+              render={({ field }) => (
+                <Field hint={t('products:fields.is_scan_only_help')}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    }
+                    label={t('products:fields.is_scan_only')}
+                  />
+                </Field>
+              )}
+            />
+
             <Stack direction='row' spacing={1.5} justifyContent='flex-end'>
               <Button
                 variant='secondary'
@@ -290,8 +312,9 @@ type EditFormProps = {
         name: string
         type: string
         description: string | null
-        price: number
+        price: number | null
         is_active: boolean
+        is_scan_only: boolean
         avg_cost: number
         last_purchase_cost: number | null
       }
@@ -326,7 +349,8 @@ function EditForm({
       type: '',
       description: '',
       price: 0,
-      is_active: true
+      is_active: true,
+      is_scan_only: false
     }
   })
 
@@ -336,8 +360,9 @@ function EditForm({
         name: existing.name,
         type: existing.type,
         description: existing.description ?? '',
-        price: Number(existing.price),
-        is_active: existing.is_active
+        price: Number(existing.price ?? 0),
+        is_active: existing.is_active,
+        is_scan_only: existing.is_scan_only ?? false
       })
     }
   }, [existing, reset])
@@ -454,6 +479,34 @@ function EditForm({
                   </Typography>
                 </Box>
               </Stack>
+            )}
+
+            <Controller
+              control={control}
+              name='is_scan_only'
+              render={({ field }) => (
+                <Field hint={t('products:fields.is_scan_only_help')}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    }
+                    label={t('products:fields.is_scan_only')}
+                  />
+                </Field>
+              )}
+            />
+
+            {existing && (
+              <>
+                <Divider sx={{ borderColor: 'var(--border-subtle)' }} />
+                <PacksSection
+                  productId={existing.id}
+                  productName={existing.name}
+                />
+              </>
             )}
 
             <Controller

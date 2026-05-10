@@ -48,5 +48,20 @@
     "service_only": "کوئی مصنوعات نہیں — صرف سروس چارج",
     "notes_label": "نوٹس",
     "below_avg_cost_warning": "یہ قیمت اوسط لاگت سے کم ہے۔ نقصان پر فروخت۔"
+  },
+  "items": {
+    "columns": {
+      "discount": "رعایت",
+      "line_subtotal": "لائن ذیلی کل",
+      "line_total": "لائن کل"
+    },
+    "discount_percent_display": "{{percent}}٪ (−{{amount}})",
+    "discount_fixed_display": "−{{amount}} (مقررہ)",
+    "no_discount": "—"
+  },
+  "totals": {
+    "tier_discount": "گروپ رعایت ({{name}} {{percent}}٪)",
+    "manual_override_percent": "دستی اوور رائیڈ ({{percent}}٪)",
+    "manual_override_fixed": "دستی اوور رائیڈ (مقررہ)"
   }
 }

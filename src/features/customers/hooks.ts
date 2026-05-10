@@ -73,6 +73,7 @@ export function useCreateCustomer() {
       phone: string
       address?: string | null
       notes?: string | null
+      tier_id?: string | null
     }) => {
       const { data: shop, error: shopErr } = await supabase
         .from('shops')
@@ -86,6 +87,7 @@ export function useCreateCustomer() {
           phone: values.phone,
           address: values.address ?? null,
           notes: values.notes ?? null,
+          tier_id: values.tier_id ?? null,
           shop_id: shop.id
         })
         .select('*')
@@ -111,6 +113,7 @@ export function useUpdateCustomer() {
       phone: string
       address?: string | null
       notes?: string | null
+      tier_id?: string | null
     }) => {
       const { id, ...rest } = values
       const { data, error } = await supabase
@@ -119,7 +122,8 @@ export function useUpdateCustomer() {
           name: rest.name,
           phone: rest.phone,
           address: rest.address ?? null,
-          notes: rest.notes ?? null
+          notes: rest.notes ?? null,
+          tier_id: rest.tier_id ?? null
         })
         .eq('id', id)
         .select('*')

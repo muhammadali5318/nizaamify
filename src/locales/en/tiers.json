@@ -1,0 +1,46 @@
+{
+  "title": "Customer Tiers",
+  "subtitle": "Customers in each tier automatically get the matching discount on items at checkout.",
+  "fields": {
+    "name": "Name",
+    "discount_percent": "Discount %",
+    "is_default": "Default tier",
+    "notes": "Notes"
+  },
+  "labels": {
+    "default_badge": "default",
+    "customers_count_one": "{{count}} customer",
+    "customers_count_other": "{{count}} customers",
+    "high_discount_warning": "Are you sure? That's a very high discount.",
+    "moved_to_default_one": "{{count}} customer moved to {{tierName}}.",
+    "moved_to_default_other": "{{count}} customers moved to {{tierName}}.",
+    "no_customers_moved": "No customers were assigned to this tier."
+  },
+  "actions": {
+    "new_tier": "+ New tier",
+    "edit": "Edit",
+    "archive": "Archive",
+    "set_default": "Set as default",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "dialog": {
+    "new_title": "New tier",
+    "edit_title": "Edit tier",
+    "archive_confirm_title": "Archive this tier?",
+    "archive_confirm_body": "Customers on this tier will be moved to the default tier."
+  },
+  "errors": {
+    "duplicate_name": "A tier with this name already exists.",
+    "cannot_archive_default": "Set another tier as default first.",
+    "cannot_unset_default": "Set another tier as default first.",
+    "discount_out_of_range": "Discount must be between 0 and 100.",
+    "name_required": "Name is required.",
+    "save_failed": "Could not save tier. Please try again.",
+    "archive_failed": "Could not archive tier. Please try again."
+  },
+  "messages": {
+    "saved": "Tier saved",
+    "default_set": "Default tier updated"
+  }
+}

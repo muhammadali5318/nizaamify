@@ -22,6 +22,10 @@ type SaleItem = {
   qty: number
   price_at_sale: number | string
   cost_at_sale: number | string
+  /** v2.2 line discount snapshot. */
+  line_discount_type?: 'percent' | 'fixed' | null
+  line_discount_value?: number | null
+  line_discount_amount?: number | null
   product?: { name?: string } | null
 }
 
@@ -63,13 +67,37 @@ export default function SaleDetailPage() {
   }
 
   const shortId = sale.id.slice(0, 8)
-  const subtotal = sale.items.reduce(
-    (s, it) => s + Number(it.price_at_sale) * it.qty,
-    0
-  )
+  // Items subtotal AFTER line discounts. Tier discount is then applied to
+  // this number to produce post-tier-discount total. Spec §1 stacking order.
+  const itemsSubtotal = sale.items.reduce((s, it) => {
+    const sub = Number(it.price_at_sale) * it.qty
+    const lineDisc = Number(it.line_discount_amount ?? 0)
+    return s + (sub - lineDisc)
+  }, 0)
+  const tierDiscount = Number(sale.tier_discount_amount ?? 0)
+  const serviceCharge = Number(sale.service_charge ?? 0)
   const total = Number(sale.total)
   const amountPaid = Number(sale.amount_paid ?? 0)
   const onCredit = Math.max(0, total - amountPaid)
+
+  // Discount line label (spec §5.5)
+  const tierLabel: string | null = (() => {
+    if (sale.tier_override_type === 'percent') {
+      return t('sales:totals.manual_override_percent', {
+        percent: Number(sale.tier_override_value ?? 0)
+      })
+    }
+    if (sale.tier_override_type === 'fixed') {
+      return t('sales:totals.manual_override_fixed')
+    }
+    if (sale.tier?.name && sale.tier_discount_percent_snapshot !== null) {
+      return t('sales:totals.tier_discount', {
+        name: sale.tier.name,
+        percent: Number(sale.tier_discount_percent_snapshot)
+      })
+    }
+    return null
+  })()
 
   const linkedLedger = sale.ledger
   const isCreditish =
@@ -109,10 +137,38 @@ export default function SaleDetailPage() {
       cell: (it) => formatPKR(Number(it.cost_at_sale), locale)
     },
     {
+      id: 'discount',
+      header: t('sales:items.columns.discount'),
+      align: 'end',
+      hideOnMobile: true,
+      cell: (it) => {
+        if (!it.line_discount_type || !it.line_discount_amount) {
+          return (
+            <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
+              {t('sales:items.no_discount')}
+            </Typography>
+          )
+        }
+        if (it.line_discount_type === 'percent') {
+          return t('sales:items.discount_percent_display', {
+            percent: Number(it.line_discount_value ?? 0),
+            amount: formatPKR(Number(it.line_discount_amount), locale)
+          })
+        }
+        return t('sales:items.discount_fixed_display', {
+          amount: formatPKR(Number(it.line_discount_amount), locale)
+        })
+      }
+    },
+    {
       id: 'line_total',
       header: t('sales:detail.line_total'),
       align: 'end',
-      cell: (it) => formatPKR(Number(it.price_at_sale) * it.qty, locale)
+      cell: (it) => {
+        const sub = Number(it.price_at_sale) * it.qty
+        const lineDisc = Number(it.line_discount_amount ?? 0)
+        return formatPKR(sub - lineDisc, locale)
+      }
     },
     {
       id: 'line_profit',
@@ -120,8 +176,12 @@ export default function SaleDetailPage() {
       align: 'end',
       hideOnMobile: true,
       cell: (it) => {
-        const profit =
-          (Number(it.price_at_sale) - Number(it.cost_at_sale)) * it.qty
+        // Revenue is post-line-discount; cost stays unaffected by discounts.
+        const sub = Number(it.price_at_sale) * it.qty
+        const lineDisc = Number(it.line_discount_amount ?? 0)
+        const revenue = sub - lineDisc
+        const cost = Number(it.cost_at_sale) * it.qty
+        const profit = revenue - cost
         return (
           <Box
             component='span'
@@ -277,17 +337,29 @@ export default function SaleDetailPage() {
                 {t('sales:detail.subtotal')}
               </Typography>
               <Typography variant='body2'>
-                {formatPKR(subtotal, locale)}
+                {formatPKR(itemsSubtotal, locale)}
               </Typography>
             </Stack>
-            <Stack direction='row' justifyContent='space-between' mt={0.5}>
-              <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
-                {t('sales:columns.service_charge')}
-              </Typography>
-              <Typography variant='body2'>
-                {formatPKR(sale.service_charge, locale)}
-              </Typography>
-            </Stack>
+            {tierDiscount > 0 && tierLabel && (
+              <Stack direction='row' justifyContent='space-between' mt={0.5}>
+                <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
+                  {tierLabel}
+                </Typography>
+                <Typography variant='body2'>
+                  −{formatPKR(tierDiscount, locale)}
+                </Typography>
+              </Stack>
+            )}
+            {serviceCharge > 0 && (
+              <Stack direction='row' justifyContent='space-between' mt={0.5}>
+                <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
+                  {t('sales:columns.service_charge')}
+                </Typography>
+                <Typography variant='body2'>
+                  {formatPKR(serviceCharge, locale)}
+                </Typography>
+              </Stack>
+            )}
             <Stack
               direction='row'
               justifyContent='space-between'

@@ -15,13 +15,30 @@ export type SaleDetailItem = {
   qty: number
   price_at_sale: number
   cost_at_sale: number
+  /** v2.2 per-line discount snapshot. */
+  line_discount_type: 'percent' | 'fixed' | null
+  line_discount_value: number | null
+  line_discount_amount: number
   product: { id: string; name: string } | null
 }
 
 export type SaleDetail = Invoice & {
-  customer: { id: string; name: string; phone: string } | null
+  customer: {
+    id: string
+    name: string
+    phone: string
+    tier_id: string | null
+  } | null
   cashier: { email: string } | null
   items: SaleDetailItem[]
+  /** v2.2 invoice-level discount snapshot. */
+  tier_id: string | null
+  tier_discount_percent_snapshot: number | null
+  tier_discount_amount: number
+  tier_override_type: 'percent' | 'fixed' | null
+  tier_override_value: number | null
+  /** Joined tier name at time of sale (snapshot). NULL on overrides. */
+  tier: { name: string } | null
   ledger: {
     id: string
     type: 'debit' | 'credit'
@@ -88,10 +105,12 @@ export function useSale(id: string | undefined) {
         .select(
           `
           *,
-          customer:customers ( id, name, phone ),
+          customer:customers ( id, name, phone, tier_id ),
           cashier:profiles!invoices_cashier_id_fkey ( email ),
+          tier:customer_tiers ( name ),
           sale_items (
             id, product_id, qty, price_at_sale, cost_at_sale,
+            line_discount_type, line_discount_value, line_discount_amount,
             product:products ( id, name )
           )
           `
@@ -143,13 +162,17 @@ export function useSale(id: string | undefined) {
       }
 
       const items = (data.sale_items as unknown as SaleDetailItem[]) ?? []
+      // The select * picks up tier_id, tier_discount_*, tier_override_* on
+      // the invoice row (added by v2.2 migration 0029). Cast through the
+      // SaleDetail union so TS knows about them.
       return {
         ...(data as unknown as Invoice),
         customer: (data.customer as SaleDetail['customer']) ?? null,
         cashier: (data.cashier as SaleDetail['cashier']) ?? null,
+        tier: (data.tier as SaleDetail['tier']) ?? null,
         items,
         ledger
-      }
+      } as SaleDetail
     }
   })
 }

@@ -48,7 +48,8 @@ export default function CustomerFormPage() {
           name: values.name.trim(),
           phone: values.phone,
           address: values.address.trim() || null,
-          notes: values.notes.trim() || null
+          notes: values.notes.trim() || null,
+          tier_id: values.tier_id ?? null
         })
         notify.success(t('customers:messages.saved'))
         navigate(paths.gotoCustomer(c.id))
@@ -58,7 +59,8 @@ export default function CustomerFormPage() {
           name: values.name.trim(),
           phone: values.phone,
           address: values.address.trim() || null,
-          notes: values.notes.trim() || null
+          notes: values.notes.trim() || null,
+          tier_id: values.tier_id ?? null
         })
         notify.success(t('customers:messages.saved'))
         navigate(paths.gotoCustomer(id))
@@ -88,7 +90,8 @@ export default function CustomerFormPage() {
                   name: existing.name,
                   phone: existing.phone,
                   address: existing.address ?? '',
-                  notes: existing.notes ?? ''
+                  notes: existing.notes ?? '',
+                  tier_id: existing.tier_id ?? null
                 }
               : undefined
           }

@@ -17,7 +17,8 @@ export const createProductSchema = (t: TFunction) =>
       .nonnegative(t('products:errors.opening_stock_invalid')),
     opening_cost: z
       .number({ invalid_type_error: t('products:errors.opening_cost_invalid') })
-      .nonnegative(t('products:errors.opening_cost_invalid'))
+      .nonnegative(t('products:errors.opening_cost_invalid')),
+    is_scan_only: z.boolean()
   })
 
 export const editProductSchema = (t: TFunction) =>
@@ -28,7 +29,8 @@ export const editProductSchema = (t: TFunction) =>
     price: z
       .number({ invalid_type_error: t('products:errors.price_invalid') })
       .nonnegative(t('products:errors.price_invalid')),
-    is_active: z.boolean()
+    is_active: z.boolean(),
+    is_scan_only: z.boolean()
   })
 
 export type CreateProductValues = z.infer<

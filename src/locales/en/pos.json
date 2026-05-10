@@ -27,7 +27,10 @@
     "was_price": "was {{price}}",
     "below_avg_cost_warning": "Below average cost — selling at a loss.",
     "stock_remaining": "Stock: {{count}} left",
-    "remove_line": "Remove"
+    "remove_line": "Remove",
+    "quick_add_each": "+1 {{unitName}}",
+    "quick_add_pack": "+1 {{unitName}} ({{baseQty}})",
+    "scan_only_help": "Scan-only — use the pack buttons"
   },
   "payment": {
     "title": "Payment",
@@ -65,6 +68,32 @@
     "close": "Close",
     "view_cart": "View cart ({{count}} items, {{total}})"
   },
+  "totals": {
+    "tier_discount": "Tier discount",
+    "tier_discount_with_name": "Tier discount ({{name}} {{percent}}%)",
+    "manual_override_percent": "Manual override ({{percent}}%)",
+    "manual_override_fixed": "Manual override",
+    "override_link": "Override",
+    "override_modal_title": "Override discount for this sale only",
+    "override_type_label": "Discount type",
+    "override_type_percent": "Percentage",
+    "override_type_fixed": "Fixed amount",
+    "override_value_label": "Value",
+    "override_apply": "Apply override",
+    "override_reset": "Reset",
+    "override_cancel": "Cancel",
+    "override_help": "This sale only — the customer's tier returns to default afterwards."
+  },
+  "line": {
+    "add_discount": "Add discount",
+    "remove_discount": "Remove discount",
+    "discount_type": "Line discount",
+    "discount_percent_label": "%",
+    "discount_fixed_label": "PKR",
+    "line_subtotal": "Line subtotal",
+    "line_discount": "Line discount",
+    "line_total": "Line total"
+  },
   "receipt": {
     "title": "Receipt",
     "invoice": "Invoice",
@@ -91,7 +120,11 @@
     "submit_failed": "Could not complete the sale. Please try again.",
     "empty_sale": "Sale must have at least one item or a service charge",
     "amount_exceeds_total": "Amount paid cannot exceed total",
-    "customer_required": "Customer is required for credit or partial sales"
+    "customer_required": "Customer is required for credit or partial sales",
+    "line_discount_percent_out_of_range": "Discount must be between 0% and 100%.",
+    "line_discount_exceeds_line": "Discount cannot exceed the line subtotal.",
+    "override_percent_out_of_range": "Override percent must be between 0 and 100.",
+    "override_fixed_exceeds_items": "Override amount cannot exceed the items subtotal."
   },
   "messages": {
     "saved": "Sale completed"

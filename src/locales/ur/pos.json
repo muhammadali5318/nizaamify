@@ -27,7 +27,10 @@
     "was_price": "پہلے {{price}}",
     "below_avg_cost_warning": "اوسط لاگت سے کم — نقصان پر فروخت۔",
     "stock_remaining": "اسٹاک: {{count}} باقی",
-    "remove_line": "ہٹائیں"
+    "remove_line": "ہٹائیں",
+    "quick_add_each": "+1 {{unitName}}",
+    "quick_add_pack": "+1 {{unitName}} ({{baseQty}})",
+    "scan_only_help": "صرف اسکین — پیک بٹن استعمال کریں"
   },
   "payment": {
     "title": "ادائیگی",
@@ -56,6 +59,32 @@
     "cash": "نقد فروخت مکمل کریں",
     "credit": "ادھار فروخت مکمل کریں",
     "partial": "جزوی فروخت مکمل کریں ({{paid}} ادا، {{credit}} ادھار)"
+  },
+  "totals": {
+    "tier_discount": "گروپ رعایت",
+    "tier_discount_with_name": "گروپ رعایت ({{name}} {{percent}}%)",
+    "manual_override_percent": "دستی اوور رائیڈ ({{percent}}%)",
+    "manual_override_fixed": "دستی اوور رائیڈ",
+    "override_link": "اوور رائیڈ",
+    "override_modal_title": "صرف اس فروخت کے لیے رعایت اوور رائیڈ کریں",
+    "override_type_label": "رعایت کی قسم",
+    "override_type_percent": "فیصد",
+    "override_type_fixed": "مقررہ رقم",
+    "override_value_label": "قدر",
+    "override_apply": "اوور رائیڈ لاگو کریں",
+    "override_reset": "ری سیٹ",
+    "override_cancel": "منسوخ",
+    "override_help": "صرف اس فروخت کے لیے — گاہک کا گروپ بعد میں ڈیفالٹ پر واپس آ جائے گا۔"
+  },
+  "line": {
+    "add_discount": "رعایت شامل کریں",
+    "remove_discount": "رعایت ہٹائیں",
+    "discount_type": "لائن رعایت",
+    "discount_percent_label": "٪",
+    "discount_fixed_label": "روپے",
+    "line_subtotal": "لائن ذیلی کل",
+    "line_discount": "لائن رعایت",
+    "line_total": "لائن کل"
   },
   "actions": {
     "complete_sale": "فروخت مکمل کریں",
@@ -91,7 +120,11 @@
     "submit_failed": "فروخت مکمل نہیں ہو سکی۔ دوبارہ کوشش کریں۔",
     "empty_sale": "فروخت میں کم از کم ایک آئٹم یا سروس چارج ہونا چاہیے",
     "amount_exceeds_total": "ادا شدہ رقم کل سے زیادہ نہیں ہو سکتی",
-    "customer_required": "ادھار یا جزوی فروخت کے لیے گاہک ضروری ہے"
+    "customer_required": "ادھار یا جزوی فروخت کے لیے گاہک ضروری ہے",
+    "line_discount_percent_out_of_range": "رعایت 0٪ اور 100٪ کے درمیان ہونی چاہیے۔",
+    "line_discount_exceeds_line": "رعایت لائن ذیلی کل سے زیادہ نہیں ہو سکتی۔",
+    "override_percent_out_of_range": "اوور رائیڈ فیصد 0 اور 100 کے درمیان ہونا چاہیے۔",
+    "override_fixed_exceeds_items": "اوور رائیڈ رقم اشیاء کے ذیلی کل سے زیادہ نہیں ہو سکتی۔"
   },
   "messages": {
     "saved": "فروخت مکمل ہو گئی"

@@ -1,0 +1,46 @@
+{
+  "title": "گاہک کے گروپس",
+  "subtitle": "ہر گروپ کے گاہکوں کو چیک آؤٹ پر اشیاء پر متعلقہ رعایت خود بخود ملتی ہے۔",
+  "fields": {
+    "name": "نام",
+    "discount_percent": "رعایت ٪",
+    "is_default": "ڈیفالٹ گروپ",
+    "notes": "نوٹس"
+  },
+  "labels": {
+    "default_badge": "ڈیفالٹ",
+    "customers_count_one": "{{count}} گاہک",
+    "customers_count_other": "{{count}} گاہک",
+    "high_discount_warning": "کیا آپ یقینی ہیں؟ یہ بہت زیادہ رعایت ہے۔",
+    "moved_to_default_one": "{{count}} گاہک {{tierName}} میں منتقل ہو گیا۔",
+    "moved_to_default_other": "{{count}} گاہک {{tierName}} میں منتقل ہو گئے۔",
+    "no_customers_moved": "اس گروپ کو کوئی گاہک تفویض نہیں تھا۔"
+  },
+  "actions": {
+    "new_tier": "+ نیا گروپ",
+    "edit": "ترمیم",
+    "archive": "محفوظ شدہ",
+    "set_default": "ڈیفالٹ بنائیں",
+    "save": "محفوظ کریں",
+    "cancel": "منسوخ کریں"
+  },
+  "dialog": {
+    "new_title": "نیا گروپ",
+    "edit_title": "گروپ میں ترمیم",
+    "archive_confirm_title": "یہ گروپ محفوظ شدہ کریں؟",
+    "archive_confirm_body": "اس گروپ کے گاہکوں کو ڈیفالٹ گروپ میں منتقل کر دیا جائے گا۔"
+  },
+  "errors": {
+    "duplicate_name": "اس نام کا گروپ پہلے سے موجود ہے۔",
+    "cannot_archive_default": "پہلے کوئی اور گروپ ڈیفالٹ بنائیں۔",
+    "cannot_unset_default": "پہلے کوئی اور گروپ ڈیفالٹ بنائیں۔",
+    "discount_out_of_range": "رعایت 0 اور 100 کے درمیان ہونی چاہیے۔",
+    "name_required": "نام درکار ہے۔",
+    "save_failed": "گروپ محفوظ نہیں ہوا۔ دوبارہ کوشش کریں۔",
+    "archive_failed": "گروپ محفوظ شدہ نہیں ہو سکا۔ دوبارہ کوشش کریں۔"
+  },
+  "messages": {
+    "saved": "گروپ محفوظ ہو گیا",
+    "default_set": "ڈیفالٹ گروپ اپ ڈیٹ ہو گیا"
+  }
+}

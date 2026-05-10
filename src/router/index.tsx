@@ -13,6 +13,7 @@ import SubscriptionExpiredPage from 'src/features/subscription/SubscriptionExpir
 import DashboardPage from 'src/features/dashboard/DashboardPage'
 import SettingsPage from 'src/features/settings/SettingsPage'
 import SupportPage from 'src/features/settings/SupportPage'
+import TiersPage from 'src/features/tiers/TiersPage'
 import ProductsListPage from 'src/features/products/ProductsListPage'
 import ProductFormPage from 'src/features/products/ProductFormPage'
 import PurchasesListPage from 'src/features/purchases/PurchasesListPage'
@@ -105,6 +106,7 @@ export function Router() {
         // Always-accessible (any subscription state)
         { path: paths.settings, element: <SettingsPage /> },
         { path: paths.support, element: <SupportPage /> },
+        { path: paths.tiers, element: <TiersPage /> },
         // Subscription-gated
         {
           path: paths.dashboard,

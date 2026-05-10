@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Collapse from '@mui/material/Collapse'
+import MenuItem from '@mui/material/MenuItem'
 import Stack from '@mui/material/Stack'
+import TextField from '@mui/material/TextField'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import { Controller, useForm } from 'react-hook-form'
@@ -10,6 +12,7 @@ import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { Banner, Button, Field, Input, Textarea } from 'src/components/ui'
+import { useTiers } from 'src/features/tiers/hooks'
 
 const PK_PHONE_RE = /^(\+92|0)[0-9]{10}$/
 
@@ -18,6 +21,7 @@ export type CustomerFormValues = {
   phone: string
   address: string
   notes: string
+  tier_id: string | null
 }
 
 const schema = (t: TFunction) =>
@@ -28,7 +32,8 @@ const schema = (t: TFunction) =>
       .max(100, t('customers:errors.name_required')),
     phone: z.string().regex(PK_PHONE_RE, t('customers:errors.phone_invalid')),
     address: z.string().max(250).optional().default(''),
-    notes: z.string().max(1000).optional().default('')
+    notes: z.string().max(1000).optional().default(''),
+    tier_id: z.string().uuid().nullable().default(null)
   })
 
 type Props = {
@@ -54,8 +59,10 @@ export default function CustomerForm({
   cancelLabel,
   topError
 }: Props) {
-  const { t } = useTranslation(['customers', 'common'])
+  const { t } = useTranslation(['customers', 'common', 'tiers'])
   const [showMore, setShowMore] = useState(!compact)
+  const { data: tiers = [] } = useTiers()
+  const defaultTierId = tiers.find((tt) => tt.is_default)?.id ?? null
 
   const {
     control,
@@ -67,7 +74,8 @@ export default function CustomerForm({
       name: defaultValues?.name ?? '',
       phone: defaultValues?.phone ?? '',
       address: defaultValues?.address ?? '',
-      notes: defaultValues?.notes ?? ''
+      notes: defaultValues?.notes ?? '',
+      tier_id: defaultValues?.tier_id ?? defaultTierId
     }
   })
 
@@ -101,6 +109,34 @@ export default function CustomerForm({
             </Field>
           )}
         />
+
+        {tiers.length > 0 && (
+          <Controller
+            control={control}
+            name='tier_id'
+            render={({ field }) => (
+              <Field label={t('customers:fields.tier')}>
+                <TextField
+                  select
+                  fullWidth
+                  size='small'
+                  value={field.value ?? ''}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === '' ? null : e.target.value
+                    )
+                  }
+                >
+                  {tiers.map((tier) => (
+                    <MenuItem key={tier.id} value={tier.id}>
+                      {`${tier.name} (${tier.discount_percent}%)`}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Field>
+            )}
+          />
+        )}
 
         {compact && (
           <Box>

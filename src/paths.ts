@@ -50,6 +50,7 @@ export const paths = {
 
   settings: '/settings',
   support: '/settings/support',
+  tiers: '/settings/tiers',
 
   notFound: '/404'
 }
