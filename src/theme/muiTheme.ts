@@ -41,6 +41,7 @@ const HEX = {
   brand300: '#FCD34D',
   brand400: '#FBBF24',
   brand500: '#F59E0B',
+  brand600: '#D97706',
   brand700: '#B45309',
   brand800: '#92400E',
   brand900: '#78350F',
@@ -249,12 +250,131 @@ export function getTheme(
       MuiSelect: {
         styleOverrides: { outlined: { borderRadius: 8 } }
       },
+      // ---------- Dropdown / popover container ----------
+      // Shared styling for every popup: Select dropdowns, MenuList,
+      // profile menu Popper, etc. Larger radius matches the card
+      // language; amber-tinted shadow ties the popup to the page glow.
+      // Inner padding gives items room to breathe and rounded item
+      // pills land nicely against the edge.
       MuiMenu: {
+        defaultProps: { transitionDuration: 160 },
         styleOverrides: {
           paper: {
-            borderRadius: 10,
-            boxShadow: v('--shadow-md'),
-            border: `1px solid ${v('--border-default')}`
+            borderRadius: v('--radius-lg'),
+            border: `1px solid ${v('--border-default')}`,
+            boxShadow: v('--shadow-card'),
+            backgroundColor: v('--surface-card'),
+            backgroundImage: 'none',
+            paddingBlock: 6,
+            paddingInline: 6,
+            backdropFilter: 'saturate(160%)'
+          },
+          list: {
+            paddingBlock: 0
+          }
+        }
+      },
+      MuiMenuItem: {
+        styleOverrides: {
+          root: {
+            borderRadius: v('--radius'),
+            paddingBlock: 8,
+            paddingInline: 12,
+            marginBlock: 2,
+            fontSize: '0.9375rem',
+            transition:
+              'background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out)',
+            '&:hover': {
+              backgroundColor: v('--surface-muted')
+            },
+            '&.Mui-selected': {
+              backgroundColor: v('--status-brand-bg'),
+              color: v('--text-brand'),
+              '&:hover': { backgroundColor: v('--status-brand-bg') },
+              '& .MuiListItemIcon-root, & .MuiSvgIcon-root': {
+                color: v('--text-brand')
+              }
+            },
+            '&.Mui-focusVisible': {
+              backgroundColor: v('--surface-muted')
+            }
+          }
+        }
+      },
+      MuiAutocomplete: {
+        styleOverrides: {
+          paper: {
+            borderRadius: v('--radius-lg'),
+            border: `1px solid ${v('--border-default')}`,
+            boxShadow: v('--shadow-card'),
+            backgroundColor: v('--surface-card'),
+            backgroundImage: 'none',
+            marginBlockStart: 6,
+            overflow: 'hidden'
+          },
+          listbox: {
+            paddingBlock: 6,
+            paddingInline: 6,
+            // Custom scrollbar — translucent thumb, no track, only shown
+            // on hover. Reads cleanly against the warm surface in both
+            // modes.
+            scrollbarWidth: 'thin',
+            scrollbarColor: `${v('--border-strong')} transparent`,
+            '&::-webkit-scrollbar': { width: 8 },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: v('--border-default'),
+              borderRadius: 4
+            },
+            '&:hover::-webkit-scrollbar-thumb': {
+              backgroundColor: v('--border-strong')
+            }
+          },
+          option: {
+            borderRadius: v('--radius'),
+            marginBlock: 2,
+            paddingBlock: 8,
+            paddingInline: 12,
+            fontSize: '0.9375rem',
+            transition: 'background-color var(--duration-fast) var(--ease-out)',
+            // MUI uses two states for Autocomplete options:
+            //   data-focus="true" while keyboard / mouse traversal,
+            //   aria-selected="true" once chosen. Style both.
+            '&[data-focus="true"]': {
+              backgroundColor: v('--surface-muted')
+            },
+            '&[aria-selected="true"]': {
+              backgroundColor: v('--status-brand-bg'),
+              color: v('--text-brand'),
+              '&[data-focus="true"]': {
+                backgroundColor: v('--status-brand-bg')
+              }
+            }
+          },
+          noOptions: {
+            color: v('--text-muted'),
+            fontSize: '0.875rem',
+            paddingBlock: 14,
+            textAlign: 'center'
+          },
+          loading: {
+            color: v('--text-muted'),
+            fontSize: '0.875rem',
+            paddingBlock: 14,
+            textAlign: 'center'
+          }
+        }
+      },
+      MuiPopover: {
+        // The TopBar profile menu and a few one-off popups use Popover
+        // directly. Inherit the same surface/shadow as MuiMenu so they
+        // don't drift visually.
+        styleOverrides: {
+          paper: {
+            borderRadius: v('--radius-lg'),
+            border: `1px solid ${v('--border-default')}`,
+            boxShadow: v('--shadow-card'),
+            backgroundColor: v('--surface-card'),
+            backgroundImage: 'none'
           }
         }
       },

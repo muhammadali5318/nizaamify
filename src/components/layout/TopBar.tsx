@@ -147,12 +147,18 @@ export function TopBar({
           {({ TransitionProps }) => (
             <Grow {...TransitionProps}>
               <Paper
-                elevation={4}
+                elevation={0}
                 sx={{
                   minWidth: 240,
                   mt: 1,
+                  borderRadius: 'var(--radius-lg)',
                   border: '1px solid var(--border-default)',
-                  boxShadow: 'var(--shadow-md)'
+                  // Match the new MuiMenu/MuiAutocomplete container — warm
+                  // surface + amber-tinted bloom — so this Popper-driven
+                  // menu doesn't read as a different component family.
+                  backgroundColor: 'var(--surface-card)',
+                  boxShadow: 'var(--shadow-card)',
+                  backgroundImage: 'none'
                 }}
               >
                 <ClickAwayListener onClickAway={() => setProfileOpen(false)}>
