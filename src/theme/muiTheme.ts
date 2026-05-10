@@ -35,18 +35,21 @@ const v = (token: string) => `var(${token})`
 // and any `sx` styling can still consume `var(--token)` freely — those are
 // just CSS strings, never parsed.
 const HEX = {
-  brand300: '#86E0A4',
-  brand400: '#67C090',
-  brand500: '#4A9D88',
-  brand700: '#215B63',
-  brand800: '#184E68',
-  brand900: '#124170',
-  brand950: '#0A2A4A',
+  // v2.4: amber brand scale (mirrors tokens.css). Component-level styling
+  // uses var(--brand-*) directly; these literals are only for MUI palette
+  // values that go through alpha()/decomposeColor().
+  brand300: '#FCD34D',
+  brand400: '#FBBF24',
+  brand500: '#F59E0B',
+  brand700: '#B45309',
+  brand800: '#92400E',
+  brand900: '#78350F',
+  brand950: '#451A03',
   neutral0: '#FFFFFF',
-  neutral50: '#F8FAFA',
-  neutral200: '#E2E7E8',
-  neutral400: '#9AA4A8',
-  neutral700: '#363D40',
+  neutral50: '#FAFAF9',
+  neutral200: '#E5E5E2',
+  neutral400: '#9CA0A0',
+  neutral700: '#353A3D',
   neutral900: '#13171A',
   success100: '#DCFCE7',
   success500: '#16A34A',
@@ -85,17 +88,21 @@ export function getTheme(
     },
     palette: {
       mode,
+      // Dark surfaces need a brighter primary so the CTA carries weight; the
+      // light-mode brand-700 amber would muddy on near-black. brand-500 reads
+      // cleanly in both, but the contrast-text flips to dark on dark mode so
+      // the amber-on-amber-text doesn't disappear.
       primary: {
-        main: HEX.brand700,
-        dark: HEX.brand800,
-        light: HEX.brand500,
-        contrastText: HEX.neutral0
+        main: isDark ? HEX.brand500 : HEX.brand700,
+        dark: isDark ? HEX.brand400 : HEX.brand800,
+        light: isDark ? HEX.brand300 : HEX.brand500,
+        contrastText: isDark ? '#1A1308' : HEX.neutral0
       },
       secondary: {
         main: HEX.brand400,
         dark: HEX.brand500,
         light: HEX.brand300,
-        contrastText: HEX.brand900
+        contrastText: '#1A1308'
       },
       error: {
         main: HEX.error500,

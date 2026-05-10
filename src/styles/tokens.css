@@ -1,36 +1,39 @@
 /* Design tokens — single source of truth.
-   Per MVP_DESIGN_SYSTEM_v1.7.md §2 (color), §3.1 (fonts), §4.2 (radii), §4.3 (shadows), §4.4 (motion).
    Components consume the SEMANTIC tokens (surface-*, text-*, action-*, status-*).
-   Raw scales (brand-*, neutral-*, success-*, etc.) are exposed for the rare bespoke case. */
+   Raw scales (brand-*, neutral-*, success-*, etc.) are exposed for the rare bespoke case.
+
+   v2.4 revamp: brand scale is amber (was teal/navy). Dark-mode tokens are scoped
+   under [data-theme="dark"] — only semantic tokens flip; raw scales stay constant.
+   The active theme is written by ThemeModeProvider on <html> and <body>. */
 
 :root {
-  /* ---------- Brand scale (mint → teal → navy) ---------- */
-  --brand-50:  #F0FDF4;
-  --brand-100: #DCFCE7;
-  --brand-200: #AAFFC7;   /* user anchor */
-  --brand-300: #86E0A4;
-  --brand-400: #67C090;   /* user anchor */
-  --brand-500: #4A9D88;
-  --brand-600: #357B7E;
-  --brand-700: #215B63;   /* user anchor — primary CTA */
-  --brand-800: #184E68;
-  --brand-900: #124170;   /* user anchor — heading/topbar */
-  --brand-950: #0A2A4A;
+  /* ---------- Brand scale (amber) — v2.4 ---------- */
+  --brand-50:  #FFFBEB;
+  --brand-100: #FEF3C7;
+  --brand-200: #FDE68A;
+  --brand-300: #FCD34D;   /* light accent — secondary CTAs */
+  --brand-400: #FBBF24;
+  --brand-500: #F59E0B;   /* dark-mode primary CTA */
+  --brand-600: #D97706;
+  --brand-700: #B45309;   /* light-mode primary CTA */
+  --brand-800: #92400E;
+  --brand-900: #78350F;
+  --brand-950: #451A03;
 
-  /* ---------- Neutral scale (slightly cool, ~3% toward teal) ---------- */
+  /* ---------- Neutral scale (slightly warm to pair with amber) ---------- */
   --neutral-0:   #FFFFFF;
-  --neutral-50:  #F8FAFA;
-  --neutral-100: #F1F4F4;
-  --neutral-200: #E2E7E8;
-  --neutral-300: #CBD2D4;
-  --neutral-400: #9AA4A8;
-  --neutral-500: #6B7679;
-  --neutral-600: #4D5659;
-  --neutral-700: #363D40;
-  --neutral-800: #23282A;
+  --neutral-50:  #FAFAF9;
+  --neutral-100: #F2F2F0;
+  --neutral-200: #E5E5E2;
+  --neutral-300: #CFCFCB;
+  --neutral-400: #9CA0A0;
+  --neutral-500: #6B7174;
+  --neutral-600: #4A4F52;
+  --neutral-700: #353A3D;
+  --neutral-800: #22262A;
   --neutral-900: #13171A;
 
-  /* ---------- Semantic scales ---------- */
+  /* ---------- Semantic scales (status colors) ---------- */
   --success-50:  #F0FDF4;
   --success-100: #DCFCE7;
   --success-500: #16A34A;
@@ -60,7 +63,7 @@
   --surface-subtle:   var(--neutral-50);
   --surface-muted:    var(--neutral-100);
   --surface-emphasis: var(--brand-50);
-  --surface-inverse:  var(--brand-900);
+  --surface-inverse:  var(--neutral-900);
 
   /* ---------- Semantic text ---------- */
   --text-primary:   var(--neutral-900);
@@ -80,7 +83,7 @@
   /* ---------- Interactive (actions) ---------- */
   --action-primary:        var(--brand-700);
   --action-primary-hover:  var(--brand-800);
-  --action-primary-press:  var(--brand-950);
+  --action-primary-press:  var(--brand-900);
   --action-primary-text:   var(--neutral-0);
 
   --action-secondary:         var(--neutral-0);
@@ -88,9 +91,9 @@
   --action-secondary-border:  var(--neutral-300);
   --action-secondary-text:    var(--text-primary);
 
-  --action-accent:        var(--brand-400);   /* mint, sparingly */
-  --action-accent-hover:  var(--brand-500);
-  --action-accent-text:   var(--brand-900);
+  --action-accent:        var(--brand-500);   /* warm amber, primary CTA accent */
+  --action-accent-hover:  var(--brand-600);
+  --action-accent-text:   var(--neutral-900);
 
   --action-destructive:        var(--error-600);
   --action-destructive-hover:  var(--error-700);
@@ -111,12 +114,12 @@
   /* ---------- Focus ring ---------- */
   --focus-ring: 0 0 0 3px color-mix(in srgb, var(--brand-700) 40%, transparent);
 
-  /* ---------- Typography (font families per §3.1) ---------- */
+  /* ---------- Typography (font families) ---------- */
   --font-sans-en:    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-sans-ur:    'Noto Naskh Arabic', 'Noto Sans Arabic', system-ui, sans-serif;
   --font-display-ur: 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', system-ui, sans-serif;
 
-  /* ---------- Border radii (§4.2) ---------- */
+  /* ---------- Border radii ---------- */
   --radius-none: 0;
   --radius-sm:   4px;
   --radius:      8px;     /* default — inputs, buttons, small cards */
@@ -125,7 +128,7 @@
   --radius-xl:   16px;
   --radius-full: 9999px;
 
-  /* ---------- Shadows (§4.3) ---------- */
+  /* ---------- Shadows (light) ---------- */
   --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
   --shadow-sm: 0 2px 4px -1px rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
   --shadow-md: 0 6px 12px -3px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
@@ -133,12 +136,91 @@
   --shadow-xl: 0 24px 48px -12px rgba(15, 23, 42, 0.18);
   --shadow-brand: 0 8px 20px -8px color-mix(in srgb, var(--brand-700) 40%, transparent);
 
-  /* ---------- Motion (§4.4) ---------- */
+  /* ---------- Motion ---------- */
   --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --duration-fast: 120ms;
   --duration-base: 200ms;
   --duration-slow: 320ms;
+}
+
+/* =====================================================================
+   DARK MODE — only semantic tokens flip; raw scales stay constant.
+   The [data-theme="dark"] attribute is written by ThemeModeProvider.
+   ===================================================================== */
+[data-theme="dark"] {
+  /* Surfaces — near-black canvas with layered greys for elevation. */
+  --surface-base:     #15181A;
+  --surface-subtle:   #0F1112;   /* page background */
+  --surface-muted:    #1D2124;
+  --surface-emphasis: #2A2017;   /* amber-tinted highlight surface */
+  --surface-inverse:  var(--neutral-50);
+
+  /* Text */
+  --text-primary:   #F4F5F6;
+  --text-secondary: #C7CDD0;
+  --text-muted:     #8C9498;
+  --text-disabled:  #565C5F;
+  --text-inverse:   var(--neutral-900);
+  --text-brand:     var(--brand-400);
+
+  /* Borders — translucent whites read better on near-black than fixed greys. */
+  --border-subtle:  rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.10);
+  --border-strong:  rgba(255, 255, 255, 0.16);
+  --border-brand:   var(--brand-400);
+  --border-focus:   var(--brand-400);
+
+  /* Actions — amber stays the primary accent; brighter mid-tones read better
+     on dark surfaces than the deep brand-700/900 used in light mode. */
+  --action-primary:        var(--brand-500);
+  --action-primary-hover:  var(--brand-400);
+  --action-primary-press:  var(--brand-300);
+  --action-primary-text:   #1A1308;
+
+  --action-secondary:         #1D2124;
+  --action-secondary-hover:   #262B2F;
+  --action-secondary-border:  rgba(255, 255, 255, 0.12);
+  --action-secondary-text:    #F4F5F6;
+
+  --action-accent:        var(--brand-400);
+  --action-accent-hover:  var(--brand-300);
+  --action-accent-text:   #1A1308;
+
+  --action-destructive:        #DC2626;
+  --action-destructive-hover:  #EF4444;
+  --action-destructive-text:   var(--neutral-0);
+
+  /* Status fills — darker tinted bgs with brighter text reads cleanly. */
+  --status-success-bg:   rgba(34, 197, 94, 0.16);
+  --status-success-text: #4ADE80;
+  --status-warning-bg:   rgba(245, 158, 11, 0.16);
+  --status-warning-text: #FBBF24;
+  --status-error-bg:     rgba(220, 38, 38, 0.18);
+  --status-error-text:   #FCA5A5;
+  --status-info-bg:      rgba(59, 130, 246, 0.16);
+  --status-info-text:    #93C5FD;
+  --status-brand-bg:     rgba(245, 158, 11, 0.14);
+  --status-brand-text:   var(--brand-300);
+
+  /* Focus ring uses the bright dark-mode brand. */
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--brand-400) 50%, transparent);
+
+  /* Shadows on dark surfaces are nearly invisible; lean on borders for depth.
+     Keeping a faint shadow scale so popovers/menus still feel layered. */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 4px -1px rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 6px 12px -3px rgba(0, 0, 0, 0.45), 0 2px 4px -2px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 24px -6px rgba(0, 0, 0, 0.5), 0 4px 8px -4px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 24px 48px -12px rgba(0, 0, 0, 0.6);
+  --shadow-brand: 0 8px 20px -8px color-mix(in srgb, var(--brand-400) 40%, transparent);
+}
+
+/* Smooth transitions when toggling theme so the swap feels intentional, not jarring. */
+html, body {
+  transition:
+    background-color var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out);
 }
 
 @media (prefers-reduced-motion: reduce) {
