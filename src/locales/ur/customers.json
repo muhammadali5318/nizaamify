@@ -9,12 +9,14 @@
   "fields": {
     "name": "نام",
     "phone": "فون",
+    "tier": "گروپ",
     "address": "پتہ",
     "notes": "نوٹس",
     "address_optional": "پتہ (اختیاری)",
     "notes_optional": "نوٹس (اختیاری)",
     "last_activity": "آخری سرگرمی"
   },
+  "tier_chip_label": "{{name}} ({{percent}}%)",
   "actions": {
     "save": "محفوظ کریں",
     "back": "گاہک پر واپس جائیں",

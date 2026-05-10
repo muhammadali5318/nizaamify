@@ -1,0 +1,42 @@
+{
+  "title": "Units",
+  "base_unit": "Base unit",
+  "base_unit_price": "Base unit price",
+  "base_unit_price_optional": "Base unit price (leave blank if you don't sell individual units)",
+  "pack": "Pack",
+  "packs": "Packs",
+  "packs_section_title": "Packs (optional)",
+  "packs_section_description": "Define larger units you transact in. Stock and avg cost stay in base units.",
+  "stock_in_only_help": "Leave a sell price blank to use this pack only for stock-in (e.g. buy in cartons, sell as units).",
+  "table": {
+    "unit": "Unit",
+    "contains": "Contains",
+    "sell_price": "Sell price",
+    "default_for": "Default for",
+    "default_purchase": "Purchase",
+    "default_sale": "Sale",
+    "remove": "Remove pack"
+  },
+  "add_pack": "+ Add pack",
+  "in_use_locked": "In use — base quantity is locked",
+  "contains_n_base": "{{count}} base unit",
+  "contains_n_base_plural": "{{count}} base units",
+  "stock_display": {
+    "label": "Show stock as",
+    "base": "Base units",
+    "compact": "Compact",
+    "compound": "Compound"
+  },
+  "errors": {
+    "duplicate_unit": "This unit is already defined for this product.",
+    "base_qty_invalid": "Pack must contain at least 2 base units.",
+    "base_qty_locked": "Cannot change pack contents after first transaction.",
+    "default_already_set": "Another pack is already the default.",
+    "default_sale_needs_price": "A pack can only be the default sale unit if it has a sell price.",
+    "no_priced_unit": "Set a base price or at least one pack price — every product needs at least one sellable unit.",
+    "pack_not_sellable": "This pack doesn't have a sell price.",
+    "base_unit_not_sellable": "This product doesn't have a base price set.",
+    "unit_name_required": "Unit name is required.",
+    "save_failed": "Could not save units. Please try again."
+  }
+}

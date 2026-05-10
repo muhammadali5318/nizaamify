@@ -1,10 +1,14 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import { useSearchProducts, type ProductSearchRow } from './hooks'
+import {
+  useProductStockBreakdowns,
+  type ProductStockBreakdown
+} from 'src/features/units/hooks'
 import { formatPKR } from 'src/features/subscription/env'
 import {
   Badge,
@@ -15,8 +19,56 @@ import {
   type DataTableColumn
 } from 'src/components/ui'
 
+export type StockDisplayMode = 'base' | 'compact' | 'compound'
+
+/**
+ * Compact / Compound rendering per spec §5.2. The frontend MUST consume
+ * `whole_packs` and `remainder_base` from the view — recomputing in JS was
+ * the documented source of the v2.0 "5 cartons + 5 each" off-by-one bug.
+ *
+ * - Base: "66 each" (always — ignores packs)
+ * - Compact: largest pack whose remainder_base = 0, else base
+ * - Compound: largest pack split: "5 cartons + 6 each"
+ */
+function formatStock(
+  stock: number,
+  base_unit_name: string,
+  packs: ProductStockBreakdown['pack_breakdown'],
+  mode: StockDisplayMode
+): { primary: string; secondary?: string } {
+  if (mode === 'base' || packs.length === 0) {
+    return { primary: `${stock} ${base_unit_name}`.trim() }
+  }
+  // The view returns packs sorted by base_qty desc, so packs[0] is largest.
+  if (mode === 'compact') {
+    const exact = packs.find((p) => p.remainder_base === 0)
+    if (exact) {
+      return { primary: `${exact.whole_packs} ${exact.unit_name}` }
+    }
+    return { primary: `${stock} ${base_unit_name}`.trim() }
+  }
+  // compound — use the largest pack's pre-computed whole/remainder
+  const largest = packs[0]
+  const whole = largest.whole_packs
+  const remainder = largest.remainder_base
+  if (whole === 0) {
+    return { primary: `${remainder} ${base_unit_name}`.trim() }
+  }
+  if (remainder === 0) {
+    return { primary: `${whole} ${largest.unit_name}` }
+  }
+  return {
+    primary: `${whole} ${largest.unit_name} + ${remainder} ${base_unit_name}`
+  }
+}
+
 export type ProductTableProps = {
-  renderActions: (row: ProductSearchRow) => ReactNode
+  /** Action slot. Receives the row and (when fetched) its pack breakdown so
+   * callers like the POS can render quick-add buttons per spec §5.5. */
+  renderActions: (
+    row: ProductSearchRow,
+    breakdown?: ProductStockBreakdown
+  ) => ReactNode
   onlyInStock?: boolean
   showSearch?: boolean
   pageSize?: number
@@ -25,6 +77,11 @@ export type ProductTableProps = {
   emptyTitle?: string
   emptyHelp?: string
   syncUrl?: boolean
+  /** Stock-cell rendering mode (spec §5.2). */
+  stockDisplayMode?: StockDisplayMode
+  /** Force a breakdown fetch even when stockDisplayMode='base' — used by the
+   * POS so renderActions can offer per-pack quick-add buttons. */
+  loadBreakdownsForActions?: boolean
 }
 
 const DEFAULT_PAGE_SIZE = 50
@@ -38,7 +95,9 @@ export default function ProductTable({
   showLastPurchase = false,
   emptyTitle,
   emptyHelp,
-  syncUrl = true
+  syncUrl = true,
+  stockDisplayMode = 'base',
+  loadBreakdownsForActions = false
 }: ProductTableProps) {
   const { t, i18n } = useTranslation(['products', 'common'])
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
@@ -87,6 +146,16 @@ export default function ProductTable({
   const rows = data?.rows ?? []
   const total = data?.total ?? 0
 
+  const visibleProductIds = useMemo(() => rows.map((r) => r.id), [rows])
+  // Skip the breakdown fetch when the stock toggle is on Base AND no caller
+  // needs breakdowns for actions — most retailers never flip the toggle, and
+  // the bare `stock` count is already in row.
+  const needsBreakdowns =
+    stockDisplayMode !== 'base' || loadBreakdownsForActions
+  const { data: breakdowns } = useProductStockBreakdowns(
+    needsBreakdowns ? visibleProductIds : []
+  )
+
   const isEmpty = !isLoading && rows.length === 0
   const isSearchingButEmpty = isEmpty && debounced.length > 0
   const emptyMessage = isSearchingButEmpty
@@ -98,9 +167,11 @@ export default function ProductTable({
     {
       id: 'actions',
       header: '',
-      width: 96,
+      // POS quick-add wants room for several pack chips; the regular edit
+      // page only needs ~96px for the icon row.
+      width: loadBreakdownsForActions ? 240 : 96,
       cardRole: 'actions',
-      cell: (row) => renderActions(row)
+      cell: (row) => renderActions(row, breakdowns?.get(row.id))
     },
     {
       id: 'name',
@@ -127,24 +198,36 @@ export default function ProductTable({
       id: 'stock',
       header: t('products:fields.stock'),
       align: 'end',
-      cell: (row) => (
-        <Stack
-          direction='row'
-          spacing={0.75}
-          justifyContent='flex-end'
-          alignItems='center'
-        >
-          <Typography variant='body1'>{row.stock}</Typography>
-          {row.stock === 0 ? (
-            <Badge
-              variant='neutral'
-              label={t('products:badges.out_of_stock')}
-            />
-          ) : row.stock <= 5 ? (
-            <Badge variant='warning' label={t('products:badges.low_stock')} />
-          ) : null}
-        </Stack>
-      )
+      cell: (row) => {
+        const breakdown = breakdowns?.get(row.id)
+        const formatted =
+          stockDisplayMode !== 'base' && breakdown
+            ? formatStock(
+                breakdown.base_qty ?? row.stock,
+                breakdown.base_unit_name ?? '',
+                breakdown.pack_breakdown ?? [],
+                stockDisplayMode
+              )
+            : { primary: String(row.stock) }
+        return (
+          <Stack
+            direction='row'
+            spacing={0.75}
+            justifyContent='flex-end'
+            alignItems='center'
+          >
+            <Typography variant='body1'>{formatted.primary}</Typography>
+            {row.stock === 0 ? (
+              <Badge
+                variant='neutral'
+                label={t('products:badges.out_of_stock')}
+              />
+            ) : row.stock <= 5 ? (
+              <Badge variant='warning' label={t('products:badges.low_stock')} />
+            ) : null}
+          </Stack>
+        )
+      }
     },
     {
       id: 'price',

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
@@ -16,7 +17,17 @@ import { useNotifier } from 'src/components/notistack/NotificationProvider'
 import { formatPKR } from 'src/features/subscription/env'
 import SupplierCombobox from 'src/features/suppliers/SupplierCombobox'
 import ProductCombobox from 'src/features/products/ProductCombobox'
-import { useRecordPurchase, type OverheadCategory } from './hooks'
+import { useProducts } from 'src/features/products/hooks'
+import {
+  fetchPurchasableUnitsForProduct,
+  type PurchasableUnit
+} from 'src/features/units/hooks'
+import {
+  useRecordPurchase,
+  type OverheadCategory,
+  type PurchaseLineInput
+} from './hooks'
+import CreatePackDialog from './CreatePackDialog'
 
 const todayISO = () => new Date().toISOString().slice(0, 10)
 
@@ -32,6 +43,10 @@ type LastEdited = 'qty' | 'cost' | 'total'
 
 type LineState = {
   product_id: string
+  /** Loaded async on product change. Empty until then. */
+  available_units: PurchasableUnit[]
+  /** Index into available_units. Defaults to is_default_purchase pack else base. */
+  selected_unit_idx: number
   qty: string
   unitCost: string
   lineTotal: string
@@ -47,6 +62,8 @@ type OverheadState = {
 
 const emptyLine = (): LineState => ({
   product_id: '',
+  available_units: [],
+  selected_unit_idx: 0,
   qty: '',
   unitCost: '',
   lineTotal: '',
@@ -127,6 +144,7 @@ export default function NewPurchasePage() {
   const record = useRecordPurchase()
   const notify = useNotifier()
 
+  const { data: allProducts } = useProducts()
   const [purchaseDate, setPurchaseDate] = useState(todayISO())
   const [supplierId, setSupplierId] = useState<string | null>(null)
   const [note, setNote] = useState('')
@@ -134,6 +152,14 @@ export default function NewPurchasePage() {
   const [overhead, setOverhead] = useState<OverheadState[]>([])
   const [error, setError] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  // Inline "Create new pack" modal state. We track which line opened it so
+  // the new pack auto-selects on that line after the RPC succeeds.
+  const [packDialog, setPackDialog] = useState<{
+    open: boolean
+    lineIndex: number
+    productId: string
+    productName: string
+  } | null>(null)
 
   const itemsSubtotal = useMemo(
     () =>
@@ -164,6 +190,37 @@ export default function NewPurchasePage() {
       prev.map((ln, idx) => (idx === i ? recompute(ln, field, val) : ln))
     )
 
+  /**
+   * When the product picker fires, load that product's purchasable units and
+   * pre-select the default-purchase pack (or base, if none). Per spec §6.2 we
+   * do NOT auto-convert qty across unit changes — the user reasserts qty in
+   * whatever unit they're invoicing in.
+   */
+  const handleProductChange = async (i: number, id: string | null) => {
+    if (!id) {
+      setLine(i, {
+        product_id: '',
+        available_units: [],
+        selected_unit_idx: 0
+      })
+      return
+    }
+    setLine(i, { product_id: id })
+    try {
+      const units = await fetchPurchasableUnitsForProduct({
+        productId: id,
+        baseUnitName: 'Each'
+      })
+      const defaultIdx = units.findIndex((u) => u.isDefaultPurchase)
+      setLine(i, {
+        available_units: units,
+        selected_unit_idx: defaultIdx >= 0 ? defaultIdx : 0
+      })
+    } catch {
+      notify.error(t('purchases:errors.submit_failed'))
+    }
+  }
+
   const addLine = () => setLines((prev) => [...prev, emptyLine()])
   const removeLine = (i: number) => {
     if (lines.length === 1) return
@@ -193,11 +250,7 @@ export default function NewPurchasePage() {
       fieldErrors.supplier = t('purchases:errors.supplier_required')
     }
 
-    const items: {
-      product_id: string
-      qty: number
-      cost_at_purchase: number
-    }[] = []
+    const items: PurchaseLineInput[] = []
     for (let i = 0; i < lines.length; i++) {
       const ln = lines[i]
       if (!ln.product_id) {
@@ -216,7 +269,23 @@ export default function NewPurchasePage() {
         fieldErrors[`item_${i}_cost`] = t('purchases:errors.cost_invalid')
         continue
       }
-      items.push({ product_id: ln.product_id, qty: q, cost_at_purchase: c })
+      const unit = ln.available_units[ln.selected_unit_idx]
+      // record_purchase accepts both shapes (Phase C). Pack lines need
+      // pack_id+pack_qty so the server can resolve base_qty for stock math.
+      if (unit && unit.kind === 'pack' && unit.packId) {
+        items.push({
+          product_id: ln.product_id,
+          pack_id: unit.packId,
+          pack_qty: q,
+          cost_at_purchase: c
+        })
+      } else {
+        items.push({
+          product_id: ln.product_id,
+          qty: q,
+          cost_at_purchase: c
+        })
+      }
     }
     if (items.length === 0 && Object.keys(fieldErrors).length === 0) {
       fieldErrors.items = t('purchases:errors.items_required')
@@ -374,11 +443,55 @@ export default function NewPurchasePage() {
                   >
                     <ProductCombobox
                       value={ln.product_id || null}
-                      onChange={(id) => setLine(i, { product_id: id ?? '' })}
+                      onChange={(id) => void handleProductChange(i, id)}
                       size='small'
                     />
                   </Field>
                 </Box>
+                {ln.product_id && ln.available_units.length > 0 && (
+                  <Box sx={{ flex: '1 1 140px', minWidth: 130 }}>
+                    <Field label={t('purchases:fields.unit')}>
+                      <Select
+                        size='small'
+                        fullWidth
+                        value={ln.selected_unit_idx}
+                        onChange={(e) => {
+                          const v = e.target.value as unknown as number | string
+                          if (v === '__create_pack__') {
+                            const product = (allProducts ?? []).find(
+                              (p) => p.id === ln.product_id
+                            )
+                            setPackDialog({
+                              open: true,
+                              lineIndex: i,
+                              productId: ln.product_id,
+                              productName: product?.name ?? ln.product_id
+                            })
+                            return
+                          }
+                          setLine(i, { selected_unit_idx: Number(v) })
+                        }}
+                      >
+                        {ln.available_units.map((u, idx) => (
+                          <MenuItem key={idx} value={idx}>
+                            {u.unitName}
+                            {u.kind === 'pack' && ` (${u.baseQty})`}
+                          </MenuItem>
+                        ))}
+                        <MenuItem
+                          value='__create_pack__'
+                          sx={{
+                            color: 'var(--text-brand)',
+                            fontWeight: 600,
+                            borderTop: '1px solid var(--border-subtle)'
+                          }}
+                        >
+                          {t('purchases:form.create_new_pack')}
+                        </MenuItem>
+                      </Select>
+                    </Field>
+                  </Box>
+                )}
                 <Box sx={{ flex: '1 1 100px', minWidth: 90 }}>
                   <Field
                     label={t('purchases:fields.qty')}
@@ -394,7 +507,15 @@ export default function NewPurchasePage() {
                 </Box>
                 <Box sx={{ flex: '1 1 130px', minWidth: 100 }}>
                   <Field
-                    label={t('purchases:fields.cost')}
+                    label={
+                      ln.available_units.length > 1
+                        ? t('purchases:fields.cost_per_unit', {
+                            unitName:
+                              ln.available_units[ln.selected_unit_idx]
+                                ?.unitName ?? ''
+                          })
+                        : t('purchases:fields.cost')
+                    }
                     error={errors[`item_${i}_cost`]}
                   >
                     <Input
@@ -644,6 +765,33 @@ export default function NewPurchasePage() {
           {t('purchases:form.submit')}
         </Button>
       </Stack>
+
+      {packDialog && (
+        <CreatePackDialog
+          open={packDialog.open}
+          onClose={() => setPackDialog(null)}
+          productId={packDialog.productId}
+          productName={packDialog.productName}
+          onCreated={async (newPackId) => {
+            // Refetch the line's units so the new pack appears, then select it.
+            const i = packDialog.lineIndex
+            try {
+              const units = await fetchPurchasableUnitsForProduct({
+                productId: packDialog.productId,
+                baseUnitName: 'Each'
+              })
+              const idx = units.findIndex((u) => u.packId === newPackId)
+              setLine(i, {
+                available_units: units,
+                selected_unit_idx: idx >= 0 ? idx : 0
+              })
+            } catch {
+              // non-fatal — the existing line state is still valid; user
+              // can re-pick after refresh.
+            }
+          }}
+        />
+      )}
     </Box>
   )
 }

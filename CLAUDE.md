@@ -123,6 +123,9 @@ When making a decision that reverses the PRD or affects multiple layers, write a
 - **v1.7** — design system revamp (mint→navy palette, Urdu font fix, DataTable primitive)
 - **v1.8** — db hardening: RLS audit, search_path, FK indexes, locks, money precision, view security_invoker, append-only across financial tables
 - **v1.9** — stock-in hardening: suppliers, landed-cost pro-rata allocation, bidirectional cost calc, searchable product/supplier comboboxes, MTD-default list with pagination, Effect-on-Inventory snapshot fix
+- **v2.0** — *superseded by v2.1*. UoM + first-class pack pricing was spec'd and partially built (migrations 0026/0027), then walked back. `MVP_v2.0_UNITS_OF_MEASURE.md` is historical reference only; do not implement against it.
+- **v2.1** — stock-in unit handling: `units_of_measure`, `product_packs` (no price column — packs are stock-in shortcuts only), `products.is_scan_only`, `purchase_items.{pack_id, pack_qty, pack_base_qty_snapshot, qty_in_base}`. Sales stay in base units; `record_sale` byte-equivalent to v1.6. Stock display view exposes `whole_packs` + `remainder_base` directly so the frontend never recomputes breakdowns. `record_purchase` accepts pack-shaped lines; `define_pack_inline` auto-creates UoMs at stock-in time. POS quick-add buttons; scan-only enforcement.
+- **v2.2** — customer tiers + per-line discounts + manual override. `customer_tiers` (named %-only groups, default per shop), `customers.tier_id`, invoice snapshot of tier id/percent/amount/override-type/override-value, `sale_items.line_discount_*`. `record_sale` rewrites: stacking order is **negotiated price → per-line discount → tier (or override) → service charge added last**. Discounts apply to items only, never service. Override has tier_id=NULL by spec; the customer_id still resolves their *current* tier for tooltips. Snapshots are immutable — editing a tier's % does not rewrite history. Settings tiers page, customer form tier picker, POS line discount + override modal, sale detail discount column + tier discount line, customer detail tier chip.
 
 ## Open ToDos / Known gaps
 
@@ -135,6 +138,8 @@ When making a decision that reverses the PRD or affects multiple layers, write a
 - Advance payments (customer credit balance) — deferred from v1.4
 - Returns / refunds — deferred since v1.2
 - Weekly `pg_dump` GitHub Action — recommended in v1.8 post-mortem; still pending
+- v2.1 polish: per-supplier comparison reports UI; mobile cart pack-edit sheet (currently only desktop has the inline pack chip)
+- v2.2 polish: edit-line bottom sheet on mobile (per-line discount UI is desktop-inline only); `khata` list does not surface tier (only customer detail does)
 
 ## Gotchas / hard-earned lessons
 
@@ -149,6 +154,11 @@ When making a decision that reverses the PRD or affects multiple layers, write a
 - **`reverse_ledger_entry` blocks sale-tied debits** — entries with `invoice_id IS NOT NULL` raise `cannot_reverse_invoice_tied_debit` so callers go through `receive_payment` (or future `void_sale`) instead.
 - **`create or replace view`** cannot change column types. When casting a computed sum to `numeric(12,2)` you must `drop view; create view`.
 - **Landed-cost allocation** (v1.9): overhead is distributed pro-rata by line value into `purchase_items.overhead_per_unit`. `avg_cost` uses the effective unit cost (= `cost_at_purchase + overhead_per_unit`); `last_purchase_cost` stays at the supplier's quoted unit cost. Don't conflate the two.
+- **`product_packs` has no `price` column** (v2.0's pack-as-sellable-unit design was scrapped in v2.1). Pack pricing was determined to be overkill for SME tier. If a B2B customer ever asks for receipt-level "1 carton (50 each) @ 1,200" pricing, it's a v3 ticket — don't add a price column to packs without revisiting the v2.0 → v2.1 supersession.
+- **Frontend never recomputes pack breakdown** (v2.1 §5.2). The `product_stock_display` view exposes `whole_packs` and `remainder_base` already computed; consume them directly. The original "5 cartons + 5 each" off-by-one bug came from JS recomputation drifting from DB truth — keeping one source authoritative is the fix.
+- **Restoring an RPC body via migration**: `CREATE OR REPLACE FUNCTION` cannot change a function's parameter list. When v2.1 reverted `record_sale` to v1.6 shape it kept the same signature, so REPLACE worked; when v2.2 added `p_tier_override_type` / `p_tier_override_value`, the migration `DROP FUNCTION` first then created the new shape. Pattern: signature-changing rewrites need DROP + CREATE in the same transaction.
+- **Discount stacking order is fixed** (v2.2 §1): negotiated unit price → per-line discount → tier/override discount → service charge added last. Discounts never touch service. Storing snapshots on every invoice + sale_item means later edits to tier % don't rewrite history. The view `invoice_with_discount_detail` reverses the math (`items_subtotal_post_line_discounts = total + tier_discount_amount − service_charge`); naming reflects that line discounts are absorbed into per-row `line_discount_amount`, not invoice-level.
+- **Tier override invoices have `tier_id IS NULL`** (v2.2 §3.3 constraint). Looking up the customer's tier-at-time-of-sale on an override invoice falls back to a live `customers.tier_id` lookup; that's "current tier", not the snapshot. Override invoices show "Manual override (X%)" instead of a tier name.
 
 ## Lint / test gotchas
 

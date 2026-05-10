@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      customer_tiers: {
+        Row: {
+          created_at: string
+          discount_percent: number
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          notes: string | null
+          shop_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          discount_percent?: number
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name: string
+          notes?: string | null
+          shop_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          discount_percent?: number
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name?: string
+          notes?: string | null
+          shop_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'customer_tiers_shop_id_fkey'
+            columns: ['shop_id']
+            isOneToOne: false
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       customers: {
         Row: {
           address: string | null
@@ -24,6 +68,7 @@ export type Database = {
           outstanding_balance: number
           phone: string
           shop_id: string
+          tier_id: string | null
           updated_at: string
         }
         Insert: {
@@ -35,6 +80,7 @@ export type Database = {
           outstanding_balance?: number
           phone: string
           shop_id: string
+          tier_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -46,6 +92,7 @@ export type Database = {
           outstanding_balance?: number
           phone?: string
           shop_id?: string
+          tier_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -54,6 +101,13 @@ export type Database = {
             columns: ['shop_id']
             isOneToOne: false
             referencedRelation: 'shops'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'customers_tier_id_fkey'
+            columns: ['tier_id']
+            isOneToOne: false
+            referencedRelation: 'customer_tiers'
             referencedColumns: ['id']
           }
         ]
@@ -117,6 +171,11 @@ export type Database = {
           payment_type: string
           service_charge: number
           shop_id: string
+          tier_discount_amount: number
+          tier_discount_percent_snapshot: number | null
+          tier_id: string | null
+          tier_override_type: string | null
+          tier_override_value: number | null
           total: number
         }
         Insert: {
@@ -129,6 +188,11 @@ export type Database = {
           payment_type: string
           service_charge?: number
           shop_id: string
+          tier_discount_amount?: number
+          tier_discount_percent_snapshot?: number | null
+          tier_id?: string | null
+          tier_override_type?: string | null
+          tier_override_value?: number | null
           total: number
         }
         Update: {
@@ -141,6 +205,11 @@ export type Database = {
           payment_type?: string
           service_charge?: number
           shop_id?: string
+          tier_discount_amount?: number
+          tier_discount_percent_snapshot?: number | null
+          tier_id?: string | null
+          tier_override_type?: string | null
+          tier_override_value?: number | null
           total?: number
         }
         Relationships: [
@@ -177,6 +246,13 @@ export type Database = {
             columns: ['shop_id']
             isOneToOne: false
             referencedRelation: 'shops'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'invoices_tier_id_fkey'
+            columns: ['tier_id']
+            isOneToOne: false
+            referencedRelation: 'customer_tiers'
             referencedColumns: ['id']
           }
         ]
@@ -241,6 +317,13 @@ export type Database = {
             columns: ['customer_id']
             isOneToOne: false
             referencedRelation: 'customers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ledger_entries_invoice_id_fkey'
+            columns: ['invoice_id']
+            isOneToOne: false
+            referencedRelation: 'invoice_with_discount_detail'
             referencedColumns: ['id']
           },
           {
@@ -314,17 +397,74 @@ export type Database = {
           }
         ]
       }
+      product_packs: {
+        Row: {
+          base_qty: number
+          created_at: string
+          id: string
+          is_active: boolean
+          is_default_purchase: boolean
+          product_id: string
+          unit_id: string
+          updated_at: string
+        }
+        Insert: {
+          base_qty: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default_purchase?: boolean
+          product_id: string
+          unit_id: string
+          updated_at?: string
+        }
+        Update: {
+          base_qty?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default_purchase?: boolean
+          product_id?: string
+          unit_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'product_packs_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'product_packs_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'products'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'product_packs_unit_id_fkey'
+            columns: ['unit_id']
+            isOneToOne: false
+            referencedRelation: 'units_of_measure'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       products: {
         Row: {
           avg_cost: number
+          base_unit_id: string
           cost: number
           created_at: string
           description: string | null
           id: string
           is_active: boolean
+          is_scan_only: boolean
           last_purchase_cost: number | null
           name: string
-          price: number
+          price: number | null
           shop_id: string
           stock: number
           type: string
@@ -332,14 +472,16 @@ export type Database = {
         }
         Insert: {
           avg_cost?: number
+          base_unit_id: string
           cost: number
           created_at?: string
           description?: string | null
           id?: string
           is_active?: boolean
+          is_scan_only?: boolean
           last_purchase_cost?: number | null
           name: string
-          price: number
+          price?: number | null
           shop_id: string
           stock?: number
           type: string
@@ -347,20 +489,29 @@ export type Database = {
         }
         Update: {
           avg_cost?: number
+          base_unit_id?: string
           cost?: number
           created_at?: string
           description?: string | null
           id?: string
           is_active?: boolean
+          is_scan_only?: boolean
           last_purchase_cost?: number | null
           name?: string
-          price?: number
+          price?: number | null
           shop_id?: string
           stock?: number
           type?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: 'products_base_unit_id_fkey'
+            columns: ['base_unit_id']
+            isOneToOne: false
+            referencedRelation: 'units_of_measure'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'products_shop_id_fkey'
             columns: ['shop_id']
@@ -404,9 +555,13 @@ export type Database = {
           cost_at_purchase: number
           id: string
           overhead_per_unit: number
+          pack_base_qty_snapshot: number | null
+          pack_id: string | null
+          pack_qty: number | null
           product_id: string
           purchase_id: string
           qty: number
+          qty_in_base: number
         }
         Insert: {
           avg_cost_after?: number | null
@@ -414,9 +569,13 @@ export type Database = {
           cost_at_purchase: number
           id?: string
           overhead_per_unit?: number
+          pack_base_qty_snapshot?: number | null
+          pack_id?: string | null
+          pack_qty?: number | null
           product_id: string
           purchase_id: string
           qty: number
+          qty_in_base: number
         }
         Update: {
           avg_cost_after?: number | null
@@ -424,11 +583,29 @@ export type Database = {
           cost_at_purchase?: number
           id?: string
           overhead_per_unit?: number
+          pack_base_qty_snapshot?: number | null
+          pack_id?: string | null
+          pack_qty?: number | null
           product_id?: string
           purchase_id?: string
           qty?: number
+          qty_in_base?: number
         }
         Relationships: [
+          {
+            foreignKeyName: 'purchase_items_pack_id_fkey'
+            columns: ['pack_id']
+            isOneToOne: false
+            referencedRelation: 'product_packs'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['product_id']
+          },
           {
             foreignKeyName: 'purchase_items_product_id_fkey'
             columns: ['product_id']
@@ -552,6 +729,9 @@ export type Database = {
           cost_at_sale: number
           id: string
           invoice_id: string
+          line_discount_amount: number
+          line_discount_type: string | null
+          line_discount_value: number | null
           price_at_sale: number
           product_id: string
           qty: number
@@ -560,6 +740,9 @@ export type Database = {
           cost_at_sale: number
           id?: string
           invoice_id: string
+          line_discount_amount?: number
+          line_discount_type?: string | null
+          line_discount_value?: number | null
           price_at_sale: number
           product_id: string
           qty: number
@@ -568,6 +751,9 @@ export type Database = {
           cost_at_sale?: number
           id?: string
           invoice_id?: string
+          line_discount_amount?: number
+          line_discount_type?: string | null
+          line_discount_value?: number | null
           price_at_sale?: number
           product_id?: string
           qty?: number
@@ -577,8 +763,22 @@ export type Database = {
             foreignKeyName: 'sale_items_invoice_id_fkey'
             columns: ['invoice_id']
             isOneToOne: false
+            referencedRelation: 'invoice_with_discount_detail'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
+            isOneToOne: false
             referencedRelation: 'invoices'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['product_id']
           },
           {
             foreignKeyName: 'sale_items_product_id_fkey'
@@ -768,6 +968,44 @@ export type Database = {
           }
         ]
       }
+      units_of_measure: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          shop_id: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          shop_id: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          shop_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'units_of_measure_shop_id_fkey'
+            columns: ['shop_id']
+            isOneToOne: false
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
+        ]
+      }
     }
     Views: {
       customer_balance_reconciliation: {
@@ -839,6 +1077,72 @@ export type Database = {
           }
         ]
       }
+      invoice_with_discount_detail: {
+        Row: {
+          amount_paid: number | null
+          cashier_id: string | null
+          created_at: string | null
+          customer_id: string | null
+          discount_source: string | null
+          id: string | null
+          items_subtotal_post_line_discounts: number | null
+          notes: string | null
+          payment_type: string | null
+          service_charge: number | null
+          shop_id: string | null
+          tier_discount_amount: number | null
+          tier_discount_percent_snapshot: number | null
+          tier_id: string | null
+          tier_name: string | null
+          tier_override_type: string | null
+          tier_override_value: number | null
+          total: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'invoices_cashier_id_fkey'
+            columns: ['cashier_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
+            isOneToOne: false
+            referencedRelation: 'customer_balance_reconciliation'
+            referencedColumns: ['customer_id']
+          },
+          {
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
+            isOneToOne: false
+            referencedRelation: 'customer_outstanding'
+            referencedColumns: ['customer_id']
+          },
+          {
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
+            isOneToOne: false
+            referencedRelation: 'customers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'invoices_shop_id_fkey'
+            columns: ['shop_id']
+            isOneToOne: false
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'invoices_tier_id_fkey'
+            columns: ['tier_id']
+            isOneToOne: false
+            referencedRelation: 'customer_tiers'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       ledger_entries_view: {
         Row: {
           amount: number | null
@@ -886,6 +1190,13 @@ export type Database = {
             foreignKeyName: 'ledger_entries_invoice_id_fkey'
             columns: ['invoice_id']
             isOneToOne: false
+            referencedRelation: 'invoice_with_discount_detail'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ledger_entries_invoice_id_fkey'
+            columns: ['invoice_id']
+            isOneToOne: false
             referencedRelation: 'invoices'
             referencedColumns: ['id']
           },
@@ -921,6 +1232,26 @@ export type Database = {
           total_sales: number | null
         }
         Relationships: []
+      }
+      product_stock_display: {
+        Row: {
+          base_qty: number | null
+          base_unit_code: string | null
+          base_unit_name: string | null
+          is_scan_only: boolean | null
+          pack_breakdown: Json | null
+          product_id: string | null
+          shop_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
+            isOneToOne: false
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
+        ]
       }
       subscription_effective: {
         Row: {
@@ -995,6 +1326,27 @@ export type Database = {
         Returns: string
       }
       current_shop_id: { Args: never; Returns: string }
+      deactivate_pack: { Args: { p_pack_id: string }; Returns: undefined }
+      deactivate_tier: { Args: { p_tier_id: string }; Returns: number }
+      define_pack_inline: {
+        Args: {
+          p_base_qty: number
+          p_is_default_purchase?: boolean
+          p_product_id: string
+          p_unit_code: string
+          p_unit_name: string
+        }
+        Returns: string
+      }
+      define_tier: {
+        Args: {
+          p_discount_percent?: number
+          p_is_default?: boolean
+          p_name: string
+          p_notes?: string
+        }
+        Returns: string
+      }
       expire_subscriptions: { Args: never; Returns: undefined }
       list_customers: {
         Args: { p_limit?: number; p_offset?: number; p_query?: string }
@@ -1063,6 +1415,8 @@ export type Database = {
           p_items?: Json
           p_notes?: string
           p_service_charge?: number
+          p_tier_override_type?: string
+          p_tier_override_value?: number
         }
         Returns: string
       }
@@ -1157,6 +1511,25 @@ export type Database = {
           name: string
           total_count: number
         }[]
+      }
+      set_default_tier: { Args: { p_tier_id: string }; Returns: undefined }
+      update_pack: {
+        Args: {
+          p_base_qty: number
+          p_is_default_purchase: boolean
+          p_pack_id: string
+        }
+        Returns: undefined
+      }
+      update_tier: {
+        Args: {
+          p_discount_percent: number
+          p_is_default: boolean
+          p_name: string
+          p_notes?: string
+          p_tier_id: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

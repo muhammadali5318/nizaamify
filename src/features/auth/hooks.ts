@@ -20,6 +20,24 @@ export function useProfile() {
   })
 }
 
+export function useShop() {
+  const { user } = useSession()
+  return useQuery({
+    queryKey: ['shop', user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      if (!user) return null
+      const { data, error } = await supabase
+        .from('shops')
+        .select('id, shop_name')
+        .eq('owner_user_id', user.id)
+        .single()
+      if (error) throw error
+      return data as { id: string; shop_name: string }
+    }
+  })
+}
+
 type EffectiveStatus = 'trial' | 'active' | 'expired' | 'suspended'
 
 export function useEffectiveSubscription() {

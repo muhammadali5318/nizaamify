@@ -103,6 +103,7 @@ export type CreateProductInput = {
   price: number
   opening_stock: number
   opening_cost: number
+  is_scan_only: boolean
 }
 
 export function useCreateProduct() {
@@ -121,7 +122,17 @@ export function useCreateProduct() {
         }
       )
       if (error) throw error
-      return data as string
+      const productId = data as string
+      // Scan-only is a v2.1 product flag set via direct UPDATE — no RPC for it
+      // since the column has no business rules beyond shop ownership (RLS).
+      if (values.is_scan_only) {
+        const { error: updErr } = await supabase
+          .from('products')
+          .update({ is_scan_only: true })
+          .eq('id', productId)
+        if (updErr) throw updErr
+      }
+      return productId
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['products'] })
@@ -136,6 +147,7 @@ export type UpdateProductInput = {
   description: string | null
   price: number
   is_active: boolean
+  is_scan_only: boolean
 }
 
 export function useUpdateProduct() {
@@ -150,7 +162,8 @@ export function useUpdateProduct() {
           type: rest.type,
           description: rest.description,
           price: rest.price,
-          is_active: rest.is_active
+          is_active: rest.is_active,
+          is_scan_only: rest.is_scan_only
         } as ProductUpdate)
         .eq('id', id)
       if (error) throw error

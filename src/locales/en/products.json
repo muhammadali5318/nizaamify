@@ -26,7 +26,9 @@
     "opening_stock": "Opening stock (optional)",
     "opening_qty": "Opening quantity",
     "opening_cost": "Opening cost per unit",
-    "opening_help": "Use this to seed your initial inventory without recording a purchase."
+    "opening_help": "Use this to seed your initial inventory without recording a purchase.",
+    "is_scan_only": "Scan-only",
+    "is_scan_only_help": "When enabled, the cashier cannot type a quantity at the register — they must scan or click a pack. Useful for products where loose-unit sales aren't allowed."
   },
   "badges": {
     "low_stock": "Low",
@@ -64,6 +66,23 @@
     "saved": "Product saved",
     "archived": "Product archived",
     "restored": "Product restored"
+  },
+  "packs": {
+    "section_title": "Packs",
+    "section_subtitle": "Defined packs for stocking in. Sales are always in base units.",
+    "columns": {
+      "unit": "Unit",
+      "contains": "Contains",
+      "default_purchase": "Default for purchase"
+    },
+    "add_pack": "+ Add pack",
+    "default_badge": "Default",
+    "edit": "Edit",
+    "deactivate": "Deactivate",
+    "deactivate_confirm_title": "Deactivate this pack?",
+    "deactivate_confirm_body": "Historical stock-ins keep their reference. New stock-ins won't be able to use this pack.",
+    "deactivated": "Pack deactivated",
+    "save_failed": "Could not update pack. Please try again."
   },
   "pagination": {
     "showing": "Showing {{from}}–{{to}} of {{total}}",

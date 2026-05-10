@@ -49,6 +49,17 @@ export default function PurchaseDetailPage() {
     (it) => it.avg_cost_before !== null || it.avg_cost_after !== null
   )
 
+  // Per spec §5.4 the supplier-quoted cost stored in cost_at_purchase is per
+  // chosen unit (per pack for pack lines, per base for base lines). qty stores
+  // qty_in_base. So line total uses pack_qty when present; effective per-base
+  // cost divides cost_at_purchase by base_qty for pack lines.
+  const lineQty = (it: PurchaseDetailItem): number =>
+    it.pack_qty !== null && it.pack_qty !== undefined ? it.pack_qty : it.qty
+  const perBaseCost = (it: PurchaseDetailItem): number =>
+    it.pack_qty !== null && it.pack_base_qty_snapshot
+      ? Number(it.cost_at_purchase) / it.pack_base_qty_snapshot
+      : Number(it.cost_at_purchase)
+
   const itemColumns: DataTableColumn<PurchaseDetailItem>[] = [
     {
       id: 'serial',
@@ -70,7 +81,19 @@ export default function PurchaseDetailPage() {
       id: 'qty',
       header: t('purchases:fields.qty'),
       align: 'end',
-      cell: (it) => it.qty
+      cell: (it) => {
+        if (it.pack_qty !== null && it.pack && it.pack_base_qty_snapshot) {
+          return (
+            <Stack alignItems='flex-end'>
+              <span>{`${it.pack_qty} × ${it.pack.unit_name}${it.pack.is_active ? '' : ' 🗄'}`}</span>
+              <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
+                {`(= ${it.qty_in_base})`}
+              </Typography>
+            </Stack>
+          )
+        }
+        return it.qty
+      }
     },
     {
       id: 'unit_cost',
@@ -94,16 +117,13 @@ export default function PurchaseDetailPage() {
       align: 'end',
       hideOnMobile: true,
       cell: (it) =>
-        formatPKR(
-          Number(it.cost_at_purchase) + Number(it.overhead_per_unit),
-          locale
-        )
+        formatPKR(perBaseCost(it) + Number(it.overhead_per_unit), locale)
     },
     {
       id: 'line_total',
       header: t('purchases:fields.total'),
       align: 'end',
-      cell: (it) => formatPKR(it.qty * Number(it.cost_at_purchase), locale)
+      cell: (it) => formatPKR(lineQty(it) * Number(it.cost_at_purchase), locale)
     }
   ]
 

@@ -48,5 +48,20 @@
     "service_only": "No products — service charge only",
     "notes_label": "Notes",
     "below_avg_cost_warning": "This price is below average cost. Selling at a loss."
+  },
+  "items": {
+    "columns": {
+      "discount": "Discount",
+      "line_subtotal": "Line subtotal",
+      "line_total": "Line total"
+    },
+    "discount_percent_display": "{{percent}}% (−{{amount}})",
+    "discount_fixed_display": "−{{amount}} (fixed)",
+    "no_discount": "—"
+  },
+  "totals": {
+    "tier_discount": "Tier discount ({{name}} {{percent}}%)",
+    "manual_override_percent": "Manual override ({{percent}}%)",
+    "manual_override_fixed": "Manual override (fixed)"
   }
 }
