@@ -69,34 +69,44 @@
   --surface-card:     #FFFCF7;
   --surface-card-hover: #FFFAEF;
 
-  /* Ambient body gradient — a subtle warm wash from one side. Disabled
-     (transparent) by default; layered on the body bg in global.scss. */
+  /* Ambient body gradient — a warm wash that comes from one side and
+     reaches at least halfway across the viewport. Layered behind the page
+     in global.scss. The light-mode wash is restrained but visible: a soft
+     sunlit feel rather than a colored tint. */
   --body-glow: radial-gradient(
-    1200px 800px at 100% 0%,
-    rgba(245, 158, 11, 0.06) 0%,
-    rgba(245, 158, 11, 0.0) 60%
+    1600px 1100px at 100% 0%,
+    rgba(245, 158, 11, 0.14) 0%,
+    rgba(245, 158, 11, 0.07) 30%,
+    rgba(245, 158, 11, 0.025) 55%,
+    rgba(245, 158, 11, 0) 80%
   );
 
-  /* ---------- Semantic text ---------- */
+  /* ---------- Semantic text ----------
+     text-brand uses brand-600 (a true amber, not the brown brand-700) so
+     highlighted typography reads as warm gold instead of muddy brown in
+     light mode. Dark mode flips it to brand-400 in the [data-theme] block. */
   --text-primary:   var(--neutral-900);
   --text-secondary: var(--neutral-700);
   --text-muted:     var(--neutral-500);
   --text-disabled:  var(--neutral-400);
   --text-inverse:   var(--neutral-0);
-  --text-brand:     var(--brand-700);
+  --text-brand:     var(--brand-600);
 
   /* ---------- Semantic borders ---------- */
   --border-subtle:  var(--neutral-100);
   --border-default: var(--neutral-200);
   --border-strong:  var(--neutral-300);
-  --border-brand:   var(--brand-700);
-  --border-focus:   var(--brand-700);
+  --border-brand:   var(--brand-500);
+  --border-focus:   var(--brand-500);
 
-  /* ---------- Interactive (actions) ---------- */
-  --action-primary:        var(--brand-700);
-  --action-primary-hover:  var(--brand-800);
-  --action-primary-press:  var(--brand-900);
-  --action-primary-text:   var(--neutral-0);
+  /* ---------- Interactive (actions) ----------
+     Primary CTA is the bright sunny amber (brand-500), not the dark
+     brand-700 brown. Contrast text is dark so the on-amber label reads
+     against the bright bg; matches the design-inspiration light mockup. */
+  --action-primary:        var(--brand-500);
+  --action-primary-hover:  var(--brand-600);
+  --action-primary-press:  var(--brand-700);
+  --action-primary-text:   #1A1308;
 
   --action-secondary:         var(--neutral-0);
   --action-secondary-hover:   var(--neutral-50);
@@ -124,7 +134,7 @@
   --status-brand-text:   var(--brand-800);
 
   /* ---------- Focus ring ---------- */
-  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--brand-700) 40%, transparent);
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--brand-500) 45%, transparent);
 
   /* ---------- Typography (font families) ---------- */
   --font-sans-en:    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -182,15 +192,18 @@
   --surface-card:        #1A1814;   /* warm slate (amber undertone) */
   --surface-card-hover:  #1F1B16;
 
-  /* Sideways ambient glow — soft amber bloom on the trailing edge so the
-     page feels lit by an off-screen light. Logical positioning works for
-     LTR (glow on top-right) and mirrors automatically in RTL when the
-     consumer uses logical properties. */
+  /* Sideways ambient glow — soft amber bloom from the trailing edge that
+     reaches well past the viewport midline so the page feels lit by an
+     off-screen warm light. Multi-stop falloff keeps the bloom buttery
+     instead of a hard halo. Tuned to read distinctly against the cool
+     slate page (--surface-subtle = #0F1112). */
   --body-glow: radial-gradient(
-    1200px 900px at 100% 0%,
-    rgba(245, 158, 11, 0.10) 0%,
-    rgba(245, 158, 11, 0.04) 35%,
-    rgba(0, 0, 0, 0) 70%
+    1800px 1300px at 100% 0%,
+    rgba(245, 158, 11, 0.22) 0%,
+    rgba(245, 158, 11, 0.13) 22%,
+    rgba(245, 158, 11, 0.06) 45%,
+    rgba(245, 158, 11, 0.025) 65%,
+    rgba(0, 0, 0, 0) 85%
   );
 
   /* Text */

@@ -12,12 +12,16 @@ export interface CardProps extends Omit<PaperProps, 'variant' | 'elevation'> {
 // `surface-card` is a hair warmer than `surface-base` (amber undertone) so
 // cards register as warm volumes against the cool slate page in dark mode.
 // In light mode the difference is barely perceptible (#FFFCF7 vs #FFFFFF).
-// `shadow-card` carries a soft amber bloom that reads as ambient warmth.
+//
+// Default cards stay shadowless (dashboard/list pages get visual rhythm
+// from the warm surface alone — extra shadows make those pages feel
+// noisy). The 'elevated' variant carries the amber-bloom shadow for
+// surfaces that need to lift off the page (POS cart panel, modals).
 const VARIANT_SX: Record<CardVariant, object> = {
   default: {
     backgroundColor: 'var(--surface-card)',
     border: '1px solid var(--border-default)',
-    boxShadow: 'var(--shadow-card)'
+    boxShadow: 'none'
   },
   muted: {
     backgroundColor: 'var(--surface-muted)',
@@ -27,7 +31,7 @@ const VARIANT_SX: Record<CardVariant, object> = {
   elevated: {
     backgroundColor: 'var(--surface-card)',
     border: '1px solid var(--border-default)',
-    boxShadow: 'var(--shadow-card-hover)'
+    boxShadow: 'var(--shadow-card)'
   }
 }
 

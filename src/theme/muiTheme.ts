@@ -88,15 +88,17 @@ export function getTheme(
     },
     palette: {
       mode,
-      // Dark surfaces need a brighter primary so the CTA carries weight; the
-      // light-mode brand-700 amber would muddy on near-black. brand-500 reads
-      // cleanly in both, but the contrast-text flips to dark on dark mode so
-      // the amber-on-amber-text doesn't disappear.
+      // Bright amber (brand-500) is the primary CTA in BOTH modes — the
+      // light-mode brand-700 was too brown and muddied highlighted text.
+      // Contrast text is dark in both modes so the on-amber label reads
+      // against the bright bg. `dark` (MUI's hover/active variant) goes
+      // deeper in light mode and brighter in dark mode, since hover on a
+      // bright bg should *intensify* rather than darken.
       primary: {
-        main: isDark ? HEX.brand500 : HEX.brand700,
-        dark: isDark ? HEX.brand400 : HEX.brand800,
-        light: isDark ? HEX.brand300 : HEX.brand500,
-        contrastText: isDark ? '#1A1308' : HEX.neutral0
+        main: HEX.brand500,
+        dark: isDark ? HEX.brand400 : HEX.brand600,
+        light: isDark ? HEX.brand300 : HEX.brand400,
+        contrastText: '#1A1308'
       },
       secondary: {
         main: HEX.brand400,
