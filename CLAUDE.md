@@ -31,14 +31,15 @@ ErrorBoundary
 └── I18nextProvider
     └── QueryClientProvider
         └── BrowserRouter
-            └── AuthProvider                  ← session + profile + subscription state
-                └── CacheProvider (Emotion)   ← rebuilt on language change (LTR vs RTL plugin)
-                    └── ThemeProvider (MUI)   ← theme is a factory, re-fed on direction change
-                        └── NotificationProvider
-                            └── Router        ← useRoutes from src/router/index.tsx
+            └── AuthProvider                      ← session + profile + subscription state
+                └── ThemeModeProvider             ← system | light | dark, persisted to localStorage
+                    └── CacheProvider (Emotion)   ← rebuilt on language change (LTR vs RTL plugin)
+                        └── ThemeProvider (MUI)   ← theme is a factory: getTheme(direction, mode)
+                            └── NotificationProvider
+                                └── Router        ← useRoutes from src/router/index.tsx
 ```
 
-The Emotion cache and MUI theme are **per-direction** (`ltr` / `rtl`) and rebuilt only when language changes — see ADR-0003 (`decisions/0003-mui-rtl-pipeline.md`). Don't recreate caches per render.
+The Emotion cache and MUI theme are **per-direction** (`ltr` / `rtl`) and rebuilt only when language changes — see ADR-0003 (`decisions/0003-mui-rtl-pipeline.md`). Don't recreate caches per render. `ThemeModeProvider` (v2.4) writes `data-theme="dark"` on `<html>`+`<body>` and feeds the resolved mode into `getTheme(direction, mode)` so dark mode flips both the CSS-variable layer and MUI's `palette.mode` in lockstep.
 
 ### Guard chain (`src/lib/guards.tsx`)
 
@@ -99,6 +100,83 @@ Per ADR-0006, the React `<RequireActiveSubscription>` guard is the only enforcem
 
 There is no payment gateway. Admins flip `subscriptions.status` via SQL — exact snippets in `decisions/0010-admin-runbook.md`. Run via `mcp__supabase__execute_sql`.
 
+## Design system (v2.4) — read this before touching UI
+
+The current visual language is **amber on near-black, with a sideways ambient glow**, defined entirely through tokens in `src/styles/tokens.css`. Use the patterns below; don't reach past them. Three rules cover most decisions:
+
+> **(1)** Never write a raw hex / rgba in a component. Use a token.
+> **(2)** Never use a raw color scale (`--brand-700`, `--warning-700`, `--neutral-200`) for *foreground* (text/icon/border). Use the semantic token (`--text-brand`, `--status-warning-text`, `--surface-muted`) so it flips per theme.
+> **(3)** Backgrounds in full-screen page wrappers should be `transparent` (or omitted) so the body's amber glow reads through. Painting `surface-subtle` over the whole page kills the glow.
+
+### Theme mode
+
+- `useThemeMode()` from `src/lib/themeMode.tsx` exposes `{ mode, resolved, setMode, toggle }` where `mode ∈ { 'system', 'light', 'dark' }` and `resolved ∈ { 'light', 'dark' }`. Persisted under `nizaamify.theme.mode`.
+- The DOM gets `data-theme` written on both `<html>` and `<body>`. CSS hooks via `[data-theme="dark"] { ... }` in `tokens.css`.
+- MUI's `palette.mode` is fed from `resolved` so internal `alpha()` / hover / disabled calculations stay correct. Don't bypass — `getTheme(direction, mode)` in `src/theme/muiTheme.ts` is the only entry point.
+
+### Color tokens — the canonical map
+
+Raw scales live in `tokens.css` and stay constant across themes. Semantic tokens flip via the `[data-theme="dark"]` block. **Always reach for the semantic.**
+
+| You want… | Use this token | Why |
+|-----------|---------------|-----|
+| Page bg | nothing — let body paint `--surface-subtle` | Body bg + body-glow are the canvas; pages should not redraw their own bg |
+| Card bg | `--surface-card` | Slightly warm (amber undertone). Reads as "warm volume on cool page" |
+| Subtle fill / disabled chip | `--surface-muted` | Mode-aware grey; mid-tone neutral |
+| Page-level subtle bg block | `--surface-subtle` | Same as body bg — useful for full-bleed banners |
+| Inverse surface (tooltip / inverse banner) | `--surface-inverse` | Auto-flips: dark on light, light on dark |
+| Primary CTA bg | `--action-primary` (or MUI `<Button color='primary'>`) | brand-500 amber in both modes |
+| Primary CTA text | `--action-primary-text` | Always dark `#1A1308` on amber |
+| Brand-toned text/icon | `--text-brand` | brand-600 light / brand-400 dark — never use `--brand-700` directly |
+| Status warning/error/success text | `--status-{warning,error,success}-text` | Brighter versions in dark — never use `--warning-700` etc. directly |
+| Status fills (badges) | `--status-*-bg` | Translucent in dark, solid tinted in light |
+| Border (default) | `--border-default` | Mode-aware |
+| Border (hairline / dividers) | `--border-subtle` | Lower-contrast |
+| Focus ring | `--focus-ring` | brand-500 45% — drop into `boxShadow` |
+
+### Surface depth (when to shadow)
+
+Pick a Card variant on intent, not just looks:
+
+- `<Card variant="default">` — **no shadow**. Use for dashboards, list pages, form cards. The warm `--surface-card` tint provides depth on its own.
+- `<Card variant="muted">` — `--surface-muted` bg, no shadow. Use for passive containers (e.g. summary footers).
+- `<Card variant="elevated">` — `--shadow-card` (amber-bloom). Reserved for surfaces that genuinely need to lift — POS cart panel, important dialogs.
+
+### Body glow (don't break it)
+
+`tokens.css` defines `--body-glow` (a radial gradient at the trailing edge); `global.scss` paints it via `body::before` at z-index 0. `#root` is z-index 1 and *transparent* — your page content rides above it. **Any full-screen layout you add must keep its background `transparent`** (`AuthLayout`, `OnboardingPage`, `SubscriptionExpiredPage`, the `<main>` Box in `AppShell` are all set up this way). If you paint `surface-subtle` (or any solid color) on a full-bleed Box, the glow disappears under it.
+
+### Dropdown family (MUI overrides centralised)
+
+Every popover-like surface — `<Select>` Menu, `<Autocomplete>` Listbox, `<Menu>`, the TopBar profile-menu Popper — shares one container vocabulary defined in `getTheme()`'s `MuiMenu` / `MuiAutocomplete` / `MuiPopover` overrides. New dropdowns should pick this up automatically. **Don't override `paper`, `option`, or `listbox` styling at the call site** unless you have a real reason (and document it). The shared treatment:
+
+- Container: `--surface-card` bg, `--shadow-card` bloom, `--radius-lg` corners, 6 px inner padding.
+- Items: rounded pill (radius-md), 8 px vertical padding, hover = `--surface-muted`, selected = `--status-brand-bg` + `--text-brand`.
+- Custom thin scrollbar on Autocomplete listbox.
+- Open animation: 160 ms.
+
+If you build a **new** dropdown using `<Popper>` directly (the way TopBar does), set the inner `<Paper>`'s `sx` to mirror the shared container: `borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--surface-card)', boxShadow: 'var(--shadow-card)', border: '1px solid var(--border-default)'`.
+
+### Typography is locked
+
+The user gave a hard rule: **don't change typography**. Keep Inter (English) + Noto Naskh Arabic (Urdu body) + Noto Nastaliq Urdu (Urdu display). The current size scale (`displayLg` / `display` / `h1`–`h6` / `body1`/`body2` / `caption`/`overline`) is the only one in use; new screens inherit. If you find yourself reaching for a custom `fontSize`, you're outside the system — use the right MUI variant.
+
+### LTR/RTL
+
+- Use logical CSS properties: `paddingInlineStart`, `marginInlineEnd`, `borderInlineStart`, `textAlign: 'start' | 'end'`. The amber gradient is positioned at `100% 0%` (physical top-right of viewport in both directions) — that's intentional for the lit-from-corner aesthetic; if you build a layout that needs to mirror, use a different gradient, don't fight the body glow.
+- The Emotion `CacheProvider` rebuilds with `getEmotionCache(direction)` only on language change — RTL plugins are scoped per cache. Don't manually transform paddings; trust logical properties + the cache.
+
+### Quick checklist when building a new screen
+
+- [ ] Page wrapper background = `transparent` (or omit) — let the body glow read through.
+- [ ] Surface containers = `<Card>` (default for content, elevated for floats).
+- [ ] Brand-colored foreground = `--text-brand` (never `--brand-*`).
+- [ ] Status-colored foreground = `--status-*-text` (never `--*-700`).
+- [ ] Form fields use `<Field>` + `<Input>`/`<Textarea>` from `src/components/ui` so radii and focus rings stay consistent.
+- [ ] Action buttons use `<Button variant=...>` from `src/components/ui` — never raw `<MuiButton>`.
+- [ ] Dropdowns / selects don't override paper styling — let the theme handle it.
+- [ ] Test in both `light` and `dark` × both `en LTR` and `ur RTL` before declaring done.
+
 ## Decision log
 
 `decisions/` holds ADRs for every reversal of a PRD assumption or cross-cutting choice. Read `decisions/README.md` first when a question feels architectural — the answer is often already there. Notable bindings:
@@ -129,7 +207,7 @@ When making a decision that reverses the PRD or affects multiple layers, write a
 - **v2.1** — stock-in unit handling: `units_of_measure`, `product_packs` (no price column — packs are stock-in shortcuts only), `products.is_scan_only`, `purchase_items.{pack_id, pack_qty, pack_base_qty_snapshot, qty_in_base}`. Sales stay in base units; `record_sale` byte-equivalent to v1.6. Stock display view exposes `whole_packs` + `remainder_base` directly so the frontend never recomputes breakdowns. `record_purchase` accepts pack-shaped lines; `define_pack_inline` auto-creates UoMs at stock-in time. POS quick-add buttons; scan-only enforcement.
 - **v2.2** — customer tiers + per-line discounts + manual override. `customer_tiers` (named %-only groups, default per shop), `customers.tier_id`, invoice snapshot of tier id/percent/amount/override-type/override-value, `sale_items.line_discount_*`. `record_sale` rewrites: stacking order is **negotiated price → per-line discount → tier (or override) → service charge added last**. Discounts apply to items only, never service. *Partially reverted in v2.3 — see below.*
 - **v2.3** — fixes from v2.1/v2.2 testing. (a) Tiers reduced to pure customer categories: `customer_tiers.discount_percent` dropped; tiers no longer auto-discount sales. The popup is now the only source of an invoice-level discount. (b) Invoice columns renamed `tier_*` → `sale_discount_*` (4 columns + recreated `invoices_sale_discount_consistent` constraint). (c) Overhead allocation rewritten: stored as new `purchase_items.line_overhead_amount` via **largest-remainder** method in `record_purchase` (overhead distributed pro-rata by line value, leftover penny goes to the highest-value line). The legacy `overhead_per_unit` column is kept for back-compat — drop in a future cleanup. (d) `search_products` is name-only (combined name+type GIN index dropped; relevance preserved + `p_only_in_stock` filter). (e) Frontend: PurchaseDetail row indices precomputed (DataTable's `cell` doesn't pass index — was rendering NaN); columns restructured to # / Product / Qty / Unit cost / Subtotal / Overhead / Total with explanatory note; "Cost change" replaces "Δ"; per-piece cost shown under unit cost when pack base_qty > 1; supplier dropdown widened. (f) POS: tier auto-discount logic removed; customer card with tier chip pinned at the top of the cart; cart column headers added; "Override" → "Apply discount"; submit payload `tier_override_*` → `sale_discount_*`; sale discount cleared on customer change and on submit success.
-- **v2.4** — UI revamp + dark mode (no business-logic changes). Brand scale (`--brand-50…--brand-950` in `tokens.css`) flips from teal/navy to **amber** to match the screenshots in `desgin_inspiration/` (folder is misspelled). Dark mode is delivered via a `[data-theme="dark"]` override block in `tokens.css` — only semantic tokens (surface-*, text-*, border-*, status-*, action-*, shadow-*) flip; raw scales stay constant. `ThemeModeProvider` in `src/lib/themeMode.tsx` resolves `system | light | dark` and writes the attribute on `<html>` + `<body>`; `getTheme(direction, mode)` extends the existing factory so MUI's internal alpha/hover calculations stay correct in dark. TopBar has a sun/moon toggle. Sidebar's active state is now a single amber pill (was a leading-bar+bg combo). Banner / DataTable / Tooltip primitives switched from raw `--info-50/--warning-700/--error-700/--neutral-900/--neutral-0` references to semantic `status-*-text` / `surface-inverse` / `text-inverse` / `text-brand` so they read correctly on near-black surfaces; the same status-*-text swap was applied across all feature pages. Typography (Inter / Noto Naskh / Noto Nastaliq) is unchanged.
+- **v2.4** — UI revamp + dark mode (no business-logic changes). See the dedicated **Design system (v2.4)** section above for the canonical rules; summary here for the build trail. Brand scale flips teal/navy → amber. Dark mode via a `[data-theme="dark"]` block in `tokens.css` — only semantic tokens flip, raw scales stay constant. `ThemeModeProvider` (`src/lib/themeMode.tsx`) handles `system | light | dark` and writes `data-theme` on `<html>`+`<body>`; `getTheme(direction, mode)` flows the resolved mode into MUI's `palette.mode`. Sun/moon toggle in TopBar. New token family for ambient warmth: `--surface-card` (warm undertone for cards), `--shadow-card` / `--shadow-card-hover` (amber-bloom), `--body-glow` (radial gradient painted via `body::before`). Light-mode primary shifted from brand-700 brown to brand-500 bright amber with dark contrast text. `<Card>` default = no shadow (elevated keeps the bloom). Dropdown overrides centralised in `MuiMenu` / `MuiAutocomplete` / `MuiPopover` so every popup shares one container language. Sidebar active state simplified to an amber pill. Typography unchanged.
 
 ## Open ToDos / Known gaps
 
