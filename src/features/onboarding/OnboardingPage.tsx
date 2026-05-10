@@ -22,6 +22,7 @@ import {
   type OnboardingValues
 } from './schemas'
 import { Banner, Button, Card, Field, Input, Textarea } from 'src/components/ui'
+import { PK_PHONE_HINT } from 'src/lib/phone'
 
 const STEPS = ['shop', 'owner'] as const
 
@@ -148,7 +149,7 @@ export default function OnboardingPage() {
                     error={errors.shop_phone?.message}
                   >
                     <Input
-                      placeholder='+92xxxxxxxxxx'
+                      placeholder={PK_PHONE_HINT}
                       {...register('shop_phone')}
                     />
                   </Field>
@@ -180,7 +181,7 @@ export default function OnboardingPage() {
                     error={errors.owner_phone?.message}
                   >
                     <Input
-                      placeholder='+92xxxxxxxxxx'
+                      placeholder={PK_PHONE_HINT}
                       {...register('owner_phone')}
                     />
                   </Field>

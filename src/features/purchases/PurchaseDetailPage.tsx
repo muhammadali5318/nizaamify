@@ -49,25 +49,34 @@ export default function PurchaseDetailPage() {
     (it) => it.avg_cost_before !== null || it.avg_cost_after !== null
   )
 
+  // DataTable's cell signature is (row) → ReactNode (no index), so we
+  // precompute the row number per row id. Fixes the v2.3 NaN bug.
+  const itemSerialById = new Map(items.map((it, i) => [it.id, i + 1]))
+  const overheadSerialById = new Map(overhead.map((o, i) => [o.id, i + 1]))
+
   // Per spec §5.4 the supplier-quoted cost stored in cost_at_purchase is per
   // chosen unit (per pack for pack lines, per base for base lines). qty stores
-  // qty_in_base. So line total uses pack_qty when present; effective per-base
-  // cost divides cost_at_purchase by base_qty for pack lines.
+  // qty_in_base. So line total uses pack_qty when present.
   const lineQty = (it: PurchaseDetailItem): number =>
     it.pack_qty !== null && it.pack_qty !== undefined ? it.pack_qty : it.qty
-  const perBaseCost = (it: PurchaseDetailItem): number =>
-    it.pack_qty !== null && it.pack_base_qty_snapshot
-      ? Number(it.cost_at_purchase) / it.pack_base_qty_snapshot
-      : Number(it.cost_at_purchase)
+  const lineSubtotal = (it: PurchaseDetailItem): number =>
+    lineQty(it) * Number(it.cost_at_purchase)
+  // v2.3: line_overhead_amount is the source of truth (largest-remainder
+  // allocation). Fall back to overhead_per_unit × qty_in_base for legacy rows.
+  const lineOverhead = (it: PurchaseDetailItem): number => {
+    const fromAmount = Number(it.line_overhead_amount ?? 0)
+    if (fromAmount > 0) return fromAmount
+    return Number(it.overhead_per_unit ?? 0) * it.qty_in_base
+  }
 
   const itemColumns: DataTableColumn<PurchaseDetailItem>[] = [
     {
       id: 'serial',
       header: '#',
       width: 40,
-      cell: (_p, idx) => (
+      cell: (it) => (
         <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
-          {idx + 1}
+          {itemSerialById.get(it.id) ?? ''}
         </Typography>
       )
     },
@@ -102,28 +111,26 @@ export default function PurchaseDetailPage() {
       cell: (it) => formatPKR(Number(it.cost_at_purchase), locale)
     },
     {
-      id: 'overhead_per_unit',
-      header: t('purchases:detail.overhead_per_unit'),
+      id: 'subtotal',
+      header: t('purchases:detail.line_subtotal'),
       align: 'end',
-      hideOnMobile: true,
-      cell: (it) =>
-        Number(it.overhead_per_unit) > 0
-          ? formatPKR(Number(it.overhead_per_unit), locale)
-          : '—'
+      cell: (it) => formatPKR(lineSubtotal(it), locale)
     },
     {
-      id: 'effective_cost',
-      header: t('purchases:detail.effective_cost'),
+      id: 'overhead',
+      header: t('purchases:detail.line_overhead'),
       align: 'end',
       hideOnMobile: true,
-      cell: (it) =>
-        formatPKR(perBaseCost(it) + Number(it.overhead_per_unit), locale)
+      cell: (it) => {
+        const v = lineOverhead(it)
+        return v > 0 ? formatPKR(v, locale) : '—'
+      }
     },
     {
       id: 'line_total',
       header: t('purchases:fields.total'),
       align: 'end',
-      cell: (it) => formatPKR(lineQty(it) * Number(it.cost_at_purchase), locale)
+      cell: (it) => formatPKR(lineSubtotal(it) + lineOverhead(it), locale)
     }
   ]
 
@@ -153,8 +160,8 @@ export default function PurchaseDetailPage() {
           : formatPKR(Number(it.avg_cost_after), locale)
     },
     {
-      id: 'delta',
-      header: t('purchases:detail.delta'),
+      id: 'cost_change',
+      header: t('purchases:detail.cost_change'),
       align: 'end',
       cell: (it) => {
         if (it.avg_cost_before === null || it.avg_cost_after === null) {
@@ -183,9 +190,9 @@ export default function PurchaseDetailPage() {
       id: 'serial',
       header: '#',
       width: 40,
-      cell: (_p, idx) => (
+      cell: (o) => (
         <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
-          {idx + 1}
+          {overheadSerialById.get(o.id) ?? ''}
         </Typography>
       )
     },
@@ -274,6 +281,11 @@ export default function PurchaseDetailPage() {
           <Typography variant='h3'>{t('purchases:detail.items')}</Typography>
         </Box>
         <Box sx={{ p: 2 }}>
+          {Number(purchase.overhead_subtotal) > 0 && (
+            <Banner variant='info' sx={{ mb: 2 }}>
+              {t('purchases:detail.overhead_distribution_note')}
+            </Banner>
+          )}
           <DataTable
             columns={itemColumns}
             rows={items}

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { TFunction } from 'i18next'
+import { PK_PHONE_RE } from 'src/lib/phone'
 
-const PK_PHONE_RE = /^(\+92|0)[0-9]{10}$/
 const CNIC_RE = /^[0-9]{5}-[0-9]{7}-[0-9]$/
 
 export const shopStepSchema = (t: TFunction) =>

@@ -3,8 +3,6 @@ import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Switch from '@mui/material/Switch'
-import Typography from '@mui/material/Typography'
-import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import { useTranslation } from 'react-i18next'
 import { Button, Dialog, Field, Input, Textarea } from 'src/components/ui'
 import { useNotifier } from 'src/components/notistack/NotificationProvider'
@@ -38,20 +36,17 @@ export default function TierFormDialog({
   const notify = useNotifier()
 
   const [name, setName] = useState('')
-  const [percent, setPercent] = useState('0')
   const [isDefault, setIsDefault] = useState(false)
   const [notes, setNotes] = useState('')
-  const [errs, setErrs] = useState<{ name?: string; percent?: string }>({})
+  const [errs, setErrs] = useState<{ name?: string }>({})
 
   useEffect(() => {
     if (mode.kind === 'edit') {
       setName(mode.tier.name)
-      setPercent(String(mode.tier.discount_percent))
       setIsDefault(mode.tier.is_default)
       setNotes(mode.tier.notes ?? '')
     } else {
       setName('')
-      setPercent('0')
       setIsDefault(false)
       setNotes('')
     }
@@ -60,13 +55,9 @@ export default function TierFormDialog({
 
   const submit = async () => {
     const trimmed = name.trim()
-    const p = Number(percent)
     const next: typeof errs = {}
     if (!trimmed) next.name = t('tiers:errors.name_required')
-    if (!Number.isFinite(p) || p < 0 || p > 100) {
-      next.percent = t('tiers:errors.discount_out_of_range')
-    }
-    if (next.name || next.percent) {
+    if (next.name) {
       setErrs(next)
       return
     }
@@ -75,7 +66,6 @@ export default function TierFormDialog({
       if (mode.kind === 'create') {
         await define.mutateAsync({
           name: trimmed,
-          discountPercent: p,
           isDefault,
           notes: notes.trim() || null
         })
@@ -83,7 +73,6 @@ export default function TierFormDialog({
         await update.mutateAsync({
           tierId: mode.tier.id,
           name: trimmed,
-          discountPercent: p,
           isDefault,
           notes: notes.trim() || null
         })
@@ -97,7 +86,6 @@ export default function TierFormDialog({
   }
 
   const saving = define.isPending || update.isPending
-  const showHighDiscountWarn = Number(percent) > 30
 
   // Editing the current default? Disable the toggle — the spec rejects
   // un-defaulting a tier; the user must designate another default first.
@@ -133,32 +121,6 @@ export default function TierFormDialog({
         <Field label={t('tiers:fields.name')} error={errs.name}>
           <Input value={name} onChange={(e) => setName(e.target.value)} />
         </Field>
-        <Field label={t('tiers:fields.discount_percent')} error={errs.percent}>
-          <Input
-            type='number'
-            inputProps={{
-              min: 0,
-              max: 100,
-              step: '0.01',
-              inputMode: 'decimal'
-            }}
-            value={percent}
-            onChange={(e) => setPercent(e.target.value)}
-          />
-        </Field>
-        {showHighDiscountWarn && (
-          <Stack
-            direction='row'
-            spacing={0.75}
-            alignItems='flex-start'
-            sx={{ color: 'var(--warning-700)' }}
-          >
-            <WarningAmberIcon fontSize='small' sx={{ mt: 0.25 }} />
-            <Typography variant='caption'>
-              {t('tiers:labels.high_discount_warning')}
-            </Typography>
-          </Stack>
-        )}
         <Box>
           <FormControlLabel
             control={

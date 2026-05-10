@@ -19,15 +19,15 @@ export type OverrideValue = {
 type Props = {
   open: boolean
   onClose: () => void
-  /** Current items_subtotal (post line discounts, pre tier discount). */
+  /** Current items_subtotal (post line discounts, pre sale discount). */
   itemsSubtotal: number
   serviceCharge: number
-  /** Existing override (re-edit) or the customer's tier % (initial fill). */
+  /** Existing sale discount (re-edit) or a 0% default (initial fill). */
   initialValue: OverrideValue
   /** Locale for currency formatting. */
   locale: string
   onApply: (value: OverrideValue) => void
-  /** Reset removes the override entirely; tier returns to customer/default. */
+  /** Reset removes the discount entirely. */
   onReset: () => void
 }
 
@@ -70,17 +70,17 @@ export default function OverrideDiscountDialog({
     if (!Number.isFinite(numeric) || numeric < 0) {
       setErr(
         type === 'percent'
-          ? t('pos:errors.override_percent_out_of_range')
-          : t('pos:errors.override_fixed_exceeds_items')
+          ? t('pos:errors.sale_discount_percent_out_of_range')
+          : t('pos:errors.sale_discount_fixed_exceeds_items')
       )
       return
     }
     if (type === 'percent' && numeric > 100) {
-      setErr(t('pos:errors.override_percent_out_of_range'))
+      setErr(t('pos:errors.sale_discount_percent_out_of_range'))
       return
     }
     if (type === 'fixed' && numeric > itemsSubtotal) {
-      setErr(t('pos:errors.override_fixed_exceeds_items'))
+      setErr(t('pos:errors.sale_discount_fixed_exceeds_items'))
       return
     }
     onApply({ type, value: numeric })
@@ -91,23 +91,23 @@ export default function OverrideDiscountDialog({
       open={open}
       onClose={onClose}
       maxWidth='xs'
-      title={t('pos:totals.override_modal_title')}
+      title={t('pos:totals.apply_discount_modal_title')}
       actions={
         <>
           <Button variant='ghost' onClick={onReset}>
-            {t('pos:totals.override_reset')}
+            {t('pos:totals.apply_discount_reset')}
           </Button>
           <Button variant='secondary' onClick={onClose}>
-            {t('pos:totals.override_cancel')}
+            {t('pos:totals.apply_discount_cancel')}
           </Button>
           <Button variant='primary' onClick={apply} disabled={!valid}>
-            {t('pos:totals.override_apply')}
+            {t('pos:totals.apply_discount_apply')}
           </Button>
         </>
       }
     >
       <Stack spacing={2}>
-        <Field label={t('pos:totals.override_type_label')}>
+        <Field label={t('pos:totals.apply_discount_type_label')}>
           <RadioGroup
             row
             value={type}
@@ -116,20 +116,20 @@ export default function OverrideDiscountDialog({
             <FormControlLabel
               value='percent'
               control={<Radio />}
-              label={t('pos:totals.override_type_percent')}
+              label={t('pos:totals.apply_discount_type_percent')}
             />
             <FormControlLabel
               value='fixed'
               control={<Radio />}
-              label={t('pos:totals.override_type_fixed')}
+              label={t('pos:totals.apply_discount_type_fixed')}
             />
           </RadioGroup>
         </Field>
         <Field
           label={
             type === 'percent'
-              ? `${t('pos:totals.override_value_label')} (%)`
-              : `${t('pos:totals.override_value_label')} (PKR)`
+              ? `${t('pos:totals.apply_discount_value_label')} (%)`
+              : `${t('pos:totals.apply_discount_value_label')} (PKR)`
           }
           error={err ?? undefined}
         >
@@ -167,7 +167,7 @@ export default function OverrideDiscountDialog({
             </Stack>
             <Stack direction='row' justifyContent='space-between'>
               <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
-                {t('pos:totals.tier_discount')}
+                {t('pos:totals.sale_discount_label')}
               </Typography>
               <Typography variant='body2'>
                 −{formatPKR(previewDiscount, locale)}
@@ -203,7 +203,7 @@ export default function OverrideDiscountDialog({
         </Box>
 
         <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
-          {t('pos:totals.override_help')}
+          {t('pos:totals.apply_discount_help')}
         </Typography>
       </Stack>
     </Dialog>

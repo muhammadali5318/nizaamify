@@ -7,7 +7,6 @@ import EditIcon from '@mui/icons-material/Edit'
 import ArchiveIcon from '@mui/icons-material/Archive'
 import StarIcon from '@mui/icons-material/Star'
 import StarBorderIcon from '@mui/icons-material/StarBorder'
-import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import { useTranslation } from 'react-i18next'
 import {
   Badge,
@@ -134,28 +133,18 @@ export default function TiersPage() {
                         label={t('tiers:labels.default_badge')}
                       />
                     )}
-                    {tier.discount_percent > 30 && (
-                      <Tooltip title={t('tiers:labels.high_discount_warning')}>
-                        <WarningAmberIcon
-                          fontSize='small'
-                          sx={{ color: 'var(--warning-700)' }}
-                        />
-                      </Tooltip>
-                    )}
                   </Stack>
                   <Typography
                     variant='caption'
                     sx={{ color: 'var(--text-muted)', display: 'block' }}
                   >
-                    {`${tier.discount_percent}% · ${
-                      tier.customer_count === 1
-                        ? t('tiers:labels.customers_count_one', {
-                            count: tier.customer_count
-                          })
-                        : t('tiers:labels.customers_count_other', {
-                            count: tier.customer_count
-                          })
-                    }`}
+                    {tier.customer_count === 1
+                      ? t('tiers:labels.customers_count_one', {
+                          count: tier.customer_count
+                        })
+                      : t('tiers:labels.customers_count_other', {
+                          count: tier.customer_count
+                        })}
                   </Typography>
                   {tier.notes && (
                     <Typography

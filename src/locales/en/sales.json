@@ -60,8 +60,7 @@
     "no_discount": "—"
   },
   "totals": {
-    "tier_discount": "Tier discount ({{name}} {{percent}}%)",
-    "manual_override_percent": "Manual override ({{percent}}%)",
-    "manual_override_fixed": "Manual override (fixed)"
+    "sale_discount_percent": "Discount ({{percent}}%)",
+    "sale_discount_fixed": "Discount (fixed)"
   }
 }

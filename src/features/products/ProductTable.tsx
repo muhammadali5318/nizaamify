@@ -63,12 +63,17 @@ function formatStock(
 }
 
 export type ProductTableProps = {
-  /** Action slot. Receives the row and (when fetched) its pack breakdown so
-   * callers like the POS can render quick-add buttons per spec §5.5. */
+  /** Action slot rendered in the rightmost column. POS puts the primary [+]
+   * (or "Scan only" caption) plus pack quick-add chips stacked vertically;
+   * the products list puts edit/archive icons. */
   renderActions: (
     row: ProductSearchRow,
     breakdown?: ProductStockBreakdown
   ) => ReactNode
+  /** Optional column header shown above the actions cell. POS uses "Add";
+   * the products list leaves it blank since edit/archive don't share a
+   * single label. */
+  actionsHeader?: ReactNode
   onlyInStock?: boolean
   showSearch?: boolean
   pageSize?: number
@@ -88,6 +93,7 @@ const DEFAULT_PAGE_SIZE = 50
 
 export default function ProductTable({
   renderActions,
+  actionsHeader,
   onlyInStock = false,
   showSearch = true,
   pageSize = DEFAULT_PAGE_SIZE,
@@ -165,15 +171,6 @@ export default function ProductTable({
 
   const columns: DataTableColumn<ProductSearchRow>[] = [
     {
-      id: 'actions',
-      header: '',
-      // POS quick-add wants room for several pack chips; the regular edit
-      // page only needs ~96px for the icon row.
-      width: loadBreakdownsForActions ? 240 : 96,
-      cardRole: 'actions',
-      cell: (row) => renderActions(row, breakdowns?.get(row.id))
-    },
-    {
       id: 'name',
       header: t('products:fields.name'),
       cardRole: 'heading',
@@ -197,7 +194,7 @@ export default function ProductTable({
     {
       id: 'stock',
       header: t('products:fields.stock'),
-      align: 'end',
+      align: 'start',
       cell: (row) => {
         const breakdown = breakdowns?.get(row.id)
         const formatted =
@@ -213,7 +210,7 @@ export default function ProductTable({
           <Stack
             direction='row'
             spacing={0.75}
-            justifyContent='flex-end'
+            justifyContent='flex-start'
             alignItems='center'
           >
             <Typography variant='body1'>{formatted.primary}</Typography>
@@ -266,7 +263,19 @@ export default function ProductTable({
             )
           }
         ]
-      : [])
+      : []),
+    {
+      // Rightmost column per v2.3 §6.3.2. POS renders the primary [+] and
+      // any pack quick-add chips here, stacked vertically; products list
+      // renders edit/archive icons. Wider when actions need pack chips so
+      // labels like "+1 Carton (100)" don't truncate.
+      id: 'actions',
+      header: actionsHeader ?? '',
+      width: loadBreakdownsForActions ? 160 : 96,
+      align: 'end',
+      cardRole: 'actions',
+      cell: (row) => renderActions(row, breakdowns?.get(row.id))
+    }
   ]
 
   return (

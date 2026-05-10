@@ -139,6 +139,9 @@ export type PurchaseDetailItem = {
   qty: number
   cost_at_purchase: number
   overhead_per_unit: number
+  /** v2.3: source-of-truth line-level overhead allocation (largest-remainder).
+   * 0 on legacy rows; UI falls back to overhead_per_unit × qty_in_base. */
+  line_overhead_amount: number
   avg_cost_before: number | null
   avg_cost_after: number | null
   /** v2.0 pack snapshot. Null on v1.x rows and on base-unit purchases. */
@@ -179,6 +182,7 @@ export function usePurchaseDetail(id: string | undefined) {
           supplier:suppliers ( name ),
           purchase_items (
             id, product_id, qty, cost_at_purchase, overhead_per_unit,
+            line_overhead_amount,
             avg_cost_before, avg_cost_after,
             pack_id, pack_qty, pack_base_qty_snapshot, qty_in_base,
             product:products ( id, name, type ),

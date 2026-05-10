@@ -21,8 +21,9 @@
     "confirm_archive_body": "{{name}} will be hidden from new stock-ins. Past purchases keep their history."
   },
   "errors": {
-    "duplicate_name": "A supplier with this name already exists in your shop.",
+    "duplicate_name": "A supplier with this name and contact already exists. Add a contact (or change it) to tell them apart.",
     "name_required": "Supplier name is required.",
+    "contact_invalid": "Enter a valid Pakistani phone number (03XXXXXXXXX) or leave blank.",
     "save_failed": "Could not save supplier. Please try again.",
     "archive_failed": "Could not archive supplier. Please try again."
   },

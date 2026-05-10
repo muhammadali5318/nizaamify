@@ -8,7 +8,9 @@
     "stock_in": "{{count}} in stock",
     "low_stock": "Only {{count}} left",
     "out_of_stock": "Out of stock",
-    "stock_capped": "Cannot add more — only {{count}} in stock"
+    "stock_capped": "Cannot add more — only {{count}} in stock",
+    "scan_only_label": "Scan only",
+    "add_column_header": "Add"
   },
   "cart": {
     "title": "Cart",
@@ -23,6 +25,10 @@
     "qty_label": "Quantity",
     "unit_price": "Unit price",
     "line_total": "Line total",
+    "col_product": "Product",
+    "col_qty": "Qty",
+    "col_price": "Price",
+    "col_total": "Total",
     "modified_price_badge": "Modified",
     "was_price": "was {{price}}",
     "below_avg_cost_warning": "Below average cost — selling at a loss.",
@@ -53,7 +59,8 @@
     "required_for_credit": "Required for credit or partial sales",
     "add_new": "+ Add new customer",
     "no_results": "No customers found",
-    "load_more": "Load more"
+    "load_more": "Load more",
+    "switch_to_walk_in": "Switch to walk-in"
   },
   "submit": {
     "cash": "Complete cash sale",
@@ -69,20 +76,20 @@
     "view_cart": "View cart ({{count}} items, {{total}})"
   },
   "totals": {
-    "tier_discount": "Tier discount",
-    "tier_discount_with_name": "Tier discount ({{name}} {{percent}}%)",
-    "manual_override_percent": "Manual override ({{percent}}%)",
-    "manual_override_fixed": "Manual override",
-    "override_link": "Override",
-    "override_modal_title": "Override discount for this sale only",
-    "override_type_label": "Discount type",
-    "override_type_percent": "Percentage",
-    "override_type_fixed": "Fixed amount",
-    "override_value_label": "Value",
-    "override_apply": "Apply override",
-    "override_reset": "Reset",
-    "override_cancel": "Cancel",
-    "override_help": "This sale only — the customer's tier returns to default afterwards."
+    "sale_discount_label": "Discount",
+    "sale_discount_percent": "Discount ({{percent}}%)",
+    "sale_discount_fixed": "Discount (fixed)",
+    "apply_discount_link": "Apply discount",
+    "edit_discount_link": "Edit",
+    "apply_discount_modal_title": "Apply discount to this sale",
+    "apply_discount_type_label": "Discount type",
+    "apply_discount_type_percent": "Percentage",
+    "apply_discount_type_fixed": "Fixed amount",
+    "apply_discount_value_label": "Value",
+    "apply_discount_apply": "Apply",
+    "apply_discount_reset": "Reset",
+    "apply_discount_cancel": "Cancel",
+    "apply_discount_help": "This sale only. Discounts do not carry across sales."
   },
   "line": {
     "add_discount": "Add discount",
@@ -123,8 +130,8 @@
     "customer_required": "Customer is required for credit or partial sales",
     "line_discount_percent_out_of_range": "Discount must be between 0% and 100%.",
     "line_discount_exceeds_line": "Discount cannot exceed the line subtotal.",
-    "override_percent_out_of_range": "Override percent must be between 0 and 100.",
-    "override_fixed_exceeds_items": "Override amount cannot exceed the items subtotal."
+    "sale_discount_percent_out_of_range": "Discount percent must be between 0 and 100.",
+    "sale_discount_fixed_exceeds_items": "Discount cannot exceed the items subtotal."
   },
   "messages": {
     "saved": "Sale completed"

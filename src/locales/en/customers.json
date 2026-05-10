@@ -16,7 +16,6 @@
     "notes_optional": "Notes (optional)",
     "last_activity": "Last activity"
   },
-  "tier_chip_label": "{{name}} ({{percent}}%)",
   "actions": {
     "save": "Save",
     "back": "Back to customers",
@@ -32,7 +31,7 @@
   "errors": {
     "name_required": "Name is required",
     "phone_required": "Phone is required",
-    "phone_invalid": "Enter a valid Pakistani phone number",
+    "phone_invalid": "Enter a valid Pakistani phone number (03XXXXXXXXX)",
     "phone_taken": "A customer with this phone already exists",
     "phone_duplicate": "A customer with this phone already exists in your shop",
     "save_failed": "Could not save customer. Please try again.",
