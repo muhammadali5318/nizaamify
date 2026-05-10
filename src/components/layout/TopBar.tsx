@@ -58,13 +58,16 @@ export function TopBar({
       sx={{
         width: { md: `calc(100% - ${sidebarWidth}px)` },
         marginInlineStart: { md: `${sidebarWidth}px` },
-        // Use the same dark surface as the page in dark mode, and a near-black
-        // bar in light mode (matches design_inspiration screenshots). Border
-        // gives definition without a hard shadow.
-        backgroundColor: 'var(--surface-base)',
+        // Translucent in both modes so the body's amber wash bleeds through
+        // for that "glass over warm light" feel the inspiration screenshots
+        // have. Use color-mix on surface-base so we get an 80% opacity tint
+        // without pinning a literal rgba(...) — token-safe across themes.
+        backgroundColor:
+          'color-mix(in srgb, var(--surface-base) 80%, transparent)',
         color: 'var(--text-primary)',
         borderBottom: '1px solid var(--border-subtle)',
-        backdropFilter: 'saturate(180%) blur(8px)'
+        backdropFilter: 'saturate(180%) blur(12px)',
+        WebkitBackdropFilter: 'saturate(180%) blur(12px)'
       }}
     >
       <Toolbar

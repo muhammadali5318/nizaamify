@@ -64,6 +64,18 @@
   --surface-muted:    var(--neutral-100);
   --surface-emphasis: var(--brand-50);
   --surface-inverse:  var(--neutral-900);
+  /* Card surface — slightly warm (amber undertone) so cards feel layered
+     against the page instead of bleeding into it. */
+  --surface-card:     #FFFCF7;
+  --surface-card-hover: #FFFAEF;
+
+  /* Ambient body gradient — a subtle warm wash from one side. Disabled
+     (transparent) by default; layered on the body bg in global.scss. */
+  --body-glow: radial-gradient(
+    1200px 800px at 100% 0%,
+    rgba(245, 158, 11, 0.06) 0%,
+    rgba(245, 158, 11, 0.0) 60%
+  );
 
   /* ---------- Semantic text ---------- */
   --text-primary:   var(--neutral-900);
@@ -135,6 +147,15 @@
   --shadow-lg: 0 12px 24px -6px rgba(15, 23, 42, 0.10), 0 4px 8px -4px rgba(15, 23, 42, 0.06);
   --shadow-xl: 0 24px 48px -12px rgba(15, 23, 42, 0.18);
   --shadow-brand: 0 8px 20px -8px color-mix(in srgb, var(--brand-700) 40%, transparent);
+  /* Card-specific shadow with a faint amber bloom (warm). In light mode the
+     bloom is barely perceptible; in dark mode it gives cards a soft glow
+     that matches the design-inspiration screenshots. */
+  --shadow-card:
+    0 1px 2px 0 rgba(15, 23, 42, 0.04),
+    0 8px 24px -10px color-mix(in srgb, var(--brand-500) 22%, transparent);
+  --shadow-card-hover:
+    0 1px 2px 0 rgba(15, 23, 42, 0.05),
+    0 14px 32px -12px color-mix(in srgb, var(--brand-500) 30%, transparent);
 
   /* ---------- Motion ---------- */
   --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
@@ -149,12 +170,28 @@
    The [data-theme="dark"] attribute is written by ThemeModeProvider.
    ===================================================================== */
 [data-theme="dark"] {
-  /* Surfaces — near-black canvas with layered greys for elevation. */
+  /* Surfaces — near-black canvas with layered greys for elevation.
+     Card surface is a hair warmer than surface-base so cards register as
+     amber-tinted volumes against the cool slate page. The visual delta is
+     small but reads consistently across the inspiration screenshots. */
   --surface-base:     #15181A;
   --surface-subtle:   #0F1112;   /* page background */
   --surface-muted:    #1D2124;
   --surface-emphasis: #2A2017;   /* amber-tinted highlight surface */
   --surface-inverse:  var(--neutral-50);
+  --surface-card:        #1A1814;   /* warm slate (amber undertone) */
+  --surface-card-hover:  #1F1B16;
+
+  /* Sideways ambient glow — soft amber bloom on the trailing edge so the
+     page feels lit by an off-screen light. Logical positioning works for
+     LTR (glow on top-right) and mirrors automatically in RTL when the
+     consumer uses logical properties. */
+  --body-glow: radial-gradient(
+    1200px 900px at 100% 0%,
+    rgba(245, 158, 11, 0.10) 0%,
+    rgba(245, 158, 11, 0.04) 35%,
+    rgba(0, 0, 0, 0) 70%
+  );
 
   /* Text */
   --text-primary:   #F4F5F6;
@@ -214,6 +251,14 @@
   --shadow-lg: 0 12px 24px -6px rgba(0, 0, 0, 0.5), 0 4px 8px -4px rgba(0, 0, 0, 0.4);
   --shadow-xl: 0 24px 48px -12px rgba(0, 0, 0, 0.6);
   --shadow-brand: 0 8px 20px -8px color-mix(in srgb, var(--brand-400) 40%, transparent);
+  /* Card glow — amber bloom paired with a soft black shadow. Reads as
+     "cards floating in warm light" against the cool slate page. */
+  --shadow-card:
+    0 1px 2px 0 rgba(0, 0, 0, 0.5),
+    0 12px 32px -12px color-mix(in srgb, var(--brand-400) 35%, transparent);
+  --shadow-card-hover:
+    0 1px 2px 0 rgba(0, 0, 0, 0.55),
+    0 18px 44px -12px color-mix(in srgb, var(--brand-400) 50%, transparent);
 }
 
 /* Smooth transitions when toggling theme so the swap feels intentional, not jarring. */

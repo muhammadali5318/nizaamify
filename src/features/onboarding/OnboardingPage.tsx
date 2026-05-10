@@ -87,7 +87,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: 'var(--surface-subtle)' }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: 'transparent' }}>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
         <LanguageSelector />
       </Box>
