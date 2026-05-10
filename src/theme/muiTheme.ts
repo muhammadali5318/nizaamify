@@ -315,11 +315,19 @@ export function getTheme(
       MuiTooltip: {
         defaultProps: { enterDelay: 200 },
         styleOverrides: {
+          // surface-inverse + text-inverse flip with theme so the tooltip
+          // always contrasts cleanly with the page (dark on light, light
+          // on dark).
           tooltip: {
-            backgroundColor: v('--neutral-900'),
-            color: v('--neutral-0'),
+            backgroundColor: v('--surface-inverse'),
+            color: v('--text-inverse'),
             fontSize: '0.8125rem',
-            borderRadius: 6
+            borderRadius: 6,
+            paddingInline: 8,
+            paddingBlock: 4
+          },
+          arrow: {
+            color: v('--surface-inverse')
           }
         }
       },
