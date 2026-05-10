@@ -13,8 +13,7 @@ import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { Banner, Button, Field, Input, Textarea } from 'src/components/ui'
 import { useTiers } from 'src/features/tiers/hooks'
-
-const PK_PHONE_RE = /^(\+92|0)[0-9]{10}$/
+import { PK_PHONE_HINT, PK_PHONE_RE } from 'src/lib/phone'
 
 export type CustomerFormValues = {
   name: string
@@ -105,7 +104,7 @@ export default function CustomerForm({
               label={t('customers:fields.phone')}
               error={errors.phone?.message}
             >
-              <Input {...field} placeholder='+92xxxxxxxxxx' />
+              <Input {...field} placeholder={PK_PHONE_HINT} />
             </Field>
           )}
         />
@@ -129,7 +128,7 @@ export default function CustomerForm({
                 >
                   {tiers.map((tier) => (
                     <MenuItem key={tier.id} value={tier.id}>
-                      {`${tier.name} (${tier.discount_percent}%)`}
+                      {tier.name}
                     </MenuItem>
                   ))}
                 </TextField>

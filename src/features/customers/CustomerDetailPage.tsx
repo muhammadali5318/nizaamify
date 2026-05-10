@@ -239,15 +239,7 @@ export default function CustomerDetailPage() {
               <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
                 {customer.phone}
               </Typography>
-              {tier && (
-                <Badge
-                  variant='info'
-                  label={t('customers:tier_chip_label', {
-                    name: tier.name,
-                    percent: tier.discount_percent
-                  })}
-                />
-              )}
+              {tier && <Badge variant='info' label={tier.name} />}
             </Stack>
           </Box>
           <Stack

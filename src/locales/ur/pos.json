@@ -8,7 +8,9 @@
     "stock_in": "{{count}} اسٹاک میں",
     "low_stock": "صرف {{count}} باقی",
     "out_of_stock": "اسٹاک ختم",
-    "stock_capped": "مزید نہیں — اسٹاک میں صرف {{count}}"
+    "stock_capped": "مزید نہیں — اسٹاک میں صرف {{count}}",
+    "scan_only_label": "صرف اسکین",
+    "add_column_header": "شامل کریں"
   },
   "cart": {
     "title": "کارٹ",
@@ -23,6 +25,10 @@
     "qty_label": "مقدار",
     "unit_price": "فی یونٹ قیمت",
     "line_total": "لائن کل",
+    "col_product": "مصنوعات",
+    "col_qty": "مقدار",
+    "col_price": "قیمت",
+    "col_total": "کل",
     "modified_price_badge": "ترمیم شدہ",
     "was_price": "پہلے {{price}}",
     "below_avg_cost_warning": "اوسط لاگت سے کم — نقصان پر فروخت۔",
@@ -53,7 +59,8 @@
     "required_for_credit": "ادھار یا جزوی فروخت کے لیے ضروری",
     "add_new": "+ نیا گاہک شامل کریں",
     "no_results": "کوئی گاہک نہیں ملا",
-    "load_more": "مزید لوڈ کریں"
+    "load_more": "مزید لوڈ کریں",
+    "switch_to_walk_in": "واک ان پر سوئچ کریں"
   },
   "submit": {
     "cash": "نقد فروخت مکمل کریں",
@@ -61,20 +68,20 @@
     "partial": "جزوی فروخت مکمل کریں ({{paid}} ادا، {{credit}} ادھار)"
   },
   "totals": {
-    "tier_discount": "گروپ رعایت",
-    "tier_discount_with_name": "گروپ رعایت ({{name}} {{percent}}%)",
-    "manual_override_percent": "دستی اوور رائیڈ ({{percent}}%)",
-    "manual_override_fixed": "دستی اوور رائیڈ",
-    "override_link": "اوور رائیڈ",
-    "override_modal_title": "صرف اس فروخت کے لیے رعایت اوور رائیڈ کریں",
-    "override_type_label": "رعایت کی قسم",
-    "override_type_percent": "فیصد",
-    "override_type_fixed": "مقررہ رقم",
-    "override_value_label": "قدر",
-    "override_apply": "اوور رائیڈ لاگو کریں",
-    "override_reset": "ری سیٹ",
-    "override_cancel": "منسوخ",
-    "override_help": "صرف اس فروخت کے لیے — گاہک کا گروپ بعد میں ڈیفالٹ پر واپس آ جائے گا۔"
+    "sale_discount_label": "رعایت",
+    "sale_discount_percent": "رعایت ({{percent}}%)",
+    "sale_discount_fixed": "رعایت (مقررہ)",
+    "apply_discount_link": "رعایت لاگو کریں",
+    "edit_discount_link": "ترمیم",
+    "apply_discount_modal_title": "اس فروخت پر رعایت لاگو کریں",
+    "apply_discount_type_label": "رعایت کی قسم",
+    "apply_discount_type_percent": "فیصد",
+    "apply_discount_type_fixed": "مقررہ رقم",
+    "apply_discount_value_label": "قدر",
+    "apply_discount_apply": "لاگو کریں",
+    "apply_discount_reset": "ری سیٹ",
+    "apply_discount_cancel": "منسوخ",
+    "apply_discount_help": "صرف اس فروخت کے لیے۔ رعایت دوسری فروخت پر منتقل نہیں ہوتی۔"
   },
   "line": {
     "add_discount": "رعایت شامل کریں",
@@ -123,8 +130,8 @@
     "customer_required": "ادھار یا جزوی فروخت کے لیے گاہک ضروری ہے",
     "line_discount_percent_out_of_range": "رعایت 0٪ اور 100٪ کے درمیان ہونی چاہیے۔",
     "line_discount_exceeds_line": "رعایت لائن ذیلی کل سے زیادہ نہیں ہو سکتی۔",
-    "override_percent_out_of_range": "اوور رائیڈ فیصد 0 اور 100 کے درمیان ہونا چاہیے۔",
-    "override_fixed_exceeds_items": "اوور رائیڈ رقم اشیاء کے ذیلی کل سے زیادہ نہیں ہو سکتی۔"
+    "sale_discount_percent_out_of_range": "رعایت فیصد 0 اور 100 کے درمیان ہونا چاہیے۔",
+    "sale_discount_fixed_exceeds_items": "رعایت اشیاء کے ذیلی کل سے زیادہ نہیں ہو سکتی۔"
   },
   "messages": {
     "saved": "فروخت مکمل ہو گئی"

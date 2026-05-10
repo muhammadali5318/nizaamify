@@ -17,7 +17,6 @@ export type Database = {
       customer_tiers: {
         Row: {
           created_at: string
-          discount_percent: number
           id: string
           is_active: boolean
           is_default: boolean
@@ -28,7 +27,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          discount_percent?: number
           id?: string
           is_active?: boolean
           is_default?: boolean
@@ -39,7 +37,6 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          discount_percent?: number
           id?: string
           is_active?: boolean
           is_default?: boolean
@@ -169,13 +166,13 @@ export type Database = {
           id: string
           notes: string | null
           payment_type: string
+          sale_discount_amount: number
+          sale_discount_percent_snapshot: number | null
+          sale_discount_type: string | null
+          sale_discount_value: number | null
           service_charge: number
           shop_id: string
-          tier_discount_amount: number
-          tier_discount_percent_snapshot: number | null
           tier_id: string | null
-          tier_override_type: string | null
-          tier_override_value: number | null
           total: number
         }
         Insert: {
@@ -186,13 +183,13 @@ export type Database = {
           id?: string
           notes?: string | null
           payment_type: string
+          sale_discount_amount?: number
+          sale_discount_percent_snapshot?: number | null
+          sale_discount_type?: string | null
+          sale_discount_value?: number | null
           service_charge?: number
           shop_id: string
-          tier_discount_amount?: number
-          tier_discount_percent_snapshot?: number | null
           tier_id?: string | null
-          tier_override_type?: string | null
-          tier_override_value?: number | null
           total: number
         }
         Update: {
@@ -203,13 +200,13 @@ export type Database = {
           id?: string
           notes?: string | null
           payment_type?: string
+          sale_discount_amount?: number
+          sale_discount_percent_snapshot?: number | null
+          sale_discount_type?: string | null
+          sale_discount_value?: number | null
           service_charge?: number
           shop_id?: string
-          tier_discount_amount?: number
-          tier_discount_percent_snapshot?: number | null
           tier_id?: string | null
-          tier_override_type?: string | null
-          tier_override_value?: number | null
           total?: number
         }
         Relationships: [
@@ -554,6 +551,7 @@ export type Database = {
           avg_cost_before: number | null
           cost_at_purchase: number
           id: string
+          line_overhead_amount: number
           overhead_per_unit: number
           pack_base_qty_snapshot: number | null
           pack_id: string | null
@@ -568,6 +566,7 @@ export type Database = {
           avg_cost_before?: number | null
           cost_at_purchase: number
           id?: string
+          line_overhead_amount?: number
           overhead_per_unit?: number
           pack_base_qty_snapshot?: number | null
           pack_id?: string | null
@@ -582,6 +581,7 @@ export type Database = {
           avg_cost_before?: number | null
           cost_at_purchase?: number
           id?: string
+          line_overhead_amount?: number
           overhead_per_unit?: number
           pack_base_qty_snapshot?: number | null
           pack_id?: string | null
@@ -1088,14 +1088,14 @@ export type Database = {
           items_subtotal_post_line_discounts: number | null
           notes: string | null
           payment_type: string | null
+          sale_discount_amount: number | null
+          sale_discount_percent_snapshot: number | null
+          sale_discount_type: string | null
+          sale_discount_value: number | null
           service_charge: number | null
           shop_id: string | null
-          tier_discount_amount: number | null
-          tier_discount_percent_snapshot: number | null
           tier_id: string | null
           tier_name: string | null
-          tier_override_type: string | null
-          tier_override_value: number | null
           total: number | null
         }
         Relationships: [
@@ -1339,12 +1339,7 @@ export type Database = {
         Returns: string
       }
       define_tier: {
-        Args: {
-          p_discount_percent?: number
-          p_is_default?: boolean
-          p_name: string
-          p_notes?: string
-        }
+        Args: { p_is_default?: boolean; p_name: string; p_notes?: string }
         Returns: string
       }
       expire_subscriptions: { Args: never; Returns: undefined }
@@ -1414,9 +1409,9 @@ export type Database = {
           p_customer_id?: string
           p_items?: Json
           p_notes?: string
+          p_sale_discount_type?: string
+          p_sale_discount_value?: number
           p_service_charge?: number
-          p_tier_override_type?: string
-          p_tier_override_value?: number
         }
         Returns: string
       }
@@ -1523,7 +1518,6 @@ export type Database = {
       }
       update_tier: {
         Args: {
-          p_discount_percent: number
           p_is_default: boolean
           p_name: string
           p_notes?: string

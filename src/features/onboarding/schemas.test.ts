@@ -6,11 +6,11 @@ const t = ((key: string) => key) as unknown as Parameters<
 >[0]
 
 describe('onboarding shop step schema', () => {
-  it('accepts a valid shop', () => {
+  it('accepts a valid shop with 0-prefix phone', () => {
     const r = shopStepSchema(t).safeParse({
       shop_name: 'Test Shop',
       shop_address: '123 Mall Rd',
-      shop_phone: '+923001234567',
+      shop_phone: '03001234567',
       shop_type: ''
     })
     expect(r.success).toBe(true)
@@ -26,21 +26,21 @@ describe('onboarding shop step schema', () => {
     expect(r.success).toBe(false)
   })
 
-  it('accepts the 0-prefix phone variant', () => {
+  it('rejects the +92 prefix variant (0-prefix only)', () => {
     const r = shopStepSchema(t).safeParse({
       shop_name: 'Test',
       shop_address: '123 Mall Rd',
-      shop_phone: '03001234567',
+      shop_phone: '+923001234567',
       shop_type: ''
     })
-    expect(r.success).toBe(true)
+    expect(r.success).toBe(false)
   })
 
   it('rejects too-short shop name', () => {
     const r = shopStepSchema(t).safeParse({
       shop_name: 'X',
       shop_address: '123 Mall Rd',
-      shop_phone: '+923001234567'
+      shop_phone: '03001234567'
     })
     expect(r.success).toBe(false)
   })
@@ -50,7 +50,7 @@ describe('onboarding owner step schema', () => {
   it('rejects bad CNIC format', () => {
     const r = ownerStepSchema(t).safeParse({
       owner_name: 'Test Owner',
-      owner_phone: '+923001234567',
+      owner_phone: '03001234567',
       owner_cnic: '1234-5678-9',
       owner_address: '123 Mall Rd'
     })
@@ -60,7 +60,7 @@ describe('onboarding owner step schema', () => {
   it('accepts well-formed CNIC', () => {
     const r = ownerStepSchema(t).safeParse({
       owner_name: 'Test Owner',
-      owner_phone: '+923001234567',
+      owner_phone: '03001234567',
       owner_cnic: '12345-1234567-1',
       owner_address: '123 Mall Rd'
     })
@@ -70,7 +70,7 @@ describe('onboarding owner step schema', () => {
   it('treats empty CNIC as valid (optional)', () => {
     const r = ownerStepSchema(t).safeParse({
       owner_name: 'Test Owner',
-      owner_phone: '+923001234567',
+      owner_phone: '03001234567',
       owner_cnic: '',
       owner_address: '123 Mall Rd'
     })

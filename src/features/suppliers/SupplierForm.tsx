@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Stack from '@mui/material/Stack'
 import { useTranslation } from 'react-i18next'
 import { Banner, Button, Field, Input, Textarea } from 'src/components/ui'
+import { PK_PHONE_HINT } from 'src/lib/phone'
 import { supplierSchema, type SupplierFormValues } from './schemas'
 
 type Props = {
@@ -62,11 +63,15 @@ export default function SupplierForm({
           />
         </Field>
 
-        <Field label={t('suppliers:fields.contact')}>
+        <Field
+          label={t('suppliers:fields.contact')}
+          error={errors.contact && t('suppliers:errors.contact_invalid')}
+        >
           <Input
             value={contact}
             onChange={(e) => setContact(e.target.value)}
             inputProps={{ maxLength: 60 }}
+            placeholder={PK_PHONE_HINT}
           />
         </Field>
 

@@ -367,32 +367,36 @@ export default function NewPurchasePage() {
         </Typography>
         <Stack spacing={2}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-            <Field
-              label={t('purchases:fields.purchase_date')}
-              required
-              error={errors.date}
-              htmlFor='purchase_date'
-            >
-              <Input
-                id='purchase_date'
-                type='date'
-                value={purchaseDate}
-                onChange={(e) => setPurchaseDate(e.target.value)}
-                inputProps={{ max: todayISO() }}
-              />
-            </Field>
-            <Field
-              label={t('purchases:form.supplier')}
-              required
-              error={errors.supplier}
-            >
-              <SupplierCombobox
-                value={supplierId}
-                onChange={setSupplierId}
+            <Box sx={{ flex: '0 0 200px' }}>
+              <Field
+                label={t('purchases:fields.purchase_date')}
                 required
-                size='medium'
-              />
-            </Field>
+                error={errors.date}
+                htmlFor='purchase_date'
+              >
+                <Input
+                  id='purchase_date'
+                  type='date'
+                  value={purchaseDate}
+                  onChange={(e) => setPurchaseDate(e.target.value)}
+                  inputProps={{ max: todayISO() }}
+                />
+              </Field>
+            </Box>
+            <Box sx={{ flex: '1 1 auto', minWidth: 0 }}>
+              <Field
+                label={t('purchases:form.supplier')}
+                required
+                error={errors.supplier}
+              >
+                <SupplierCombobox
+                  value={supplierId}
+                  onChange={setSupplierId}
+                  required
+                  size='medium'
+                />
+              </Field>
+            </Box>
           </Stack>
           <Field label={t('purchases:fields.note')}>
             <Textarea
@@ -525,6 +529,27 @@ export default function NewPurchasePage() {
                       inputProps={{ min: 0, step: '0.01' }}
                     />
                   </Field>
+                  {(() => {
+                    const unit = ln.available_units[ln.selected_unit_idx]
+                    const cost = num(ln.unitCost)
+                    if (unit?.kind === 'pack' && unit.baseQty > 1 && cost > 0) {
+                      return (
+                        <Typography
+                          variant='caption'
+                          sx={{
+                            color: 'var(--text-muted)',
+                            display: 'block',
+                            mt: 0.25
+                          }}
+                        >
+                          {t('purchases:fields.per_piece_cost', {
+                            cost: formatPKR(cost / unit.baseQty, locale)
+                          })}
+                        </Typography>
+                      )
+                    }
+                    return null
+                  })()}
                 </Box>
                 <Box sx={{ flex: '1 1 130px', minWidth: 100 }}>
                   <Field label={t('purchases:fields.total')}>

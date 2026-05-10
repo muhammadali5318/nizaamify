@@ -16,7 +16,6 @@
     "notes_optional": "نوٹس (اختیاری)",
     "last_activity": "آخری سرگرمی"
   },
-  "tier_chip_label": "{{name}} ({{percent}}%)",
   "actions": {
     "save": "محفوظ کریں",
     "back": "گاہک پر واپس جائیں",
@@ -32,7 +31,7 @@
   "errors": {
     "name_required": "نام ضروری ہے",
     "phone_required": "فون نمبر ضروری ہے",
-    "phone_invalid": "درست پاکستانی فون نمبر درج کریں",
+    "phone_invalid": "درست پاکستانی فون نمبر درج کریں (03XXXXXXXXX)",
     "phone_taken": "اس فون نمبر کے ساتھ پہلے سے گاہک موجود ہے",
     "phone_duplicate": "آپ کی دکان میں اس فون نمبر کے ساتھ پہلے سے گاہک موجود ہے",
     "save_failed": "گاہک محفوظ نہیں ہو سکا۔ دوبارہ کوشش کریں۔",

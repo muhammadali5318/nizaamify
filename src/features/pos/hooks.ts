@@ -19,9 +19,10 @@ export function useRecordSale() {
       service_charge: number
       notes: string | null
       items: SaleItemInput[]
-      /** v2.2: when set, takes precedence over the customer's tier discount. */
-      tier_override_type?: 'percent' | 'fixed' | null
-      tier_override_value?: number | null
+      /** v2.3: manual sale-time discount (% or fixed). Customer tier no longer
+       * auto-discounts. Cleared by caller after successful submit. */
+      sale_discount_type?: 'percent' | 'fixed' | null
+      sale_discount_value?: number | null
     }) => {
       const { data, error } = await supabase.rpc('record_sale', {
         p_customer_id: args.customer_id,
@@ -29,8 +30,8 @@ export function useRecordSale() {
         p_service_charge: args.service_charge,
         p_notes: args.notes,
         p_items: args.items as unknown as never,
-        p_tier_override_type: args.tier_override_type ?? undefined,
-        p_tier_override_value: args.tier_override_value ?? undefined
+        p_sale_discount_type: args.sale_discount_type ?? undefined,
+        p_sale_discount_value: args.sale_discount_value ?? undefined
       })
       if (error) throw error
       return data

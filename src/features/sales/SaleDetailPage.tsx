@@ -67,34 +67,29 @@ export default function SaleDetailPage() {
   }
 
   const shortId = sale.id.slice(0, 8)
-  // Items subtotal AFTER line discounts. Tier discount is then applied to
-  // this number to produce post-tier-discount total. Spec §1 stacking order.
+  // Items subtotal AFTER line discounts. Sale discount is then applied to
+  // this number to produce the post-discount total. Spec §1 stacking order.
   const itemsSubtotal = sale.items.reduce((s, it) => {
     const sub = Number(it.price_at_sale) * it.qty
     const lineDisc = Number(it.line_discount_amount ?? 0)
     return s + (sub - lineDisc)
   }, 0)
-  const tierDiscount = Number(sale.tier_discount_amount ?? 0)
+  const saleDiscount = Number(sale.sale_discount_amount ?? 0)
   const serviceCharge = Number(sale.service_charge ?? 0)
   const total = Number(sale.total)
   const amountPaid = Number(sale.amount_paid ?? 0)
   const onCredit = Math.max(0, total - amountPaid)
 
-  // Discount line label (spec §5.5)
-  const tierLabel: string | null = (() => {
-    if (sale.tier_override_type === 'percent') {
-      return t('sales:totals.manual_override_percent', {
-        percent: Number(sale.tier_override_value ?? 0)
+  // Discount line label (v2.3: tiers no longer drive discount; the only
+  // source is the manual sale_discount popup snapshot on the invoice).
+  const saleDiscountLabel: string | null = (() => {
+    if (sale.sale_discount_type === 'percent') {
+      return t('sales:totals.sale_discount_percent', {
+        percent: Number(sale.sale_discount_value ?? 0)
       })
     }
-    if (sale.tier_override_type === 'fixed') {
-      return t('sales:totals.manual_override_fixed')
-    }
-    if (sale.tier?.name && sale.tier_discount_percent_snapshot !== null) {
-      return t('sales:totals.tier_discount', {
-        name: sale.tier.name,
-        percent: Number(sale.tier_discount_percent_snapshot)
-      })
+    if (sale.sale_discount_type === 'fixed') {
+      return t('sales:totals.sale_discount_fixed')
     }
     return null
   })()
@@ -340,13 +335,13 @@ export default function SaleDetailPage() {
                 {formatPKR(itemsSubtotal, locale)}
               </Typography>
             </Stack>
-            {tierDiscount > 0 && tierLabel && (
+            {saleDiscount > 0 && saleDiscountLabel && (
               <Stack direction='row' justifyContent='space-between' mt={0.5}>
                 <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
-                  {tierLabel}
+                  {saleDiscountLabel}
                 </Typography>
                 <Typography variant='body2'>
-                  −{formatPKR(tierDiscount, locale)}
+                  −{formatPKR(saleDiscount, locale)}
                 </Typography>
               </Stack>
             )}

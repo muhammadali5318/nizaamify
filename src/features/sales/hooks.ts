@@ -31,13 +31,14 @@ export type SaleDetail = Invoice & {
   } | null
   cashier: { email: string } | null
   items: SaleDetailItem[]
-  /** v2.2 invoice-level discount snapshot. */
-  tier_id: string | null
-  tier_discount_percent_snapshot: number | null
-  tier_discount_amount: number
-  tier_override_type: 'percent' | 'fixed' | null
-  tier_override_value: number | null
-  /** Joined tier name at time of sale (snapshot). NULL on overrides. */
+  /** v2.3 invoice-level sale-discount snapshot.
+   * Renamed from tier_* in v2.3 — tiers no longer auto-discount; the popup
+   * is the only source of an invoice-level discount. */
+  sale_discount_type: 'percent' | 'fixed' | null
+  sale_discount_value: number | null
+  sale_discount_amount: number
+  /** Customer's tier at the time of the sale (snapshot — purely for display,
+   * does NOT drive discount math). Joined via invoices.tier_id. */
   tier: { name: string } | null
   ledger: {
     id: string
@@ -162,9 +163,9 @@ export function useSale(id: string | undefined) {
       }
 
       const items = (data.sale_items as unknown as SaleDetailItem[]) ?? []
-      // The select * picks up tier_id, tier_discount_*, tier_override_* on
-      // the invoice row (added by v2.2 migration 0029). Cast through the
-      // SaleDetail union so TS knows about them.
+      // The select * picks up tier_id and the v2.3-renamed sale_discount_*
+      // columns on the invoice row. Cast through the SaleDetail union so TS
+      // knows about them.
       return {
         ...(data as unknown as Invoice),
         customer: (data.customer as SaleDetail['customer']) ?? null,

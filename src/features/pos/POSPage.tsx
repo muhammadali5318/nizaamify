@@ -188,7 +188,14 @@ export default function POSPage() {
 
   const [cart, dispatch] = useReducer(cartReducer, [])
   const [serviceCharge, setServiceCharge] = useState('0')
-  const [amountPaidStr, setAmountPaidStr] = useState('0')
+  // null = "follow total" (default cash). Any string = the user has typed
+  // (or pressed Pay full/Pay nothing) and the amount sticks until cleared.
+  // Using a derived `amountPaid` instead of a useEffect-synced string
+  // eliminates the one-render flicker where adding an item would briefly
+  // show "customer required for credit" before the effect updated.
+  const [amountPaidOverride, setAmountPaidOverride] = useState<string | null>(
+    null
+  )
   const [customerId, setCustomerId] = useState<string | null>(null)
   const [notes, setNotes] = useState('')
   const [cartOpen, setCartOpen] = useState(false)
@@ -217,41 +224,46 @@ export default function POSPage() {
   })
   const [error, setError] = useState<string | null>(null)
 
-  // ---- v2.2 discount math ----
+  // ---- v2.3 discount math ----
   // items_subtotal: sum of line totals (after per-line discounts).
   const itemsSubtotal = round2(cart.reduce((s, c) => s + lineTotal(c), 0))
   const service = Math.max(0, Number(serviceCharge) || 0)
 
-  // Override (set via the modal) takes precedence over the customer's tier.
-  const [override, setOverride] = useState<OverrideValue | null>(null)
+  // v2.3: sale-time discount is *manual only* — set via the popup. Customer
+  // tier no longer auto-discounts.
+  const [saleDiscount, setSaleDiscount] = useState<OverrideValue | null>(null)
   const [overrideOpen, setOverrideOpen] = useState(false)
 
+  // Tier list is still read so we can show the tier chip on the customer card.
   const { data: tiers = [] } = useTiers()
   const { data: selectedCustomer } = useCustomer(customerId ?? undefined)
-  // Resolve the active tier % the same way record_sale does:
-  //   override → customer's tier → shop default → 0
   const customerTier = selectedCustomer?.tier_id
     ? tiers.find((t2) => t2.id === selectedCustomer.tier_id)
-    : undefined
-  const defaultTier = tiers.find((t2) => t2.is_default)
-  const activeTier = customerTier ?? defaultTier
-  const activeTierPercent = activeTier?.discount_percent ?? 0
+    : null
 
-  const tierDiscountAmount = override
-    ? override.type === 'percent'
-      ? round2((itemsSubtotal * override.value) / 100)
-      : Math.min(round2(override.value), itemsSubtotal)
-    : round2((itemsSubtotal * activeTierPercent) / 100)
+  // Clear any in-progress sale discount when the customer changes — discounts
+  // are per-sale and should not persist across distinct customers.
+  useEffect(() => {
+    setSaleDiscount(null)
+  }, [customerId])
 
-  const total = round2(itemsSubtotal - tierDiscountAmount + service)
-  const amountPaid = Math.min(Math.max(0, Number(amountPaidStr) || 0), total)
+  const saleDiscountAmount = saleDiscount
+    ? saleDiscount.type === 'percent'
+      ? round2((itemsSubtotal * saleDiscount.value) / 100)
+      : Math.min(round2(saleDiscount.value), itemsSubtotal)
+    : 0
+
+  const total = round2(itemsSubtotal - saleDiscountAmount + service)
+  // No override → cash sale (amount paid follows total). Override set →
+  // user-driven (Pay nothing, partial, etc.) and clamped to current total.
+  const amountPaid =
+    amountPaidOverride === null
+      ? total
+      : Math.min(Math.max(0, Number(amountPaidOverride) || 0), total)
+  const amountPaidDisplay =
+    amountPaidOverride === null ? total.toFixed(2) : amountPaidOverride
   const onCredit = Math.max(0, total - amountPaid)
   const itemCount = cart.reduce((s, c) => s + c.qty, 0)
-
-  // Default amount_paid to total when total changes (sane "cash" default).
-  useEffect(() => {
-    setAmountPaidStr(total.toFixed(2))
-  }, [total])
 
   const paymentType: 'cash' | 'credit' | 'partial' =
     onCredit === 0 ? 'cash' : amountPaid === 0 ? 'credit' : 'partial'
@@ -353,8 +365,8 @@ export default function POSPage() {
         service_charge: service,
         notes: notes.trim() || null,
         items,
-        tier_override_type: override?.type ?? null,
-        tier_override_value: override?.value ?? null
+        sale_discount_type: saleDiscount?.type ?? null,
+        sale_discount_value: saleDiscount?.value ?? null
       })
       setReceipt({
         open: true,
@@ -377,6 +389,8 @@ export default function POSPage() {
       setServiceCharge('0')
       setCustomerId(null)
       setNotes('')
+      setSaleDiscount(null)
+      setAmountPaidOverride(null)
       setCartOpen(false)
       notify.success(t('pos:messages.saved'))
     } catch (e: unknown) {
@@ -393,10 +407,10 @@ export default function POSPage() {
         setError(t('pos:errors.line_discount_percent_out_of_range'))
       } else if (msg.includes('line_discount_exceeds_line_subtotal')) {
         setError(t('pos:errors.line_discount_exceeds_line'))
-      } else if (msg.includes('override_percent_out_of_range')) {
-        setError(t('pos:errors.override_percent_out_of_range'))
-      } else if (msg.includes('override_fixed_exceeds_items_subtotal')) {
-        setError(t('pos:errors.override_fixed_exceeds_items'))
+      } else if (msg.includes('sale_discount_percent_out_of_range')) {
+        setError(t('pos:errors.sale_discount_percent_out_of_range'))
+      } else if (msg.includes('sale_discount_fixed_exceeds_items_subtotal')) {
+        setError(t('pos:errors.sale_discount_fixed_exceeds_items'))
       } else {
         setError(t('pos:errors.submit_failed'))
       }
@@ -408,20 +422,20 @@ export default function POSPage() {
       cart={cart}
       dispatch={dispatch}
       itemsSubtotal={itemsSubtotal}
-      tierDiscountAmount={tierDiscountAmount}
-      activeTierName={activeTier?.name ?? null}
-      activeTierPercent={activeTierPercent}
-      override={override}
+      saleDiscountAmount={saleDiscountAmount}
+      saleDiscount={saleDiscount}
       onOpenOverride={() => setOverrideOpen(true)}
       total={total}
       onCredit={onCredit}
       service={service}
       serviceCharge={serviceCharge}
       setServiceCharge={setServiceCharge}
-      amountPaidStr={amountPaidStr}
-      setAmountPaidStr={setAmountPaidStr}
+      amountPaidDisplay={amountPaidDisplay}
+      setAmountPaidOverride={setAmountPaidOverride}
       customerId={customerId}
       setCustomerId={setCustomerId}
+      customerName={selectedCustomer?.name ?? null}
+      customerTierName={customerTier?.name ?? null}
       customerRequired={customerRequired}
       notes={notes}
       setNotes={setNotes}
@@ -453,18 +467,30 @@ export default function POSPage() {
             onlyInStock
             showAvgCost
             loadBreakdownsForActions
+            actionsHeader={t('pos:picker.add_column_header')}
             renderActions={(row, breakdown) => {
+              // v2.3 §6.3.2/§6.3.3 (revised): all "add to cart" affordances
+              // live in the rightmost column. Primary [+] sits on top; pack
+              // quick-add chips stack vertically below it as secondary
+              // buttons. Scan-only products hide the primary [+] entirely
+              // and show a muted "Scan only" caption in its place — pack
+              // chips, when present, still render below.
               const isScanOnly = !!breakdown?.is_scan_only
               const packs = breakdown?.pack_breakdown ?? []
               return (
                 <Stack
-                  direction='row'
                   spacing={0.5}
-                  alignItems='center'
-                  flexWrap='wrap'
-                  rowGap={0.5}
+                  alignItems='flex-end'
+                  sx={{ width: '100%' }}
                 >
-                  {!isScanOnly && (
+                  {isScanOnly ? (
+                    <Typography
+                      variant='caption'
+                      sx={{ color: 'var(--text-muted)' }}
+                    >
+                      {t('pos:picker.scan_only_label')}
+                    </Typography>
+                  ) : (
                     <Tooltip title={t('pos:picker.add_to_cart')}>
                       <span>
                         <IconButton
@@ -507,8 +533,9 @@ export default function POSPage() {
                           size='sm'
                           disabled={row.stock < p.base_qty}
                           onClick={() => handleAddProduct(row, p.base_qty)}
+                          sx={{ minWidth: 'auto', whiteSpace: 'nowrap' }}
                         >
-                          {`+${p.base_qty} ${p.unit_name}`}
+                          {`+1 ${p.unit_name} (${p.base_qty})`}
                         </Button>
                       </span>
                     </Tooltip>
@@ -520,9 +547,11 @@ export default function POSPage() {
         </Box>
 
         {!isMobile && (
-          <Box sx={{ width: 420, flexShrink: 0 }}>
+          <Box sx={{ width: 440, flexShrink: 0 }}>
             <Card variant='elevated' noPadding>
-              <Box sx={{ p: 2 }}>{cartPanel}</Box>
+              <Box sx={{ p: 2, backgroundColor: 'var(--surface-subtle)' }}>
+                {cartPanel}
+              </Box>
             </Card>
           </Box>
         )}
@@ -610,15 +639,16 @@ export default function POSPage() {
         onClose={() => setOverrideOpen(false)}
         itemsSubtotal={itemsSubtotal}
         serviceCharge={service}
-        // Pre-fill with the current override if set, else the customer's tier %.
-        initialValue={override ?? { type: 'percent', value: activeTierPercent }}
+        // v2.3: no auto-tier seeding. Pre-fill with the current value (if any),
+        // otherwise default to a 0% discount that the user can adjust.
+        initialValue={saleDiscount ?? { type: 'percent', value: 0 }}
         locale={locale}
         onApply={(val) => {
-          setOverride(val)
+          setSaleDiscount(val)
           setOverrideOpen(false)
         }}
         onReset={() => {
-          setOverride(null)
+          setSaleDiscount(null)
           setOverrideOpen(false)
         }}
       />
@@ -630,20 +660,20 @@ type CartPanelProps = {
   cart: CartItem[]
   dispatch: React.Dispatch<CartAction>
   itemsSubtotal: number
-  tierDiscountAmount: number
-  activeTierName: string | null
-  activeTierPercent: number
-  override: OverrideValue | null
+  saleDiscountAmount: number
+  saleDiscount: OverrideValue | null
   onOpenOverride: () => void
   total: number
   onCredit: number
   service: number
   serviceCharge: string
   setServiceCharge: (s: string) => void
-  amountPaidStr: string
-  setAmountPaidStr: (s: string) => void
+  amountPaidDisplay: string
+  setAmountPaidOverride: (s: string | null) => void
   customerId: string | null
   setCustomerId: (id: string | null) => void
+  customerName: string | null
+  customerTierName: string | null
   customerRequired: boolean
   notes: string
   setNotes: (s: string) => void
@@ -662,19 +692,19 @@ function CartPanel({
   cart,
   dispatch,
   itemsSubtotal,
-  tierDiscountAmount,
-  activeTierName,
-  activeTierPercent,
-  override,
+  saleDiscountAmount,
+  saleDiscount,
   onOpenOverride,
   total,
   onCredit,
   serviceCharge,
   setServiceCharge,
-  amountPaidStr,
-  setAmountPaidStr,
+  amountPaidDisplay,
+  setAmountPaidOverride,
   customerId,
   setCustomerId,
+  customerName,
+  customerTierName,
   customerRequired,
   notes,
   setNotes,
@@ -691,6 +721,65 @@ function CartPanel({
 
   return (
     <>
+      {/* Customer card pinned at the top of the cart panel (spec §1.2/§5.6).
+          Walk-in shows the picker; a real customer shows name + tier chip. */}
+      <Box sx={{ mb: 1.5 }}>
+        {customerId && customerName ? (
+          <Stack
+            direction='row'
+            spacing={1}
+            alignItems='center'
+            sx={{
+              p: 1,
+              borderRadius: 1,
+              backgroundColor: 'var(--surface-muted)'
+            }}
+          >
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Stack
+                direction='row'
+                spacing={0.75}
+                alignItems='center'
+                flexWrap='wrap'
+              >
+                <Typography variant='body1' sx={{ fontWeight: 600 }} noWrap>
+                  {customerName}
+                </Typography>
+                {customerTierName && (
+                  <Badge variant='info' label={customerTierName} />
+                )}
+              </Stack>
+            </Box>
+            <Tooltip title={t('pos:customer.switch_to_walk_in')}>
+              <IconButton
+                size='small'
+                onClick={() => setCustomerId(null)}
+                aria-label={t('pos:customer.switch_to_walk_in')}
+              >
+                <CloseIcon fontSize='small' />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        ) : (
+          <CustomerPicker
+            value={customerId}
+            onChange={setCustomerId}
+            required={customerRequired}
+            clearable={!customerRequired}
+            label={
+              customerRequired
+                ? t('pos:payment.customer')
+                : t('pos:customer.walk_in')
+            }
+            errorText={
+              customerRequired && !customerId
+                ? t('pos:customer.required_for_credit')
+                : undefined
+            }
+          />
+        )}
+      </Box>
+
       {cart.length === 0 ? (
         <Box sx={{ py: 4, textAlign: 'center' }}>
           <ShoppingCartIcon
@@ -719,42 +808,66 @@ function CartPanel({
           </Typography>
         </Box>
       ) : (
-        <Stack mb={2} divider={<Divider />}>
+        // Card-style cart lines. Each line is self-labeling, so the legacy
+        // column headers above the list have been retired (v2.3 follow-up):
+        //   - Product name leads, wraps freely (no `noWrap` truncation).
+        //   - Line total anchors top-right as the visual focus.
+        //   - × removal sits next to the total — same gestalt: "this much, or
+        //     not at all".
+        //   - Controls sit below a hairline divider with inline captions.
+        // Same layout from 320 px to 1200 px, no responsive split needed.
+        <Stack spacing={1.25} mb={2}>
           {cart.map((c) => {
             const modified = Math.abs(c.price - c.default_price) > 0.001
             const belowCost = c.price < c.avg_cost
+            const stockLeft = c.stock - c.qty
             return (
-              <Box key={c.product_id} sx={{ py: 1.5 }}>
-                <Stack direction='row' spacing={1} alignItems='flex-start'>
-                  <Tooltip title={t('pos:cart.remove_line')}>
-                    <IconButton
-                      size='small'
-                      onClick={() =>
-                        dispatch({
-                          type: 'remove',
-                          product_id: c.product_id
-                        })
-                      }
-                      aria-label={t('pos:cart.remove_line')}
-                      sx={{ width: 32, height: 32 }}
-                    >
-                      <CloseIcon fontSize='small' />
-                    </IconButton>
-                  </Tooltip>
+              <Box
+                key={c.product_id}
+                sx={{
+                  backgroundColor: 'var(--surface-base)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  boxShadow: 'var(--shadow-xs)',
+                  p: 1.75,
+                  transition:
+                    'border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out)',
+                  '&:focus-within': {
+                    borderColor: 'var(--border-focus)',
+                    boxShadow: 'var(--shadow-sm)'
+                  }
+                }}
+              >
+                {/* Header strip: name (wraps) | line total | × */}
+                <Stack
+                  direction='row'
+                  spacing={1.25}
+                  alignItems='flex-start'
+                  sx={{ minWidth: 0 }}
+                >
                   <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      variant='body1'
+                      sx={{
+                        fontWeight: 600,
+                        lineHeight: 1.3,
+                        // explicitly override any inherited noWrap; long
+                        // product names wrap to multiple lines instead of
+                        // truncating with an ellipsis.
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word'
+                      }}
+                    >
+                      {c.name}
+                    </Typography>
                     <Stack
                       direction='row'
                       spacing={0.5}
                       alignItems='center'
                       flexWrap='wrap'
+                      rowGap={0.5}
+                      sx={{ mt: 0.5 }}
                     >
-                      <Typography
-                        variant='body1'
-                        sx={{ fontWeight: 600 }}
-                        noWrap
-                      >
-                        {c.name}
-                      </Typography>
                       <Badge variant='neutral' label={c.type} />
                       {modified && (
                         <Badge
@@ -762,76 +875,163 @@ function CartPanel({
                           label={t('pos:cart.modified_price_badge')}
                         />
                       )}
+                      <Typography
+                        variant='caption'
+                        sx={{
+                          color:
+                            stockLeft <= 0
+                              ? 'var(--warning-700)'
+                              : 'var(--text-muted)'
+                        }}
+                      >
+                        {`· ${t('pos:cart.stock_remaining', {
+                          count: stockLeft
+                        })}`}
+                      </Typography>
                     </Stack>
-                    <Typography
-                      variant='caption'
-                      sx={{ color: 'var(--text-muted)' }}
-                    >
-                      {t('pos:cart.stock_remaining', {
-                        count: c.stock - c.qty
-                      })}
-                    </Typography>
                   </Box>
-                </Stack>
 
-                <Stack
-                  direction='row'
-                  spacing={1}
-                  alignItems='center'
-                  mt={1}
-                  flexWrap='wrap'
-                >
-                  <QtyStepper
-                    value={c.qty}
-                    min={1}
-                    max={c.stock}
-                    onChange={(qty) =>
-                      dispatch({
-                        type: 'set_qty',
-                        product_id: c.product_id,
-                        qty
-                      })
-                    }
-                    onAtMaxAttempt={() => onAtMaxAttempt(c.stock)}
-                    ariaLabel={t('pos:cart.qty_label')}
-                  />
-                  <TextField
-                    size='small'
-                    type='number'
-                    inputProps={{ step: '0.01', min: 0, inputMode: 'numeric' }}
-                    value={c.price}
-                    onChange={(e) => {
-                      const v = Number(e.target.value)
-                      if (Number.isFinite(v) && v >= 0) {
-                        dispatch({
-                          type: 'set_price',
-                          product_id: c.product_id,
-                          price: v
-                        })
-                      }
-                    }}
-                    sx={{ width: 110 }}
-                    label={t('pos:cart.unit_price')}
-                  />
-                  <Box sx={{ flex: 1, textAlign: 'end' }}>
+                  <Stack
+                    direction='row'
+                    spacing={0.5}
+                    alignItems='center'
+                    sx={{ flexShrink: 0 }}
+                  >
                     <Typography
-                      variant='overline'
-                      sx={{ color: 'var(--text-muted)', display: 'block' }}
+                      variant='h3'
+                      component='span'
+                      sx={{
+                        fontVariantNumeric: 'tabular-nums',
+                        color: 'var(--text-primary)',
+                        whiteSpace: 'nowrap'
+                      }}
                     >
-                      {t('pos:cart.line_total')}
-                    </Typography>
-                    <Typography variant='h3' component='span'>
                       {formatPKR(lineTotal(c), locale)}
                     </Typography>
-                  </Box>
+                    <Tooltip title={t('pos:cart.remove_line')}>
+                      <IconButton
+                        size='small'
+                        onClick={() =>
+                          dispatch({
+                            type: 'remove',
+                            product_id: c.product_id
+                          })
+                        }
+                        aria-label={t('pos:cart.remove_line')}
+                        sx={{
+                          width: 28,
+                          height: 28,
+                          color: 'var(--text-muted)',
+                          '&:hover': {
+                            color: 'var(--error-700)',
+                            backgroundColor: 'var(--surface-muted)'
+                          }
+                        }}
+                      >
+                        <CloseIcon fontSize='small' />
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
                 </Stack>
+
+                <Divider
+                  sx={{ my: 1.25, borderColor: 'var(--border-subtle)' }}
+                />
+
+                {/* Controls strip: Qty stepper + Price input, each with
+                    inline caption. flex-wraps if the cart panel is narrow. */}
+                <Stack
+                  direction='row'
+                  spacing={1.5}
+                  alignItems='center'
+                  flexWrap='wrap'
+                  rowGap={1}
+                >
+                  <Stack
+                    direction='row'
+                    spacing={1}
+                    alignItems='center'
+                    sx={{ flexShrink: 0 }}
+                  >
+                    <Typography
+                      variant='caption'
+                      sx={{
+                        color: 'var(--text-muted)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em'
+                      }}
+                    >
+                      {t('pos:cart.col_qty')}
+                    </Typography>
+                    <QtyStepper
+                      value={c.qty}
+                      min={1}
+                      max={c.stock}
+                      onChange={(qty) =>
+                        dispatch({
+                          type: 'set_qty',
+                          product_id: c.product_id,
+                          qty
+                        })
+                      }
+                      onAtMaxAttempt={() => onAtMaxAttempt(c.stock)}
+                      ariaLabel={t('pos:cart.qty_label')}
+                    />
+                  </Stack>
+
+                  <Stack
+                    direction='row'
+                    spacing={1}
+                    alignItems='center'
+                    sx={{ flex: 1, minWidth: 140, justifyContent: 'flex-end' }}
+                  >
+                    <Typography
+                      variant='caption'
+                      sx={{
+                        color: 'var(--text-muted)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em'
+                      }}
+                    >
+                      {t('pos:cart.col_price')}
+                    </Typography>
+                    <TextField
+                      size='small'
+                      type='number'
+                      inputProps={{
+                        step: '0.01',
+                        min: 0,
+                        inputMode: 'numeric',
+                        style: {
+                          textAlign: 'end',
+                          fontVariantNumeric: 'tabular-nums'
+                        }
+                      }}
+                      value={c.price}
+                      onChange={(e) => {
+                        const v = Number(e.target.value)
+                        if (Number.isFinite(v) && v >= 0) {
+                          dispatch({
+                            type: 'set_price',
+                            product_id: c.product_id,
+                            price: v
+                          })
+                        }
+                      }}
+                      sx={{ width: 120 }}
+                      aria-label={t('pos:cart.unit_price')}
+                    />
+                  </Stack>
+                </Stack>
+
                 {modified && (
                   <Typography
                     variant='caption'
                     sx={{
                       color: 'var(--text-muted)',
                       display: 'block',
-                      mt: 0.5
+                      mt: 0.75,
+                      textAlign: 'end'
                     }}
                   >
                     {t('pos:cart.was_price', {
@@ -840,7 +1040,6 @@ function CartPanel({
                   </Typography>
                 )}
 
-                {/* v2.2 per-line discount: collapsed link → inline controls. */}
                 <LineDiscountRow
                   item={c}
                   dispatch={dispatch}
@@ -861,7 +1060,7 @@ function CartPanel({
         </Stack>
       )}
 
-      {/* Subtotal first, then tier discount (v2.2), then service, then total. */}
+      {/* Subtotal first, then sale discount (v2.3 manual only), then service. */}
       <Stack
         direction='row'
         justifyContent='space-between'
@@ -876,7 +1075,7 @@ function CartPanel({
         </Typography>
       </Stack>
 
-      {(tierDiscountAmount > 0 || override !== null) && (
+      {saleDiscount !== null && saleDiscountAmount > 0 && (
         <Stack
           direction='row'
           justifyContent='space-between'
@@ -890,33 +1089,26 @@ function CartPanel({
             flexWrap='wrap'
           >
             <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
-              {override
-                ? override.type === 'percent'
-                  ? t('pos:totals.manual_override_percent', {
-                      percent: override.value
-                    })
-                  : t('pos:totals.manual_override_fixed')
-                : activeTierName
-                  ? t('pos:totals.tier_discount_with_name', {
-                      name: activeTierName,
-                      percent: activeTierPercent
-                    })
-                  : t('pos:totals.tier_discount')}
+              {saleDiscount.type === 'percent'
+                ? t('pos:totals.sale_discount_percent', {
+                    percent: saleDiscount.value
+                  })
+                : t('pos:totals.sale_discount_fixed')}
             </Typography>
             <Button variant='link' size='sm' onClick={onOpenOverride}>
-              {t('pos:totals.override_link')}
+              {t('pos:totals.edit_discount_link')}
             </Button>
           </Stack>
           <Typography variant='body2'>
-            −{formatPKR(tierDiscountAmount, locale)}
+            −{formatPKR(saleDiscountAmount, locale)}
           </Typography>
         </Stack>
       )}
 
-      {tierDiscountAmount === 0 && override === null && (
+      {(saleDiscount === null || saleDiscountAmount === 0) && (
         <Box sx={{ mb: 1 }}>
           <Button variant='link' size='sm' onClick={onOpenOverride}>
-            {t('pos:totals.override_link')}
+            {t('pos:totals.apply_discount_link')}
           </Button>
         </Box>
       )}
@@ -961,22 +1153,22 @@ function CartPanel({
             step: '0.01',
             inputMode: 'numeric'
           }}
-          value={amountPaidStr}
-          onChange={(e) => setAmountPaidStr(e.target.value)}
+          value={amountPaidDisplay}
+          onChange={(e) => setAmountPaidOverride(e.target.value)}
         />
       </Field>
       <Stack direction='row' spacing={1} mt={1} mb={1.5}>
         <Button
           variant='secondary'
           size='sm'
-          onClick={() => setAmountPaidStr(total.toFixed(2))}
+          onClick={() => setAmountPaidOverride(null)}
         >
           {t('pos:payment.pay_full')}
         </Button>
         <Button
           variant='secondary'
           size='sm'
-          onClick={() => setAmountPaidStr('0')}
+          onClick={() => setAmountPaidOverride('0')}
         >
           {t('pos:payment.pay_nothing')}
         </Button>
@@ -1001,25 +1193,6 @@ function CartPanel({
           {formatPKR(onCredit, locale)}
         </Typography>
       </Stack>
-
-      <Box sx={{ mb: 1.5 }}>
-        <CustomerPicker
-          value={customerId}
-          onChange={setCustomerId}
-          required={customerRequired}
-          clearable={!customerRequired}
-          label={
-            customerRequired
-              ? t('pos:payment.customer')
-              : t('pos:customer.walk_in')
-          }
-          errorText={
-            customerRequired && !customerId
-              ? t('pos:customer.required_for_credit')
-              : undefined
-          }
-        />
-      </Box>
 
       <Field label={t('pos:payment.notes_placeholder')}>
         <Textarea

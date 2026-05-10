@@ -60,8 +60,7 @@
     "no_discount": "—"
   },
   "totals": {
-    "tier_discount": "گروپ رعایت ({{name}} {{percent}}٪)",
-    "manual_override_percent": "دستی اوور رائیڈ ({{percent}}٪)",
-    "manual_override_fixed": "دستی اوور رائیڈ (مقررہ)"
+    "sale_discount_percent": "رعایت ({{percent}}٪)",
+    "sale_discount_fixed": "رعایت (مقررہ)"
   }
 }

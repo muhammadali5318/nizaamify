@@ -115,6 +115,13 @@ export default function PurchasesListPage() {
   const total = data?.total ?? 0
 
   const startSerial = page * PAGE_SIZE
+  // DataTable's cell signature is (row) → ReactNode (no index). Precompute
+  // the serial per row.id so we can render `# row N + page offset` correctly.
+  // Rendering with `(_p, idx) => idx + 1` would resolve to NaN.
+  const serialById = useMemo(
+    () => new Map(rows.map((r, i) => [r.id, startSerial + i + 1])),
+    [rows, startSerial]
+  )
 
   const columns: DataTableColumn<PurchaseListRow>[] = useMemo(
     () => [
@@ -122,9 +129,9 @@ export default function PurchasesListPage() {
         id: 'serial',
         header: '#',
         width: 48,
-        cell: (_p, idx) => (
+        cell: (p) => (
           <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
-            {startSerial + idx + 1}
+            {serialById.get(p.id) ?? ''}
           </Typography>
         )
       },
@@ -207,7 +214,7 @@ export default function PurchasesListPage() {
           )
       }
     ],
-    [locale, startSerial, t]
+    [locale, serialById, t]
   )
 
   return (

@@ -33,7 +33,7 @@
     "address_min": "Address must be at least 5 characters",
     "address_max": "Address must be 250 characters or fewer",
     "phone_required": "Phone is required",
-    "phone_invalid": "Enter a valid Pakistani phone number (+92 or 0)",
+    "phone_invalid": "Enter a valid Pakistani phone number (03XXXXXXXXX)",
     "cnic_invalid": "Enter CNIC as XXXXX-XXXXXXX-X",
     "submit_failed": "Could not complete setup. Please try again."
   }

@@ -165,9 +165,20 @@ export function useArchiveSupplier() {
 }
 
 export function isDuplicateSupplierError(err: unknown): boolean {
-  const message =
-    typeof (err as { message?: unknown })?.message === 'string'
-      ? ((err as { message: string }).message as string)
-      : ''
-  return message.includes('duplicate_supplier_name')
+  const e = err as { message?: unknown; code?: unknown }
+  const message = typeof e?.message === 'string' ? e.message : ''
+  const code = typeof e?.code === 'string' ? e.code : ''
+  // Two paths reach here:
+  //   - create_supplier_inline RPC raises `duplicate_supplier_name_contact`
+  //     (and the legacy `duplicate_supplier_name` pre-v2.3b)
+  //   - useUpdateSupplier hits the table directly, so a duplicate surfaces
+  //     as a raw PG unique-violation (sqlstate 23505) on the
+  //     `uq_suppliers_shop_name_contact` index.
+  if (
+    message.includes('duplicate_supplier_name_contact') ||
+    message.includes('duplicate_supplier_name')
+  ) {
+    return true
+  }
+  return code === '23505' && message.includes('uq_suppliers_shop_name')
 }

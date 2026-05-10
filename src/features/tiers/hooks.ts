@@ -5,7 +5,6 @@ export type CustomerTier = {
   id: string
   shop_id: string
   name: string
-  discount_percent: number
   is_default: boolean
   is_active: boolean
   notes: string | null
@@ -16,6 +15,9 @@ export type CustomerTier = {
 /**
  * Lists all active tiers for the current shop, joining a customer count via
  * a lightweight aggregation query.
+ *
+ * v2.3: tiers are pure categories now — `discount_percent` was dropped. The
+ * UI displays tiers for visual differentiation only; no auto-discount.
  */
 export function useTiers() {
   return useQuery({
@@ -24,11 +26,9 @@ export function useTiers() {
       const [tiersRes, countsRes] = await Promise.all([
         supabase
           .from('customer_tiers')
-          .select(
-            'id, shop_id, name, discount_percent, is_default, is_active, notes'
-          )
+          .select('id, shop_id, name, is_default, is_active, notes')
           .eq('is_active', true)
-          .order('discount_percent', { ascending: false }),
+          .order('name'),
         supabase.from('customers').select('tier_id')
       ])
       if (tiersRes.error) throw tiersRes.error
@@ -50,7 +50,6 @@ export function useTiers() {
 
 export type DefineTierInput = {
   name: string
-  discountPercent: number
   isDefault: boolean
   notes: string | null
 }
@@ -61,7 +60,6 @@ export function useDefineTier() {
     mutationFn: async (input: DefineTierInput): Promise<string> => {
       const { data, error } = await supabase.rpc('define_tier', {
         p_name: input.name,
-        p_discount_percent: input.discountPercent,
         p_is_default: input.isDefault,
         p_notes: input.notes ?? undefined
       })
@@ -77,7 +75,6 @@ export function useDefineTier() {
 export type UpdateTierInput = {
   tierId: string
   name: string
-  discountPercent: number
   isDefault: boolean
   notes: string | null
 }
@@ -89,7 +86,6 @@ export function useUpdateTier() {
       const { error } = await supabase.rpc('update_tier', {
         p_tier_id: input.tierId,
         p_name: input.name,
-        p_discount_percent: input.discountPercent,
         p_is_default: input.isDefault,
         p_notes: input.notes ?? undefined
       })
@@ -136,15 +132,13 @@ export function useSetDefaultTier() {
   })
 }
 
-/** Maps known v2.2 RPC error codes to i18n keys. */
+/** Maps known tier RPC error codes to i18n keys. */
 export function tierErrorKey(err: unknown): string | null {
   const msg =
     typeof (err as { message?: unknown })?.message === 'string'
       ? (err as { message: string }).message
       : ''
   if (msg.includes('tier_name_duplicate')) return 'tiers:errors.duplicate_name'
-  if (msg.includes('tier_discount_out_of_range'))
-    return 'tiers:errors.discount_out_of_range'
   if (msg.includes('cannot_archive_default_tier'))
     return 'tiers:errors.cannot_archive_default'
   if (msg.includes('cannot_unset_default_tier'))
