@@ -25,10 +25,10 @@ export const createProductSchema = (t: TFunction) =>
     opening_cost: z
       .number({ invalid_type_error: t('products:errors.opening_cost_invalid') })
       .nonnegative(t('products:errors.opening_cost_invalid')),
-    is_scan_only: z.boolean(),
-    has_batches: z.boolean(),
-    expiry_alert_days: optionalPositiveInt,
-    warranty_alert_days: optionalPositiveInt
+    is_scan_only: z.boolean().default(false),
+    has_batches: z.boolean().default(false),
+    expiry_alert_days: optionalPositiveInt.optional(),
+    warranty_alert_days: optionalPositiveInt.optional()
   })
 
 export const editProductSchema = (t: TFunction) =>
@@ -42,10 +42,10 @@ export const editProductSchema = (t: TFunction) =>
       .number({ invalid_type_error: t('products:errors.price_invalid') })
       .nonnegative(t('products:errors.price_invalid')),
     is_active: z.boolean(),
-    is_scan_only: z.boolean(),
-    has_batches: z.boolean(),
-    expiry_alert_days: optionalPositiveInt,
-    warranty_alert_days: optionalPositiveInt
+    is_scan_only: z.boolean().default(false),
+    has_batches: z.boolean().default(false),
+    expiry_alert_days: optionalPositiveInt.optional(),
+    warranty_alert_days: optionalPositiveInt.optional()
   })
 
 export type CreateProductValues = z.infer<
