@@ -252,10 +252,19 @@ Spec: `MVP_v2.7_VARIANT_UI.md`
 - ✅ CLAUDE.md gotcha added
 - 🟦 **Stage 2 (folded-in scope) will fix the dashboard/reports gross_profit by reading from invoice_financials view; until that lands, the dashboard MTD figure remains over-stated by Σ sale_discount + Σ line_discount in the period.**
 
-### Stage 2 hardening (folded-in from Stage 1)
-- 🟦 invoice_financials view (single source of truth)
-- 🟦 3 financial audit queries
-- 🟦 record_sale transaction integrity ADR
-- 🟦 cost_at_sale snapshot timing ADR
-- 🟦 Decimal precision audit
-- 🟦 No JS Number on money paths audit
+### Stage 2 hardening (folded-in from Stage 1) — completed 2026-05-12
+- ✅ **invoice_financials view (single source of truth)** — migration 0051. `sale_item_financials` does largest-remainder allocation of `invoices.sale_discount_amount` across lines; `invoice_financials` aggregates per-invoice. `monthly_summary` rewritten to read from `invoice_financials`. ADR: `decisions/2026-05-12-invoice-financials-single-source-of-truth.md`. SaleDetail + Dashboard now read the same canonical number.
+- ✅ **3 financial audit queries** (audits 7/8/9) — stored_total consistency, math sanity, ledger debit ≡ outstanding. All return 0 rows. ADR: `decisions/2026-05-12-stage2-audit-extensions.md`.
+- ✅ **record_sale transaction integrity ADR** — verified via deliberate-failure test (credit payment with no customer → exception → full rollback). ADR: `decisions/2026-05-12-record-sale-transaction-integrity.md`.
+- ✅ **cost_at_sale snapshot timing ADR** — verified in migration 0041 (FOR UPDATE acquired before avg_cost read; snapshot frozen by append-only trigger). ADR: `decisions/2026-05-12-cost-at-sale-snapshot-timing.md`.
+- ✅ **Decimal precision audit** — all money columns confirmed `numeric(12,2)`. New views inherit.
+- ✅ **No JS Number on money paths** — full codebase audit + 6 server-side views/columns added (migrations 0052–0056): `invoice_financials.outstanding`, `purchase_item_financials` (line_subtotal + line_overhead + line_total + cost_delta), `daily_sales_7`, `expenses_by_category_mtd`, `total_outstanding`, generated `invoices.outstanding` column. Frontend hooks (`useSale`, `usePurchaseDetail`, `useTotalOutstanding`, `useDailySalesLast7`, `useExpenseBreakdownThisMonth`, SalesListPage) all read server-computed totals. Composition-time previews (POS cart, NewPurchase form) explicitly out of scope — server is authoritative on submission. `Receipt.tsx` subtotal flagged as known composition-path leak in CLAUDE.md. ADR: `decisions/2026-05-12-no-js-number-on-money-paths.md`.
+
+### Stage 2 verification gate — 2026-05-12
+- ✅ All 9 audits return 0 rows (v2.6 §6 audits 1-6 + new 7/8/9)
+- ✅ Sale #62c622cd profit = 1,000.00 via `invoice_financials` (expected 1,000) ✓
+- ✅ Sale #f9f13521 profit = 500.00 via `invoice_financials` (expected 500) ✓
+- ✅ `npm run type-check` clean
+- ✅ `npm run lint` clean
+- ✅ Security advisors: only the documented warnings (ADR-0011 + HIBP open-todo); no new ones from migrations 0051–0056
+- ✅ Dashboard MTD figure is no longer over-stated — `monthly_summary` now reads from `invoice_financials`

@@ -165,6 +165,7 @@ export type Database = {
           customer_id: string | null
           id: string
           notes: string | null
+          outstanding: number | null
           payment_type: string
           sale_discount_amount: number
           sale_discount_percent_snapshot: number | null
@@ -182,6 +183,7 @@ export type Database = {
           customer_id?: string | null
           id?: string
           notes?: string | null
+          outstanding?: number | null
           payment_type: string
           sale_discount_amount?: number
           sale_discount_percent_snapshot?: number | null
@@ -199,6 +201,7 @@ export type Database = {
           customer_id?: string | null
           id?: string
           notes?: string | null
+          outstanding?: number | null
           payment_type?: string
           sale_discount_amount?: number
           sale_discount_percent_snapshot?: number | null
@@ -315,6 +318,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'customers'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ledger_entries_invoice_id_fkey'
+            columns: ['invoice_id']
+            isOneToOne: false
+            referencedRelation: 'invoice_financials'
+            referencedColumns: ['invoice_id']
           },
           {
             foreignKeyName: 'ledger_entries_invoice_id_fkey'
@@ -1029,6 +1039,13 @@ export type Database = {
             foreignKeyName: 'sale_items_invoice_id_fkey'
             columns: ['invoice_id']
             isOneToOne: false
+            referencedRelation: 'invoice_financials'
+            referencedColumns: ['invoice_id']
+          },
+          {
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
+            isOneToOne: false
             referencedRelation: 'invoice_with_discount_detail'
             referencedColumns: ['id']
           },
@@ -1443,6 +1460,13 @@ export type Database = {
           }
         ]
       }
+      daily_sales_7: {
+        Row: {
+          day: string | null
+          total_sales: number | null
+        }
+        Relationships: []
+      }
       daily_sales_today: {
         Row: {
           cash_sales: number | null
@@ -1452,6 +1476,64 @@ export type Database = {
           total_sales: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: 'invoices_shop_id_fkey'
+            columns: ['shop_id']
+            isOneToOne: false
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      expenses_by_category_mtd: {
+        Row: {
+          category: string | null
+          expense_count: number | null
+          total_amount: number | null
+        }
+        Relationships: []
+      }
+      invoice_financials: {
+        Row: {
+          amount_paid: number | null
+          created_at: string | null
+          customer_id: string | null
+          gross_margin_percent: number | null
+          gross_profit: number | null
+          invoice_id: string | null
+          items_subtotal: number | null
+          outstanding: number | null
+          payment_type: string | null
+          post_discount_items: number | null
+          revenue: number | null
+          sale_discount_amount: number | null
+          service_charge: number | null
+          shop_id: string | null
+          stored_total: number | null
+          total_cost: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
+            isOneToOne: false
+            referencedRelation: 'customer_balance_reconciliation'
+            referencedColumns: ['customer_id']
+          },
+          {
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
+            isOneToOne: false
+            referencedRelation: 'customer_outstanding'
+            referencedColumns: ['customer_id']
+          },
+          {
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
+            isOneToOne: false
+            referencedRelation: 'customers'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'invoices_shop_id_fkey'
             columns: ['shop_id']
@@ -1569,6 +1651,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'customers'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ledger_entries_invoice_id_fkey'
+            columns: ['invoice_id']
+            isOneToOne: false
+            referencedRelation: 'invoice_financials'
+            referencedColumns: ['invoice_id']
           },
           {
             foreignKeyName: 'ledger_entries_invoice_id_fkey'
@@ -1722,6 +1811,236 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'shops'
             referencedColumns: ['id']
+          }
+        ]
+      }
+      purchase_item_financials: {
+        Row: {
+          avg_cost_after: number | null
+          avg_cost_before: number | null
+          cost_at_purchase: number | null
+          cost_delta: number | null
+          line_overhead: number | null
+          line_overhead_amount: number | null
+          line_subtotal: number | null
+          line_total: number | null
+          overhead_per_unit: number | null
+          pack_base_qty_snapshot: number | null
+          pack_id: string | null
+          pack_qty: number | null
+          product_id: string | null
+          purchase_id: string | null
+          purchase_item_id: string | null
+          qty: number | null
+          qty_in_base: number | null
+          variant_id: string | null
+        }
+        Insert: {
+          avg_cost_after?: number | null
+          avg_cost_before?: number | null
+          cost_at_purchase?: number | null
+          cost_delta?: never
+          line_overhead?: never
+          line_overhead_amount?: number | null
+          line_subtotal?: never
+          line_total?: never
+          overhead_per_unit?: number | null
+          pack_base_qty_snapshot?: number | null
+          pack_id?: string | null
+          pack_qty?: number | null
+          product_id?: string | null
+          purchase_id?: string | null
+          purchase_item_id?: string | null
+          qty?: number | null
+          qty_in_base?: number | null
+          variant_id?: string | null
+        }
+        Update: {
+          avg_cost_after?: number | null
+          avg_cost_before?: number | null
+          cost_at_purchase?: number | null
+          cost_delta?: never
+          line_overhead?: never
+          line_overhead_amount?: number | null
+          line_subtotal?: never
+          line_total?: never
+          overhead_per_unit?: number | null
+          pack_base_qty_snapshot?: number | null
+          pack_id?: string | null
+          pack_qty?: number | null
+          product_id?: string | null
+          purchase_id?: string | null
+          purchase_item_id?: string | null
+          qty?: number | null
+          qty_in_base?: number | null
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'purchase_items_pack_id_fkey'
+            columns: ['pack_id']
+            isOneToOne: false
+            referencedRelation: 'product_packs'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'products'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'purchase_items_purchase_id_fkey'
+            columns: ['purchase_id']
+            isOneToOne: false
+            referencedRelation: 'purchases'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_variants'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['variant_id']
+          }
+        ]
+      }
+      sale_item_financials: {
+        Row: {
+          allocated_sale_discount: number | null
+          cost_at_sale: number | null
+          invoice_id: string | null
+          line_cost: number | null
+          line_discount_amount: number | null
+          line_profit: number | null
+          line_revenue: number | null
+          line_value: number | null
+          price_at_sale: number | null
+          product_id: string | null
+          qty: number | null
+          sale_item_id: string | null
+          variant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
+            isOneToOne: false
+            referencedRelation: 'invoice_financials'
+            referencedColumns: ['invoice_id']
+          },
+          {
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
+            isOneToOne: false
+            referencedRelation: 'invoice_with_discount_detail'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
+            isOneToOne: false
+            referencedRelation: 'invoices'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'products'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_variants'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['variant_id']
           }
         ]
       }
@@ -1990,14 +2309,19 @@ export type Database = {
           avg_cost: number
           category_id: string
           description: string
+          has_variants: boolean
           id: string
           is_active: boolean
           last_purchase_cost: number
+          max_price: number
+          min_price: number
           name: string
           price: number
           relevance: number
           stock: number
+          total_stock_all_variants: number
           type: string
+          variant_count: number
         }[]
       }
       search_products_count: {

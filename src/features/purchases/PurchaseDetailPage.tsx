@@ -54,20 +54,9 @@ export default function PurchaseDetailPage() {
   const itemSerialById = new Map(items.map((it, i) => [it.id, i + 1]))
   const overheadSerialById = new Map(overhead.map((o, i) => [o.id, i + 1]))
 
-  // Per spec §5.4 the supplier-quoted cost stored in cost_at_purchase is per
-  // chosen unit (per pack for pack lines, per base for base lines). qty stores
-  // qty_in_base. So line total uses pack_qty when present.
-  const lineQty = (it: PurchaseDetailItem): number =>
-    it.pack_qty !== null && it.pack_qty !== undefined ? it.pack_qty : it.qty
-  const lineSubtotal = (it: PurchaseDetailItem): number =>
-    lineQty(it) * Number(it.cost_at_purchase)
-  // v2.3: line_overhead_amount is the source of truth (largest-remainder
-  // allocation). Fall back to overhead_per_unit × qty_in_base for legacy rows.
-  const lineOverhead = (it: PurchaseDetailItem): number => {
-    const fromAmount = Number(it.line_overhead_amount ?? 0)
-    if (fromAmount > 0) return fromAmount
-    return Number(it.overhead_per_unit ?? 0) * it.qty_in_base
-  }
+  // v2.6c: line_subtotal + line_overhead come from purchase_item_financials
+  // (server-computed). Frontend reads, never computes. The view encodes the
+  // v2.3 largest-remainder result + the v1.x legacy fallback in one column.
 
   const itemColumns: DataTableColumn<PurchaseDetailItem>[] = [
     {
@@ -114,7 +103,7 @@ export default function PurchaseDetailPage() {
       id: 'subtotal',
       header: t('purchases:detail.line_subtotal'),
       align: 'end',
-      cell: (it) => formatPKR(lineSubtotal(it), locale)
+      cell: (it) => formatPKR(Number(it.line_subtotal), locale)
     },
     {
       id: 'overhead',
@@ -122,7 +111,7 @@ export default function PurchaseDetailPage() {
       align: 'end',
       hideOnMobile: true,
       cell: (it) => {
-        const v = lineOverhead(it)
+        const v = Number(it.line_overhead)
         return v > 0 ? formatPKR(v, locale) : '—'
       }
     },
@@ -130,7 +119,7 @@ export default function PurchaseDetailPage() {
       id: 'line_total',
       header: t('purchases:fields.total'),
       align: 'end',
-      cell: (it) => formatPKR(lineSubtotal(it) + lineOverhead(it), locale)
+      cell: (it) => formatPKR(Number(it.line_total), locale)
     }
   ]
 
@@ -164,10 +153,12 @@ export default function PurchaseDetailPage() {
       header: t('purchases:detail.cost_change'),
       align: 'end',
       cell: (it) => {
-        if (it.avg_cost_before === null || it.avg_cost_after === null) {
+        if (it.cost_delta === null) {
           return t('purchases:detail.not_available')
         }
-        const delta = Number(it.avg_cost_after) - Number(it.avg_cost_before)
+        // v2.6c: cost_delta is server-computed (avg_cost_after − avg_cost_before)
+        // from purchase_item_financials. No JS money arithmetic.
+        const delta = Number(it.cost_delta)
         const sign = delta > 0 ? '+' : ''
         const color =
           delta > 0

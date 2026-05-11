@@ -40,12 +40,14 @@ export function useTotalOutstanding() {
   return useQuery({
     queryKey: ['outstanding-total'],
     queryFn: async () => {
+      // v2.6c: aggregate happens in Postgres (total_outstanding view) so
+      // no JS Number arithmetic runs on a money sum. Returns numeric(12,2).
       const { data, error } = await supabase
-        .from('customer_outstanding')
-        .select('outstanding')
-        .gt('outstanding', 0)
+        .from('total_outstanding')
+        .select('total')
+        .maybeSingle()
       if (error) throw error
-      return (data ?? []).reduce((s, r) => s + Number(r.outstanding ?? 0), 0)
+      return Number(data?.total ?? 0)
     }
   })
 }

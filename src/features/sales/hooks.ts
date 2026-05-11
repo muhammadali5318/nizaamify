@@ -19,6 +19,17 @@ export type SaleDetailItem = {
   line_discount_type: 'percent' | 'fixed' | null
   line_discount_value: number | null
   line_discount_amount: number
+  /** v2.6b: server-computed allocation of invoice.sale_discount_amount across
+   * lines (largest-remainder). Single source of truth = sale_item_financials. */
+  allocated_sale_discount: number
+  /** v2.6b: server-computed line revenue (price*qty − line_disc − allocated). */
+  line_revenue: number
+  /** v2.6c: server-computed line value (price*qty − line_disc, BEFORE sale disc). */
+  line_value: number
+  /** v2.6b: server-computed line cost (cost_at_sale × qty). */
+  line_cost: number
+  /** v2.6b: server-computed line profit. */
+  line_profit: number
   product: { id: string; name: string } | null
 }
 
@@ -40,6 +51,19 @@ export type SaleDetail = Invoice & {
   /** Customer's tier at the time of the sale (snapshot — purely for display,
    * does NOT drive discount math). Joined via invoices.tier_id. */
   tier: { name: string } | null
+  /** v2.6c: server-computed invoice-level financials. items_subtotal is the
+   * Σ line_value (post-line-discount, pre-sale-discount); revenue + gross_profit
+   * + outstanding all come from invoice_financials. Frontend reads these
+   * directly per no-JS-Number-on-money discipline. */
+  financials: {
+    items_subtotal: number
+    post_discount_items: number
+    revenue: number
+    total_cost: number
+    gross_profit: number
+    gross_margin_percent: number | null
+    outstanding: number
+  } | null
   ledger: {
     id: string
     type: 'debit' | 'credit'
@@ -162,16 +186,87 @@ export function useSale(id: string | undefined) {
         ]
       }
 
-      const items = (data.sale_items as unknown as SaleDetailItem[]) ?? []
-      // The select * picks up tier_id and the v2.3-renamed sale_discount_*
-      // columns on the invoice row. Cast through the SaleDetail union so TS
-      // knows about them.
+      const rawItems = (data.sale_items as unknown as SaleDetailItem[]) ?? []
+
+      // v2.6b + v2.6c: parallel fetch the per-line financials (allocation +
+      // profit) and the invoice-level totals. Both come from the single
+      // sources of truth (sale_item_financials + invoice_financials).
+      // Frontend reads, never computes.
+      type FinRow = {
+        sale_item_id: string
+        allocated_sale_discount: number | string
+        line_value: number | string
+        line_revenue: number | string
+        line_cost: number | string
+        line_profit: number | string
+      }
+      type InvFin = {
+        items_subtotal: number | string
+        post_discount_items: number | string
+        revenue: number | string
+        total_cost: number | string
+        gross_profit: number | string
+        gross_margin_percent: number | string | null
+        outstanding: number | string
+      }
+      const [finRes, invFinRes] = await Promise.all([
+        supabase
+          .from('sale_item_financials')
+          .select(
+            'sale_item_id, allocated_sale_discount, line_value, line_revenue, line_cost, line_profit'
+          )
+          .eq('invoice_id', data.id),
+        supabase
+          .from('invoice_financials')
+          .select(
+            'items_subtotal, post_discount_items, revenue, total_cost, gross_profit, gross_margin_percent, outstanding'
+          )
+          .eq('invoice_id', data.id)
+          .maybeSingle()
+      ])
+      if (finRes.error) throw finRes.error
+      if (invFinRes.error) throw invFinRes.error
+
+      const finById = new Map<string, FinRow>()
+      for (const r of (finRes.data ?? []) as FinRow[]) {
+        finById.set(r.sale_item_id, r)
+      }
+      const items: SaleDetailItem[] = rawItems.map((it) => {
+        const fin = finById.get(it.id)
+        return {
+          ...it,
+          allocated_sale_discount: Number(fin?.allocated_sale_discount ?? 0),
+          line_revenue: Number(fin?.line_revenue ?? 0),
+          line_cost: Number(fin?.line_cost ?? 0),
+          line_profit: Number(fin?.line_profit ?? 0),
+          // line_value = price_at_sale × qty − line_discount_amount, server-computed
+          line_value: Number(fin?.line_value ?? 0)
+        }
+      })
+
+      const invFin = invFinRes.data as InvFin | null
+      const financials = invFin
+        ? {
+            items_subtotal: Number(invFin.items_subtotal),
+            post_discount_items: Number(invFin.post_discount_items),
+            revenue: Number(invFin.revenue),
+            total_cost: Number(invFin.total_cost),
+            gross_profit: Number(invFin.gross_profit),
+            gross_margin_percent:
+              invFin.gross_margin_percent === null
+                ? null
+                : Number(invFin.gross_margin_percent),
+            outstanding: Number(invFin.outstanding)
+          }
+        : null
+
       return {
         ...(data as unknown as Invoice),
         customer: (data.customer as SaleDetail['customer']) ?? null,
         cashier: (data.cashier as SaleDetail['cashier']) ?? null,
         tier: (data.tier as SaleDetail['tier']) ?? null,
         items,
+        financials,
         ledger
       } as SaleDetail
     }

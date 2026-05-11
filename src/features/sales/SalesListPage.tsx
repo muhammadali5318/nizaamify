@@ -96,7 +96,9 @@ export default function SalesListPage() {
       cell: (r) => {
         const isPartial = r.payment_type === 'partial'
         const paid = Number(r.amount_paid ?? 0)
-        const credit = Math.max(0, Number(r.total) - paid)
+        // v2.6c: outstanding is a server-computed generated column on
+        // invoices (numeric(12,2)). No JS arithmetic on money.
+        const credit = Number(r.outstanding ?? 0)
         const badge = (
           <Badge
             variant={paymentBadgeVariant[r.payment_type] ?? 'neutral'}
