@@ -29,7 +29,8 @@ void i18n
       'sales',
       'suppliers',
       'units',
-      'tiers'
+      'tiers',
+      'variant_attributes'
     ],
     detection: {
       order: ['localStorage', 'navigator'],

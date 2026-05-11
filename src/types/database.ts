@@ -475,6 +475,13 @@ export type Database = {
             foreignKeyName: 'product_packs_product_id_fkey'
             columns: ['product_id']
             isOneToOne: false
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'product_packs_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
             referencedRelation: 'product_with_default_variant'
             referencedColumns: ['product_id']
           },
@@ -503,11 +510,69 @@ export type Database = {
             foreignKeyName: 'product_packs_variant_id_fkey'
             columns: ['variant_id']
             isOneToOne: false
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'product_packs_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
             referencedRelation: 'product_variants'
             referencedColumns: ['id']
           },
           {
             foreignKeyName: 'product_packs_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['variant_id']
+          }
+        ]
+      }
+      product_variant_attribute_values: {
+        Row: {
+          attribute_value_id: string
+          variant_id: string
+        }
+        Insert: {
+          attribute_value_id: string
+          variant_id: string
+        }
+        Update: {
+          attribute_value_id?: string
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'product_variant_attribute_values_attribute_value_id_fkey'
+            columns: ['attribute_value_id']
+            isOneToOne: false
+            referencedRelation: 'variant_attribute_values'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'product_variant_attribute_values_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'product_variant_attribute_values_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'product_variant_attribute_values_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_variants'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'product_variant_attribute_values_variant_id_fkey'
             columns: ['variant_id']
             isOneToOne: false
             referencedRelation: 'product_with_default_variant'
@@ -570,6 +635,13 @@ export type Database = {
             foreignKeyName: 'product_variants_product_id_fkey'
             columns: ['product_id']
             isOneToOne: false
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
             referencedRelation: 'product_with_default_variant'
             referencedColumns: ['product_id']
           },
@@ -590,6 +662,7 @@ export type Database = {
           cost: number
           created_at: string
           description: string | null
+          has_variants: boolean
           id: string
           is_active: boolean
           is_scan_only: boolean
@@ -608,6 +681,7 @@ export type Database = {
           cost: number
           created_at?: string
           description?: string | null
+          has_variants?: boolean
           id?: string
           is_active?: boolean
           is_scan_only?: boolean
@@ -626,6 +700,7 @@ export type Database = {
           cost?: number
           created_at?: string
           description?: string | null
+          has_variants?: boolean
           id?: string
           is_active?: boolean
           is_scan_only?: boolean
@@ -756,6 +831,13 @@ export type Database = {
             foreignKeyName: 'purchase_items_product_id_fkey'
             columns: ['product_id']
             isOneToOne: false
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
             referencedRelation: 'product_with_default_variant'
             referencedColumns: ['product_id']
           },
@@ -778,6 +860,13 @@ export type Database = {
             columns: ['variant_id']
             isOneToOne: false
             referencedRelation: 'product_stock_display'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_variant_full'
             referencedColumns: ['variant_id']
           },
           {
@@ -961,6 +1050,13 @@ export type Database = {
             foreignKeyName: 'sale_items_product_id_fkey'
             columns: ['product_id']
             isOneToOne: false
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
             referencedRelation: 'product_with_default_variant'
             referencedColumns: ['product_id']
           },
@@ -976,6 +1072,13 @@ export type Database = {
             columns: ['variant_id']
             isOneToOne: false
             referencedRelation: 'product_stock_display'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_variant_full'
             referencedColumns: ['variant_id']
           },
           {
@@ -1204,6 +1307,82 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: 'units_of_measure_shop_id_fkey'
+            columns: ['shop_id']
+            isOneToOne: false
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      variant_attribute_values: {
+        Row: {
+          attribute_id: string
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          attribute_id: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          attribute_id?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'variant_attribute_values_attribute_id_fkey'
+            columns: ['attribute_id']
+            isOneToOne: false
+            referencedRelation: 'variant_attributes'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      variant_attributes: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          shop_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          shop_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          shop_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'variant_attributes_shop_id_fkey'
             columns: ['shop_id']
             isOneToOne: false
             referencedRelation: 'shops'
@@ -1459,6 +1638,42 @@ export type Database = {
           }
         ]
       }
+      product_variant_full: {
+        Row: {
+          attributes: Json | null
+          avg_cost: number | null
+          category_id: string | null
+          cost: number | null
+          has_variants: boolean | null
+          is_default: boolean | null
+          last_purchase_cost: number | null
+          price: number | null
+          product_id: string | null
+          product_name: string | null
+          shop_id: string | null
+          sku: string | null
+          stock: number | null
+          variant_id: string | null
+          variant_is_active: boolean | null
+          variant_label: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'products_category_id_fkey'
+            columns: ['category_id']
+            isOneToOne: false
+            referencedRelation: 'product_categories'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
+            isOneToOne: false
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       product_with_default_variant: {
         Row: {
           avg_cost: number | null
@@ -1466,9 +1681,12 @@ export type Database = {
           category_id: string | null
           cost: number | null
           description: string | null
+          has_variants: boolean | null
           is_scan_only: boolean | null
           last_purchase_cost: number | null
           legacy_type_column: string | null
+          max_price: number | null
+          min_price: number | null
           name: string | null
           price: number | null
           product_created_at: string | null
@@ -1478,6 +1696,8 @@ export type Database = {
           shop_id: string | null
           sku: string | null
           stock: number | null
+          total_stock_all_variants: number | null
+          variant_count: number | null
           variant_id: string | null
           variant_is_active: boolean | null
         }
@@ -1544,6 +1764,25 @@ export type Database = {
       }
     }
     Functions: {
+      add_variant_to_product: {
+        Args: {
+          p_attribute_value_ids: string[]
+          p_opening_cost?: number
+          p_opening_stock?: number
+          p_price?: number
+          p_product_id: string
+          p_sku?: string
+        }
+        Returns: string
+      }
+      add_variant_value: {
+        Args: {
+          p_attribute_id: string
+          p_display_order?: number
+          p_value: string
+        }
+        Returns: string
+      }
       complete_onboarding: {
         Args: {
           p_owner_address: string
@@ -1574,6 +1813,22 @@ export type Database = {
           variant_id: string
         }[]
       }
+      create_product_with_variants: {
+        Args: {
+          p_attribute_ids?: string[]
+          p_base_unit_code?: string
+          p_category_id: string
+          p_default_price: number
+          p_description?: string
+          p_is_scan_only?: boolean
+          p_name: string
+          p_variants?: Json
+        }
+        Returns: {
+          product_id: string
+          variant_ids: string[]
+        }[]
+      }
       create_supplier_inline: {
         Args: {
           p_address?: string
@@ -1583,9 +1838,18 @@ export type Database = {
         }
         Returns: string
       }
+      create_variant_attribute: {
+        Args: { p_display_order?: number; p_name: string }
+        Returns: string
+      }
       current_shop_id: { Args: never; Returns: string }
       deactivate_pack: { Args: { p_pack_id: string }; Returns: undefined }
       deactivate_tier: { Args: { p_tier_id: string }; Returns: number }
+      deactivate_variant_attribute: {
+        Args: { p_id: string }
+        Returns: undefined
+      }
+      deactivate_variant_value: { Args: { p_id: string }; Returns: undefined }
       define_pack_inline: {
         Args: {
           p_base_qty: number
@@ -1601,6 +1865,14 @@ export type Database = {
         Returns: string
       }
       expire_subscriptions: { Args: never; Returns: undefined }
+      list_attribute_values: {
+        Args: { p_attribute_id: string }
+        Returns: {
+          display_order: number
+          id: string
+          value: string
+        }[]
+      }
       list_customers: {
         Args: { p_limit?: number; p_offset?: number; p_query?: string }
         Returns: {
@@ -1779,6 +2051,15 @@ export type Database = {
           total_count: number
         }[]
       }
+      search_variant_attributes: {
+        Args: { p_query?: string }
+        Returns: {
+          display_order: number
+          id: string
+          name: string
+          value_count: number
+        }[]
+      }
       set_default_tier: { Args: { p_tier_id: string }; Returns: undefined }
       update_category: {
         Args: { p_id: string; p_is_active?: boolean; p_name?: string }
@@ -1798,6 +2079,24 @@ export type Database = {
           p_name: string
           p_notes?: string
           p_tier_id: string
+        }
+        Returns: undefined
+      }
+      update_variant_attribute: {
+        Args: {
+          p_display_order?: number
+          p_id: string
+          p_is_active?: boolean
+          p_name?: string
+        }
+        Returns: undefined
+      }
+      update_variant_value: {
+        Args: {
+          p_display_order?: number
+          p_id: string
+          p_is_active?: boolean
+          p_value?: string
         }
         Returns: undefined
       }

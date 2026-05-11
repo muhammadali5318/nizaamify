@@ -47,6 +47,27 @@ export default function SettingsPage() {
               {t('common:actions.edit')}
             </Button>
           </Stack>
+          <Divider />
+          <Stack
+            direction='row'
+            justifyContent='space-between'
+            alignItems='center'
+          >
+            <Box>
+              <Typography variant='body1' sx={{ fontWeight: 600 }}>
+                {t('variant_attributes:title')}
+              </Typography>
+              <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
+                {t('variant_attributes:subtitle')}
+              </Typography>
+            </Box>
+            <Button
+              variant='secondary'
+              onClick={() => navigate(paths.variantAttributes)}
+            >
+              {t('common:actions.edit')}
+            </Button>
+          </Stack>
         </Stack>
       </Card>
     </Box>

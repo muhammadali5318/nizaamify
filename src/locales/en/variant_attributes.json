@@ -1,0 +1,45 @@
+{
+  "title": "Variant Attributes",
+  "subtitle": "Define attributes like Color, Size, Storage that you'll reuse across products.",
+  "new_attribute": "+ New attribute",
+  "values_count_one": "{{count}} value",
+  "values_count_other": "{{count}} values",
+  "empty_state": "You haven't defined any variant attributes yet.",
+  "examples": "Examples: Color, Size, Storage, Volume, Dimension.",
+  "fields": {
+    "name": "Name",
+    "display_order": "Display order",
+    "value": "Value"
+  },
+  "actions": {
+    "add_value": "+ Add value",
+    "save": "Save",
+    "cancel": "Cancel",
+    "archive": "Archive",
+    "back": "Back"
+  },
+  "dialog": {
+    "new_attribute_title": "New attribute",
+    "edit_attribute_title": "Edit attribute",
+    "new_value_title": "New value",
+    "edit_value_title": "Edit value",
+    "confirm_archive_attribute_title": "Archive this attribute?",
+    "confirm_archive_attribute_body": "Products that use this attribute keep their variants. New products won't be able to pick it.",
+    "confirm_archive_value_title": "Archive this value?",
+    "confirm_archive_value_body": "Variants that already use this value keep their reference. New variants won't be able to pick it."
+  },
+  "messages": {
+    "attribute_saved": "Attribute saved",
+    "attribute_archived": "Attribute archived",
+    "value_saved": "Value saved",
+    "value_archived": "Value archived"
+  },
+  "errors": {
+    "in_use_cannot_archive": "This attribute is used by active products. Archive the variants first.",
+    "value_in_use_cannot_archive": "This value is used by active variants. Archive those variants first.",
+    "duplicate_name": "An attribute with this name already exists in this shop.",
+    "duplicate_value": "This value already exists in the attribute.",
+    "blank_name": "Name is required",
+    "save_failed": "Could not save. Please try again."
+  }
+}
