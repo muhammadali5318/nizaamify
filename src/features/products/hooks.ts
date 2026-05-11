@@ -10,6 +10,7 @@ export type ProductSearchRow = {
   id: string
   name: string
   type: string
+  category_id: string
   description: string | null
   price: number
   avg_cost: number
@@ -24,6 +25,7 @@ export type SearchProductsArgs = {
   page: number
   pageSize: number
   onlyInStock?: boolean
+  categoryId?: string | null
 }
 
 export type RecentPurchaseProduct = {
@@ -51,9 +53,13 @@ export function useRecentPurchaseProducts(limit = 10) {
 }
 
 export function useSearchProducts(args: SearchProductsArgs) {
-  const { query, page, pageSize, onlyInStock = false } = args
+  const { query, page, pageSize, onlyInStock = false, categoryId = null } = args
   return useQuery({
-    queryKey: ['products', 'search', { query, page, pageSize, onlyInStock }],
+    queryKey: [
+      'products',
+      'search',
+      { query, page, pageSize, onlyInStock, categoryId }
+    ],
     queryFn: async () => {
       const offset = page * pageSize
       const [rowsRes, countRes] = await Promise.all([
@@ -61,11 +67,13 @@ export function useSearchProducts(args: SearchProductsArgs) {
           p_query: query || undefined,
           p_limit: pageSize,
           p_offset: offset,
-          p_only_in_stock: onlyInStock
+          p_only_in_stock: onlyInStock,
+          p_category_id: categoryId ?? undefined
         }),
         supabase.rpc('search_products_count', {
           p_query: query || undefined,
-          p_only_in_stock: onlyInStock
+          p_only_in_stock: onlyInStock,
+          p_category_id: categoryId ?? undefined
         })
       ])
       if (rowsRes.error) throw rowsRes.error
@@ -98,7 +106,7 @@ export function useProduct(id: string | undefined) {
 
 export type CreateProductInput = {
   name: string
-  type: string
+  category_id: string
   description: string | null
   price: number
   opening_stock: number
@@ -114,7 +122,7 @@ export function useCreateProduct() {
         'create_product_with_opening_stock',
         {
           p_name: values.name,
-          p_type: values.type,
+          p_category_id: values.category_id,
           p_description: values.description ?? undefined,
           p_price: values.price,
           p_opening_stock: values.opening_stock,
@@ -123,8 +131,6 @@ export function useCreateProduct() {
       )
       if (error) throw error
       const productId = data as string
-      // Scan-only is a v2.1 product flag set via direct UPDATE — no RPC for it
-      // since the column has no business rules beyond shop ownership (RLS).
       if (values.is_scan_only) {
         const { error: updErr } = await supabase
           .from('products')
@@ -136,6 +142,7 @@ export function useCreateProduct() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['products'] })
+      void qc.invalidateQueries({ queryKey: ['categories'] })
     }
   })
 }
@@ -143,7 +150,7 @@ export function useCreateProduct() {
 export type UpdateProductInput = {
   id: string
   name: string
-  type: string
+  category_id: string
   description: string | null
   price: number
   is_active: boolean
@@ -155,11 +162,20 @@ export function useUpdateProduct() {
   return useMutation({
     mutationFn: async (values: UpdateProductInput) => {
       const { id, ...rest } = values
+      // Snapshot the category name into products.type for back-compat with any
+      // legacy read path until the column is dropped in a future cleanup.
+      const { data: cat, error: catErr } = await supabase
+        .from('product_categories')
+        .select('name')
+        .eq('id', rest.category_id)
+        .single()
+      if (catErr) throw catErr
       const { error } = await supabase
         .from('products')
         .update({
           name: rest.name,
-          type: rest.type,
+          type: cat.name,
+          category_id: rest.category_id,
           description: rest.description,
           price: rest.price,
           is_active: rest.is_active,
@@ -172,6 +188,7 @@ export function useUpdateProduct() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['products'] })
       void qc.invalidateQueries({ queryKey: ['product'] })
+      void qc.invalidateQueries({ queryKey: ['categories'] })
     }
   })
 }
@@ -208,20 +225,3 @@ export function useProducts(opts?: { includeArchived?: boolean }) {
   })
 }
 
-export function useExistingProductTypes() {
-  return useQuery({
-    queryKey: ['products', 'types'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('type')
-        .eq('is_active', true)
-      if (error) throw error
-      const set = new Set<string>()
-      for (const row of data ?? []) {
-        if (row.type) set.add(row.type)
-      }
-      return Array.from(set).sort()
-    }
-  })
-}

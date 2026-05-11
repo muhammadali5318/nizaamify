@@ -4,7 +4,9 @@ import type { TFunction } from 'i18next'
 export const createProductSchema = (t: TFunction) =>
   z.object({
     name: z.string().min(1, t('products:errors.name_required')).max(200),
-    type: z.string().min(1, t('products:errors.type_required')).max(80),
+    category_id: z
+      .string()
+      .uuid({ message: t('products:errors.category_required') }),
     description: z.string().max(1000).nullable(),
     price: z
       .number({ invalid_type_error: t('products:errors.price_invalid') })
@@ -24,7 +26,9 @@ export const createProductSchema = (t: TFunction) =>
 export const editProductSchema = (t: TFunction) =>
   z.object({
     name: z.string().min(1, t('products:errors.name_required')).max(200),
-    type: z.string().min(1, t('products:errors.type_required')).max(80),
+    category_id: z
+      .string()
+      .uuid({ message: t('products:errors.category_required') }),
     description: z.string().max(1000).nullable(),
     price: z
       .number({ invalid_type_error: t('products:errors.price_invalid') })

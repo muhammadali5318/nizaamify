@@ -17,20 +17,15 @@ import {
   type CreateProductValues,
   type EditProductValues
 } from './schemas'
-import {
-  useCreateProduct,
-  useExistingProductTypes,
-  useProduct,
-  useUpdateProduct
-} from './hooks'
+import { useCreateProduct, useProduct, useUpdateProduct } from './hooks'
 import PacksSection from './PacksSection'
+import CategoryCombobox from './CategoryCombobox'
 import { paths } from 'src/paths'
 import { formatPKR } from 'src/features/subscription/env'
 import {
   Banner,
   Button,
   Card,
-  Combobox,
   Field,
   Input,
   Textarea,
@@ -44,12 +39,12 @@ type SupabaseLikeError = {
   details?: string | null
 }
 
-function isDuplicateNameTypeError(err: unknown): boolean {
+function isDuplicateNameCategoryError(err: unknown): boolean {
   if (!err || typeof err !== 'object') return false
   const e = err as SupabaseLikeError
   if (e.code === '23505') return true
   const haystack = `${e.message ?? ''} ${e.details ?? ''}`.toLowerCase()
-  return haystack.includes('uq_products_shop_name_type')
+  return haystack.includes('uq_products_shop_name_category')
 }
 
 export default function ProductFormPage() {
@@ -61,7 +56,6 @@ export default function ProductFormPage() {
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
 
   const { data: existing } = useProduct(isNew ? undefined : id)
-  const { data: existingTypes } = useExistingProductTypes()
   const create = useCreateProduct()
   const update = useUpdateProduct()
   const [duplicateError, setDuplicateError] = useState(false)
@@ -69,14 +63,13 @@ export default function ProductFormPage() {
   if (isNew) {
     return (
       <CreateForm
-        existingTypes={existingTypes ?? []}
         duplicateError={duplicateError}
         onSubmit={async (values) => {
           setDuplicateError(false)
           try {
             await create.mutateAsync({
               name: values.name,
-              type: values.type,
+              category_id: values.category_id,
               description: values.description?.trim()
                 ? values.description
                 : null,
@@ -88,7 +81,7 @@ export default function ProductFormPage() {
             notify.success(t('products:messages.saved'))
             navigate(paths.products)
           } catch (err: unknown) {
-            if (isDuplicateNameTypeError(err)) {
+            if (isDuplicateNameCategoryError(err)) {
               setDuplicateError(true)
             } else {
               notify.error(t('products:errors.save_failed'))
@@ -103,7 +96,6 @@ export default function ProductFormPage() {
     <EditForm
       key={existing?.id ?? 'edit'}
       existing={existing}
-      existingTypes={existingTypes ?? []}
       duplicateError={duplicateError}
       locale={locale}
       onSubmit={async (values) => {
@@ -113,7 +105,7 @@ export default function ProductFormPage() {
           await update.mutateAsync({
             id: existing.id,
             name: values.name,
-            type: values.type,
+            category_id: values.category_id,
             description: values.description?.trim() ? values.description : null,
             price: values.price,
             is_active: values.is_active,
@@ -122,7 +114,7 @@ export default function ProductFormPage() {
           notify.success(t('products:messages.saved'))
           navigate(paths.products)
         } catch (err: unknown) {
-          if (isDuplicateNameTypeError(err)) {
+          if (isDuplicateNameCategoryError(err)) {
             setDuplicateError(true)
           } else {
             notify.error(t('products:errors.save_failed'))
@@ -134,16 +126,11 @@ export default function ProductFormPage() {
 }
 
 type CreateFormProps = {
-  existingTypes: string[]
   duplicateError: boolean
   onSubmit: (values: CreateProductValues) => Promise<void>
 }
 
-function CreateForm({
-  existingTypes,
-  duplicateError,
-  onSubmit
-}: CreateFormProps) {
+function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
   const { t } = useTranslation(['products', 'common'])
   const navigate = useNavigate()
 
@@ -156,7 +143,7 @@ function CreateForm({
     resolver: zodResolver(createProductSchema(t)),
     defaultValues: {
       name: '',
-      type: '',
+      category_id: '',
       description: '',
       price: 0,
       opening_stock: 0,
@@ -174,7 +161,7 @@ function CreateForm({
           <Stack spacing={2.5}>
             {duplicateError && (
               <Banner variant='error'>
-                {t('products:errors.duplicate_name_type')}
+                {t('products:errors.duplicate_name_category')}
               </Banner>
             )}
 
@@ -188,23 +175,14 @@ function CreateForm({
 
             <Controller
               control={control}
-              name='type'
+              name='category_id'
               render={({ field }) => (
-                <Field
-                  label={t('products:fields.type')}
-                  hint={t('products:fields.type_hint')}
-                  error={errors.type?.message}
-                >
-                  <Combobox
-                    freeSolo
-                    options={existingTypes}
-                    value={field.value}
-                    inputValue={field.value}
-                    onInputChange={(_, v) => field.onChange(v)}
-                    onChange={(_, v) => field.onChange(v ?? '')}
-                    placeholder={t('products:fields.type_placeholder')}
-                  />
-                </Field>
+                <CategoryCombobox
+                  value={field.value || null}
+                  onChange={(id) => field.onChange(id ?? '')}
+                  required
+                  errorText={errors.category_id?.message}
+                />
               )}
             />
 
@@ -311,6 +289,7 @@ type EditFormProps = {
         id: string
         name: string
         type: string
+        category_id: string
         description: string | null
         price: number | null
         is_active: boolean
@@ -320,7 +299,6 @@ type EditFormProps = {
       }
     | null
     | undefined
-  existingTypes: string[]
   duplicateError: boolean
   locale: string
   onSubmit: (values: EditProductValues) => Promise<void>
@@ -328,7 +306,6 @@ type EditFormProps = {
 
 function EditForm({
   existing,
-  existingTypes,
   duplicateError,
   locale,
   onSubmit
@@ -346,7 +323,7 @@ function EditForm({
     resolver: zodResolver(editProductSchema(t)),
     defaultValues: {
       name: '',
-      type: '',
+      category_id: '',
       description: '',
       price: 0,
       is_active: true,
@@ -358,7 +335,7 @@ function EditForm({
     if (existing) {
       reset({
         name: existing.name,
-        type: existing.type,
+        category_id: existing.category_id,
         description: existing.description ?? '',
         price: Number(existing.price ?? 0),
         is_active: existing.is_active,
@@ -376,7 +353,7 @@ function EditForm({
           <Stack spacing={2.5}>
             {duplicateError && (
               <Banner variant='error'>
-                {t('products:errors.duplicate_name_type')}
+                {t('products:errors.duplicate_name_category')}
               </Banner>
             )}
 
@@ -390,23 +367,14 @@ function EditForm({
 
             <Controller
               control={control}
-              name='type'
+              name='category_id'
               render={({ field }) => (
-                <Field
-                  label={t('products:fields.type')}
-                  hint={t('products:fields.type_hint')}
-                  error={errors.type?.message}
-                >
-                  <Combobox
-                    freeSolo
-                    options={existingTypes}
-                    value={field.value}
-                    inputValue={field.value}
-                    onInputChange={(_, v) => field.onChange(v)}
-                    onChange={(_, v) => field.onChange(v ?? '')}
-                    placeholder={t('products:fields.type_placeholder')}
-                  />
-                </Field>
+                <CategoryCombobox
+                  value={field.value || null}
+                  onChange={(id) => field.onChange(id ?? '')}
+                  required
+                  errorText={errors.category_id?.message}
+                />
               )}
             />
 
