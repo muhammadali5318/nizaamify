@@ -18,6 +18,11 @@ export type ProductSearchRow = {
   stock: number
   is_active: boolean
   relevance: number
+  // v2.7 additions — null when product is single-variant
+  has_variants: boolean
+  variant_count: number
+  min_price: number | null
+  max_price: number | null
 }
 
 export type SearchProductsArgs = {

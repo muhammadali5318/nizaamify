@@ -10,7 +10,16 @@
     "out_of_stock": "اسٹاک ختم",
     "stock_capped": "مزید نہیں — اسٹاک میں صرف {{count}}",
     "scan_only_label": "صرف اسکین",
-    "add_column_header": "کارٹ میں شامل کریں"
+    "add_column_header": "کارٹ میں شامل کریں",
+    "pick_variant": "ویرئنٹ منتخب کریں",
+    "variants_badge_one": "{{count}} ویرئنٹ",
+    "variants_badge_other": "{{count}} ویرئنٹس",
+    "price_range": "روپے {{min}} – {{max}}"
+  },
+  "variant_picker": {
+    "title": "{{productName}} — ویرئنٹ منتخب کریں",
+    "stock_in_cell": "اسٹاک",
+    "out_of_stock": "اسٹاک ختم"
   },
   "cart": {
     "title": "کارٹ",

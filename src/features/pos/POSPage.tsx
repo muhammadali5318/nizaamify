@@ -13,7 +13,10 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import ProductTable from 'src/features/products/ProductTable'
-import type { ProductSearchRow } from 'src/features/products/hooks'
+import type {
+  ProductSearchRow,
+  ProductVariantRow
+} from 'src/features/products/hooks'
 import { useRecordSale } from './hooks'
 import Receipt, { type ReceiptLine } from './Receipt'
 import QtyStepper from './QtyStepper'
@@ -27,6 +30,7 @@ import OverrideDiscountDialog, {
   type OverrideValue
 } from './OverrideDiscountDialog'
 import PosProductDrawer from './PosProductDrawer'
+import PosVariantPicker from './PosVariantPicker'
 import {
   Badge,
   Banner,
@@ -44,6 +48,12 @@ export type DiscountType = 'percent' | 'fixed'
 
 type CartItem = {
   product_id: string
+  /** v2.7: set when the cart line targets a specific variant. Two cart lines
+   * for the same product but different variants are distinct lines. Null for
+   * single-variant products — record_sale resolves to default variant. */
+  variant_id: string | null
+  /** v2.7: e.g. "Red / M". Null for single-variant products. */
+  variant_label: string | null
   name: string
   type: string
   default_price: number
@@ -61,33 +71,36 @@ type AddItem = Omit<
   'qty' | 'line_discount_type' | 'line_discount_value'
 >
 
+/** Unique key for a cart line: variant_id when present (multi-variant), else
+ * product_id. Lets the cart hold two lines for two variants of one product. */
+function lineKey(c: { product_id: string; variant_id: string | null }): string {
+  return c.variant_id ?? c.product_id
+}
+
 type CartAction =
   | { type: 'add'; item: AddItem; qtyDelta?: number }
-  | { type: 'set_qty'; product_id: string; qty: number }
-  | { type: 'remove'; product_id: string }
-  | { type: 'set_price'; product_id: string; price: number }
+  | { type: 'set_qty'; key: string; qty: number }
+  | { type: 'remove'; key: string }
+  | { type: 'set_price'; key: string; price: number }
   | {
       type: 'set_line_discount'
-      product_id: string
+      key: string
       discount_type: DiscountType
       discount_value: number
     }
-  | { type: 'clear_line_discount'; product_id: string }
+  | { type: 'clear_line_discount'; key: string }
   | { type: 'reset' }
 
 function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
   switch (action.type) {
     case 'add': {
       const delta = Math.max(1, Math.trunc(action.qtyDelta ?? 1))
-      const existing = state.find(
-        (c) => c.product_id === action.item.product_id
-      )
+      const k = lineKey(action.item)
+      const existing = state.find((c) => lineKey(c) === k)
       if (existing) {
         const nextQty = Math.min(existing.qty + delta, existing.stock)
         if (nextQty === existing.qty) return state
-        return state.map((c) =>
-          c.product_id === action.item.product_id ? { ...c, qty: nextQty } : c
-        )
+        return state.map((c) => (lineKey(c) === k ? { ...c, qty: nextQty } : c))
       }
       return [
         ...state,
@@ -101,7 +114,7 @@ function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
     }
     case 'set_qty': {
       return state.map((c) =>
-        c.product_id === action.product_id
+        lineKey(c) === action.key
           ? {
               ...c,
               qty: Math.max(1, Math.min(c.stock, Math.trunc(action.qty)))
@@ -110,14 +123,14 @@ function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
       )
     }
     case 'remove':
-      return state.filter((c) => c.product_id !== action.product_id)
+      return state.filter((c) => lineKey(c) !== action.key)
     case 'set_price':
       return state.map((c) =>
-        c.product_id === action.product_id ? { ...c, price: action.price } : c
+        lineKey(c) === action.key ? { ...c, price: action.price } : c
       )
     case 'set_line_discount':
       return state.map((c) =>
-        c.product_id === action.product_id
+        lineKey(c) === action.key
           ? {
               ...c,
               line_discount_type: action.discount_type,
@@ -127,7 +140,7 @@ function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
       )
     case 'clear_line_discount':
       return state.map((c) =>
-        c.product_id === action.product_id
+        lineKey(c) === action.key
           ? {
               ...c,
               line_discount_type: null,
@@ -238,6 +251,9 @@ export default function POSPage() {
    * fetches the product via useProduct, which keeps the cart untouched
    * regardless of detail-page state. */
   const [drawerProductId, setDrawerProductId] = useState<string | null>(null)
+  /** v2.7: when set, the variant picker dialog is open for this product row. */
+  const [variantPickerRow, setVariantPickerRow] =
+    useState<ProductSearchRow | null>(null)
 
   // Tier list is still read so we can show the tier chip on the customer card.
   const { data: tiers = [] } = useTiers()
@@ -318,17 +334,20 @@ export default function POSPage() {
    */
   const handleAddProduct = (row: ProductSearchRow, qtyDelta = 1) => {
     if (row.stock <= 0) return
-    const existing = cart.find((c) => c.product_id === row.id)
+    const existing = cart.find(
+      (c) => c.product_id === row.id && c.variant_id === null
+    )
     const currentQty = existing?.qty ?? 0
     if (currentQty + qtyDelta > row.stock) {
       notify.warning(t('pos:picker.stock_capped', { count: row.stock }))
-      // Still add up to the cap so the user sees something happen.
     }
     dispatch({
       type: 'add',
       qtyDelta,
       item: {
         product_id: row.id,
+        variant_id: null,
+        variant_label: null,
         name: row.name,
         type: row.type,
         default_price: Number(row.price),
@@ -339,12 +358,42 @@ export default function POSPage() {
     })
   }
 
+  /**
+   * v2.7: add a specific variant of a multi-variant product to the cart.
+   * Different variants of the same product are separate cart lines (lineKey
+   * dedupes by variant_id when present).
+   */
+  const handleAddVariant = (
+    row: ProductSearchRow,
+    variant: ProductVariantRow
+  ) => {
+    if (variant.stock <= 0) return
+    if (variant.price === null) return
+    dispatch({
+      type: 'add',
+      qtyDelta: 1,
+      item: {
+        product_id: row.id,
+        variant_id: variant.variant_id,
+        variant_label: variant.variant_label,
+        name: row.name,
+        type: row.type,
+        default_price: Number(variant.price),
+        price: Number(variant.price),
+        avg_cost: Number(variant.avg_cost),
+        stock: variant.stock
+      }
+    })
+  }
+
   /** Drawer "Add to cart" button. We don't have a ProductSearchRow handy here,
    * so adapt from the product table's latest data by id — or fall back to a
    * one-shot fetch via `from('products')`. The drawer body has the product
    * cached via useProduct, so the row lookup is fast. */
   const handleAddProductById = async (productId: string) => {
-    const cached = cart.find((c) => c.product_id === productId)
+    const cached = cart.find(
+      (c) => c.product_id === productId && c.variant_id === null
+    )
     if (cached) {
       handleAddProduct(
         {
@@ -358,7 +407,11 @@ export default function POSPage() {
           last_purchase_cost: null,
           stock: cached.stock,
           is_active: true,
-          relevance: 0
+          relevance: 0,
+          has_variants: false,
+          variant_count: 1,
+          min_price: cached.default_price,
+          max_price: cached.default_price
         },
         1
       )
@@ -382,7 +435,11 @@ export default function POSPage() {
         last_purchase_cost: null,
         stock: data.stock,
         is_active: data.is_active,
-        relevance: 0
+        relevance: 0,
+        has_variants: false,
+        variant_count: 1,
+        min_price: Number(data.price ?? 0),
+        max_price: Number(data.price ?? 0)
       },
       1
     )
@@ -404,8 +461,13 @@ export default function POSPage() {
     }
 
     try {
+      // record_sale items: pass variant_id (preferred) OR product_id (legacy →
+      // default variant) per v2.6 ADR-0025. The cart's variant_id is null for
+      // single-variant adds; in that case product_id alone is correct.
       const items = cart.map((c) => ({
-        product_id: c.product_id,
+        ...(c.variant_id
+          ? { variant_id: c.variant_id }
+          : { product_id: c.product_id }),
         qty: c.qty,
         price_at_sale: c.price,
         // v2.2: omit line_discount fields when no discount on this line so the
@@ -426,8 +488,8 @@ export default function POSPage() {
         open: true,
         invoiceId: invoiceId as unknown as string,
         lines: cart.map((c) => ({
-          product_id: c.product_id,
-          name: c.name,
+          key: lineKey(c),
+          name: c.variant_label ? `${c.name} — ${c.variant_label}` : c.name,
           qty: c.qty,
           price: c.price
         })),
@@ -551,6 +613,18 @@ export default function POSPage() {
                     >
                       {t('pos:picker.scan_only_label')}
                     </Typography>
+                  ) : row.has_variants ? (
+                    // v2.7 §8.1: multi-variant products show a "Pick variant"
+                    // button instead of a direct add — clicking opens the
+                    // PosVariantPicker, which then dispatches the variant-aware
+                    // add via handleAddVariant.
+                    <Button
+                      variant='secondary'
+                      size='sm'
+                      onClick={() => setVariantPickerRow(row)}
+                    >
+                      {t('pos:picker.pick_variant')}
+                    </Button>
                   ) : (
                     <Tooltip title={t('pos:picker.add_to_cart')}>
                       <span>
@@ -719,6 +793,18 @@ export default function POSPage() {
         onClose={() => setDrawerProductId(null)}
         onAddToCart={(productId) => {
           void handleAddProductById(productId)
+        }}
+      />
+
+      <PosVariantPicker
+        open={variantPickerRow !== null}
+        productId={variantPickerRow?.id ?? null}
+        productName={variantPickerRow?.name ?? ''}
+        onClose={() => setVariantPickerRow(null)}
+        onAdd={(variant) => {
+          if (!variantPickerRow) return
+          handleAddVariant(variantPickerRow, variant)
+          setVariantPickerRow(null)
         }}
       />
     </Box>
@@ -927,7 +1013,9 @@ function CartPanel({
                         wordBreak: 'break-word'
                       }}
                     >
-                      {c.name}
+                      {c.variant_label
+                        ? `${c.name} — ${c.variant_label}`
+                        : c.name}
                     </Typography>
                     <Stack
                       direction='row'
@@ -983,7 +1071,7 @@ function CartPanel({
                         onClick={() =>
                           dispatch({
                             type: 'remove',
-                            product_id: c.product_id
+                            key: lineKey(c)
                           })
                         }
                         aria-label={t('pos:cart.remove_line')}
@@ -1039,7 +1127,7 @@ function CartPanel({
                       onChange={(qty) =>
                         dispatch({
                           type: 'set_qty',
-                          product_id: c.product_id,
+                          key: lineKey(c),
                           qty
                         })
                       }
@@ -1082,7 +1170,7 @@ function CartPanel({
                         if (Number.isFinite(v) && v >= 0) {
                           dispatch({
                             type: 'set_price',
-                            product_id: c.product_id,
+                            key: lineKey(c),
                             price: v
                           })
                         }
@@ -1335,7 +1423,7 @@ function LineDiscountRow({ item, dispatch, locale, t }: LineDiscountRowProps) {
           onClick={() =>
             dispatch({
               type: 'set_line_discount',
-              product_id: item.product_id,
+              key: lineKey(item),
               discount_type: 'percent',
               discount_value: 0
             })
@@ -1372,7 +1460,7 @@ function LineDiscountRow({ item, dispatch, locale, t }: LineDiscountRowProps) {
           onClick={() =>
             dispatch({
               type: 'set_line_discount',
-              product_id: item.product_id,
+              key: lineKey(item),
               discount_type: 'percent',
               discount_value: item.line_discount_value ?? 0
             })
@@ -1386,7 +1474,7 @@ function LineDiscountRow({ item, dispatch, locale, t }: LineDiscountRowProps) {
           onClick={() =>
             dispatch({
               type: 'set_line_discount',
-              product_id: item.product_id,
+              key: lineKey(item),
               discount_type: 'fixed',
               discount_value: Math.min(item.line_discount_value ?? 0, sub)
             })
@@ -1410,7 +1498,7 @@ function LineDiscountRow({ item, dispatch, locale, t }: LineDiscountRowProps) {
           if (Number.isFinite(v) && v >= 0 && item.line_discount_type) {
             dispatch({
               type: 'set_line_discount',
-              product_id: item.product_id,
+              key: lineKey(item),
               discount_type: item.line_discount_type,
               discount_value: v
             })
@@ -1429,7 +1517,7 @@ function LineDiscountRow({ item, dispatch, locale, t }: LineDiscountRowProps) {
         size='small'
         aria-label={t('pos:line.remove_discount')}
         onClick={() =>
-          dispatch({ type: 'clear_line_discount', product_id: item.product_id })
+          dispatch({ type: 'clear_line_discount', key: lineKey(item) })
         }
       >
         <CloseIcon fontSize='small' />

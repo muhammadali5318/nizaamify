@@ -10,7 +10,16 @@
     "out_of_stock": "Out of stock",
     "stock_capped": "Cannot add more — only {{count}} in stock",
     "scan_only_label": "Scan only",
-    "add_column_header": "Add to cart"
+    "add_column_header": "Add to cart",
+    "pick_variant": "Pick variant",
+    "variants_badge_one": "{{count}} variant",
+    "variants_badge_other": "{{count}} variants",
+    "price_range": "Rs {{min}} – {{max}}"
+  },
+  "variant_picker": {
+    "title": "{{productName}} — Pick variant",
+    "stock_in_cell": "Stock",
+    "out_of_stock": "Out of stock"
   },
   "cart": {
     "title": "Cart",

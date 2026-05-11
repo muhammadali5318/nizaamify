@@ -122,7 +122,7 @@ export default function ProductTable({
   loadBreakdownsForActions = false,
   categoryId = null
 }: ProductTableProps) {
-  const { t, i18n } = useTranslation(['products', 'common'])
+  const { t, i18n } = useTranslation(['products', 'common', 'pos'])
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
 
   const [params, setParams] = useSearchParams()
@@ -246,6 +246,17 @@ export default function ProductTable({
       header: t('products:fields.stock'),
       align: 'start',
       cell: (row) => {
+        // v2.7: multi-variant products show "X variants" instead of stock.
+        if (row.has_variants) {
+          return (
+            <Badge
+              variant='neutral'
+              label={t('pos:picker.variants_badge', {
+                count: row.variant_count ?? 0
+              })}
+            />
+          )
+        }
         const breakdown = breakdowns?.get(row.id)
         const formatted =
           stockDisplayMode !== 'base' && breakdown
@@ -280,7 +291,20 @@ export default function ProductTable({
       id: 'price',
       header: t('products:fields.selling_price'),
       align: 'end',
-      cell: (row) => formatPKR(Number(row.price), locale)
+      cell: (row) => {
+        // v2.7: multi-variant products show a price range "Rs min – max"
+        if (row.has_variants) {
+          if (row.min_price === null || row.max_price === null) return '—'
+          if (Number(row.min_price) === Number(row.max_price)) {
+            return formatPKR(Number(row.min_price), locale)
+          }
+          return t('pos:picker.price_range', {
+            min: Number(row.min_price).toLocaleString(locale),
+            max: Number(row.max_price).toLocaleString(locale)
+          })
+        }
+        return formatPKR(Number(row.price), locale)
+      }
     },
     ...(showAvgCost
       ? [
