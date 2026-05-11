@@ -116,37 +116,37 @@ Spec: `MVP_FIXES_v2.5.md`
 Status: 🟦 not started · 🟨 in progress · ✅ done · ❌ blocked
 
 ### Phase B — Schema migration
-- 🟨 Create product_categories table + RLS + indexes
-- 🟨 Add products.category_id column
-- 🟨 Backfill distinct types as categories per shop
-- 🟨 Link products to categories
-- 🟨 Verify zero NULL category_id rows
-- 🟨 Set products.category_id NOT NULL
-- 🟨 Drop old unique index (type), create new (category_id)
-- 🟨 Regenerate database.ts
+- ✅ Create product_categories table + RLS + indexes
+- ✅ Add products.category_id column
+- ✅ Backfill distinct types as categories per shop
+- ✅ Link products to categories
+- ✅ Verify zero NULL category_id rows
+- ✅ Set products.category_id NOT NULL
+- ✅ Drop old unique index (type), create new (category_id)
+- ✅ Regenerate database.ts
 
 ### Phase C — Backend RPCs
-- 🟨 search_categories
-- 🟨 create_category_inline
-- 🟨 update_category
-- 🟨 search_products(p_category_id)
-- 🟨 search_products_count(p_category_id)
-- 🟨 create_product_with_opening_stock(p_category_id)
+- ✅ search_categories
+- ✅ create_category_inline
+- ✅ update_category
+- ✅ search_products(p_category_id)
+- ✅ search_products_count(p_category_id)
+- ✅ create_product_with_opening_stock(p_category_id)
 
 ### Phase D — Frontend
-- 🟨 ProductDetailPage at /products/:id (header, fields, packs, recent activity)
-- 🟨 Edit modal on detail page (reuses form)
-- 🟨 Eye icon on /products list rows + row click → detail
-- 🟨 Drop Actions column from /products (per spec discovery default)
-- 🟨 Category filter dropdown on /products (URL-driven)
-- 🟨 Category combobox in product form (replaces Type) + "+ Create new category"
-- 🟨 POS drawer detail (right-side, mobile bottom-sheet)
-- 🟨 Eye icon on POS rows + row click → drawer
-- 🟨 "Add to cart" header + center-align `+` button in POS
-- 🟨 i18n keys EN + UR
+- ✅ ProductDetailPage at /products/:id (header, fields, packs, recent activity)
+- ✅ Edit modal on detail page (reuses form)
+- ✅ Eye icon on /products list rows + row click → detail
+- ✅ Drop Actions column from /products (per spec discovery default)
+- ✅ Category filter dropdown on /products (URL-driven)
+- ✅ Category combobox in product form (replaces Type) + "+ Create new category"
+- ✅ POS drawer detail (right-side, mobile bottom-sheet)
+- ✅ Eye icon on POS rows + row click → drawer
+- ✅ "Add to cart" header + center-align `+` button in POS
+- ✅ i18n keys EN + UR
 
 ### Phase E — Verification
-- 🟨 Manual smoke test §12
-- 🟨 npm run lint + type-check + build green
-- 🟨 Update CLAUDE.md (v2.5 line, gotchas, todos)
-- 🟨 Record decisions in decisions/
+- 🟦 Manual smoke test §12 — **not run by Claude.** Code-level checks (lint, type, build, tests) all green; the §12 walkthrough is a human task.
+- ✅ npm run lint + type-check + build + tests green
+- ✅ Update CLAUDE.md (v2.5 line, gotchas, todos)
+- ✅ Record decisions in decisions/ (ADRs 0019, 0020, 0021)

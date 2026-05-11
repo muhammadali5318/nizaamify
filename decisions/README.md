@@ -27,3 +27,6 @@ Granularity: one ADR per *reversal of a PRD assumption* or *cross-cutting archit
 - [0014 — v1.7 design system acceptance](./0014-v17-design-system-acceptance.md)
 - [0015 — v1.8 database hardening](./0015-v18-database-hardening.md)
 - [0016 — v1.9 stock-in: suppliers, landed cost, snapshot avg-before/after](./0016-v19-suppliers-landed-cost.md)
+- [0019 — v2.5 product_categories entity replaces products.type](./0019-v25-product-categories-entity.md)
+- [0020 — v2.5 product detail routing pattern (full route + POS drawer)](./0020-v25-product-detail-routing-pattern.md)
+- [0021 — v2.5 eye icon as primary row action; Actions column dropped](./0021-v25-eye-icon-and-actions-column-drop.md)
