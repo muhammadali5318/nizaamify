@@ -26,10 +26,18 @@ export type OverheadCategory =
  * `record_purchase` accepts either; the pack variant is required for v2.0
  * stock-in-only packs (price=null) where qty is in cartons not base units.
  */
+// v2.6+v2.7: lines may carry variant_id (multi-variant products) OR product_id
+// (single-variant fallback resolved server-side to the default variant).
 export type PurchaseLineInput =
-  | { product_id: string; qty: number; cost_at_purchase: number }
   | {
       product_id: string
+      variant_id?: string
+      qty: number
+      cost_at_purchase: number
+    }
+  | {
+      product_id: string
+      variant_id?: string
       pack_id: string
       pack_qty: number
       cost_at_purchase: number

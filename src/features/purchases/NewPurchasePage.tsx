@@ -28,6 +28,7 @@ import {
   type PurchaseLineInput
 } from './hooks'
 import CreatePackDialog from './CreatePackDialog'
+import LineVariantPicker from './LineVariantPicker'
 
 const todayISO = () => new Date().toISOString().slice(0, 10)
 
@@ -43,6 +44,9 @@ type LastEdited = 'qty' | 'cost' | 'total'
 
 type LineState = {
   product_id: string
+  /** v2.7: when the picked product has_variants, the user picks one of its
+   * variants here. Otherwise empty; the server resolves product_id → default. */
+  variant_id: string
   /** Loaded async on product change. Empty until then. */
   available_units: PurchasableUnit[]
   /** Index into available_units. Defaults to is_default_purchase pack else base. */
@@ -62,6 +66,7 @@ type OverheadState = {
 
 const emptyLine = (): LineState => ({
   product_id: '',
+  variant_id: '',
   available_units: [],
   selected_unit_idx: 0,
   qty: '',
@@ -200,12 +205,14 @@ export default function NewPurchasePage() {
     if (!id) {
       setLine(i, {
         product_id: '',
+        variant_id: '',
         available_units: [],
         selected_unit_idx: 0
       })
       return
     }
-    setLine(i, { product_id: id })
+    // Reset variant_id on every product change — the user picks per-product.
+    setLine(i, { product_id: id, variant_id: '' })
     try {
       const units = await fetchPurchasableUnitsForProduct({
         productId: id,
@@ -275,6 +282,7 @@ export default function NewPurchasePage() {
       if (unit && unit.kind === 'pack' && unit.packId) {
         items.push({
           product_id: ln.product_id,
+          variant_id: ln.variant_id || undefined,
           pack_id: unit.packId,
           pack_qty: q,
           cost_at_purchase: c
@@ -282,6 +290,7 @@ export default function NewPurchasePage() {
       } else {
         items.push({
           product_id: ln.product_id,
+          variant_id: ln.variant_id || undefined,
           qty: q,
           cost_at_purchase: c
         })
@@ -452,6 +461,15 @@ export default function NewPurchasePage() {
                     />
                   </Field>
                 </Box>
+                {ln.product_id && (
+                  <Box sx={{ flex: '1 1 160px', minWidth: 140 }}>
+                    <LineVariantPicker
+                      productId={ln.product_id}
+                      value={ln.variant_id}
+                      onChange={(vid) => setLine(i, { variant_id: vid })}
+                    />
+                  </Box>
+                )}
                 {ln.product_id && ln.available_units.length > 0 && (
                   <Box sx={{ flex: '1 1 140px', minWidth: 130 }}>
                     <Field label={t('purchases:fields.unit')}>
