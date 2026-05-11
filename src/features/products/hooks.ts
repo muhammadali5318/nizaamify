@@ -93,13 +93,39 @@ export function useProduct(id: string | undefined) {
     enabled: !!id,
     queryFn: async () => {
       if (!id) return null
+      // v2.6: stock/price/cost/avg_cost/last_purchase_cost moved to the default
+      // variant. We fetch the product row + its default variant in one round
+      // trip and overlay variant fields onto the top-level Product shape so
+      // downstream consumers (detail page, edit modal) don't change.
       const { data, error } = await supabase
         .from('products')
-        .select('*')
+        .select(
+          'id, shop_id, name, type, category_id, description, is_active, is_scan_only, base_unit_id, created_at, updated_at, default_variant:product_variants!inner(id, sku, stock, price, cost, avg_cost, last_purchase_cost)'
+        )
         .eq('id', id)
+        .eq('product_variants.is_default', true)
+        .eq('product_variants.is_active', true)
         .single()
       if (error) throw error
-      return data
+      const variant = Array.isArray(data.default_variant)
+        ? data.default_variant[0]
+        : data.default_variant
+      const merged = {
+        ...data,
+        default_variant_id: variant?.id ?? null,
+        sku: variant?.sku ?? null,
+        stock: variant?.stock ?? 0,
+        price: variant?.price ?? null,
+        cost: variant?.cost ?? null,
+        avg_cost: variant?.avg_cost ?? 0,
+        last_purchase_cost: variant?.last_purchase_cost ?? null
+      } as Product & {
+        default_variant_id: string | null
+        sku: string | null
+      }
+      // Remove the relational sub-object — downstream code reads flat fields.
+      delete (merged as { default_variant?: unknown }).default_variant
+      return merged
     }
   })
 }
@@ -200,6 +226,8 @@ export function useCreateProduct() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (values: CreateProductInput) => {
+      // v2.6: RPC returns table(product_id, variant_id); is_scan_only is a
+      // first-class parameter now, so the post-insert UPDATE is gone.
       const { data, error } = await supabase.rpc(
         'create_product_with_opening_stock',
         {
@@ -208,19 +236,14 @@ export function useCreateProduct() {
           p_description: values.description ?? undefined,
           p_price: values.price,
           p_opening_stock: values.opening_stock,
-          p_opening_cost: values.opening_cost
+          p_opening_cost:
+            values.opening_stock > 0 ? values.opening_cost : undefined,
+          p_is_scan_only: values.is_scan_only
         }
       )
       if (error) throw error
-      const productId = data as string
-      if (values.is_scan_only) {
-        const { error: updErr } = await supabase
-          .from('products')
-          .update({ is_scan_only: true })
-          .eq('id', productId)
-        if (updErr) throw updErr
-      }
-      return productId
+      const row = Array.isArray(data) ? data[0] : data
+      return (row as { product_id: string }).product_id
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['products'] })
@@ -244,15 +267,19 @@ export function useUpdateProduct() {
   return useMutation({
     mutationFn: async (values: UpdateProductInput) => {
       const { id, ...rest } = values
-      // Snapshot the category name into products.type for back-compat with any
-      // legacy read path until the column is dropped in a future cleanup.
+      // v2.6: products.price is deprecated — variant.price is the source of
+      // truth. We update both: the products row (name/category/description/
+      // is_active/is_scan_only) AND the default variant (price). Writing
+      // products.price too is harmless and keeps the legacy column stable
+      // until a future cleanup migration drops it.
       const { data: cat, error: catErr } = await supabase
         .from('product_categories')
         .select('name')
         .eq('id', rest.category_id)
         .single()
       if (catErr) throw catErr
-      const { error } = await supabase
+
+      const { error: prodErr } = await supabase
         .from('products')
         .update({
           name: rest.name,
@@ -264,7 +291,17 @@ export function useUpdateProduct() {
           is_scan_only: rest.is_scan_only
         } as ProductUpdate)
         .eq('id', id)
-      if (error) throw error
+      if (prodErr) throw prodErr
+
+      // Variant price is the source of truth post-v2.6.
+      const { error: variantErr } = await supabase
+        .from('product_variants')
+        .update({ price: rest.price })
+        .eq('product_id', id)
+        .eq('is_default', true)
+        .eq('is_active', true)
+      if (variantErr) throw variantErr
+
       return id
     },
     onSuccess: () => {
@@ -284,6 +321,15 @@ export function useArchiveProduct() {
         .update({ is_active: isActive })
         .eq('id', id)
       if (error) throw error
+      // v2.6: keep the default variant's is_active in sync with the product's
+      // — the compat view joins on v.is_active, so a "live" variant under an
+      // "archived" product would leak into reads.
+      const { error: variantErr } = await supabase
+        .from('product_variants')
+        .update({ is_active: isActive })
+        .eq('product_id', id)
+        .eq('is_default', true)
+      if (variantErr) throw variantErr
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['products'] })
