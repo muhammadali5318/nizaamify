@@ -30,6 +30,21 @@
     "add_value": "+ قیمت شامل کریں",
     "remove": "ہٹائیں"
   },
+  "stock_in_matrix": {
+    "title": "{{productName}} — ویرئنٹس وصول کریں",
+    "qty": "مقدار",
+    "cost_per_unit": "فی یونٹ قیمت",
+    "subtotal": "ذیلی کل",
+    "per_unit_cost": "فی یونٹ قیمت",
+    "per_unit_cost_help": "ایک بار ٹائپ کریں، پھر \"سب پر لاگو\" پر کلک کریں تاکہ ہر قطار میں قیمت بھر جائے۔",
+    "apply_to_all": "سب پر لاگو",
+    "total_units": "کل یونٹس",
+    "current_stock_one": "اسٹاک میں {{count}}",
+    "current_stock_other": "اسٹاک میں {{count}}",
+    "apply": "میٹرکس لاگو کریں",
+    "configure_variants": "ویرئنٹس ترتیب دیں",
+    "reconfigure_variants": "{{count}} ویرئنٹ لائنیں — ترمیم"
+  },
   "errors": {
     "max_3_attributes": "ایک مصنوعات میں زیادہ سے زیادہ 3 خصوصیات ہو سکتی ہیں۔",
     "duplicate_combination": "یہ امتزاج پہلے سے موجود ہے۔",

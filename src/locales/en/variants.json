@@ -30,6 +30,21 @@
     "add_value": "+ Add value",
     "remove": "Remove"
   },
+  "stock_in_matrix": {
+    "title": "{{productName}} — Receive variants",
+    "qty": "Qty",
+    "cost_per_unit": "Cost per unit",
+    "subtotal": "Subtotal",
+    "per_unit_cost": "Per-unit cost",
+    "per_unit_cost_help": "Type once, then click \"Apply to all\" to fill every row's cost.",
+    "apply_to_all": "Apply to all",
+    "total_units": "Total units",
+    "current_stock_one": "{{count}} in stock",
+    "current_stock_other": "{{count}} in stock",
+    "apply": "Apply matrix",
+    "configure_variants": "Configure variants",
+    "reconfigure_variants": "{{count}} variant lines — edit"
+  },
   "errors": {
     "max_3_attributes": "A product can have at most 3 attributes.",
     "duplicate_combination": "This combination already exists.",
