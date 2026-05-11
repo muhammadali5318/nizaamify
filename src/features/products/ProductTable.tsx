@@ -99,6 +99,12 @@ export type ProductTableProps = {
   loadBreakdownsForActions?: boolean
   /** Category filter (v2.5 §7). null = all categories. */
   categoryId?: string | null
+  /** v2.8.3: filter to products where at least one active variant has
+   * price = null. URL-synced via ?needs_pricing=1 by the caller. */
+  needsPricing?: boolean
+  /** i18n key for the empty-state helper text. Caller can pass a
+   * filter-specific empty hint (e.g. "All products are priced."). */
+  emptyHelpKey?: string
 }
 
 const DEFAULT_PAGE_SIZE = 50
@@ -120,7 +126,9 @@ export default function ProductTable({
   syncUrl = true,
   stockDisplayMode = 'base',
   loadBreakdownsForActions = false,
-  categoryId = null
+  categoryId = null,
+  needsPricing = false,
+  emptyHelpKey
 }: ProductTableProps) {
   const { t, i18n } = useTranslation(['products', 'common', 'pos'])
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
@@ -140,10 +148,10 @@ export default function ProductTable({
     return () => clearTimeout(h)
   }, [search])
 
-  // Reset to page 1 whenever the query or category filter changes.
+  // Reset to page 1 whenever the query or filters change.
   useEffect(() => {
     setPage(0)
-  }, [debounced, categoryId])
+  }, [debounced, categoryId, needsPricing])
 
   // Sync state -> URL (without breaking back-button)
   useEffect(() => {
@@ -163,7 +171,8 @@ export default function ProductTable({
     page,
     pageSize,
     onlyInStock,
-    categoryId
+    categoryId,
+    needsPricing
   })
 
   const rows = data?.rows ?? []
@@ -178,9 +187,16 @@ export default function ProductTable({
 
   const isEmpty = !isLoading && rows.length === 0
   const isSearchingButEmpty =
-    isEmpty && (debounced.length > 0 || categoryId !== null)
+    isEmpty && (debounced.length > 0 || categoryId !== null || needsPricing)
+  // v2.8.3: when a "needs pricing" filter is active and returns zero,
+  // the empty state is a green-light "All products are priced." instead
+  // of the usual "no results" message.
   const emptyMessage = isSearchingButEmpty
-    ? t('products:no_results')
+    ? needsPricing && debounced.length === 0 && categoryId === null
+      ? emptyHelpKey
+        ? t(emptyHelpKey)
+        : t('products:no_results')
+      : t('products:no_results')
     : (emptyTitle ?? t('products:empty'))
   const emptyHelper = isSearchingButEmpty ? '' : (emptyHelp ?? '')
 
@@ -300,8 +316,43 @@ export default function ProductTable({
       header: t('products:fields.selling_price'),
       align: 'end',
       cell: (row) => {
-        // v2.7: multi-variant products show a price range "Rs min – max"
+        // v2.8.3 multi-variant treatment:
+        //   * all priced       → "Rs min – max" or single price
+        //   * partially priced → "Rs X – set price" warning
+        //   * none priced      → "Set price" warning
         if (row.has_variants) {
+          if (row.has_null_price_variant) {
+            if (row.min_price !== null) {
+              return (
+                <Typography
+                  component='span'
+                  variant='body2'
+                  sx={{
+                    color: 'var(--status-warning-text)',
+                    fontWeight: 500
+                  }}
+                  aria-label={t('products:list.set_price_aria')}
+                >
+                  {t('products:list.price_range_with_unpriced', {
+                    min: Number(row.min_price).toLocaleString(locale)
+                  })}
+                </Typography>
+              )
+            }
+            return (
+              <Typography
+                component='span'
+                variant='body2'
+                sx={{
+                  color: 'var(--status-warning-text)',
+                  fontWeight: 500
+                }}
+                aria-label={t('products:list.set_price_aria')}
+              >
+                {t('products:list.set_price_warning')} ⚠
+              </Typography>
+            )
+          }
           if (row.min_price === null || row.max_price === null) return '—'
           if (Number(row.min_price) === Number(row.max_price)) {
             return formatPKR(Number(row.min_price), locale)
@@ -310,6 +361,22 @@ export default function ProductTable({
             min: Number(row.min_price).toLocaleString(locale),
             max: Number(row.max_price).toLocaleString(locale)
           })
+        }
+        // v2.8.3 single-variant: surface unpriced state clearly.
+        if (row.price === null) {
+          return (
+            <Typography
+              component='span'
+              variant='body2'
+              sx={{
+                color: 'var(--status-warning-text)',
+                fontWeight: 500
+              }}
+              aria-label={t('products:list.set_price_aria')}
+            >
+              {t('products:list.set_price_warning')} ⚠
+            </Typography>
+          )
         }
         return formatPKR(Number(row.price), locale)
       }

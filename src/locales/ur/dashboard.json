@@ -18,6 +18,25 @@
     "add_expense": "خرچ شامل کریں",
     "view_khata": "کھاتہ دیکھیں"
   },
+  "expired_stock": {
+    "title": "ایکسپائر شدہ اسٹاک",
+    "count_one": "{{count}} بیچ",
+    "count_other": "{{count}} بیچز",
+    "expired_days_ago_one": "{{count}} دن پہلے ایکسپائر",
+    "expired_days_ago_other": "{{count}} دن پہلے ایکسپائر",
+    "view_all": "سب دیکھیں",
+    "write_off_all": "سب رائٹ آف کریں…",
+    "write_off_all_dialog_title_one": "{{count}} ایکسپائر بیچ رائٹ آف کریں",
+    "write_off_all_dialog_title_other": "{{count}} ایکسپائر بیچز رائٹ آف کریں",
+    "write_off_all_dialog_body": "تمام درج بیچز نیچے دی گئی وجہ کے ساتھ رائٹ آف کر دیے جائیں گے۔ اسٹاک ہٹا دیا جائے گا اور ہر بیچ غیر فعال نشان زد ہو گا۔",
+    "write_off_all_reason_label": "وجہ",
+    "write_off_all_reason_placeholder": "مثلاً: ایکسپائر اسٹاک کی صفائی",
+    "write_off_all_submit": "سب رائٹ آف کریں",
+    "write_off_all_failed_one": "{{count}} بیچ رائٹ آف نہ ہو سکا — دوبارہ کوشش کریں یا الگ سے رائٹ آف کریں۔",
+    "write_off_all_failed_other": "{{count}} بیچز رائٹ آف نہ ہو سکے — دوبارہ کوشش کریں یا الگ سے رائٹ آف کریں۔",
+    "list_title": "ایکسپائر شدہ اسٹاک",
+    "list_empty": "کوئی ایکسپائر اسٹاک نہیں — سب ایکسپائری کے اندر۔"
+  },
   "inventory_alerts": {
     "title": "انوینٹری الرٹس",
     "expiring_soon": "جلد ایکسپائر ہو رہا ہے",

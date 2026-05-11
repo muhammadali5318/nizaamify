@@ -361,3 +361,34 @@ Per `MVP_v2.8.2_PARTIAL_WRITEOFF.md`. Two gaps closed:
 - ✅ All prior audits stay zero (v2.6 §6, v2.6c, v2.8 §9, v2.8.1).
 - ✅ Both triggers present on `inventory_batches`: auto-deactivate (new) + immutability (existing).
 - ✅ Type-check + lint + build green.
+
+---
+
+## v2.8.3 — Expired stock visibility + null-price surfacing — 2026-05-13
+
+Per `MVP_v2.8.3_VISIBILITY_FIXES.md`. Two visibility surfaces, one migration, no schema change.
+
+### Phase A — Discovery
+- ✅ Live data: 0 expired-with-stock batches, 0 null-price active products. Both surfaces ship preventatively.
+
+### Phase B — Backend (migration 0063)
+- ✅ `batches_already_expired` view (security_invoker = true). Same column shape as `batches_expiring_soon` minus alert-window logic — past-expiry is past-expiry.
+- ✅ `product_with_default_variant` widened with `has_null_price_variant` boolean (exists() over active variants with price = null).
+- ✅ `search_products` + `search_products_count` DROP+CREATE with new `p_needs_pricing` param (default false, back-compat preserved). RETURNS TABLE gains `has_null_price_variant`.
+- ✅ §1.6 audit query: zero rows confirming the view's filter is in sync with the live data shape.
+
+### Phase C — Frontend
+- ✅ `useAlreadyExpired` hook + `AlreadyExpiredBatchRow` type.
+- ✅ `ExpiredStockWidget` mounted on DashboardPage below the existing alerts widget. Danger-tone styling (left border + error-text + WarningAmberIcon). Per-row click navigates to product detail. "View all" links to `/inventory/expired`. "Write off all..." opens `BulkWriteOffDialog`.
+- ✅ `BulkWriteOffDialog` iterates `record_partial_writeoff(qty_remaining)` over each batch with a shared reason. Surfaces per-iteration failure count.
+- ✅ `ExpiredStockListPage` at `/inventory/expired` with the full list, per-row + bulk write-off both available.
+- ✅ Catalog list `ProductTable`: Price cell renders "Set price ⚠" for null-price single-variant rows and "Rs X – set price" for partial multi-variant pricing. Both with `aria-label` for accessibility.
+- ✅ ProductsListPage: new "Needs pricing" Checkbox in the filter bar, URL-synced via `?needs_pricing=1`. Drops page param on toggle. Empty state when filter returns zero: "All products are priced."
+- ✅ ProductTable plumbed with `needsPricing` + `emptyHelpKey` props.
+
+### Phase D — Verification
+- ✅ 3 ADRs filed: `2026-05-13-expired-stock-as-separate-dashboard-section`, `2026-05-13-bulk-write-off-loops-existing-rpc`, `2026-05-13-has-null-price-variant-aggregate-on-view`.
+- ✅ i18n: `dashboard:expired_stock.*` keys (en + ur). `products:list.*` + `products:filters.*` keys (en + ur).
+- ✅ All prior audits still zero (v2.6 §6, v2.6c, v2.8, v2.8.1, v2.8.2). New v2.8.3 audit (§1.6) returns 0.
+- ✅ Type-check + lint + build green.
+- 🟦 Spec §6 manual smoke matrix — code-level checks green; live-data walkthrough is a human task.

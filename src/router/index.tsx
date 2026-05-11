@@ -18,6 +18,7 @@ import VariantAttributesPage from 'src/features/variants/VariantAttributesPage'
 import ProductsListPage from 'src/features/products/ProductsListPage'
 import ProductFormPage from 'src/features/products/ProductFormPage'
 import ProductDetailPage from 'src/features/products/ProductDetailPage'
+import ExpiredStockListPage from 'src/features/batches/ExpiredStockListPage'
 import PurchasesListPage from 'src/features/purchases/PurchasesListPage'
 import NewPurchasePage from 'src/features/purchases/NewPurchasePage'
 import PurchaseDetailPage from 'src/features/purchases/PurchaseDetailPage'
@@ -143,6 +144,14 @@ export function Router() {
           element: (
             <RequireActiveSubscription>
               <ProductDetailPage />
+            </RequireActiveSubscription>
+          )
+        },
+        {
+          path: paths.expiredInventory,
+          element: (
+            <RequireActiveSubscription>
+              <ExpiredStockListPage />
             </RequireActiveSubscription>
           )
         },

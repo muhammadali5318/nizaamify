@@ -12,7 +12,8 @@ export type ProductSearchRow = {
   type: string
   category_id: string
   description: string | null
-  price: number
+  /** v2.8.1: nullable — products may exist without a sell price. */
+  price: number | null
   avg_cost: number
   last_purchase_cost: number | null
   stock: number
@@ -27,6 +28,10 @@ export type ProductSearchRow = {
    * single-variant products with no stock); use this for the multi-variant
    * row's "X total" summary in product lists. */
   total_stock_all_variants: number
+  /** v2.8.3: true when any active variant of this product has price = null.
+   * Drives the "Set price" surfacing in the catalog list + the Needs-pricing
+   * filter. */
+  has_null_price_variant: boolean
 }
 
 export type SearchProductsArgs = {
@@ -35,6 +40,9 @@ export type SearchProductsArgs = {
   pageSize: number
   onlyInStock?: boolean
   categoryId?: string | null
+  /** v2.8.3: filter to products where at least one active variant has
+   * price = null. URL-synced via the catalog filter chip. */
+  needsPricing?: boolean
 }
 
 export type RecentPurchaseProduct = {
@@ -62,12 +70,19 @@ export function useRecentPurchaseProducts(limit = 10) {
 }
 
 export function useSearchProducts(args: SearchProductsArgs) {
-  const { query, page, pageSize, onlyInStock = false, categoryId = null } = args
+  const {
+    query,
+    page,
+    pageSize,
+    onlyInStock = false,
+    categoryId = null,
+    needsPricing = false
+  } = args
   return useQuery({
     queryKey: [
       'products',
       'search',
-      { query, page, pageSize, onlyInStock, categoryId }
+      { query, page, pageSize, onlyInStock, categoryId, needsPricing }
     ],
     queryFn: async () => {
       const offset = page * pageSize
@@ -77,12 +92,14 @@ export function useSearchProducts(args: SearchProductsArgs) {
           p_limit: pageSize,
           p_offset: offset,
           p_only_in_stock: onlyInStock,
-          p_category_id: categoryId ?? undefined
+          p_category_id: categoryId ?? undefined,
+          p_needs_pricing: needsPricing
         }),
         supabase.rpc('search_products_count', {
           p_query: query || undefined,
           p_only_in_stock: onlyInStock,
-          p_category_id: categoryId ?? undefined
+          p_category_id: categoryId ?? undefined,
+          p_needs_pricing: needsPricing
         })
       ])
       if (rowsRes.error) throw rowsRes.error

@@ -1,6 +1,18 @@
 {
   "title": "مصنوعات",
   "search_placeholder": "نام سے مصنوعات تلاش کریں",
+  "list": {
+    "set_price_warning": "قیمت سیٹ کریں",
+    "set_price_aria": "اس مصنوع کے لیے فروخت کی قیمت ضروری ہے",
+    "price_range_with_unpriced": "روپے {{min}} – قیمت سیٹ کریں"
+  },
+  "filters": {
+    "needs_pricing": "قیمت درکار",
+    "needs_pricing_count_one": "قیمت درکار ({{count}})",
+    "needs_pricing_count_other": "قیمت درکار ({{count}})",
+    "all_priced_empty": "تمام مصنوعات کی قیمت سیٹ ہے۔",
+    "clear_filter": "فلٹر صاف کریں"
+  },
   "add_product": "مصنوعات شامل کریں",
   "new_product": "+ نئی مصنوعات",
   "edit_product": "مصنوعات میں ترمیم کریں",

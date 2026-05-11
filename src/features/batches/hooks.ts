@@ -78,6 +78,9 @@ export type ExpiringBatchRow =
 export type WarrantyExpiringBatchRow =
   Database['public']['Views']['batches_warranty_expiring_soon']['Row']
 
+export type AlreadyExpiredBatchRow =
+  Database['public']['Views']['batches_already_expired']['Row']
+
 export function useExpiringSoon(limit = 10) {
   return useQuery({
     queryKey: ['alerts', 'expiring_soon', limit],
@@ -89,6 +92,24 @@ export function useExpiringSoon(limit = 10) {
         .limit(limit)
       if (error) throw error
       return (data ?? []) as ExpiringBatchRow[]
+    }
+  })
+}
+
+/** v2.8.3: batches past expiry with stock still on hand. The v2.8 alert
+ *  widget drops them the day they expire; this is the catch-up surface. */
+export function useAlreadyExpired(limit = 50) {
+  return useQuery({
+    queryKey: ['alerts', 'already_expired', limit],
+    queryFn: async (): Promise<AlreadyExpiredBatchRow[]> => {
+      const { data, error } = await supabase
+        .from('batches_already_expired')
+        .select('*')
+        // Most-recently expired first → smallest days_since_expired.
+        .order('days_since_expired', { ascending: true, nullsFirst: false })
+        .limit(limit)
+      if (error) throw error
+      return (data ?? []) as AlreadyExpiredBatchRow[]
     }
   })
 }

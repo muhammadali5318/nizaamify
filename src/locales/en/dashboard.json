@@ -18,6 +18,25 @@
     "add_expense": "Add expense",
     "view_khata": "View Khata"
   },
+  "expired_stock": {
+    "title": "Expired stock",
+    "count_one": "{{count}} batch",
+    "count_other": "{{count}} batches",
+    "expired_days_ago_one": "expired {{count}} day ago",
+    "expired_days_ago_other": "expired {{count}} days ago",
+    "view_all": "View all",
+    "write_off_all": "Write off all…",
+    "write_off_all_dialog_title_one": "Write off {{count}} expired batch",
+    "write_off_all_dialog_title_other": "Write off {{count}} expired batches",
+    "write_off_all_dialog_body": "All listed batches will be written off with the reason below. Stock is removed and each batch is marked inactive.",
+    "write_off_all_reason_label": "Reason",
+    "write_off_all_reason_placeholder": "e.g., Expired stock cleanup",
+    "write_off_all_submit": "Write off all",
+    "write_off_all_failed_one": "{{count}} batch failed to write off — try again or write off individually.",
+    "write_off_all_failed_other": "{{count}} batches failed to write off — try again or write off individually.",
+    "list_title": "Expired stock",
+    "list_empty": "No expired stock — everything within expiry."
+  },
   "inventory_alerts": {
     "title": "Inventory alerts",
     "expiring_soon": "Expiring soon",

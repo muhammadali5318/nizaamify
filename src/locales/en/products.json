@@ -1,6 +1,18 @@
 {
   "title": "Products",
   "search_placeholder": "Search products by name",
+  "list": {
+    "set_price_warning": "Set price",
+    "set_price_aria": "This product needs a selling price",
+    "price_range_with_unpriced": "Rs {{min}} – set price"
+  },
+  "filters": {
+    "needs_pricing": "Needs pricing",
+    "needs_pricing_count_one": "Needs pricing ({{count}})",
+    "needs_pricing_count_other": "Needs pricing ({{count}})",
+    "all_priced_empty": "All products are priced.",
+    "clear_filter": "Clear filter"
+  },
   "add_product": "Add product",
   "new_product": "+ New product",
   "edit_product": "Edit product",

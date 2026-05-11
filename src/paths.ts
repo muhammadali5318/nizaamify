@@ -48,6 +48,8 @@ export const paths = {
 
   reports: '/reports',
 
+  expiredInventory: '/inventory/expired',
+
   settings: '/settings',
   support: '/settings/support',
   tiers: '/settings/tiers',
