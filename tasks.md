@@ -150,3 +150,78 @@ Status: 🟦 not started · 🟨 in progress · ✅ done · ❌ blocked
 - ✅ npm run lint + type-check + build + tests green
 - ✅ Update CLAUDE.md (v2.5 line, gotchas, todos)
 - ✅ Record decisions in decisions/ (ADRs 0019, 0020, 0021)
+
+---
+
+## v2.6 — Foundational variant refactor *(SILENT, no user-visible changes)*
+
+Spec: `MVP_v2.6_VARIANT_REFACTOR.md`
+
+### Phase A — Discovery
+- ✅ Inspect live schema; confirm v2.5 baseline
+- ✅ Sample data volume (tiny — 13 products, 20 sales, 21 purchases, 3 packs)
+- ✅ Confirm append-only triggers on sale_items / purchase_items (will need DISABLE for backfill)
+- ✅ Append v2.6 + v2.7 phase tracker to tasks.md
+
+### Phase B — Schema migration
+- 🟦 §2.1 Create product_variants table + RLS + indexes
+- 🟦 §2.2 Backfill default variant per product (audit 1)
+- 🟦 §2.3-§2.5 Add variant_id columns + backfill + NOT NULL (audits 2-4)
+- 🟦 §2.7-§2.8 product_packs unique-index swap + sync_product_id_from_variant trigger
+- 🟦 §2.10 product_with_default_variant view
+- 🟦 §3.5 product_stock_display view rewritten on variants
+- 🟦 Regenerate database.ts
+
+### Phase C — Function rewrites
+- 🟦 record_sale (variant-aware, legacy product_id fallback)
+- 🟦 record_purchase (variant-aware, preserve v2.3 largest-remainder overhead)
+- 🟦 create_product_with_opening_stock (product + default variant in one tx)
+- 🟦 search_products (returns compat view rows)
+- 🟦 define_pack_inline / update_pack / deactivate_pack (default-variant resolution)
+- 🟦 Grants
+
+### Phase D — Frontend
+- 🟦 Regenerate types
+- 🟦 Fix anything that breaks (ProductSearchRow shape, hooks)
+
+### Phase E — Verification
+- 🟦 Audit queries §6 (all six must return zero rows)
+- 🟦 Reconciliation §7 (variant stock sum = old product stock)
+- 🟦 5 ADRs per §14
+- 🟦 CLAUDE.md update
+
+---
+
+## v2.7 — Variant management UI *(user-visible features on top of v2.6)*
+
+Spec: `MVP_v2.7_VARIANT_UI.md`
+
+### Phase A — Discovery
+- 🟦 Confirm v2.6 audits all green
+- 🟦 Append v2.7 phase tracker
+
+### Phase B — Schema migration
+- 🟦 variant_attributes + values + product_variant_attribute_values
+- 🟦 products.has_variants column
+- 🟦 Replace v2.6 uq_variant_default_per_product (subquery → row trigger)
+
+### Phase C — Backend
+- 🟦 Attribute CRUD RPCs (create / update / deactivate / search)
+- 🟦 Value CRUD RPCs (add / update / deactivate / list)
+- 🟦 create_product_with_variants RPC
+- 🟦 add_variant_to_product RPC
+- 🟦 product_variant_full view
+- 🟦 Update product_with_default_variant for multi-variant aggregates
+
+### Phase D — Frontend
+- 🟦 Settings → Variant Attributes page
+- 🟦 Product form "Has variants?" toggle + matrix builder
+- 🟦 Product detail page variants table + Add variant dialog
+- 🟦 Stock-in matrix mode (fallback: expanding-line list if matrix is too complex)
+- 🟦 POS variant picker + multi-variant list rendering
+- 🟦 Cart line + receipt + sale detail variant labels
+
+### Phase E — Verification
+- 🟦 i18n EN + UR (variants / variant_attributes / stock_in.matrix / pos.variant_picker)
+- 🟦 6 ADRs per §15
+- 🟦 CLAUDE.md update
