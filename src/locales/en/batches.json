@@ -40,7 +40,6 @@
     "use_this_batch": "Use this batch"
   },
   "stock_in_section_title": "Batch info",
-  "no_expiry_toggle": "No expiry date",
   "batch_picker_title": "Pick batch for {{productName}}",
   "settings": {
     "section_title": "Inventory alerts",

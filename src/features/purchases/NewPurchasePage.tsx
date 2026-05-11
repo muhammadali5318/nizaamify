@@ -74,12 +74,6 @@ type LineState = {
   batch_manufactured?: string
   batch_expiry?: string
   batch_warranty_days?: string
-  /** v2.8: explicit "this product has no expiry" toggle. When true, the
-   * expiry date input is disabled + cleared. Leaving the date blank
-   * without checking the box is also fine — expiry is optional either
-   * way. The toggle is just a clearer declarative affordance for
-   * warranty-only products (LCD panels, batteries, accessories). */
-  batch_no_expiry?: boolean
 }
 
 type OverheadState = {
@@ -319,8 +313,7 @@ export default function NewPurchasePage() {
         batch_no: suggested ?? '',
         batch_manufactured: '',
         batch_expiry: '',
-        batch_warranty_days: '0',
-        batch_no_expiry: false
+        batch_warranty_days: '0'
       })
     } catch {
       notify.error(t('purchases:errors.submit_failed'))
@@ -458,9 +451,7 @@ export default function NewPurchasePage() {
         // friendly error; record_purchase + a CHECK constraint enforce
         // it at the DB level.
         const warrantyDays = Number(ln.batch_warranty_days ?? '0')
-        const expiryStr = ln.batch_no_expiry
-          ? null
-          : (ln.batch_expiry ?? '').trim() || null
+        const expiryStr = (ln.batch_expiry ?? '').trim() || null
         const warrantyDaysVal =
           Number.isFinite(warrantyDays) && warrantyDays > 0
             ? warrantyDays
@@ -937,7 +928,6 @@ export default function NewPurchasePage() {
                           type='date'
                           size='small'
                           fullWidth
-                          disabled={!!ln.batch_no_expiry}
                           slotProps={{ inputLabel: { shrink: true } }}
                           value={ln.batch_expiry ?? ''}
                           onChange={(e) =>
@@ -961,24 +951,6 @@ export default function NewPurchasePage() {
                       </Field>
                     </Box>
                   </Stack>
-                  <FormControlLabel
-                    sx={{ mt: 1 }}
-                    control={
-                      <Checkbox
-                        size='small'
-                        checked={!!ln.batch_no_expiry}
-                        onChange={(e) =>
-                          setLine(i, {
-                            batch_no_expiry: e.target.checked,
-                            batch_expiry: e.target.checked
-                              ? ''
-                              : ln.batch_expiry
-                          })
-                        }
-                      />
-                    }
-                    label={t('batches:no_expiry_toggle')}
-                  />
                 </Box>
               )}
             </Box>
