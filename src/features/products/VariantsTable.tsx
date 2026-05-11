@@ -33,15 +33,6 @@ export default function VariantsTable({ productId }: Props) {
 
   const columns: DataTableColumn<ProductVariantRow>[] = [
     {
-      id: 'sku',
-      header: t('variants:columns.sku'),
-      cell: (row) => (
-        <Typography variant='body2' sx={{ fontFamily: 'monospace' }}>
-          {row.sku ?? '—'}
-        </Typography>
-      )
-    },
-    {
       id: 'variant',
       header: t('variants:columns.variant'),
       cardRole: 'heading',

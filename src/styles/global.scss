@@ -94,6 +94,45 @@ body::before {
   min-height: 100vh;
 }
 
+/* Global custom scrollbar (v2.6c).
+ *
+ * Token-driven, theme-aware. Firefox uses scrollbar-width / scrollbar-color;
+ * WebKit/Blink browsers use the ::-webkit-scrollbar pseudo-elements. Same
+ * styling lives in muiTheme's MuiAutocomplete listbox override — this
+ * generalises it so every overflow container (drawers, dialogs, data tables,
+ * cards, page-level main scroll) inherits the look. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--border-default);
+  border-radius: 999px;
+  /* Inset border carves the thumb so it reads as a thinner pill inside the
+   * 10px track — same end-result the Autocomplete listbox uses. */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--border-strong);
+}
+
+*::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
 /* 3. Global font family — token-driven, scoped per language. */
 html {
   font-family: var(--font-sans-en);

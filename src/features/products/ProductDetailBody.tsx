@@ -110,12 +110,6 @@ export default function ProductDetailBody({
                       : t('products:actions.archive')
                   }
                 />
-                {product.is_scan_only && (
-                  <Badge
-                    variant='warning'
-                    label={t('products:fields.is_scan_only')}
-                  />
-                )}
               </Stack>
             </Stack>
           </Stack>
@@ -166,14 +160,6 @@ export default function ProductDetailBody({
               />
             </>
           )}
-          <DetailRow
-            label={t('products:detail.field.scan_only')}
-            value={
-              product.is_scan_only
-                ? t('products:detail.field.scan_only_yes')
-                : t('products:detail.field.scan_only_no')
-            }
-          />
           {product.description && (
             <DetailRow
               label={t('products:detail.field.description')}

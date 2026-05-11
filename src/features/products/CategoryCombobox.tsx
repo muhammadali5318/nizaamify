@@ -65,6 +65,17 @@ export default function CategoryCombobox({
     return { id: selected.id, name: selected.name, product_count: 0 }
   }, [value, selected])
 
+  // When the dropdown is closed, the visible input text mirrors the
+  // selected option. (We can't rely on MUI's default reset because we
+  // ignore reason='reset' in onInputChange to preserve the user's search
+  // query while filtering.) `useCategory` resolves async after the dialog
+  // opens — this effect catches that moment and fills the text field.
+  useEffect(() => {
+    if (!open) {
+      setInputValue(selectedOption?.name ?? '')
+    }
+  }, [open, selectedOption?.id, selectedOption?.name])
+
   const options: Option[] = useMemo(() => {
     const base = (search.data ?? []) as Option[]
     return [

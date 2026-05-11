@@ -65,9 +65,9 @@ function formatStock(
 
 export type ProductTableProps = {
   /** Action slot rendered in the trailing column. POS puts the primary [+]
-   * (or "Scan only" caption) plus pack quick-add chips stacked vertically.
-   * Pass null / omit to drop the actions column entirely — v2.5 default for
-   * the products list. */
+   * (variant picker for multi-variant products) plus pack quick-add chips
+   * stacked vertically. Pass null / omit to drop the actions column entirely
+   * — v2.5 default for the products list. */
   renderActions?: (
     row: ProductSearchRow,
     breakdown?: ProductStockBreakdown

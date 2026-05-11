@@ -180,24 +180,6 @@ export default function ProductEditDialog({
 
           <Controller
             control={control}
-            name='is_scan_only'
-            render={({ field }) => (
-              <Field hint={t('products:fields.is_scan_only_help')}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={field.value}
-                      onChange={(e) => field.onChange(e.target.checked)}
-                    />
-                  }
-                  label={t('products:fields.is_scan_only')}
-                />
-              </Field>
-            )}
-          />
-
-          <Controller
-            control={control}
             name='is_active'
             render={({ field }) => (
               <FormControlLabel

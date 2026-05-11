@@ -17,12 +17,13 @@ type Props = {
 }
 
 /**
- * Right-side drawer (bottom-sheet on mobile) shown when the cashier clicks
+ * Side-panel drawer (bottom-sheet on mobile) shown when the cashier clicks
  * a product row or its eye icon in the POS picker (v2.5 §1.3).
  *
- * Cart state lives in POSPage and is independent of this drawer — opening,
- * editing, or closing here never touches the cart. The drawer is purely
- * presentational.
+ * Slides in from the left on desktop — sits adjacent to the persistent
+ * app sidebar, leaving the cart on the right untouched. Cart state lives
+ * in POSPage and is independent of this drawer; opening, editing, or
+ * closing here never touches the cart.
  */
 export default function PosProductDrawer({
   productId,
@@ -42,7 +43,7 @@ export default function PosProductDrawer({
       <Drawer
         open={open}
         onClose={onClose}
-        anchor={isMobile ? 'bottom' : 'end'}
+        anchor={isMobile ? 'bottom' : 'left'}
         title={t('products:detail.title')}
         slotProps={{
           paper: {

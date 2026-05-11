@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
+import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
-import StickyNote2OutlinedIcon from '@mui/icons-material/StickyNote2Outlined'
+import Typography from '@mui/material/Typography'
+import VisibilityIcon from '@mui/icons-material/Visibility'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
@@ -120,13 +122,6 @@ export default function SalesListPage() {
       }
     },
     {
-      id: 'items',
-      header: t('sales:columns.items'),
-      align: 'end',
-      hideOnMobile: true,
-      cell: (r) => r.sale_items?.length ?? 0
-    },
-    {
       id: 'service_charge',
       header: t('sales:columns.service_charge'),
       align: 'end',
@@ -146,17 +141,52 @@ export default function SalesListPage() {
     {
       id: 'notes',
       header: t('sales:columns.notes'),
-      align: 'center',
-      width: 56,
+      hideOnMobile: true,
       cell: (r) =>
         r.notes ? (
-          <Tooltip title={t('sales:has_notes_tooltip')}>
-            <StickyNote2OutlinedIcon
-              fontSize='small'
-              sx={{ color: 'var(--text-muted)' }}
-            />
+          <Tooltip title={r.notes}>
+            <Typography
+              variant='body2'
+              sx={{
+                color: 'var(--text-muted)',
+                maxWidth: 220,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {r.notes}
+            </Typography>
           </Tooltip>
-        ) : null
+        ) : (
+          <Typography variant='body2' sx={{ color: 'var(--text-disabled)' }}>
+            —
+          </Typography>
+        )
+    },
+    {
+      id: 'actions',
+      header: t('sales:columns.actions'),
+      align: 'center',
+      width: 64,
+      cardRole: 'actions',
+      cell: (r) => (
+        <Tooltip title={t('sales:view_details')}>
+          <IconButton
+            size='small'
+            // The row already has onClick; this icon is the explicit
+            // affordance. Click bubbles to the row's onRowClick handler.
+            aria-label={t('sales:view_details')}
+            sx={{ color: 'var(--text-muted)' }}
+            onClick={(e) => {
+              e.stopPropagation()
+              navigate(paths.gotoSale(r.id))
+            }}
+          >
+            <VisibilityIcon fontSize='small' />
+          </IconButton>
+        </Tooltip>
+      )
     }
   ]
 

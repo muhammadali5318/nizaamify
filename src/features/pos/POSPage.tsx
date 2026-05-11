@@ -593,10 +593,8 @@ export default function POSPage() {
               // v2.3 §6.3.2/§6.3.3 (revised): all "add to cart" affordances
               // live in the rightmost column. Primary [+] sits on top; pack
               // quick-add chips stack vertically below it as secondary
-              // buttons. Scan-only products hide the primary [+] entirely
-              // and show a muted "Scan only" caption in its place — pack
-              // chips, when present, still render below.
-              const isScanOnly = !!breakdown?.is_scan_only
+              // buttons. (v2.6c: scan-only UI was retired — the column is
+              // kept in DB for future use but no longer rendered.)
               const packs = breakdown?.pack_breakdown ?? []
               return (
                 <Stack
@@ -608,14 +606,7 @@ export default function POSPage() {
                   // detail drawer.
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {isScanOnly ? (
-                    <Typography
-                      variant='caption'
-                      sx={{ color: 'var(--text-muted)' }}
-                    >
-                      {t('pos:picker.scan_only_label')}
-                    </Typography>
-                  ) : row.has_variants ? (
+                  {row.has_variants ? (
                     // v2.7 §8.1: multi-variant products show a "Pick variant"
                     // button instead of a direct add — clicking opens the
                     // PosVariantPicker, which then dispatches the variant-aware
