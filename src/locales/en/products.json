@@ -137,5 +137,14 @@
     "page": "Page {{page}} of {{totalPages}}",
     "previous": "Previous",
     "next": "Next"
+  },
+  "inventory_behavior": {
+    "section_title": "Inventory behavior",
+    "has_batches_toggle": "Has batches (track batch numbers, expiry, supplier warranty)",
+    "has_batches_help": "Enable for products like cosmetics, food, medicines, or anything with supplier warranty.",
+    "expiry_alert_days_label": "Expiry alert window (days)",
+    "expiry_alert_days_help": "Leave blank for shop default ({{default}} days)",
+    "warranty_alert_days_label": "Warranty alert window (days)",
+    "warranty_alert_days_help": "Leave blank for shop default ({{default}} days)"
   }
 }

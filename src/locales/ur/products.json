@@ -137,5 +137,14 @@
     "page": "صفحہ {{page}} از {{totalPages}}",
     "previous": "پچھلا",
     "next": "اگلا"
+  },
+  "inventory_behavior": {
+    "section_title": "انوینٹری برتاؤ",
+    "has_batches_toggle": "بیچز ہیں (بیچ نمبر، ایکسپائری، سپلائر وارنٹی)",
+    "has_batches_help": "کاسمیٹکس، خوراک، ادویات یا سپلائر وارنٹی والی اشیاء کے لیے فعال کریں۔",
+    "expiry_alert_days_label": "ایکسپائری الرٹ مدت (دن)",
+    "expiry_alert_days_help": "شاپ ڈیفالٹ ({{default}} دن) کے لیے خالی چھوڑیں",
+    "warranty_alert_days_label": "وارنٹی الرٹ مدت (دن)",
+    "warranty_alert_days_help": "شاپ ڈیفالٹ ({{default}} دن) کے لیے خالی چھوڑیں"
   }
 }

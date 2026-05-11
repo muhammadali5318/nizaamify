@@ -28,12 +28,21 @@ export type OverheadCategory =
  */
 // v2.6+v2.7: lines may carry variant_id (multi-variant products) OR product_id
 // (single-variant fallback resolved server-side to the default variant).
+// v2.8: when the variant's product has has_batches = true, the line MUST also
+// carry a `batch` object. record_purchase raises otherwise.
+export type PurchaseBatchInput = {
+  batch_no: string
+  manufactured_date?: string | null
+  expiry_date?: string | null
+  supplier_warranty_days?: number | null
+}
 export type PurchaseLineInput =
   | {
       product_id: string
       variant_id?: string
       qty: number
       cost_at_purchase: number
+      batch?: PurchaseBatchInput
     }
   | {
       product_id: string
@@ -41,6 +50,7 @@ export type PurchaseLineInput =
       pack_id: string
       pack_qty: number
       cost_at_purchase: number
+      batch?: PurchaseBatchInput
     }
 
 export type RecordPurchaseInput = {

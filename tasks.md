@@ -268,3 +268,44 @@ Spec: `MVP_v2.7_VARIANT_UI.md`
 - ✅ `npm run lint` clean
 - ✅ Security advisors: only the documented warnings (ADR-0011 + HIBP open-todo); no new ones from migrations 0051–0056
 - ✅ Dashboard MTD figure is no longer over-stated — `monthly_summary` now reads from `invoice_financials`
+
+---
+
+## v2.8 — Batch tracking, FEFO, supplier warranty & expiry alerts — 2026-05-12
+
+### Phase A — Discovery gate
+- ✅ v2.6 §6 audits 1-6 + v2.6c audits 7-9 all return 0 rows
+- ✅ Live schema verified: 42 variants across 20 products, all sale_items/purchase_items variant-linked, `invoice_financials` view present, `products.has_batches` absent (clean slate)
+
+### Phase B — Schema migration (`0057_v28_batch_tracking.sql`)
+- ✅ `products.has_batches` (default false), `expiry_alert_days`, `warranty_alert_days` (per-product overrides)
+- ✅ `shops.default_expiry_alert_days`, `default_warranty_alert_days` (defaults 30)
+- ✅ `inventory_batches` table with RLS (scoped variant → product → shop), 6 indexes (FEFO, expiry, warranty, variant lookup, batch_no uniqueness when active), `touch_updated_at` + `batch_immutable_fields` triggers
+- ✅ `sale_items.batch_id` (nullable; NOT NULL enforced by `record_sale` for batched products) + index
+- ✅ `purchase_items.batch_id` (nullable, bidirectional with `inventory_batches.purchase_item_id`) + index
+
+### Phase C — Backend RPCs + views (`0058*`)
+- ✅ `suggest_batch_no(p_variant_id, p_received_at)` → `<SHOPSP>-<PROD>-<YYMMDD>-<NNN>` (column-name fix applied — `shops.shop_name`, not `name`)
+- ✅ `record_purchase` rewrite — captures batch info when `product.has_batches`. Inserts `inventory_batches` with `cost_per_unit` = effective landed cost (v2.3 LR overhead allocation); wires `purchase_items.batch_id` back. Raises `batch_info_required_for_batched_product` / `batch_no_required` / `duplicate_batch_no` as appropriate.
+- ✅ `record_sale` rewrite — FEFO walk (`expiry_date asc nulls last, received_at asc, id asc`); optional `batch_id` override per item; multi-batch line split (one cart line → multiple `sale_items` rows when spanning batches); `line_discount_amount` allocated via largest-remainder by qty; `cost_at_sale` = batch's `cost_per_unit` for batched lines; raises `selected_batch_insufficient` / `batch_not_in_variant_or_inactive` / `no_batch_stock_available`.
+- ✅ `deactivate_batch(p_batch_id, p_reason)` — manual write-off; decrements `variant.stock` by `qty_remaining` (temporary pattern, see ADR), flips `is_active=false`, appends reason to notes.
+- ✅ `batches_expiring_soon` + `batches_warranty_expiring_soon` views (security_invoker = true), driven by `coalesce(product.x_alert_days, shop.default_x_alert_days)`.
+- ✅ `invoice_financials` from v2.6c unchanged — reads `sale_items.cost_at_sale` directly, so per-batch profit is automatically accurate.
+
+### Phase D — Frontend surfaces
+- ✅ **ProductEditDialog**: Inventory behavior section (has_batches toggle with shop-default hints; per-product `expiry_alert_days` + `warranty_alert_days` fields visible when toggled on; pre-submit guard rails — `cannot_enable_batches_with_stock` / `cannot_disable_batches_with_active_batches`)
+- ✅ **`src/features/batches/`** — new feature folder. Hooks: `useActiveBatchesForVariant`, `useAllBatchesForVariant`, `useExpiringSoon`, `useWarrantyExpiringSoon`, `useHasAnyBatchedProduct`, `useDeactivateBatch`, `useShopAlertDefaults`, `useUpdateShopAlertDefaults`, `suggestBatchNo`.
+- ✅ **BatchesSection + WriteOffBatchDialog** — product detail page renders an Active/Inactive table with per-row "Write off" affordance; inactive batches collapsed by default with "+ Show inactive" toggle.
+- ✅ **NewPurchasePage** — batch fields per line (batch_no auto-pre-filled via `suggestBatchNo`, manufactured/expiry dates, supplier_warranty_days, "No expiry date" checkbox). Submit-time validation. `PurchaseLineInput` extended with `batch?` object.
+- ✅ **DashboardPage** — `InventoryAlertsWidget` auto-hides for shops without batched products; surfaces top 4 of each list (expiring + warranty-expiring); badges + counts pull from `dashboard:inventory_alerts.*` keys.
+- ✅ **SettingsPage** — shop-level alert defaults section (default_expiry_alert_days + default_warranty_alert_days editor with save button).
+- ✅ **SaleDetailPage** — batch_no surfaced under the product name on each line; pulled via the existing `useSale` hook (joined `inventory_batches`).
+- 🟦 Deferred to a v2.8 polish ticket: ProductFormPage create-flow batch toggle (works via edit dialog post-create); POS cart batch indicator + "Pick batch" picker (FEFO works automatically without it); multi-variant batched-product detail surface.
+
+### Phase E — ADRs, i18n, CLAUDE.md, audits
+- ✅ 7 ADRs filed in `decisions/`: batches-vs-serials-mutually-exclusive; fefo-override-ux-pick-batch-link; batch-cost-vs-avg-cost-on-sales; multi-batch-line-split-data-model; batch-deactivation-temporary-pattern; shop-level-alert-defaults-with-product-overrides; batch-immutability-rules.
+- ✅ i18n: new `batches` namespace (en + ur), registered in `i18n.ts` + `locales/{en,ur}/index.ts`. Additions to `products`, `dashboard`, `pos` namespaces.
+- ✅ CLAUDE.md: v2.8 PRD entry; 6 new gotchas; 3 open-todo entries.
+- ✅ Final audit gate: v2.6 §6 audits 1-6 + v2.6c audits 7-9 + v2.8 §9 audits 1/4/5 — all return expected values (zeros + immutable trigger present).
+- ✅ `npm run type-check` clean. `npm run lint` clean. `npm run build` clean.
+- 🟦 Spec §10 manual smoke matrix (cosmetics, multi-batch FEFO, override, supplier warranty alerts, write-off, cross-shop) — code-level checks green; live-data walkthrough is a human task.

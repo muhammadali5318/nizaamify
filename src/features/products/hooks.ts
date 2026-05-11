@@ -113,7 +113,7 @@ export function useProduct(id: string | undefined) {
       const { data, error } = await supabase
         .from('products')
         .select(
-          'id, shop_id, name, type, category_id, description, is_active, is_scan_only, base_unit_id, has_variants, created_at, updated_at, default_variant:product_variants(id, sku, stock, price, cost, avg_cost, last_purchase_cost, is_default, is_active)'
+          'id, shop_id, name, type, category_id, description, is_active, is_scan_only, base_unit_id, has_variants, has_batches, expiry_alert_days, warranty_alert_days, created_at, updated_at, default_variant:product_variants(id, sku, stock, price, cost, avg_cost, last_purchase_cost, is_default, is_active)'
         )
         .eq('id', id)
         .single()
@@ -444,6 +444,10 @@ export type UpdateProductInput = {
   price: number
   is_active: boolean
   is_scan_only: boolean
+  /** v2.8 — null leaves unchanged when omitted from the patch. */
+  has_batches?: boolean
+  expiry_alert_days?: number | null
+  warranty_alert_days?: number | null
 }
 
 export type CreateProductWithVariantsInput = {
@@ -506,17 +510,71 @@ export function useUpdateProduct() {
         .single()
       if (catErr) throw catErr
 
+      // v2.8: guard rails for has_batches toggle — frontend pre-checks
+      // happen in the dialog, but enforce again here so a stale form
+      // can't slip past.
+      if (rest.has_batches !== undefined) {
+        const { data: existing } = await supabase
+          .from('products')
+          .select('has_batches')
+          .eq('id', id)
+          .maybeSingle()
+        const currentFlag = existing?.has_batches ?? false
+        if (rest.has_batches !== currentFlag) {
+          if (rest.has_batches === true) {
+            // Going false → true: every variant must have stock = 0.
+            const { count } = await supabase
+              .from('product_variants')
+              .select('id', { count: 'exact', head: true })
+              .eq('product_id', id)
+              .gt('stock', 0)
+            if ((count ?? 0) > 0) {
+              throw new Error('cannot_enable_batches_with_stock')
+            }
+          } else {
+            // Going true → false: no active batches anywhere on this product.
+            const { count } = await supabase
+              .from('inventory_batches')
+              .select('id', {
+                count: 'exact',
+                head: true
+              })
+              .eq('is_active', true)
+              .in(
+                'variant_id',
+                (
+                  await supabase
+                    .from('product_variants')
+                    .select('id')
+                    .eq('product_id', id)
+                ).data?.map((v) => v.id) ?? []
+              )
+            if ((count ?? 0) > 0) {
+              throw new Error('cannot_disable_batches_with_active_batches')
+            }
+          }
+        }
+      }
+
+      const patch: ProductUpdate = {
+        name: rest.name,
+        type: cat.name,
+        category_id: rest.category_id,
+        description: rest.description,
+        price: rest.price,
+        is_active: rest.is_active,
+        is_scan_only: rest.is_scan_only
+      }
+      if (rest.has_batches !== undefined) patch.has_batches = rest.has_batches
+      if (rest.expiry_alert_days !== undefined) {
+        patch.expiry_alert_days = rest.expiry_alert_days
+      }
+      if (rest.warranty_alert_days !== undefined) {
+        patch.warranty_alert_days = rest.warranty_alert_days
+      }
       const { error: prodErr } = await supabase
         .from('products')
-        .update({
-          name: rest.name,
-          type: cat.name,
-          category_id: rest.category_id,
-          description: rest.description,
-          price: rest.price,
-          is_active: rest.is_active,
-          is_scan_only: rest.is_scan_only
-        } as ProductUpdate)
+        .update(patch)
         .eq('id', id)
       if (prodErr) throw prodErr
 

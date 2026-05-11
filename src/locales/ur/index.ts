@@ -17,6 +17,7 @@ import units from './units.json'
 import tiers from './tiers.json'
 import variant_attributes from './variant_attributes.json'
 import variants from './variants.json'
+import batches from './batches.json'
 
 export default {
   common,
@@ -37,5 +38,6 @@ export default {
   units,
   tiers,
   variant_attributes,
-  variants
+  variants,
+  batches
 }

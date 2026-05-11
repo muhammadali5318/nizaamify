@@ -1,0 +1,62 @@
+{
+  "title": "Batches",
+  "active_batches": "Active batches",
+  "inactive_batches": "Inactive batches",
+  "fields": {
+    "batch_no": "Batch no",
+    "manufactured_date": "Manufactured",
+    "expiry_date": "Expiry",
+    "supplier_warranty_days": "Supplier warranty (days)",
+    "qty_received": "Qty received",
+    "qty_remaining": "Qty remaining",
+    "cost_per_unit": "Cost per unit",
+    "received_at": "Received",
+    "warranty_expires_at": "Warranty expires",
+    "supplier": "Supplier"
+  },
+  "indicators": {
+    "oldest": "oldest",
+    "selected": "selected",
+    "pick_batch": "Pick batch",
+    "reset_to_fefo": "Reset to FEFO",
+    "active_batches_count_one": "{{count}} active batch",
+    "active_batches_count_other": "{{count}} active batches",
+    "inactive_batches_count_one": "{{count}} inactive batch",
+    "inactive_batches_count_other": "{{count}} inactive batches",
+    "show_inactive": "+ Show inactive",
+    "hide_inactive": "Hide inactive",
+    "from_batches": "From batches {{batches}}"
+  },
+  "actions": {
+    "write_off": "Write off",
+    "write_off_confirm_title": "Write off batch {{batchNo}}",
+    "write_off_confirm_body": "This removes {{qty}} unit(s) from stock. Provide a reason.",
+    "write_off_reason_label": "Reason",
+    "write_off_reason_placeholder": "Expired / Damaged / Returned to vendor / ...",
+    "write_off_submit": "Write off batch",
+    "use_this_batch": "Use this batch"
+  },
+  "stock_in_section_title": "Batch info",
+  "no_expiry_toggle": "No expiry date",
+  "batch_picker_title": "Pick batch for {{productName}}",
+  "settings": {
+    "section_title": "Inventory alerts",
+    "section_subtitle": "Default windows for expiry and supplier-warranty alerts.",
+    "default_expiry_label": "Default expiry alert window (days)",
+    "default_warranty_label": "Default supplier warranty alert window (days)",
+    "save": "Save defaults",
+    "saved": "Defaults updated",
+    "save_failed": "Could not update defaults."
+  },
+  "errors": {
+    "batch_required_for_batched_product": "Batch info is required for this product.",
+    "batch_no_required": "Batch number is required.",
+    "duplicate_batch_no": "A batch with this number already exists for this product.",
+    "cannot_enable_batches_with_stock": "Sell or write off existing stock before enabling batch tracking.",
+    "cannot_disable_batches_with_active_batches": "Deactivate all batches before disabling batch tracking.",
+    "selected_batch_insufficient": "The selected batch doesn't have enough stock. Pick a different batch or let the system choose.",
+    "batch_not_in_variant_or_inactive": "The selected batch is not valid for this product.",
+    "no_batch_stock_available": "This product is out of stock across all batches.",
+    "deactivate_failed": "Could not write off this batch."
+  }
+}

@@ -31,6 +31,9 @@ export type SaleDetailItem = {
   /** v2.6b: server-computed line profit. */
   line_profit: number
   product: { id: string; name: string } | null
+  /** v2.8: which batch this line drew from. NULL for non-batched products. */
+  batch_id: string | null
+  batch: { id: string; batch_no: string } | null
 }
 
 export type SaleDetail = Invoice & {
@@ -136,7 +139,9 @@ export function useSale(id: string | undefined) {
           sale_items (
             id, product_id, qty, price_at_sale, cost_at_sale,
             line_discount_type, line_discount_value, line_discount_amount,
-            product:products ( id, name )
+            batch_id,
+            product:products ( id, name ),
+            batch:inventory_batches ( id, batch_no )
           )
           `
         )

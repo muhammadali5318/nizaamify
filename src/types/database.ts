@@ -157,6 +157,130 @@ export type Database = {
           }
         ]
       }
+      inventory_batches: {
+        Row: {
+          batch_no: string
+          cost_per_unit: number
+          created_at: string
+          expiry_date: string | null
+          id: string
+          is_active: boolean
+          manufactured_date: string | null
+          notes: string | null
+          purchase_item_id: string | null
+          qty_received: number
+          qty_remaining: number
+          received_at: string
+          supplier_id: string | null
+          supplier_warranty_days: number | null
+          updated_at: string
+          variant_id: string
+          warranty_expires_at: string | null
+        }
+        Insert: {
+          batch_no: string
+          cost_per_unit: number
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          is_active?: boolean
+          manufactured_date?: string | null
+          notes?: string | null
+          purchase_item_id?: string | null
+          qty_received: number
+          qty_remaining: number
+          received_at?: string
+          supplier_id?: string | null
+          supplier_warranty_days?: number | null
+          updated_at?: string
+          variant_id: string
+          warranty_expires_at?: string | null
+        }
+        Update: {
+          batch_no?: string
+          cost_per_unit?: number
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          is_active?: boolean
+          manufactured_date?: string | null
+          notes?: string | null
+          purchase_item_id?: string | null
+          qty_received?: number
+          qty_remaining?: number
+          received_at?: string
+          supplier_id?: string | null
+          supplier_warranty_days?: number | null
+          updated_at?: string
+          variant_id?: string
+          warranty_expires_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'inventory_batches_purchase_item_id_fkey'
+            columns: ['purchase_item_id']
+            isOneToOne: false
+            referencedRelation: 'purchase_item_financials'
+            referencedColumns: ['purchase_item_id']
+          },
+          {
+            foreignKeyName: 'inventory_batches_purchase_item_id_fkey'
+            columns: ['purchase_item_id']
+            isOneToOne: false
+            referencedRelation: 'purchase_items'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'inventory_batches_supplier_id_fkey'
+            columns: ['supplier_id']
+            isOneToOne: false
+            referencedRelation: 'suppliers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_variants'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['variant_id']
+          }
+        ]
+      }
       invoices: {
         Row: {
           amount_paid: number
@@ -478,6 +602,20 @@ export type Database = {
             foreignKeyName: 'product_packs_product_id_fkey'
             columns: ['product_id']
             isOneToOne: false
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'product_packs_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'product_packs_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
             referencedRelation: 'product_stock_display'
             referencedColumns: ['product_id']
           },
@@ -508,6 +646,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'units_of_measure'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'product_packs_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'product_packs_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
             foreignKeyName: 'product_packs_variant_id_fkey'
@@ -559,6 +711,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'variant_attribute_values'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'product_variant_attribute_values_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'product_variant_attribute_values_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
             foreignKeyName: 'product_variant_attribute_values_variant_id_fkey'
@@ -638,6 +804,20 @@ export type Database = {
             foreignKeyName: 'product_variants_product_id_fkey'
             columns: ['product_id']
             isOneToOne: false
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
             referencedRelation: 'product_stock_display'
             referencedColumns: ['product_id']
           },
@@ -672,6 +852,8 @@ export type Database = {
           cost: number
           created_at: string
           description: string | null
+          expiry_alert_days: number | null
+          has_batches: boolean
           has_variants: boolean
           id: string
           is_active: boolean
@@ -683,6 +865,7 @@ export type Database = {
           stock: number
           type: string
           updated_at: string
+          warranty_alert_days: number | null
         }
         Insert: {
           avg_cost?: number
@@ -691,6 +874,8 @@ export type Database = {
           cost: number
           created_at?: string
           description?: string | null
+          expiry_alert_days?: number | null
+          has_batches?: boolean
           has_variants?: boolean
           id?: string
           is_active?: boolean
@@ -702,6 +887,7 @@ export type Database = {
           stock?: number
           type: string
           updated_at?: string
+          warranty_alert_days?: number | null
         }
         Update: {
           avg_cost?: number
@@ -710,6 +896,8 @@ export type Database = {
           cost?: number
           created_at?: string
           description?: string | null
+          expiry_alert_days?: number | null
+          has_batches?: boolean
           has_variants?: boolean
           id?: string
           is_active?: boolean
@@ -721,6 +909,7 @@ export type Database = {
           stock?: number
           type?: string
           updated_at?: string
+          warranty_alert_days?: number | null
         }
         Relationships: [
           {
@@ -777,6 +966,7 @@ export type Database = {
         Row: {
           avg_cost_after: number | null
           avg_cost_before: number | null
+          batch_id: string | null
           cost_at_purchase: number
           id: string
           line_overhead_amount: number
@@ -793,6 +983,7 @@ export type Database = {
         Insert: {
           avg_cost_after?: number | null
           avg_cost_before?: number | null
+          batch_id?: string | null
           cost_at_purchase: number
           id?: string
           line_overhead_amount?: number
@@ -809,6 +1000,7 @@ export type Database = {
         Update: {
           avg_cost_after?: number | null
           avg_cost_before?: number | null
+          batch_id?: string | null
           cost_at_purchase?: number
           id?: string
           line_overhead_amount?: number
@@ -824,11 +1016,46 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: 'purchase_items_batch_id_fkey'
+            columns: ['batch_id']
+            isOneToOne: false
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['batch_id']
+          },
+          {
+            foreignKeyName: 'purchase_items_batch_id_fkey'
+            columns: ['batch_id']
+            isOneToOne: false
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['batch_id']
+          },
+          {
+            foreignKeyName: 'purchase_items_batch_id_fkey'
+            columns: ['batch_id']
+            isOneToOne: false
+            referencedRelation: 'inventory_batches'
+            referencedColumns: ['id']
+          },
+          {
             foreignKeyName: 'purchase_items_pack_id_fkey'
             columns: ['pack_id']
             isOneToOne: false
             referencedRelation: 'product_packs'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
             foreignKeyName: 'purchase_items_product_id_fkey'
@@ -864,6 +1091,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'purchases'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
             foreignKeyName: 'purchase_items_variant_id_fkey'
@@ -999,6 +1240,7 @@ export type Database = {
       }
       sale_items: {
         Row: {
+          batch_id: string | null
           cost_at_sale: number
           id: string
           invoice_id: string
@@ -1011,6 +1253,7 @@ export type Database = {
           variant_id: string
         }
         Insert: {
+          batch_id?: string | null
           cost_at_sale: number
           id?: string
           invoice_id: string
@@ -1023,6 +1266,7 @@ export type Database = {
           variant_id: string
         }
         Update: {
+          batch_id?: string | null
           cost_at_sale?: number
           id?: string
           invoice_id?: string
@@ -1035,6 +1279,27 @@ export type Database = {
           variant_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: 'sale_items_batch_id_fkey'
+            columns: ['batch_id']
+            isOneToOne: false
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['batch_id']
+          },
+          {
+            foreignKeyName: 'sale_items_batch_id_fkey'
+            columns: ['batch_id']
+            isOneToOne: false
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['batch_id']
+          },
+          {
+            foreignKeyName: 'sale_items_batch_id_fkey'
+            columns: ['batch_id']
+            isOneToOne: false
+            referencedRelation: 'inventory_batches'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'sale_items_invoice_id_fkey'
             columns: ['invoice_id']
@@ -1055,6 +1320,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'invoices'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
             foreignKeyName: 'sale_items_product_id_fkey'
@@ -1083,6 +1362,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'products'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
             foreignKeyName: 'sale_items_variant_id_fkey'
@@ -1158,6 +1451,8 @@ export type Database = {
       shops: {
         Row: {
           created_at: string
+          default_expiry_alert_days: number
+          default_warranty_alert_days: number
           id: string
           owner_user_id: string
           shop_address: string
@@ -1168,6 +1463,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          default_expiry_alert_days?: number
+          default_warranty_alert_days?: number
           id?: string
           owner_user_id: string
           shop_address: string
@@ -1178,6 +1475,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          default_expiry_alert_days?: number
+          default_warranty_alert_days?: number
           id?: string
           owner_user_id?: string
           shop_address?: string
@@ -1409,6 +1708,61 @@ export type Database = {
       }
     }
     Views: {
+      batches_expiring_soon: {
+        Row: {
+          alert_window_days: number | null
+          batch_id: string | null
+          batch_no: string | null
+          days_until_expiry: number | null
+          expiry_date: string | null
+          product_id: string | null
+          product_name: string | null
+          qty_remaining: number | null
+          shop_id: string | null
+          variant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
+            isOneToOne: false
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      batches_warranty_expiring_soon: {
+        Row: {
+          alert_window_days: number | null
+          batch_id: string | null
+          batch_no: string | null
+          days_until_warranty_expires: number | null
+          product_id: string | null
+          product_name: string | null
+          qty_remaining: number | null
+          shop_id: string | null
+          supplier_id: string | null
+          supplier_name: string | null
+          variant_id: string | null
+          warranty_expires_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'inventory_batches_supplier_id_fkey'
+            columns: ['supplier_id']
+            isOneToOne: false
+            referencedRelation: 'suppliers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
+            isOneToOne: false
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       customer_balance_reconciliation: {
         Row: {
           computed_balance: number | null
@@ -1887,6 +2241,20 @@ export type Database = {
             foreignKeyName: 'purchase_items_product_id_fkey'
             columns: ['product_id']
             isOneToOne: false
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
             referencedRelation: 'product_stock_display'
             referencedColumns: ['product_id']
           },
@@ -1917,6 +2285,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'purchases'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
             foreignKeyName: 'purchase_items_variant_id_fkey'
@@ -1990,6 +2372,20 @@ export type Database = {
             foreignKeyName: 'sale_items_product_id_fkey'
             columns: ['product_id']
             isOneToOne: false
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['product_id']
+          },
+          {
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
             referencedRelation: 'product_stock_display'
             referencedColumns: ['product_id']
           },
@@ -2013,6 +2409,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'products'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
+          },
+          {
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
             foreignKeyName: 'sale_items_variant_id_fkey'
@@ -2080,6 +2490,13 @@ export type Database = {
             referencedColumns: ['id']
           }
         ]
+      }
+      total_outstanding: {
+        Row: {
+          customer_count: number | null
+          total: number | null
+        }
+        Relationships: []
       }
     }
     Functions: {
@@ -2162,6 +2579,10 @@ export type Database = {
         Returns: string
       }
       current_shop_id: { Args: never; Returns: string }
+      deactivate_batch: {
+        Args: { p_batch_id: string; p_reason?: string }
+        Returns: undefined
+      }
       deactivate_pack: { Args: { p_pack_id: string }; Returns: undefined }
       deactivate_tier: { Args: { p_tier_id: string }; Returns: number }
       deactivate_variant_attribute: {
@@ -2385,6 +2806,10 @@ export type Database = {
         }[]
       }
       set_default_tier: { Args: { p_tier_id: string }; Returns: undefined }
+      suggest_batch_no: {
+        Args: { p_received_at?: string; p_variant_id: string }
+        Returns: string
+      }
       update_category: {
         Args: { p_id: string; p_is_active?: boolean; p_name?: string }
         Returns: undefined

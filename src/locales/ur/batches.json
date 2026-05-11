@@ -1,0 +1,62 @@
+{
+  "title": "بیچز",
+  "active_batches": "فعال بیچز",
+  "inactive_batches": "غیر فعال بیچز",
+  "fields": {
+    "batch_no": "بیچ نمبر",
+    "manufactured_date": "تیاری کی تاریخ",
+    "expiry_date": "ایکسپائری",
+    "supplier_warranty_days": "سپلائر وارنٹی (دن)",
+    "qty_received": "موصول مقدار",
+    "qty_remaining": "بقایا مقدار",
+    "cost_per_unit": "فی یونٹ لاگت",
+    "received_at": "موصول ہوا",
+    "warranty_expires_at": "وارنٹی ختم ہو رہی ہے",
+    "supplier": "سپلائر"
+  },
+  "indicators": {
+    "oldest": "سب سے پرانا",
+    "selected": "منتخب",
+    "pick_batch": "بیچ منتخب کریں",
+    "reset_to_fefo": "FEFO پر واپس کریں",
+    "active_batches_count_one": "{{count}} فعال بیچ",
+    "active_batches_count_other": "{{count}} فعال بیچز",
+    "inactive_batches_count_one": "{{count}} غیر فعال بیچ",
+    "inactive_batches_count_other": "{{count}} غیر فعال بیچز",
+    "show_inactive": "+ غیر فعال دکھائیں",
+    "hide_inactive": "غیر فعال چھپائیں",
+    "from_batches": "بیچز {{batches}} سے"
+  },
+  "actions": {
+    "write_off": "رائٹ آف",
+    "write_off_confirm_title": "بیچ {{batchNo}} رائٹ آف کریں",
+    "write_off_confirm_body": "یہ اسٹاک سے {{qty}} یونٹ ہٹا دے گا۔ وجہ بتائیں۔",
+    "write_off_reason_label": "وجہ",
+    "write_off_reason_placeholder": "ایکسپائر / خراب / واپس کیا گیا / ...",
+    "write_off_submit": "بیچ رائٹ آف کریں",
+    "use_this_batch": "یہ بیچ استعمال کریں"
+  },
+  "stock_in_section_title": "بیچ کی معلومات",
+  "no_expiry_toggle": "ایکسپائری تاریخ نہیں",
+  "batch_picker_title": "{{productName}} کے لیے بیچ منتخب کریں",
+  "settings": {
+    "section_title": "انوینٹری الرٹس",
+    "section_subtitle": "ایکسپائری اور سپلائر وارنٹی الرٹس کے لیے ڈیفالٹ مدتیں۔",
+    "default_expiry_label": "ڈیفالٹ ایکسپائری الرٹ مدت (دن)",
+    "default_warranty_label": "ڈیفالٹ سپلائر وارنٹی الرٹ مدت (دن)",
+    "save": "ڈیفالٹ محفوظ کریں",
+    "saved": "ڈیفالٹ اپ ڈیٹ ہو گئے",
+    "save_failed": "ڈیفالٹ اپ ڈیٹ نہ ہو سکے۔"
+  },
+  "errors": {
+    "batch_required_for_batched_product": "اس مصنوع کے لیے بیچ کی معلومات ضروری ہے۔",
+    "batch_no_required": "بیچ نمبر ضروری ہے۔",
+    "duplicate_batch_no": "اس مصنوع کے لیے اس نمبر کا بیچ پہلے سے موجود ہے۔",
+    "cannot_enable_batches_with_stock": "بیچ ٹریکنگ فعال کرنے سے پہلے موجودہ اسٹاک فروخت یا رائٹ آف کریں۔",
+    "cannot_disable_batches_with_active_batches": "بیچ ٹریکنگ بند کرنے سے پہلے تمام بیچ غیر فعال کریں۔",
+    "selected_batch_insufficient": "منتخب بیچ میں اتنا اسٹاک نہیں۔ دوسرا بیچ منتخب کریں یا سسٹم کو خود انتخاب کرنے دیں۔",
+    "batch_not_in_variant_or_inactive": "منتخب بیچ اس مصنوع کے لیے درست نہیں۔",
+    "no_batch_stock_available": "تمام بیچز میں یہ مصنوع ختم ہے۔",
+    "deactivate_failed": "یہ بیچ رائٹ آف نہیں ہو سکا۔"
+  }
+}

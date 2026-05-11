@@ -17,5 +17,20 @@
     "new_purchase": "New stock-in",
     "add_expense": "Add expense",
     "view_khata": "View Khata"
+  },
+  "inventory_alerts": {
+    "title": "Inventory alerts",
+    "expiring_soon": "Expiring soon",
+    "expiring_soon_count_one": "{{count}} batch",
+    "expiring_soon_count_other": "{{count}} batches",
+    "warranty_expiring": "Supplier warranty expiring",
+    "warranty_expiring_count_one": "{{count}} batch",
+    "warranty_expiring_count_other": "{{count}} batches",
+    "no_alerts": "No expiry or warranty alerts right now",
+    "view_all": "View all",
+    "expires_in_days_one": "expires in {{count}} day",
+    "expires_in_days_other": "expires in {{count}} days",
+    "warranty_ends_in_days_one": "warranty ends in {{count}} day",
+    "warranty_ends_in_days_other": "warranty ends in {{count}} days"
   }
 }

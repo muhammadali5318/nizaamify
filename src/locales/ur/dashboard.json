@@ -17,5 +17,20 @@
     "new_purchase": "نیا اسٹاک ان",
     "add_expense": "خرچ شامل کریں",
     "view_khata": "کھاتہ دیکھیں"
+  },
+  "inventory_alerts": {
+    "title": "انوینٹری الرٹس",
+    "expiring_soon": "جلد ایکسپائر ہو رہا ہے",
+    "expiring_soon_count_one": "{{count}} بیچ",
+    "expiring_soon_count_other": "{{count}} بیچز",
+    "warranty_expiring": "سپلائر وارنٹی ختم ہو رہی ہے",
+    "warranty_expiring_count_one": "{{count}} بیچ",
+    "warranty_expiring_count_other": "{{count}} بیچز",
+    "no_alerts": "ابھی کوئی ایکسپائری یا وارنٹی الرٹ نہیں",
+    "view_all": "سب دیکھیں",
+    "expires_in_days_one": "{{count}} دن میں ایکسپائر",
+    "expires_in_days_other": "{{count}} دن میں ایکسپائر",
+    "warranty_ends_in_days_one": "{{count}} دن میں وارنٹی ختم",
+    "warranty_ends_in_days_other": "{{count}} دن میں وارنٹی ختم"
   }
 }

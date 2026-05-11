@@ -14,6 +14,7 @@ import { useTargetForMonth, currentMonthISO } from 'src/features/targets/hooks'
 import { formatPKR } from 'src/features/subscription/env'
 import { Button, Card, Spinner } from 'src/components/ui'
 import { PageHeader } from 'src/components/layout'
+import InventoryAlertsWidget from 'src/features/batches/InventoryAlertsWidget'
 
 function StatCard({
   label,
@@ -218,6 +219,10 @@ export default function DashboardPage() {
             </Button>
           </Stack>
         </Card>
+
+        {/* v2.8 inventory alerts — auto-hides for shops without batched
+         *  products, so it's safe to mount unconditionally. */}
+        <InventoryAlertsWidget />
       </Stack>
     </Box>
   )

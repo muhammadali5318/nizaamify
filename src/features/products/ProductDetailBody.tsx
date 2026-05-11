@@ -18,6 +18,7 @@ import {
 } from 'src/features/units/hooks'
 import PacksSection from './PacksSection'
 import VariantsTable from './VariantsTable'
+import BatchesSection from 'src/features/batches/BatchesSection'
 
 type Props = {
   product: Product
@@ -179,6 +180,21 @@ export default function ProductDetailBody({
 
       {/* Multi-variant: variants table replaces the single-variant stock/price card */}
       {product.has_variants && <VariantsTable productId={product.id} />}
+
+      {/* v2.8: batches section (only for batched single-variant products
+       *  in v2.8 — multi-variant batched products are a v2.8 polish ticket). */}
+      {product.has_batches &&
+        !product.has_variants &&
+        (product as Product & { default_variant_id?: string | null })
+          .default_variant_id && (
+          <BatchesSection
+            variantId={
+              (product as Product & { default_variant_id: string })
+                .default_variant_id
+            }
+            productName={product.name}
+          />
+        )}
 
       {/* Packs (single-variant only — v2.7 multi-variant packs are a future ticket) */}
       {showPacksSection && !product.has_variants && (

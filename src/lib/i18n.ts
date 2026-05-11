@@ -31,7 +31,8 @@ void i18n
       'units',
       'tiers',
       'variant_attributes',
-      'variants'
+      'variants',
+      'batches'
     ],
     detection: {
       order: ['localStorage', 'navigator'],
