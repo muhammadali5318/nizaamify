@@ -164,31 +164,31 @@ Spec: `MVP_v2.6_VARIANT_REFACTOR.md`
 - ✅ Append v2.6 + v2.7 phase tracker to tasks.md
 
 ### Phase B — Schema migration
-- 🟦 §2.1 Create product_variants table + RLS + indexes
-- 🟦 §2.2 Backfill default variant per product (audit 1)
-- 🟦 §2.3-§2.5 Add variant_id columns + backfill + NOT NULL (audits 2-4)
-- 🟦 §2.7-§2.8 product_packs unique-index swap + sync_product_id_from_variant trigger
-- 🟦 §2.10 product_with_default_variant view
-- 🟦 §3.5 product_stock_display view rewritten on variants
-- 🟦 Regenerate database.ts
+- ✅ §2.1 Create product_variants table + RLS + indexes
+- ✅ §2.2 Backfill default variant per product (audit 1)
+- ✅ §2.3-§2.5 Add variant_id columns + backfill + NOT NULL (audits 2-4)
+- ✅ §2.7-§2.8 product_packs unique-index swap + sync_product_id_from_variant trigger
+- ✅ §2.10 product_with_default_variant view
+- ✅ §3.5 product_stock_display view rewritten on variants
+- ✅ Regenerate database.ts
 
 ### Phase C — Function rewrites
-- 🟦 record_sale (variant-aware, legacy product_id fallback)
-- 🟦 record_purchase (variant-aware, preserve v2.3 largest-remainder overhead)
-- 🟦 create_product_with_opening_stock (product + default variant in one tx)
-- 🟦 search_products (returns compat view rows)
-- 🟦 define_pack_inline / update_pack / deactivate_pack (default-variant resolution)
-- 🟦 Grants
+- ✅ record_sale (variant-aware, legacy product_id fallback)
+- ✅ record_purchase (variant-aware, preserve v2.3 largest-remainder overhead)
+- ✅ create_product_with_opening_stock (product + default variant in one tx)
+- ✅ search_products (returns compat view rows)
+- ✅ define_pack_inline / update_pack / deactivate_pack (default-variant resolution)
+- ✅ Grants
 
 ### Phase D — Frontend
-- 🟦 Regenerate types
-- 🟦 Fix anything that breaks (ProductSearchRow shape, hooks)
+- ✅ Regenerate types
+- ✅ Fix anything that breaks (ProductSearchRow shape, hooks)
 
 ### Phase E — Verification
-- 🟦 Audit queries §6 (all six must return zero rows)
-- 🟦 Reconciliation §7 (variant stock sum = old product stock)
-- 🟦 5 ADRs per §14
-- 🟦 CLAUDE.md update
+- ✅ Audit queries §6 (all six must return zero rows)
+- ✅ Reconciliation §7 (variant stock sum = old product stock)
+- ✅ 5 ADRs per §14
+- ✅ CLAUDE.md update
 
 ---
 

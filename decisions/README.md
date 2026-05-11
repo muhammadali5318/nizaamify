@@ -30,3 +30,7 @@ Granularity: one ADR per *reversal of a PRD assumption* or *cross-cutting archit
 - [0019 — v2.5 product_categories entity replaces products.type](./0019-v25-product-categories-entity.md)
 - [0020 — v2.5 product detail routing pattern (full route + POS drawer)](./0020-v25-product-detail-routing-pattern.md)
 - [0021 — v2.5 eye icon as primary row action; Actions column dropped](./0021-v25-eye-icon-and-actions-column-drop.md)
+- [0022 — v2.6 product-template / variant architecture](./0022-v26-product-template-variant-architecture.md)
+- [0023 — v2.6 synthetic default variant for single-variant products](./0023-v26-default-variant-pattern.md)
+- [0024 — v2.6 deprecate (don't drop) legacy product_id and products.* columns](./0024-v26-deprecate-without-drop-product-id-columns.md)
+- [0025 — v2.6 `record_sale` / `record_purchase` accept variant_id OR product_id](./0025-v26-variant-id-or-product-id-rpc-contract.md)
