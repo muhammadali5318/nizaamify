@@ -2538,11 +2538,14 @@ export type Database = {
           p_base_unit_code?: string
           p_category_id: string
           p_description?: string
+          p_expiry_alert_days?: number
+          p_has_batches?: boolean
           p_is_scan_only?: boolean
           p_name: string
           p_opening_cost?: number
           p_opening_stock?: number
-          p_price: number
+          p_price?: number
+          p_warranty_alert_days?: number
         }
         Returns: {
           product_id: string
@@ -2554,11 +2557,14 @@ export type Database = {
           p_attribute_ids?: string[]
           p_base_unit_code?: string
           p_category_id: string
-          p_default_price: number
+          p_default_price?: number
           p_description?: string
+          p_expiry_alert_days?: number
+          p_has_batches?: boolean
           p_is_scan_only?: boolean
           p_name: string
           p_variants?: Json
+          p_warranty_alert_days?: number
         }
         Returns: {
           product_id: string

@@ -179,6 +179,9 @@ export default function NewPurchasePage() {
   const [purchaseDate, setPurchaseDate] = useState(todayISO())
   const [supplierId, setSupplierId] = useState<string | null>(null)
   const [note, setNote] = useState('')
+  // v2.8.1: "This is opening stock" flag for the first stock-in of a
+  // product. Just toggles purchases.is_opening = true on submission.
+  const [isOpening, setIsOpening] = useState(false)
   const [lines, setLines] = useState<LineState[]>([emptyLine()])
   const [overhead, setOverhead] = useState<OverheadState[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -521,7 +524,8 @@ export default function NewPurchasePage() {
         purchase_date: purchaseDate,
         note: note.trim() || null,
         items,
-        overhead_items: overheadItems
+        overhead_items: overheadItems,
+        is_opening: isOpening
       })
       notify.success(t('purchases:messages.saved'))
       navigate(paths.gotoPurchase(id))
@@ -604,6 +608,28 @@ export default function NewPurchasePage() {
               inputProps={{ maxLength: 1000 }}
             />
           </Field>
+
+          {/* v2.8.1 — "This is opening stock" checkbox. Audit-only flag;
+           *  flips purchases.is_opening = true so dashboards / reports
+           *  can identify the first delivery for each product. */}
+          <Box>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size='small'
+                  checked={isOpening}
+                  onChange={(e) => setIsOpening(e.target.checked)}
+                />
+              }
+              label={t('purchases:form.is_opening_label')}
+            />
+            <Typography
+              variant='caption'
+              sx={{ display: 'block', color: 'var(--text-muted)' }}
+            >
+              {t('purchases:form.is_opening_help')}
+            </Typography>
+          </Box>
         </Stack>
       </Card>
 

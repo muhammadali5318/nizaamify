@@ -309,3 +309,30 @@ Spec: `MVP_v2.7_VARIANT_UI.md`
 - ✅ Final audit gate: v2.6 §6 audits 1-6 + v2.6c audits 7-9 + v2.8 §9 audits 1/4/5 — all return expected values (zeros + immutable trigger present).
 - ✅ `npm run type-check` clean. `npm run lint` clean. `npm run build` clean.
 - 🟦 Spec §10 manual smoke matrix (cosmetics, multi-batch FEFO, override, supplier warranty alerts, write-off, cross-shop) — code-level checks green; live-data walkthrough is a human task.
+
+---
+
+## v2.8.1 — Pricing/stock decoupled from product creation — 2026-05-12
+
+Per `MVP_v2.8.1_PRICING_DECOUPLE.md`. Migration 0060 + frontend rework. The v2.8 "save first, then edit-toggle, then stock-in" three-step flow collapses into "save (with has_batches checked), then stock-in."
+
+### Phase B — schema/RPC (migration 0060)
+- ✅ DROP+CREATE `create_product_with_opening_stock`: `p_price` defaults null; new params `p_has_batches`, `p_expiry_alert_days`, `p_warranty_alert_days`.
+- ✅ DROP+CREATE `create_product_with_variants`: same treatment.
+- ✅ New raise `cannot_seed_opening_stock_for_batched_product` when has_batches=true AND opening_stock>0 (batched products must go through stock-in).
+- ✅ Schema columns untouched — `product_variants.price` was already nullable; `stock`/`avg_cost` default to 0.
+
+### Phase C — frontend
+- ✅ Product create form: drops opening_stock + opening_cost inputs; selling price input becomes optional (blank → null); new Inventory-behavior section with has_batches toggle + alert window overrides + banner explaining stock-in flow.
+- ✅ VariantMatrixBuilder: drops `defaultOpeningCost` prop, drops per-row Opening qty column, drops `opening_stock` from `MatrixVariantSpec` and `VariantMatrixState.overrides`.
+- ✅ ProductFormPage EditForm + ProductEditDialog: keep working with the new optional-price schema (was already aligned in v2.8 polish).
+- ✅ AddProductInlineDialog: stops passing opening_stock/opening_cost (no UI surface to set them).
+- ✅ NewPurchasePage: new "This is opening stock" checkbox just above the Items section. Wires `is_opening` through `useRecordPurchase`.
+- ✅ ProductDetailBody: null-price banner with "Set selling price" CTA when `product.price IS NULL && !has_variants`.
+- ✅ i18n additions in `products` + `purchases` (en + ur) — `price_optional_help`, `price_placeholder`, `set_price`, `price_not_set_banner`, `inventory_behavior.stock_in_first_hint`, `form.is_opening_label`, `form.is_opening_help`.
+
+### Phase D — verification
+- ✅ ADR filed: `decisions/2026-05-12-pricing-decoupled-from-product-creation.md`.
+- ✅ All audit invariants green (v2.6 + v2.6c + v2.8 sets all pass; +1 new check: zero sale_items rows where variant.price IS NULL).
+- ✅ `npm run type-check` clean. `npm run lint` clean. `npm run build` clean.
+- ✅ CLAUDE.md updated (v2.8.1 PRD entry + gotcha).

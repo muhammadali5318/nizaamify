@@ -122,6 +122,30 @@ export default function ProductDetailBody({
         </Stack>
       </Card>
 
+      {/* v2.8.1: null-price banner. Selling price is optional at create
+       *  time; POS hides the product until set. Surface this prominently
+       *  so the user knows what to do. */}
+      {product.price === null && !product.has_variants && onEdit && (
+        <Card>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1.5}
+            alignItems={{ xs: 'stretch', sm: 'center' }}
+            justifyContent='space-between'
+          >
+            <Typography
+              variant='body2'
+              sx={{ color: 'var(--status-warning-text)', fontWeight: 500 }}
+            >
+              {t('products:fields.price_not_set_banner')}
+            </Typography>
+            <Button variant='secondary' size='sm' onClick={onEdit}>
+              {t('products:fields.set_price')}
+            </Button>
+          </Stack>
+        </Card>
+      )}
+
       {/* Fields */}
       <Card>
         <Stack spacing={1.5}>
@@ -141,7 +165,11 @@ export default function ProductDetailBody({
             <>
               <DetailRow
                 label={t('products:detail.field.sell_price')}
-                value={formatPKR(Number(product.price ?? 0), locale)}
+                value={
+                  product.price === null
+                    ? '—'
+                    : formatPKR(Number(product.price), locale)
+                }
               />
               <DetailRow
                 label={t('products:detail.field.stock')}

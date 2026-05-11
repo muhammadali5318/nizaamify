@@ -13,18 +13,17 @@ export const createProductSchema = (t: TFunction) =>
       .string()
       .uuid({ message: t('products:errors.category_required') }),
     description: z.string().max(1000).nullable(),
+    // v2.8.1: price is optional at create time. null means "set later via
+    // the product detail page" — POS hides the product until set.
     price: z
-      .number({ invalid_type_error: t('products:errors.price_invalid') })
-      .nonnegative(t('products:errors.price_invalid')),
-    opening_stock: z
-      .number({
-        invalid_type_error: t('products:errors.opening_stock_invalid')
-      })
-      .int()
-      .nonnegative(t('products:errors.opening_stock_invalid')),
-    opening_cost: z
-      .number({ invalid_type_error: t('products:errors.opening_cost_invalid') })
-      .nonnegative(t('products:errors.opening_cost_invalid')),
+      .union([
+        z
+          .number({ invalid_type_error: t('products:errors.price_invalid') })
+          .nonnegative(t('products:errors.price_invalid')),
+        z.null()
+      ])
+      .nullable()
+      .optional(),
     is_scan_only: z.boolean().default(false),
     has_batches: z.boolean().default(false),
     expiry_alert_days: optionalPositiveInt.optional(),
@@ -38,9 +37,18 @@ export const editProductSchema = (t: TFunction) =>
       .string()
       .uuid({ message: t('products:errors.category_required') }),
     description: z.string().max(1000).nullable(),
+    // v2.8.1: same — price is optional. Saving a blank price clears it
+    // (sets variant.price = null), surfacing the "Set selling price"
+    // banner on the product detail page.
     price: z
-      .number({ invalid_type_error: t('products:errors.price_invalid') })
-      .nonnegative(t('products:errors.price_invalid')),
+      .union([
+        z
+          .number({ invalid_type_error: t('products:errors.price_invalid') })
+          .nonnegative(t('products:errors.price_invalid')),
+        z.null()
+      ])
+      .nullable()
+      .optional(),
     is_active: z.boolean(),
     is_scan_only: z.boolean().default(false),
     has_batches: z.boolean().default(false),

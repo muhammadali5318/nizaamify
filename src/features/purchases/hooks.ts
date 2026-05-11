@@ -63,6 +63,10 @@ export type RecordPurchaseInput = {
     amount: number
     description?: string | null
   }[]
+  /** v2.8.1: when true, the resulting purchase row carries is_opening=true.
+   * Used for the first stock-in of a product (catalog upload → first
+   * delivery). Audit-only flag — `record_purchase` math is unchanged. */
+  is_opening?: boolean
 }
 
 export function useRecordPurchase() {
@@ -81,7 +85,7 @@ export function useRecordPurchase() {
             ? object
             : never,
         p_overhead_items: input.overhead_items as unknown as object,
-        p_is_opening: false
+        p_is_opening: input.is_opening ?? false
       })
       if (error) throw error
       return data as string

@@ -400,29 +400,35 @@ export type CreateProductInput = {
   name: string
   category_id: string
   description: string | null
-  price: number
-  opening_stock: number
-  opening_cost: number
+  /** v2.8.1: selling price is now optional at create time. null → variant
+   * created unsellable; POS hides it; product detail shows a "Set selling
+   * price" banner. */
+  price: number | null
   is_scan_only: boolean
+  /** v2.8.1: batch tracking can be enabled at create time. */
+  has_batches?: boolean
+  expiry_alert_days?: number | null
+  warranty_alert_days?: number | null
 }
 
 export function useCreateProduct() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (values: CreateProductInput) => {
-      // v2.6: RPC returns table(product_id, variant_id); is_scan_only is a
-      // first-class parameter now, so the post-insert UPDATE is gone.
+      // v2.8.1: opening stock + opening cost are removed from product
+      // creation. Stock-in is the only path that adds inventory.
       const { data, error } = await supabase.rpc(
         'create_product_with_opening_stock',
         {
           p_name: values.name,
           p_category_id: values.category_id,
           p_description: values.description ?? undefined,
-          p_price: values.price,
-          p_opening_stock: values.opening_stock,
-          p_opening_cost:
-            values.opening_stock > 0 ? values.opening_cost : undefined,
-          p_is_scan_only: values.is_scan_only
+          p_price: values.price ?? undefined,
+          p_opening_stock: 0,
+          p_is_scan_only: values.is_scan_only,
+          p_has_batches: values.has_batches ?? false,
+          p_expiry_alert_days: values.expiry_alert_days ?? undefined,
+          p_warranty_alert_days: values.warranty_alert_days ?? undefined
         }
       )
       if (error) throw error
@@ -453,17 +459,22 @@ export type UpdateProductInput = {
 export type CreateProductWithVariantsInput = {
   name: string
   category_id: string
-  default_price: number
+  /** v2.8.1: optional at create time — set blank and price the variants
+   * later via the product detail page. */
+  default_price: number | null
   is_scan_only: boolean
   attribute_ids: string[]
   variants: {
     attribute_value_ids: string[]
     sku?: string
-    price?: number
-    opening_stock?: number
-    opening_cost?: number
+    /** Per-row override. Falls back to default_price; null if both omitted. */
+    price?: number | null
   }[]
   description?: string | null
+  /** v2.8.1: batch tracking + alert window overrides */
+  has_batches?: boolean
+  expiry_alert_days?: number | null
+  warranty_alert_days?: number | null
 }
 
 export function useCreateProductWithVariants() {
@@ -475,11 +486,14 @@ export function useCreateProductWithVariants() {
         {
           p_name: input.name,
           p_category_id: input.category_id,
-          p_default_price: input.default_price,
+          p_default_price: input.default_price ?? undefined,
           p_is_scan_only: input.is_scan_only,
           p_attribute_ids: input.attribute_ids,
           p_variants: input.variants as unknown as never,
-          p_description: input.description ?? undefined
+          p_description: input.description ?? undefined,
+          p_has_batches: input.has_batches ?? false,
+          p_expiry_alert_days: input.expiry_alert_days ?? undefined,
+          p_warranty_alert_days: input.warranty_alert_days ?? undefined
         }
       )
       if (error) throw error

@@ -81,10 +81,11 @@ export default function ProductFormPage() {
               description: values.description?.trim()
                 ? values.description
                 : null,
-              price: values.price,
-              opening_stock: values.opening_stock,
-              opening_cost: values.opening_cost,
-              is_scan_only: values.is_scan_only
+              price: values.price ?? null,
+              is_scan_only: values.is_scan_only,
+              has_batches: values.has_batches,
+              expiry_alert_days: values.expiry_alert_days ?? null,
+              warranty_alert_days: values.warranty_alert_days ?? null
             })
             notify.success(t('products:messages.saved'))
             navigate(paths.products)
@@ -115,9 +116,12 @@ export default function ProductFormPage() {
             name: values.name,
             category_id: values.category_id,
             description: values.description?.trim() ? values.description : null,
-            price: values.price,
+            price: (values.price ?? 0) as number,
             is_active: values.is_active,
-            is_scan_only: values.is_scan_only
+            is_scan_only: values.is_scan_only,
+            has_batches: values.has_batches,
+            expiry_alert_days: values.expiry_alert_days ?? null,
+            warranty_alert_days: values.warranty_alert_days ?? null
           })
           notify.success(t('products:messages.saved'))
           navigate(paths.products)
@@ -151,8 +155,7 @@ function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
     included: {},
     overrides: {}
   })
-  const [defaultPrice, setDefaultPrice] = useState('0')
-  const [defaultOpeningCost, setDefaultOpeningCost] = useState('')
+  const [defaultPrice, setDefaultPrice] = useState('')
   const [matrixError, setMatrixError] = useState<string | null>(null)
 
   const {
@@ -169,10 +172,11 @@ function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
       name: '',
       category_id: '',
       description: '',
-      price: 0,
-      opening_stock: 0,
-      opening_cost: 0,
-      is_scan_only: false
+      price: null,
+      is_scan_only: false,
+      has_batches: false,
+      expiry_alert_days: null,
+      warranty_alert_days: null
     }
   })
 
@@ -206,63 +210,54 @@ function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
       return
     }
 
-    const priceNum = Number(defaultPrice)
-    const openingCostNum =
-      defaultOpeningCost === '' ? NaN : Number(defaultOpeningCost)
+    // v2.8.1: opening stock and opening cost no longer flow through the
+    // matrix builder. Variants are created without inventory; stock is
+    // added later via stock-in.
+    const priceNum = defaultPrice === '' ? null : Number(defaultPrice)
+    if (priceNum !== null && (!Number.isFinite(priceNum) || priceNum < 0)) {
+      setMatrixError(t('products:errors.price_invalid'))
+      return
+    }
     const values = getValues()
 
-    // Pre-flight: if any included variant has opening_stock > 0, we need an
-    // opening cost per unit. The create_product_with_variants RPC raises
-    // opening_cost_required_when_stock_positive on this path; catching it
-    // client-side gives a friendlier message + skips the round trip.
     const variantsToCreate = included.map((key) => {
       const override = matrixState.overrides[key] ?? {}
-      const qtyStr = override.opening_stock ?? '0'
-      const qty = qtyStr === '' ? 0 : Number(qtyStr)
-      return { key, override, qty }
+      return { key, override }
     })
-    const anyWithStock = variantsToCreate.some(
-      (v) => Number.isFinite(v.qty) && v.qty > 0
-    )
-    if (anyWithStock) {
-      if (!Number.isFinite(openingCostNum) || openingCostNum <= 0) {
-        setMatrixError(
-          t(
-            !Number.isFinite(openingCostNum)
-              ? 'variants:errors.opening_cost_required'
-              : 'variants:errors.opening_cost_must_be_positive'
-          )
-        )
-        return
-      }
-    }
 
     try {
-      const variants = variantsToCreate.map(({ key, override, qty }) => {
+      const variants = variantsToCreate.map(({ key, override }) => {
         const valueIds = key.split('|')
-        const variantPrice =
+        const overridePrice =
           override.price !== undefined && override.price !== ''
             ? Number(override.price)
+            : null
+        const variantPrice =
+          overridePrice !== null && Number.isFinite(overridePrice)
+            ? overridePrice
             : priceNum
         return {
           attribute_value_ids: valueIds,
           sku: override.sku ?? undefined,
-          price: Number.isFinite(variantPrice) ? variantPrice : 0,
-          opening_stock: Number.isFinite(qty) && qty > 0 ? qty : 0,
-          ...(Number.isFinite(qty) && qty > 0
-            ? { opening_cost: openingCostNum }
-            : {})
+          price:
+            variantPrice !== null && Number.isFinite(variantPrice)
+              ? variantPrice
+              : null
         }
       })
 
       const res = await createWithVariants.mutateAsync({
         name: values.name,
         category_id: values.category_id,
-        default_price: Number.isFinite(priceNum) ? priceNum : 0,
+        default_price:
+          priceNum !== null && Number.isFinite(priceNum) ? priceNum : null,
         is_scan_only: values.is_scan_only,
         attribute_ids: matrixState.attributeIds,
         variants,
-        description: values.description?.trim() ? values.description : null
+        description: values.description?.trim() ? values.description : null,
+        has_batches: values.has_batches,
+        expiry_alert_days: values.expiry_alert_days ?? null,
+        warranty_alert_days: values.warranty_alert_days ?? null
       })
       notify.success(t('products:messages.saved'))
       navigate(paths.gotoProduct(res.product_id))
@@ -335,54 +330,14 @@ function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
             </Field>
 
             {!hasVariants && (
-              <>
-                <Field
-                  label={t('products:fields.selling_price')}
-                  error={errors.price?.message}
-                >
-                  <Input
-                    type='number'
-                    inputProps={{ step: '0.01', min: 0, inputMode: 'numeric' }}
-                    {...register('price', { valueAsNumber: true })}
-                  />
-                </Field>
-
-                <Box>
-                  <Typography
-                    variant='overline'
-                    sx={{
-                      color: 'var(--text-muted)',
-                      display: 'block',
-                      mb: 1,
-                      textAlign: 'start'
-                    }}
-                  >
-                    {t('products:fields.opening_stock')}
-                  </Typography>
-                  <Divider sx={{ borderColor: 'var(--border-subtle)' }} />
-                </Box>
-
-                <Typography
-                  variant='caption'
-                  sx={{ color: 'var(--text-muted)' }}
-                >
-                  {t('products:fields.opening_help')}
-                </Typography>
-
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <Controller
+                control={control}
+                name='price'
+                render={({ field }) => (
                   <Field
-                    label={t('products:fields.opening_qty')}
-                    error={errors.opening_stock?.message}
-                  >
-                    <Input
-                      type='number'
-                      inputProps={{ step: '1', min: 0, inputMode: 'numeric' }}
-                      {...register('opening_stock', { valueAsNumber: true })}
-                    />
-                  </Field>
-                  <Field
-                    label={t('products:fields.opening_cost')}
-                    error={errors.opening_cost?.message}
+                    label={t('products:fields.selling_price')}
+                    hint={t('products:fields.price_optional_help')}
+                    error={errors.price?.message}
                   >
                     <Input
                       type='number'
@@ -391,11 +346,17 @@ function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
                         min: 0,
                         inputMode: 'numeric'
                       }}
-                      {...register('opening_cost', { valueAsNumber: true })}
+                      placeholder={t('products:fields.price_placeholder')}
+                      value={field.value ?? ''}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === '' ? null : Number(e.target.value)
+                        )
+                      }
                     />
                   </Field>
-                </Stack>
-              </>
+                )}
+              />
             )}
 
             {hasVariants && (
@@ -407,12 +368,106 @@ function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
                   productNameForSku={productName ?? ''}
                   defaultPrice={defaultPrice}
                   onDefaultPriceChange={setDefaultPrice}
-                  defaultOpeningCost={defaultOpeningCost}
-                  onDefaultOpeningCostChange={setDefaultOpeningCost}
                   errorText={matrixError}
                 />
               </>
             )}
+
+            {/* v2.8.1: Inventory behavior section — batch tracking is set
+             *  at create time now; stock and cost come in via stock-in. */}
+            <Divider sx={{ borderColor: 'var(--border-subtle)' }} />
+            <Stack spacing={1.5}>
+              <Typography
+                variant='overline'
+                sx={{ color: 'var(--text-muted)' }}
+              >
+                {t('products:inventory_behavior.section_title')}
+              </Typography>
+              <Controller
+                control={control}
+                name='has_batches'
+                render={({ field }) => (
+                  <Field
+                    hint={t('products:inventory_behavior.has_batches_help')}
+                  >
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={!!field.value}
+                          onChange={(e) => field.onChange(e.target.checked)}
+                        />
+                      }
+                      label={t(
+                        'products:inventory_behavior.has_batches_toggle'
+                      )}
+                    />
+                  </Field>
+                )}
+              />
+              {watch('has_batches') && (
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                  <Controller
+                    control={control}
+                    name='expiry_alert_days'
+                    render={({ field }) => (
+                      <Field
+                        label={t(
+                          'products:inventory_behavior.expiry_alert_days_label'
+                        )}
+                        hint={t(
+                          'products:inventory_behavior.expiry_alert_days_help',
+                          { default: 30 }
+                        )}
+                      >
+                        <Input
+                          type='number'
+                          inputProps={{ min: 1, step: 1 }}
+                          value={field.value ?? ''}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ''
+                                ? null
+                                : Number(e.target.value)
+                            )
+                          }
+                        />
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name='warranty_alert_days'
+                    render={({ field }) => (
+                      <Field
+                        label={t(
+                          'products:inventory_behavior.warranty_alert_days_label'
+                        )}
+                        hint={t(
+                          'products:inventory_behavior.warranty_alert_days_help',
+                          { default: 30 }
+                        )}
+                      >
+                        <Input
+                          type='number'
+                          inputProps={{ min: 1, step: 1 }}
+                          value={field.value ?? ''}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ''
+                                ? null
+                                : Number(e.target.value)
+                            )
+                          }
+                        />
+                      </Field>
+                    )}
+                  />
+                </Stack>
+              )}
+              <Banner variant='info'>
+                {t('products:inventory_behavior.stock_in_first_hint')}
+              </Banner>
+            </Stack>
 
             <Stack direction='row' spacing={1.5} justifyContent='flex-end'>
               <Button
@@ -455,6 +510,9 @@ type EditFormProps = {
         is_scan_only: boolean
         avg_cost: number
         last_purchase_cost: number | null
+        has_batches?: boolean | null
+        expiry_alert_days?: number | null
+        warranty_alert_days?: number | null
       }
     | null
     | undefined
@@ -484,9 +542,12 @@ function EditForm({
       name: '',
       category_id: '',
       description: '',
-      price: 0,
+      price: null,
       is_active: true,
-      is_scan_only: false
+      is_scan_only: false,
+      has_batches: false,
+      expiry_alert_days: null,
+      warranty_alert_days: null
     }
   })
 
@@ -496,9 +557,12 @@ function EditForm({
         name: existing.name,
         category_id: existing.category_id,
         description: existing.description ?? '',
-        price: Number(existing.price ?? 0),
+        price: existing.price === null ? null : Number(existing.price),
         is_active: existing.is_active,
-        is_scan_only: existing.is_scan_only ?? false
+        is_scan_only: existing.is_scan_only ?? false,
+        has_batches: existing.has_batches ?? false,
+        expiry_alert_days: existing.expiry_alert_days ?? null,
+        warranty_alert_days: existing.warranty_alert_days ?? null
       })
     }
   }, [existing, reset])

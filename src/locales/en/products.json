@@ -15,6 +15,10 @@
     "description_placeholder": "Optional notes about this product",
     "price": "Selling price (PKR)",
     "selling_price": "Selling price",
+    "price_optional_help": "Optional — leave blank to set later. POS will hide the product until a price is set.",
+    "price_placeholder": "Optional",
+    "set_price": "Set selling price",
+    "price_not_set_banner": "Selling price not set — POS won't allow sales until it's set.",
     "cost": "Cost (PKR)",
     "initial_cost": "Initial cost (PKR)",
     "avg_cost": "Avg cost",
@@ -145,6 +149,7 @@
     "expiry_alert_days_label": "Expiry alert window (days)",
     "expiry_alert_days_help": "Leave blank for shop default ({{default}} days)",
     "warranty_alert_days_label": "Warranty alert window (days)",
-    "warranty_alert_days_help": "Leave blank for shop default ({{default}} days)"
+    "warranty_alert_days_help": "Leave blank for shop default ({{default}} days)",
+    "stock_in_first_hint": "Stock and cost are captured at stock-in time. Pick this product on the stock-in form and check \"This is opening stock\" for the first delivery."
   }
 }
