@@ -313,11 +313,27 @@ export default function ProductTable({
             header: t('products:fields.avg_cost'),
             align: 'end' as const,
             hideOnMobile: true,
-            cell: (row: ProductSearchRow) => (
-              <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
-                {formatPKR(Number(row.avg_cost), locale)}
-              </Typography>
-            )
+            cell: (row: ProductSearchRow) => {
+              // v2.7: multi-variant products have no product-level avg_cost —
+              // each variant has its own. The compat view's left-join returns
+              // null here, which formatPKR(Number(null)) would render as
+              // "Rs 0.00" — misleading. Show "—" instead.
+              if (row.has_variants) {
+                return (
+                  <Typography
+                    variant='body2'
+                    sx={{ color: 'var(--text-muted)' }}
+                  >
+                    —
+                  </Typography>
+                )
+              }
+              return (
+                <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
+                  {formatPKR(Number(row.avg_cost), locale)}
+                </Typography>
+              )
+            }
           }
         ]
       : []),
@@ -328,13 +344,25 @@ export default function ProductTable({
             header: t('products:fields.last_purchase_cost'),
             align: 'end' as const,
             hideOnMobile: true,
-            cell: (row: ProductSearchRow) => (
-              <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
-                {row.last_purchase_cost === null
-                  ? '—'
-                  : formatPKR(Number(row.last_purchase_cost), locale)}
-              </Typography>
-            )
+            cell: (row: ProductSearchRow) => {
+              if (row.has_variants) {
+                return (
+                  <Typography
+                    variant='body2'
+                    sx={{ color: 'var(--text-muted)' }}
+                  >
+                    —
+                  </Typography>
+                )
+              }
+              return (
+                <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
+                  {row.last_purchase_cost === null
+                    ? '—'
+                    : formatPKR(Number(row.last_purchase_cost), locale)}
+                </Typography>
+              )
+            }
           }
         ]
       : []),
