@@ -246,23 +246,22 @@ export default function ProductTable({
       header: t('products:fields.stock'),
       align: 'start',
       cell: (row) => {
-        // v2.7: multi-variant rows show "N variants · X total" so the user
-        // sees both the family size AND the aggregate stock at a glance.
-        // X total = sum of every active variant's stock; clickthrough to the
-        // detail page reveals the per-variant breakdown.
+        // v2.7: multi-variant rows show total stock on top (the number a
+        // cashier scans for at a glance) and the variant-count badge below.
+        // Click the row to see the per-variant breakdown.
         if (row.has_variants) {
           const total = Number(row.total_stock_all_variants ?? 0)
           return (
-            <Stack direction='row' spacing={0.75} alignItems='center'>
+            <Stack spacing={0.25} alignItems='flex-start'>
+              <Typography variant='body1' sx={{ fontWeight: 600 }}>
+                {t('pos:picker.variants_total_in_stock', { count: total })}
+              </Typography>
               <Badge
                 variant='neutral'
                 label={t('pos:picker.variants_badge', {
                   count: row.variant_count ?? 0
                 })}
               />
-              <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
-                {t('pos:picker.variants_total_in_stock', { count: total })}
-              </Typography>
             </Stack>
           )
         }
