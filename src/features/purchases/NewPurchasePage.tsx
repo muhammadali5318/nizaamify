@@ -74,6 +74,11 @@ type LineState = {
   batch_manufactured?: string
   batch_expiry?: string
   batch_warranty_days?: string
+  /** v2.8: explicit "this product has no expiry" toggle. When true, the
+   * expiry date input is disabled + cleared. Leaving the date blank
+   * without checking the box is also fine — expiry is optional either
+   * way. The toggle is just a clearer declarative affordance for
+   * warranty-only products (LCD panels, batteries, accessories). */
   batch_no_expiry?: boolean
 }
 
@@ -447,12 +452,10 @@ export default function NewPurchasePage() {
           )
           continue
         }
-        if (!ln.batch_no_expiry && !(ln.batch_expiry ?? '').trim()) {
-          fieldErrors[`item_${i}_batch_expiry`] = t(
-            'batches:errors.batch_required_for_batched_product'
-          )
-          continue
-        }
+        // v2.8.3: expiry is genuinely optional. Either leave the date
+        // blank, or tick "No expiry date" to be explicit. Both produce
+        // a null expiry_date in the batch row. The toggle is just a
+        // clearer declarative affordance for warranty-only products.
         const warrantyDays = Number(ln.batch_warranty_days ?? '0')
         batchPayload = {
           batch_no: batchNo,
@@ -918,8 +921,8 @@ export default function NewPurchasePage() {
                     </Box>
                     <Box sx={{ flex: '1 1 150px' }}>
                       <Field
-                        label={t('batches:fields.expiry_date')}
-                        error={errors[`item_${i}_batch_expiry`]}
+                        label={t('batches:fields.expiry_date_optional')}
+                        hint={t('batches:fields.expiry_date_help')}
                       >
                         <TextField
                           type='date'
