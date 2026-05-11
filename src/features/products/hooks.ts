@@ -97,19 +97,28 @@ export function useProduct(id: string | undefined) {
       // variant. We fetch the product row + its default variant in one round
       // trip and overlay variant fields onto the top-level Product shape so
       // downstream consumers (detail page, edit modal) don't change.
+      // v2.7: include has_variants. For has_variants=true the inner-join on
+      // default variant returns zero rows, so we use a !left join — the
+      // variant fields then come back null and the detail page branches on
+      // has_variants to render the variants table instead.
       const { data, error } = await supabase
         .from('products')
         .select(
-          'id, shop_id, name, type, category_id, description, is_active, is_scan_only, base_unit_id, created_at, updated_at, default_variant:product_variants!inner(id, sku, stock, price, cost, avg_cost, last_purchase_cost)'
+          'id, shop_id, name, type, category_id, description, is_active, is_scan_only, base_unit_id, has_variants, created_at, updated_at, default_variant:product_variants(id, sku, stock, price, cost, avg_cost, last_purchase_cost, is_default, is_active)'
         )
         .eq('id', id)
-        .eq('product_variants.is_default', true)
-        .eq('product_variants.is_active', true)
         .single()
       if (error) throw error
-      const variant = Array.isArray(data.default_variant)
-        ? data.default_variant[0]
+      // Pick the is_default + is_active variant from the array
+      const variantsArr = Array.isArray(data.default_variant)
+        ? data.default_variant
         : data.default_variant
+          ? [data.default_variant]
+          : []
+      const variant =
+        variantsArr.find(
+          (v) => v.is_default === true && v.is_active === true
+        ) ?? null
       const merged = {
         ...data,
         default_variant_id: variant?.id ?? null,
@@ -126,6 +135,172 @@ export function useProduct(id: string | undefined) {
       // Remove the relational sub-object — downstream code reads flat fields.
       delete (merged as { default_variant?: unknown }).default_variant
       return merged
+    }
+  })
+}
+
+/**
+ * Variants for a multi-variant product, joined to their attribute combo and
+ * variant_label via the product_variant_full view (v2.7 §4.5).
+ */
+export type ProductVariantRow = {
+  variant_id: string
+  sku: string | null
+  stock: number
+  price: number | null
+  avg_cost: number
+  last_purchase_cost: number | null
+  variant_is_active: boolean
+  attributes: Record<string, string>
+  variant_label: string | null
+  is_default: boolean
+}
+
+export function useProductVariants(productId: string | undefined) {
+  return useQuery({
+    queryKey: ['product', 'variants', productId],
+    enabled: !!productId,
+    queryFn: async (): Promise<ProductVariantRow[]> => {
+      if (!productId) return []
+      const { data, error } = await supabase
+        .from('product_variant_full')
+        .select(
+          'variant_id, sku, stock, price, avg_cost, last_purchase_cost, variant_is_active, attributes, variant_label, is_default'
+        )
+        .eq('product_id', productId)
+        .order('variant_label', { ascending: true })
+      if (error) throw error
+      return (data ?? []).map((row) => ({
+        variant_id: row.variant_id ?? '',
+        sku: row.sku,
+        stock: row.stock ?? 0,
+        price: row.price === null ? null : Number(row.price),
+        avg_cost: Number(row.avg_cost ?? 0),
+        last_purchase_cost:
+          row.last_purchase_cost === null
+            ? null
+            : Number(row.last_purchase_cost),
+        variant_is_active: row.variant_is_active ?? false,
+        attributes: (row.attributes ?? {}) as Record<string, string>,
+        variant_label: row.variant_label,
+        is_default: row.is_default ?? false
+      }))
+    },
+    staleTime: 30_000
+  })
+}
+
+export function useUpdateVariantInline() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: {
+      variant_id: string
+      sku?: string | null
+      price?: number | null
+      is_active?: boolean
+    }) => {
+      const patch: Record<string, unknown> = {}
+      if (input.sku !== undefined) patch.sku = input.sku
+      if (input.price !== undefined) patch.price = input.price
+      if (input.is_active !== undefined) patch.is_active = input.is_active
+      const { error } = await supabase
+        .from('product_variants')
+        .update(patch)
+        .eq('id', input.variant_id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['product'] })
+      void qc.invalidateQueries({ queryKey: ['products'] })
+    }
+  })
+}
+
+/**
+ * Returns the ordered list of attribute ids the product's existing variants
+ * are composed of (ordered by attribute display_order). Used by AddVariantDialog
+ * so a new variant can show one value picker per existing attribute.
+ */
+export function useProductAttributeIds(productId: string | undefined) {
+  return useQuery({
+    queryKey: ['product', 'attribute_ids', productId],
+    enabled: !!productId,
+    queryFn: async (): Promise<string[]> => {
+      if (!productId) return []
+      // Pick any variant of the product; read its attribute_value_ids; join to
+      // variant_attribute_values → variant_attributes to get attribute ids.
+      const { data: oneVariant, error: vErr } = await supabase
+        .from('product_variants')
+        .select('id')
+        .eq('product_id', productId)
+        .eq('is_active', true)
+        .limit(1)
+        .maybeSingle()
+      if (vErr) throw vErr
+      if (!oneVariant) return []
+
+      const { data, error } = await supabase
+        .from('product_variant_attribute_values')
+        .select(
+          'attribute_value_id, value:variant_attribute_values!inner(attribute_id, attribute:variant_attributes!inner(id, display_order, name))'
+        )
+        .eq('variant_id', oneVariant.id)
+      if (error) throw error
+      type Row = {
+        attribute_value_id: string
+        value: {
+          attribute_id: string
+          attribute: { id: string; display_order: number; name: string }
+        } | null
+      }
+      const attrs = (data as unknown as Row[])
+        .map((r) => r.value?.attribute)
+        .filter(
+          (a): a is { id: string; display_order: number; name: string } => !!a
+        )
+      // Dedupe + order by display_order then name
+      const seen = new Set<string>()
+      attrs.sort(
+        (a, b) =>
+          a.display_order - b.display_order || a.name.localeCompare(b.name)
+      )
+      return attrs
+        .filter((a) => {
+          if (seen.has(a.id)) return false
+          seen.add(a.id)
+          return true
+        })
+        .map((a) => a.id)
+    },
+    staleTime: 30_000
+  })
+}
+
+export function useAddVariantToProduct() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: {
+      product_id: string
+      attribute_value_ids: string[]
+      sku?: string | null
+      price?: number | null
+      opening_stock?: number
+      opening_cost?: number | null
+    }) => {
+      const { data, error } = await supabase.rpc('add_variant_to_product', {
+        p_product_id: input.product_id,
+        p_attribute_value_ids: input.attribute_value_ids,
+        p_sku: input.sku ?? undefined,
+        p_price: input.price ?? undefined,
+        p_opening_stock: input.opening_stock ?? 0,
+        p_opening_cost: input.opening_cost ?? undefined
+      })
+      if (error) throw error
+      return data as string
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['product'] })
+      void qc.invalidateQueries({ queryKey: ['products'] })
     }
   })
 }

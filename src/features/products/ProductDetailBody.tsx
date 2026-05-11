@@ -17,6 +17,7 @@ import {
   type ProductStockBreakdown
 } from 'src/features/units/hooks'
 import PacksSection from './PacksSection'
+import VariantsTable from './VariantsTable'
 
 type Props = {
   product: Product
@@ -141,26 +142,30 @@ export default function ProductDetailBody({
             label={t('products:detail.field.category')}
             value={category?.name ?? '—'}
           />
-          <DetailRow
-            label={t('products:detail.field.sell_price')}
-            value={formatPKR(Number(product.price ?? 0), locale)}
-          />
-          <DetailRow
-            label={t('products:detail.field.stock')}
-            value={formatStockSummary(breakdown, product.stock)}
-          />
-          <DetailRow
-            label={t('products:detail.field.avg_cost')}
-            value={formatPKR(Number(product.avg_cost), locale)}
-          />
-          <DetailRow
-            label={t('products:detail.field.last_purchase')}
-            value={
-              product.last_purchase_cost === null
-                ? '—'
-                : formatPKR(Number(product.last_purchase_cost), locale)
-            }
-          />
+          {!product.has_variants && (
+            <>
+              <DetailRow
+                label={t('products:detail.field.sell_price')}
+                value={formatPKR(Number(product.price ?? 0), locale)}
+              />
+              <DetailRow
+                label={t('products:detail.field.stock')}
+                value={formatStockSummary(breakdown, product.stock)}
+              />
+              <DetailRow
+                label={t('products:detail.field.avg_cost')}
+                value={formatPKR(Number(product.avg_cost), locale)}
+              />
+              <DetailRow
+                label={t('products:detail.field.last_purchase')}
+                value={
+                  product.last_purchase_cost === null
+                    ? '—'
+                    : formatPKR(Number(product.last_purchase_cost), locale)
+                }
+              />
+            </>
+          )}
           <DetailRow
             label={t('products:detail.field.scan_only')}
             value={
@@ -186,8 +191,11 @@ export default function ProductDetailBody({
         </Stack>
       </Card>
 
-      {/* Packs */}
-      {showPacksSection && (
+      {/* Multi-variant: variants table replaces the single-variant stock/price card */}
+      {product.has_variants && <VariantsTable productId={product.id} />}
+
+      {/* Packs (single-variant only — v2.7 multi-variant packs are a future ticket) */}
+      {showPacksSection && !product.has_variants && (
         <Card>
           <PacksSection productId={product.id} productName={product.name} />
         </Card>
