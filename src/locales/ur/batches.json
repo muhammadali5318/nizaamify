@@ -6,8 +6,6 @@
     "batch_no": "بیچ نمبر",
     "manufactured_date": "تیاری کی تاریخ",
     "expiry_date": "ایکسپائری",
-    "expiry_date_optional": "ایکسپائری (اختیاری)",
-    "expiry_date_help": "اگر یہ مصنوع ایکسپائر نہیں ہوتی (مثلاً صرف وارنٹی والے الیکٹرانکس) تو خالی چھوڑ دیں۔",
     "supplier_warranty_days": "سپلائر وارنٹی (دن)",
     "qty_received": "موصول مقدار",
     "qty_remaining": "بقایا مقدار",

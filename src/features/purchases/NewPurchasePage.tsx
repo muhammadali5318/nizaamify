@@ -920,10 +920,7 @@ export default function NewPurchasePage() {
                       </Field>
                     </Box>
                     <Box sx={{ flex: '1 1 150px' }}>
-                      <Field
-                        label={t('batches:fields.expiry_date_optional')}
-                        hint={t('batches:fields.expiry_date_help')}
-                      >
+                      <Field label={t('batches:fields.expiry_date')}>
                         <TextField
                           type='date'
                           size='small'

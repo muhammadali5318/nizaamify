@@ -6,8 +6,6 @@
     "batch_no": "Batch no",
     "manufactured_date": "Manufactured",
     "expiry_date": "Expiry",
-    "expiry_date_optional": "Expiry (optional)",
-    "expiry_date_help": "Leave blank if this product doesn't expire (e.g. electronics with warranty only).",
     "supplier_warranty_days": "Supplier warranty (days)",
     "qty_received": "Qty received",
     "qty_remaining": "Qty remaining",
