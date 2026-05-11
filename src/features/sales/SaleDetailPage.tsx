@@ -26,6 +26,12 @@ type SaleItem = {
   line_discount_type?: 'percent' | 'fixed' | null
   line_discount_value?: number | null
   line_discount_amount?: number | null
+  /** v2.6b/c: server-computed values from sale_item_financials. */
+  allocated_sale_discount: number | string
+  line_value: number | string
+  line_revenue: number | string
+  line_cost: number | string
+  line_profit: number | string
   product?: { name?: string } | null
 }
 
@@ -67,18 +73,15 @@ export default function SaleDetailPage() {
   }
 
   const shortId = sale.id.slice(0, 8)
-  // Items subtotal AFTER line discounts. Sale discount is then applied to
-  // this number to produce the post-discount total. Spec §1 stacking order.
-  const itemsSubtotal = sale.items.reduce((s, it) => {
-    const sub = Number(it.price_at_sale) * it.qty
-    const lineDisc = Number(it.line_discount_amount ?? 0)
-    return s + (sub - lineDisc)
-  }, 0)
+  // v2.6c: every money value is read from the server (invoice_financials +
+  // sale_item_financials). No JS arithmetic on money. The invariant
+  // `outstanding = total - amount_paid` lives in invoice_financials.
+  const itemsSubtotal = sale.financials?.items_subtotal ?? 0
   const saleDiscount = Number(sale.sale_discount_amount ?? 0)
   const serviceCharge = Number(sale.service_charge ?? 0)
   const total = Number(sale.total)
   const amountPaid = Number(sale.amount_paid ?? 0)
-  const onCredit = Math.max(0, total - amountPaid)
+  const onCredit = sale.financials?.outstanding ?? 0
 
   // Discount line label (v2.3: tiers no longer drive discount; the only
   // source is the manual sale_discount popup snapshot on the invoice).
@@ -159,11 +162,8 @@ export default function SaleDetailPage() {
       id: 'line_total',
       header: t('sales:detail.line_total'),
       align: 'end',
-      cell: (it) => {
-        const sub = Number(it.price_at_sale) * it.qty
-        const lineDisc = Number(it.line_discount_amount ?? 0)
-        return formatPKR(sub - lineDisc, locale)
-      }
+      // v2.6c: line_value = price*qty − line_discount, server-computed.
+      cell: (it) => formatPKR(Number(it.line_value), locale)
     },
     {
       id: 'line_profit',
@@ -171,12 +171,9 @@ export default function SaleDetailPage() {
       align: 'end',
       hideOnMobile: true,
       cell: (it) => {
-        // Revenue is post-line-discount; cost stays unaffected by discounts.
-        const sub = Number(it.price_at_sale) * it.qty
-        const lineDisc = Number(it.line_discount_amount ?? 0)
-        const revenue = sub - lineDisc
-        const cost = Number(it.cost_at_sale) * it.qty
-        const profit = revenue - cost
+        // v2.6b: single source of truth is sale_item_financials.line_profit.
+        // No display-side arithmetic — read the server's computed value.
+        const profit = Number(it.line_profit)
         return (
           <Box
             component='span'

@@ -16,13 +16,13 @@
     "datetime": "Date & time",
     "customer": "Customer",
     "payment_type": "Payment",
-    "items": "Items",
     "service_charge": "Service",
     "total": "Total",
-    "notes": "Notes"
+    "notes": "Notes",
+    "actions": "Actions"
   },
   "partial_breakdown": "{{paid}} paid · {{credit}} on credit",
-  "has_notes_tooltip": "Has notes",
+  "view_details": "View sale details",
   "detail": {
     "title": "Sale #{{shortId}}",
     "back": "Back to sales",

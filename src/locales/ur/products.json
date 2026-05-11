@@ -1,6 +1,6 @@
 {
   "title": "مصنوعات",
-  "search_placeholder": "نام یا قسم سے مصنوعات تلاش کریں",
+  "search_placeholder": "نام سے مصنوعات تلاش کریں",
   "add_product": "مصنوعات شامل کریں",
   "new_product": "+ نئی مصنوعات",
   "edit_product": "مصنوعات میں ترمیم کریں",
@@ -9,9 +9,7 @@
   "no_results": "آپ کی تلاش سے کوئی مصنوعات میل نہیں کھاتیں",
   "fields": {
     "name": "نام",
-    "type": "قسم",
-    "type_placeholder": "مثلاً ایل سی ڈی پینل، بیٹری، چارجنگ کیبل",
-    "type_hint": "نام کے ساتھ مل کر مصنوعات کی منفرد شناخت کے لیے",
+    "category": "زمرہ",
     "description": "تفصیل",
     "description_optional": "تفصیل (اختیاری)",
     "description_placeholder": "اس مصنوعات کے بارے میں اختیاری نوٹس",
@@ -29,6 +27,22 @@
     "opening_help": "خریداری ریکارڈ کیے بغیر اپنا ابتدائی اسٹاک شامل کرنے کے لیے استعمال کریں۔",
     "is_scan_only": "صرف اسکین",
     "is_scan_only_help": "فعال ہونے پر، کیشئر کاؤنٹر پر مقدار ٹائپ نہیں کر سکتا — انہیں پیک اسکین یا کلک کرنا ہوگا۔ ایسی مصنوعات کے لیے مفید جہاں ٹکڑے کے حساب سے فروخت کی اجازت نہ ہو۔"
+  },
+  "category": {
+    "label": "زمرہ",
+    "placeholder": "زمرہ تلاش کریں…",
+    "add_new": "+ نیا زمرہ بنائیں",
+    "no_results": "کوئی مماثل زمرہ نہیں ملا",
+    "dialog_title": "نیا زمرہ",
+    "field_label": "نام",
+    "count_one": "{{count}} مصنوعات",
+    "count_other": "{{count}} مصنوعات",
+    "filter_all": "تمام زمرے",
+    "filter_label": "زمرہ",
+    "errors": {
+      "required": "زمرے کا نام ضروری ہے",
+      "duplicate": "اس نام کا زمرہ پہلے سے اس دکان میں موجود ہے۔"
+    }
   },
   "packs": {
     "section_title": "پیکس",
@@ -49,8 +63,7 @@
   },
   "badges": {
     "low_stock": "کم",
-    "out_of_stock": "ختم",
-    "default_type_warning": "منتقلی کے دوران قسم 'General' مقرر کی گئی — براہ کرم جائزہ لیں"
+    "out_of_stock": "ختم"
   },
   "helpers": {
     "cost_readonly": "اوسط قیمت اسٹاک ان ریکارڈ کرنے پر خود بخود اپ ڈیٹ ہو جاتی ہے۔",
@@ -58,7 +71,8 @@
     "name_normalized": "ناموں کا موازنہ بڑے/چھوٹے حروف اور اضافی خالی جگہ کو نظر انداز کر کے کیا جاتا ہے۔"
   },
   "tooltip": {
-    "avg_cost_explainer": "تمام اسٹاک ان پر مبنی وزنی اوسط قیمت۔ ہر اسٹاک ان پر خود بخود اپ ڈیٹ ہو جاتی ہے۔"
+    "avg_cost_explainer": "تمام اسٹاک ان پر مبنی وزنی اوسط قیمت۔ ہر اسٹاک ان پر خود بخود اپ ڈیٹ ہو جاتی ہے۔",
+    "view_details": "تفصیلات دیکھیں"
   },
   "actions": {
     "save": "محفوظ کریں",
@@ -66,23 +80,57 @@
     "restore": "بحال کریں",
     "back": "مصنوعات پر واپس جائیں",
     "edit": "ترمیم",
-    "delete": "حذف کریں"
+    "delete": "حذف کریں",
+    "view": "تفصیلات دیکھیں"
   },
   "errors": {
     "name_required": "مصنوعات کا نام ضروری ہے",
-    "type_required": "مصنوعات کی قسم ضروری ہے",
+    "category_required": "براہ کرم ایک زمرہ منتخب کریں",
     "price_invalid": "فروخت کی قیمت 0 یا اس سے زیادہ ہونی چاہیے",
     "cost_invalid": "قیمت خرید 0 یا اس سے زیادہ ہونی چاہیے",
     "stock_invalid": "اسٹاک 0 یا اس سے زیادہ ہونا چاہیے",
     "opening_stock_invalid": "ابتدائی مقدار 0 یا اس سے زیادہ ہونی چاہیے",
     "opening_cost_invalid": "ابتدائی قیمت 0 یا اس سے زیادہ ہونی چاہیے",
-    "duplicate_name_type": "اسی نام اور قسم کی مصنوعات پہلے سے موجود ہے۔",
+    "duplicate_name_category": "اس زمرے میں اسی نام کی مصنوعات پہلے سے موجود ہے۔",
     "save_failed": "مصنوعات محفوظ نہیں ہو سکیں۔ دوبارہ کوشش کریں۔"
   },
   "messages": {
     "saved": "مصنوعات محفوظ ہو گئیں",
+    "created": "مصنوعات بن گئیں",
     "archived": "مصنوعات محفوظ شدہ میں منتقل ہو گئیں",
     "restored": "مصنوعات بحال ہو گئیں"
+  },
+  "detail": {
+    "title": "مصنوعات کی تفصیلات",
+    "loading": "لوڈ ہو رہا ہے…",
+    "not_found": "مصنوعات نہیں ملیں۔",
+    "section_fields": "تفصیلات",
+    "section_packs": "پیکس",
+    "section_activity": "حالیہ سرگرمی",
+    "field": {
+      "name": "نام",
+      "category": "زمرہ",
+      "sell_price": "فروخت کی قیمت",
+      "stock": "اسٹاک",
+      "avg_cost": "اوسط قیمت",
+      "last_purchase": "آخری خریداری",
+      "scan_only": "صرف اسکین",
+      "scan_only_yes": "ہاں",
+      "scan_only_no": "نہیں",
+      "created": "بنایا گیا",
+      "last_updated": "آخری اپ ڈیٹ",
+      "description": "تفصیل"
+    },
+    "edit_button": "ترمیم کریں",
+    "edit_dialog_title": "مصنوعات میں ترمیم",
+    "add_to_cart": "+ کارٹ میں شامل کریں",
+    "activity": {
+      "stock_in": "اسٹاک ان {{date}} — +{{qty}} {{unit}} از {{supplier}}",
+      "stock_in_no_supplier": "اسٹاک ان {{date}} — +{{qty}} {{unit}}",
+      "sale": "فروخت {{date}} — {{qty}} {{unit}} بنام {{customer}}",
+      "sale_walkin": "فروخت {{date}} — {{qty}} {{unit}}",
+      "empty": "ابھی کوئی سرگرمی نہیں۔"
+    }
   },
   "pagination": {
     "showing": "{{total}} میں سے {{from}}–{{to}} دکھایا جا رہا ہے",

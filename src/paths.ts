@@ -51,6 +51,7 @@ export const paths = {
   settings: '/settings',
   support: '/settings/support',
   tiers: '/settings/tiers',
+  variantAttributes: '/settings/variant-attributes',
 
   notFound: '/404'
 }

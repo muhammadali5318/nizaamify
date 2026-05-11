@@ -28,6 +28,8 @@ import {
   type PurchaseLineInput
 } from './hooks'
 import CreatePackDialog from './CreatePackDialog'
+import StockInVariantMatrix, { type MatrixLine } from './StockInVariantMatrix'
+import { supabase } from 'src/lib/supabase'
 
 const todayISO = () => new Date().toISOString().slice(0, 10)
 
@@ -43,6 +45,16 @@ type LastEdited = 'qty' | 'cost' | 'total'
 
 type LineState = {
   product_id: string
+  /** v2.7: when the picked product has_variants, the user picks one of its
+   * variants here. Otherwise empty; the server resolves product_id → default. */
+  variant_id: string
+  /** v2.7 matrix UX: display label like "Red / M" for variant lines emitted
+   * by the matrix dialog. Empty for single-variant lines. Cosmetic only. */
+  variant_label?: string
+  /** v2.7: true after the user picks a multi-variant product. Drives the
+   * "Configure variants" button + suppresses the unit selector & qty/cost
+   * inputs on the placeholder line until the matrix is applied. */
+  is_multi_variant_placeholder?: boolean
   /** Loaded async on product change. Empty until then. */
   available_units: PurchasableUnit[]
   /** Index into available_units. Defaults to is_default_purchase pack else base. */
@@ -62,6 +74,9 @@ type OverheadState = {
 
 const emptyLine = (): LineState => ({
   product_id: '',
+  variant_id: '',
+  variant_label: '',
+  is_multi_variant_placeholder: false,
   available_units: [],
   selected_unit_idx: 0,
   qty: '',
@@ -161,6 +176,15 @@ export default function NewPurchasePage() {
     productName: string
   } | null>(null)
 
+  /** v2.7: multi-variant matrix dialog state. Opens on multi-variant product
+   * pick; Apply expands into N stock-in lines (one per variant) in place. */
+  const [matrixDialog, setMatrixDialog] = useState<{
+    open: boolean
+    lineIndex: number
+    productId: string
+    productName: string
+  } | null>(null)
+
   const itemsSubtotal = useMemo(
     () =>
       lines.reduce((s, ln) => {
@@ -200,13 +224,42 @@ export default function NewPurchasePage() {
     if (!id) {
       setLine(i, {
         product_id: '',
+        variant_id: '',
+        variant_label: '',
+        is_multi_variant_placeholder: false,
         available_units: [],
         selected_unit_idx: 0
       })
       return
     }
-    setLine(i, { product_id: id })
+    // Reset variant_id on every product change — the user picks per-product.
+    setLine(i, {
+      product_id: id,
+      variant_id: '',
+      variant_label: '',
+      is_multi_variant_placeholder: false
+    })
+
+    // v2.7: detect multi-variant — open the matrix dialog instead of the
+    // single-line unit selector. Multi-variant products don't have packs
+    // (per v2.7 §7.5 deferred) so we skip the units fetch.
     try {
+      const { data: product } = await supabase
+        .from('products')
+        .select('has_variants, name')
+        .eq('id', id)
+        .single()
+      if (product?.has_variants) {
+        setLine(i, { is_multi_variant_placeholder: true })
+        setMatrixDialog({
+          open: true,
+          lineIndex: i,
+          productId: id,
+          productName: product.name
+        })
+        return
+      }
+
       const units = await fetchPurchasableUnitsForProduct({
         productId: id,
         baseUnitName: 'Each'
@@ -219,6 +272,62 @@ export default function NewPurchasePage() {
     } catch {
       notify.error(t('purchases:errors.submit_failed'))
     }
+  }
+
+  /**
+   * v2.7 matrix Apply: replace the placeholder line at lineIndex with N new
+   * lines, one per variant entry from the matrix. Each new line is a normal
+   * variant-scoped stock-in line with product_id + variant_id + qty + cost.
+   *
+   * Existing lines for the same product are NOT touched — the user can run
+   * the matrix multiple times for the same product if they want to amend.
+   */
+  const applyMatrix =
+    (productId: string, productName: string) => (matrixLines: MatrixLine[]) => {
+      if (!matrixDialog) return
+      const idx = matrixDialog.lineIndex
+      setLines((prev) => {
+        const next = [...prev]
+        const expanded: LineState[] = matrixLines.map((ml) => ({
+          product_id: productId,
+          variant_id: ml.variant_id,
+          variant_label: ml.variant_label,
+          is_multi_variant_placeholder: false,
+          available_units: [],
+          selected_unit_idx: 0,
+          qty: String(ml.qty),
+          unitCost: String(ml.cost_at_purchase),
+          lineTotal: String(round2(ml.qty * ml.cost_at_purchase)),
+          lastEdited: null
+        }))
+        next.splice(idx, 1, ...expanded)
+        return next
+      })
+      setMatrixDialog(null)
+      notify.success(
+        t('variants:stock_in_matrix.reconfigure_variants', {
+          count: matrixLines.length,
+          productName
+        })
+      )
+    }
+
+  /** Cancel the matrix while a placeholder line exists: remove the line if
+   * it's only a placeholder (no qty/cost filled). */
+  const cancelMatrix = () => {
+    if (!matrixDialog) return
+    const idx = matrixDialog.lineIndex
+    setLines((prev) => {
+      const ln = prev[idx]
+      if (ln?.is_multi_variant_placeholder) {
+        // Reset the line to empty so the user can pick again
+        const next = [...prev]
+        next[idx] = emptyLine()
+        return next
+      }
+      return prev
+    })
+    setMatrixDialog(null)
   }
 
   const addLine = () => setLines((prev) => [...prev, emptyLine()])
@@ -259,6 +368,14 @@ export default function NewPurchasePage() {
         )
         continue
       }
+      // v2.7: placeholder lines for multi-variant products that haven't had
+      // the matrix applied yet — block submit with a friendly message.
+      if (ln.is_multi_variant_placeholder) {
+        fieldErrors[`item_${i}_product`] = t(
+          'variants:stock_in_matrix.configure_variants'
+        )
+        continue
+      }
       const q = num(ln.qty)
       const c = num(ln.unitCost)
       if (!Number.isInteger(q) || q <= 0) {
@@ -275,6 +392,7 @@ export default function NewPurchasePage() {
       if (unit && unit.kind === 'pack' && unit.packId) {
         items.push({
           product_id: ln.product_id,
+          variant_id: ln.variant_id || undefined,
           pack_id: unit.packId,
           pack_qty: q,
           cost_at_purchase: c
@@ -282,6 +400,7 @@ export default function NewPurchasePage() {
       } else {
         items.push({
           product_id: ln.product_id,
+          variant_id: ln.variant_id || undefined,
           qty: q,
           cost_at_purchase: c
         })
@@ -452,115 +571,171 @@ export default function NewPurchasePage() {
                     />
                   </Field>
                 </Box>
-                {ln.product_id && ln.available_units.length > 0 && (
-                  <Box sx={{ flex: '1 1 140px', minWidth: 130 }}>
-                    <Field label={t('purchases:fields.unit')}>
-                      <Select
-                        size='small'
-                        fullWidth
-                        value={ln.selected_unit_idx}
-                        onChange={(e) => {
-                          const v = e.target.value as unknown as number | string
-                          if (v === '__create_pack__') {
-                            const product = (allProducts ?? []).find(
-                              (p) => p.id === ln.product_id
-                            )
-                            setPackDialog({
-                              open: true,
-                              lineIndex: i,
-                              productId: ln.product_id,
-                              productName: product?.name ?? ln.product_id
-                            })
-                            return
-                          }
-                          setLine(i, { selected_unit_idx: Number(v) })
-                        }}
-                      >
-                        {ln.available_units.map((u, idx) => (
-                          <MenuItem key={idx} value={idx}>
-                            {u.unitName}
-                            {u.kind === 'pack' && ` (${u.baseQty})`}
-                          </MenuItem>
-                        ))}
-                        <MenuItem
-                          value='__create_pack__'
-                          sx={{
-                            color: 'var(--text-brand)',
-                            fontWeight: 600,
-                            borderTop: '1px solid var(--border-subtle)'
-                          }}
-                        >
-                          {t('purchases:form.create_new_pack')}
-                        </MenuItem>
-                      </Select>
-                    </Field>
+                {/* v2.7: variant label badge on lines emitted by the matrix.
+                    Read-only — variant is fixed for the line. */}
+                {ln.variant_label && (
+                  <Box sx={{ flex: '0 1 auto', alignSelf: 'center' }}>
+                    <Typography
+                      variant='caption'
+                      sx={{
+                        color: 'var(--text-brand)',
+                        backgroundColor: 'var(--status-brand-bg)',
+                        px: 1,
+                        py: 0.25,
+                        borderRadius: 'var(--radius-sm)',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {ln.variant_label}
+                    </Typography>
                   </Box>
                 )}
-                <Box sx={{ flex: '1 1 100px', minWidth: 90 }}>
-                  <Field
-                    label={t('purchases:fields.qty')}
-                    error={errors[`item_${i}_qty`]}
-                  >
-                    <Input
-                      value={ln.qty}
-                      onChange={(e) => editLine(i, 'qty', e.target.value)}
-                      type='number'
-                      inputProps={{ min: 1, step: 1 }}
-                    />
-                  </Field>
-                </Box>
-                <Box sx={{ flex: '1 1 130px', minWidth: 100 }}>
-                  <Field
-                    label={
-                      ln.available_units.length > 1
-                        ? t('purchases:fields.cost_per_unit', {
-                            unitName:
-                              ln.available_units[ln.selected_unit_idx]
-                                ?.unitName ?? ''
-                          })
-                        : t('purchases:fields.cost')
-                    }
-                    error={errors[`item_${i}_cost`]}
-                  >
-                    <Input
-                      value={ln.unitCost}
-                      onChange={(e) => editLine(i, 'cost', e.target.value)}
-                      type='number'
-                      inputProps={{ min: 0, step: '0.01' }}
-                    />
-                  </Field>
-                  {(() => {
-                    const unit = ln.available_units[ln.selected_unit_idx]
-                    const cost = num(ln.unitCost)
-                    if (unit?.kind === 'pack' && unit.baseQty > 1 && cost > 0) {
-                      return (
-                        <Typography
-                          variant='caption'
-                          sx={{
-                            color: 'var(--text-muted)',
-                            display: 'block',
-                            mt: 0.25
+                {/* v2.7: multi-variant placeholder — "Configure variants"
+                    button opens the matrix dialog (replaces the v2.7.1
+                    LineVariantPicker dropdown). */}
+                {ln.is_multi_variant_placeholder && (
+                  <Box sx={{ flex: '0 1 auto' }}>
+                    <Button
+                      variant='secondary'
+                      size='sm'
+                      onClick={() => {
+                        const product = (allProducts ?? []).find(
+                          (p) => p.id === ln.product_id
+                        )
+                        setMatrixDialog({
+                          open: true,
+                          lineIndex: i,
+                          productId: ln.product_id,
+                          productName: product?.name ?? ln.product_id
+                        })
+                      }}
+                    >
+                      {t('variants:stock_in_matrix.configure_variants')}
+                    </Button>
+                  </Box>
+                )}
+                {ln.product_id &&
+                  !ln.is_multi_variant_placeholder &&
+                  ln.available_units.length > 0 && (
+                    <Box sx={{ flex: '1 1 140px', minWidth: 130 }}>
+                      <Field label={t('purchases:fields.unit')}>
+                        <Select
+                          size='small'
+                          fullWidth
+                          value={ln.selected_unit_idx}
+                          onChange={(e) => {
+                            const v = e.target.value as unknown as
+                              | number
+                              | string
+                            if (v === '__create_pack__') {
+                              const product = (allProducts ?? []).find(
+                                (p) => p.id === ln.product_id
+                              )
+                              setPackDialog({
+                                open: true,
+                                lineIndex: i,
+                                productId: ln.product_id,
+                                productName: product?.name ?? ln.product_id
+                              })
+                              return
+                            }
+                            setLine(i, { selected_unit_idx: Number(v) })
                           }}
                         >
-                          {t('purchases:fields.per_piece_cost', {
-                            cost: formatPKR(cost / unit.baseQty, locale)
-                          })}
-                        </Typography>
-                      )
-                    }
-                    return null
-                  })()}
-                </Box>
-                <Box sx={{ flex: '1 1 130px', minWidth: 100 }}>
-                  <Field label={t('purchases:fields.total')}>
-                    <Input
-                      value={ln.lineTotal}
-                      onChange={(e) => editLine(i, 'total', e.target.value)}
-                      type='number'
-                      inputProps={{ min: 0, step: '0.01' }}
-                    />
-                  </Field>
-                </Box>
+                          {ln.available_units.map((u, idx) => (
+                            <MenuItem key={idx} value={idx}>
+                              {u.unitName}
+                              {u.kind === 'pack' && ` (${u.baseQty})`}
+                            </MenuItem>
+                          ))}
+                          <MenuItem
+                            value='__create_pack__'
+                            sx={{
+                              color: 'var(--text-brand)',
+                              fontWeight: 600,
+                              borderTop: '1px solid var(--border-subtle)'
+                            }}
+                          >
+                            {t('purchases:form.create_new_pack')}
+                          </MenuItem>
+                        </Select>
+                      </Field>
+                    </Box>
+                  )}
+                {!ln.is_multi_variant_placeholder && (
+                  <>
+                    <Box sx={{ flex: '1 1 100px', minWidth: 90 }}>
+                      <Field
+                        label={t('purchases:fields.qty')}
+                        error={errors[`item_${i}_qty`]}
+                      >
+                        <Input
+                          value={ln.qty}
+                          onChange={(e) => editLine(i, 'qty', e.target.value)}
+                          type='number'
+                          inputProps={{ min: 1, step: 1 }}
+                        />
+                      </Field>
+                    </Box>
+                    <Box sx={{ flex: '1 1 130px', minWidth: 100 }}>
+                      <Field
+                        label={
+                          ln.available_units.length > 1
+                            ? t('purchases:fields.cost_per_unit', {
+                                unitName:
+                                  ln.available_units[ln.selected_unit_idx]
+                                    ?.unitName ?? ''
+                              })
+                            : t('purchases:fields.cost')
+                        }
+                        error={errors[`item_${i}_cost`]}
+                      >
+                        <Input
+                          value={ln.unitCost}
+                          onChange={(e) => editLine(i, 'cost', e.target.value)}
+                          type='number'
+                          inputProps={{ min: 0, step: '0.01' }}
+                        />
+                      </Field>
+                      {(() => {
+                        const unit = ln.available_units[ln.selected_unit_idx]
+                        const cost = num(ln.unitCost)
+                        if (
+                          unit?.kind === 'pack' &&
+                          unit.baseQty > 1 &&
+                          cost > 0
+                        ) {
+                          return (
+                            <Typography
+                              variant='caption'
+                              sx={{
+                                color: 'var(--text-muted)',
+                                display: 'block',
+                                mt: 0.25
+                              }}
+                            >
+                              {t('purchases:fields.per_piece_cost', {
+                                cost: formatPKR(cost / unit.baseQty, locale)
+                              })}
+                            </Typography>
+                          )
+                        }
+                        return null
+                      })()}
+                    </Box>
+                    <Box sx={{ flex: '1 1 130px', minWidth: 100 }}>
+                      <Field label={t('purchases:fields.total')}>
+                        <Input
+                          value={ln.lineTotal}
+                          onChange={(e) => editLine(i, 'total', e.target.value)}
+                          type='number'
+                          inputProps={{ min: 0, step: '0.01' }}
+                        />
+                      </Field>
+                    </Box>
+                  </>
+                )}
                 <Box>
                   <IconButton
                     aria-label={t('purchases:actions.remove_line')}
@@ -815,6 +990,19 @@ export default function NewPurchasePage() {
               // can re-pick after refresh.
             }
           }}
+        />
+      )}
+
+      {matrixDialog && (
+        <StockInVariantMatrix
+          open={matrixDialog.open}
+          productId={matrixDialog.productId}
+          productName={matrixDialog.productName}
+          onClose={cancelMatrix}
+          onApply={applyMatrix(
+            matrixDialog.productId,
+            matrixDialog.productName
+          )}
         />
       )}
     </Box>

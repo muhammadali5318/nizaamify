@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useNotifier } from 'src/components/notistack/NotificationProvider'
 import { Banner, Button, Dialog, Field, Input } from 'src/components/ui'
 import { useCreateProduct } from './hooks'
+import CategoryCombobox from './CategoryCombobox'
 
 type Props = {
   open: boolean
@@ -26,14 +27,14 @@ export default function AddProductInlineDialog({
   const create = useCreateProduct()
   const notify = useNotifier()
   const [name, setName] = useState('')
-  const [type, setType] = useState('')
+  const [categoryId, setCategoryId] = useState<string | null>(null)
   const [price, setPrice] = useState('')
   const [topError, setTopError] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const reset = () => {
     setName('')
-    setType('')
+    setCategoryId(null)
     setPrice('')
     setTopError(null)
     setErrors({})
@@ -44,12 +45,14 @@ export default function AddProductInlineDialog({
     setTopError(null)
     const fieldErrors: Record<string, string> = {}
     const trimmedName = name.trim()
-    const trimmedType = type.trim()
     const priceNum = Number(price)
     if (!trimmedName)
       fieldErrors.name = t('products:errors.name_required', 'Name required')
-    if (!trimmedType)
-      fieldErrors.type = t('products:errors.type_required', 'Type required')
+    if (!categoryId)
+      fieldErrors.category_id = t(
+        'products:errors.category_required',
+        'Category required'
+      )
     if (!Number.isFinite(priceNum) || priceNum < 0)
       fieldErrors.price = t('products:errors.price_invalid', 'Invalid price')
     if (Object.keys(fieldErrors).length > 0) {
@@ -60,11 +63,12 @@ export default function AddProductInlineDialog({
     try {
       const id = await create.mutateAsync({
         name: trimmedName,
-        type: trimmedType,
+        category_id: categoryId as string,
         description: null,
         price: priceNum,
         opening_stock: 0,
-        opening_cost: 0
+        opening_cost: 0,
+        is_scan_only: false
       })
       notify.success(t('products:messages.created', 'Product created'))
       onCreated(id)
@@ -74,13 +78,11 @@ export default function AddProductInlineDialog({
         typeof (err as { message?: unknown })?.message === 'string'
           ? (err as { message: string }).message
           : ''
-      if (msg.includes('duplicate')) {
-        setTopError(
-          t(
-            'products:errors.duplicate',
-            'A product with this name + type already exists'
-          )
-        )
+      if (
+        msg.includes('duplicate') ||
+        msg.includes('uq_products_shop_name_category')
+      ) {
+        setTopError(t('products:errors.duplicate_name_category'))
       } else {
         setTopError(t('products:errors.save_failed', 'Could not save product'))
       }
@@ -114,17 +116,12 @@ export default function AddProductInlineDialog({
             />
           </Field>
 
-          <Field
-            label={t('products:fields.type', 'Type')}
+          <CategoryCombobox
+            value={categoryId}
+            onChange={setCategoryId}
             required
-            error={errors.type}
-          >
-            <Input
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              inputProps={{ maxLength: 60 }}
-            />
-          </Field>
+            errorText={errors.category_id}
+          />
 
           <Field
             label={t('products:fields.price', 'Selling price (PKR)')}

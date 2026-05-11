@@ -19,18 +19,21 @@ import {
 } from './schemas'
 import {
   useCreateProduct,
-  useExistingProductTypes,
+  useCreateProductWithVariants,
   useProduct,
   useUpdateProduct
 } from './hooks'
 import PacksSection from './PacksSection'
+import CategoryCombobox from './CategoryCombobox'
+import VariantMatrixBuilder, {
+  type VariantMatrixState
+} from 'src/features/variants/VariantMatrixBuilder'
 import { paths } from 'src/paths'
 import { formatPKR } from 'src/features/subscription/env'
 import {
   Banner,
   Button,
   Card,
-  Combobox,
   Field,
   Input,
   Textarea,
@@ -44,12 +47,12 @@ type SupabaseLikeError = {
   details?: string | null
 }
 
-function isDuplicateNameTypeError(err: unknown): boolean {
+function isDuplicateNameCategoryError(err: unknown): boolean {
   if (!err || typeof err !== 'object') return false
   const e = err as SupabaseLikeError
   if (e.code === '23505') return true
   const haystack = `${e.message ?? ''} ${e.details ?? ''}`.toLowerCase()
-  return haystack.includes('uq_products_shop_name_type')
+  return haystack.includes('uq_products_shop_name_category')
 }
 
 export default function ProductFormPage() {
@@ -61,7 +64,6 @@ export default function ProductFormPage() {
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
 
   const { data: existing } = useProduct(isNew ? undefined : id)
-  const { data: existingTypes } = useExistingProductTypes()
   const create = useCreateProduct()
   const update = useUpdateProduct()
   const [duplicateError, setDuplicateError] = useState(false)
@@ -69,14 +71,13 @@ export default function ProductFormPage() {
   if (isNew) {
     return (
       <CreateForm
-        existingTypes={existingTypes ?? []}
         duplicateError={duplicateError}
         onSubmit={async (values) => {
           setDuplicateError(false)
           try {
             await create.mutateAsync({
               name: values.name,
-              type: values.type,
+              category_id: values.category_id,
               description: values.description?.trim()
                 ? values.description
                 : null,
@@ -88,7 +89,7 @@ export default function ProductFormPage() {
             notify.success(t('products:messages.saved'))
             navigate(paths.products)
           } catch (err: unknown) {
-            if (isDuplicateNameTypeError(err)) {
+            if (isDuplicateNameCategoryError(err)) {
               setDuplicateError(true)
             } else {
               notify.error(t('products:errors.save_failed'))
@@ -103,7 +104,6 @@ export default function ProductFormPage() {
     <EditForm
       key={existing?.id ?? 'edit'}
       existing={existing}
-      existingTypes={existingTypes ?? []}
       duplicateError={duplicateError}
       locale={locale}
       onSubmit={async (values) => {
@@ -113,7 +113,7 @@ export default function ProductFormPage() {
           await update.mutateAsync({
             id: existing.id,
             name: values.name,
-            type: values.type,
+            category_id: values.category_id,
             description: values.description?.trim() ? values.description : null,
             price: values.price,
             is_active: values.is_active,
@@ -122,7 +122,7 @@ export default function ProductFormPage() {
           notify.success(t('products:messages.saved'))
           navigate(paths.products)
         } catch (err: unknown) {
-          if (isDuplicateNameTypeError(err)) {
+          if (isDuplicateNameCategoryError(err)) {
             setDuplicateError(true)
           } else {
             notify.error(t('products:errors.save_failed'))
@@ -134,29 +134,40 @@ export default function ProductFormPage() {
 }
 
 type CreateFormProps = {
-  existingTypes: string[]
   duplicateError: boolean
   onSubmit: (values: CreateProductValues) => Promise<void>
 }
 
-function CreateForm({
-  existingTypes,
-  duplicateError,
-  onSubmit
-}: CreateFormProps) {
-  const { t } = useTranslation(['products', 'common'])
+function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
+  const { t } = useTranslation(['products', 'common', 'variants'])
   const navigate = useNavigate()
+  const createWithVariants = useCreateProductWithVariants()
+  const notify = useNotifier()
+
+  const [hasVariants, setHasVariants] = useState(false)
+  const [matrixState, setMatrixState] = useState<VariantMatrixState>({
+    attributeIds: [],
+    selectedValues: {},
+    included: {},
+    overrides: {}
+  })
+  const [defaultPrice, setDefaultPrice] = useState('0')
+  const [defaultOpeningCost, setDefaultOpeningCost] = useState('')
+  const [matrixError, setMatrixError] = useState<string | null>(null)
 
   const {
     control,
     register,
     handleSubmit,
+    watch,
+    trigger,
+    getValues,
     formState: { errors, isSubmitting }
   } = useForm<CreateProductValues>({
     resolver: zodResolver(createProductSchema(t)),
     defaultValues: {
       name: '',
-      type: '',
+      category_id: '',
       description: '',
       price: 0,
       opening_stock: 0,
@@ -165,8 +176,110 @@ function CreateForm({
     }
   })
 
+  const productName = watch('name')
+
+  const submitVariantsMode = async () => {
+    setMatrixError(null)
+    // Only validate the fields that the variants path actually consumes.
+    const ok = await trigger(['name', 'category_id', 'is_scan_only'])
+    if (!ok) return
+
+    if (matrixState.attributeIds.length === 0) {
+      setMatrixError(t('variants:errors.need_at_least_one_attribute'))
+      return
+    }
+    // Need at least one value per attribute
+    if (
+      matrixState.attributeIds.some(
+        (a) => (matrixState.selectedValues[a] ?? []).length === 0
+      )
+    ) {
+      setMatrixError(t('variants:errors.need_values_for_each_attribute'))
+      return
+    }
+    // Build the variant payload from included combos
+    const included = Object.entries(matrixState.included)
+      .filter(([, on]) => on)
+      .map(([k]) => k)
+    if (included.length === 0) {
+      setMatrixError(t('variants:errors.need_at_least_one_combination'))
+      return
+    }
+
+    const priceNum = Number(defaultPrice)
+    const openingCostNum =
+      defaultOpeningCost === '' ? NaN : Number(defaultOpeningCost)
+    const values = getValues()
+
+    // Pre-flight: if any included variant has opening_stock > 0, we need an
+    // opening cost per unit. The create_product_with_variants RPC raises
+    // opening_cost_required_when_stock_positive on this path; catching it
+    // client-side gives a friendlier message + skips the round trip.
+    const variantsToCreate = included.map((key) => {
+      const override = matrixState.overrides[key] ?? {}
+      const qtyStr = override.opening_stock ?? '0'
+      const qty = qtyStr === '' ? 0 : Number(qtyStr)
+      return { key, override, qty }
+    })
+    const anyWithStock = variantsToCreate.some(
+      (v) => Number.isFinite(v.qty) && v.qty > 0
+    )
+    if (anyWithStock) {
+      if (!Number.isFinite(openingCostNum) || openingCostNum <= 0) {
+        setMatrixError(
+          t(
+            !Number.isFinite(openingCostNum)
+              ? 'variants:errors.opening_cost_required'
+              : 'variants:errors.opening_cost_must_be_positive'
+          )
+        )
+        return
+      }
+    }
+
+    try {
+      const variants = variantsToCreate.map(({ key, override, qty }) => {
+        const valueIds = key.split('|')
+        const variantPrice =
+          override.price !== undefined && override.price !== ''
+            ? Number(override.price)
+            : priceNum
+        return {
+          attribute_value_ids: valueIds,
+          sku: override.sku ?? undefined,
+          price: Number.isFinite(variantPrice) ? variantPrice : 0,
+          opening_stock: Number.isFinite(qty) && qty > 0 ? qty : 0,
+          ...(Number.isFinite(qty) && qty > 0
+            ? { opening_cost: openingCostNum }
+            : {})
+        }
+      })
+
+      const res = await createWithVariants.mutateAsync({
+        name: values.name,
+        category_id: values.category_id,
+        default_price: Number.isFinite(priceNum) ? priceNum : 0,
+        is_scan_only: values.is_scan_only,
+        attribute_ids: matrixState.attributeIds,
+        variants,
+        description: values.description?.trim() ? values.description : null
+      })
+      notify.success(t('products:messages.saved'))
+      navigate(paths.gotoProduct(res.product_id))
+    } catch (err) {
+      const msg = (err as { message?: string })?.message ?? ''
+      if (msg.includes('duplicate_variant_combination')) {
+        setMatrixError(t('variants:errors.duplicate_combination'))
+      } else if (msg.includes('uq_products_shop_name_category')) {
+        setMatrixError(t('products:errors.duplicate_name_category'))
+      } else {
+        notify.error(t('products:errors.save_failed'))
+      }
+    }
+  }
+
   return (
-    <Box sx={{ maxWidth: 672, mx: 'auto', width: '100%' }}>
+    <Box sx={{ maxWidth: 720, mx: 'auto', width: '100%' }}>
       <PageHeader title={t('products:add_product')} />
 
       <Card>
@@ -174,7 +287,7 @@ function CreateForm({
           <Stack spacing={2.5}>
             {duplicateError && (
               <Banner variant='error'>
-                {t('products:errors.duplicate_name_type')}
+                {t('products:errors.duplicate_name_category')}
               </Banner>
             )}
 
@@ -188,23 +301,14 @@ function CreateForm({
 
             <Controller
               control={control}
-              name='type'
+              name='category_id'
               render={({ field }) => (
-                <Field
-                  label={t('products:fields.type')}
-                  hint={t('products:fields.type_hint')}
-                  error={errors.type?.message}
-                >
-                  <Combobox
-                    freeSolo
-                    options={existingTypes}
-                    value={field.value}
-                    inputValue={field.value}
-                    onInputChange={(_, v) => field.onChange(v)}
-                    onChange={(_, v) => field.onChange(v ?? '')}
-                    placeholder={t('products:fields.type_placeholder')}
-                  />
-                </Field>
+                <CategoryCombobox
+                  value={field.value || null}
+                  onChange={(id) => field.onChange(id ?? '')}
+                  required
+                  errorText={errors.category_id?.message}
+                />
               )}
             />
 
@@ -216,76 +320,99 @@ function CreateForm({
               />
             </Field>
 
-            <Field
-              label={t('products:fields.selling_price')}
-              error={errors.price?.message}
-            >
-              <Input
-                type='number'
-                inputProps={{ step: '0.01', min: 0, inputMode: 'numeric' }}
-                {...register('price', { valueAsNumber: true })}
+            {/* v2.7: has_variants toggle. When ON, the variant matrix replaces
+                the single price + opening stock fields. */}
+            <Field hint={t('variants:has_variants_help')}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={hasVariants}
+                    onChange={(e) => setHasVariants(e.target.checked)}
+                  />
+                }
+                label={t('variants:has_variants_toggle')}
               />
             </Field>
 
-            <Box>
-              <Typography
-                variant='overline'
-                sx={{
-                  color: 'var(--text-muted)',
-                  display: 'block',
-                  mb: 1,
-                  textAlign: 'start'
-                }}
-              >
-                {t('products:fields.opening_stock')}
-              </Typography>
-              <Divider sx={{ borderColor: 'var(--border-subtle)' }} />
-            </Box>
-
-            <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
-              {t('products:fields.opening_help')}
-            </Typography>
-
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <Field
-                label={t('products:fields.opening_qty')}
-                error={errors.opening_stock?.message}
-              >
-                <Input
-                  type='number'
-                  inputProps={{ step: '1', min: 0, inputMode: 'numeric' }}
-                  {...register('opening_stock', { valueAsNumber: true })}
-                />
-              </Field>
-              <Field
-                label={t('products:fields.opening_cost')}
-                error={errors.opening_cost?.message}
-              >
-                <Input
-                  type='number'
-                  inputProps={{ step: '0.01', min: 0, inputMode: 'numeric' }}
-                  {...register('opening_cost', { valueAsNumber: true })}
-                />
-              </Field>
-            </Stack>
-
-            <Controller
-              control={control}
-              name='is_scan_only'
-              render={({ field }) => (
-                <Field hint={t('products:fields.is_scan_only_help')}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={field.value}
-                        onChange={(e) => field.onChange(e.target.checked)}
-                      />
-                    }
-                    label={t('products:fields.is_scan_only')}
+            {!hasVariants && (
+              <>
+                <Field
+                  label={t('products:fields.selling_price')}
+                  error={errors.price?.message}
+                >
+                  <Input
+                    type='number'
+                    inputProps={{ step: '0.01', min: 0, inputMode: 'numeric' }}
+                    {...register('price', { valueAsNumber: true })}
                   />
                 </Field>
-              )}
-            />
+
+                <Box>
+                  <Typography
+                    variant='overline'
+                    sx={{
+                      color: 'var(--text-muted)',
+                      display: 'block',
+                      mb: 1,
+                      textAlign: 'start'
+                    }}
+                  >
+                    {t('products:fields.opening_stock')}
+                  </Typography>
+                  <Divider sx={{ borderColor: 'var(--border-subtle)' }} />
+                </Box>
+
+                <Typography
+                  variant='caption'
+                  sx={{ color: 'var(--text-muted)' }}
+                >
+                  {t('products:fields.opening_help')}
+                </Typography>
+
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                  <Field
+                    label={t('products:fields.opening_qty')}
+                    error={errors.opening_stock?.message}
+                  >
+                    <Input
+                      type='number'
+                      inputProps={{ step: '1', min: 0, inputMode: 'numeric' }}
+                      {...register('opening_stock', { valueAsNumber: true })}
+                    />
+                  </Field>
+                  <Field
+                    label={t('products:fields.opening_cost')}
+                    error={errors.opening_cost?.message}
+                  >
+                    <Input
+                      type='number'
+                      inputProps={{
+                        step: '0.01',
+                        min: 0,
+                        inputMode: 'numeric'
+                      }}
+                      {...register('opening_cost', { valueAsNumber: true })}
+                    />
+                  </Field>
+                </Stack>
+              </>
+            )}
+
+            {hasVariants && (
+              <>
+                <Divider sx={{ borderColor: 'var(--border-subtle)' }} />
+                <VariantMatrixBuilder
+                  state={matrixState}
+                  onChange={setMatrixState}
+                  productNameForSku={productName ?? ''}
+                  defaultPrice={defaultPrice}
+                  onDefaultPriceChange={setDefaultPrice}
+                  defaultOpeningCost={defaultOpeningCost}
+                  onDefaultOpeningCostChange={setDefaultOpeningCost}
+                  errorText={matrixError}
+                />
+              </>
+            )}
 
             <Stack direction='row' spacing={1.5} justifyContent='flex-end'>
               <Button
@@ -294,9 +421,19 @@ function CreateForm({
               >
                 {t('products:actions.back')}
               </Button>
-              <Button type='submit' variant='primary' loading={isSubmitting}>
-                {t('products:actions.save')}
-              </Button>
+              {hasVariants ? (
+                <Button
+                  variant='primary'
+                  onClick={() => void submitVariantsMode()}
+                  loading={createWithVariants.isPending}
+                >
+                  {t('products:actions.save')}
+                </Button>
+              ) : (
+                <Button type='submit' variant='primary' loading={isSubmitting}>
+                  {t('products:actions.save')}
+                </Button>
+              )}
             </Stack>
           </Stack>
         </form>
@@ -311,6 +448,7 @@ type EditFormProps = {
         id: string
         name: string
         type: string
+        category_id: string
         description: string | null
         price: number | null
         is_active: boolean
@@ -320,7 +458,6 @@ type EditFormProps = {
       }
     | null
     | undefined
-  existingTypes: string[]
   duplicateError: boolean
   locale: string
   onSubmit: (values: EditProductValues) => Promise<void>
@@ -328,7 +465,6 @@ type EditFormProps = {
 
 function EditForm({
   existing,
-  existingTypes,
   duplicateError,
   locale,
   onSubmit
@@ -346,7 +482,7 @@ function EditForm({
     resolver: zodResolver(editProductSchema(t)),
     defaultValues: {
       name: '',
-      type: '',
+      category_id: '',
       description: '',
       price: 0,
       is_active: true,
@@ -358,7 +494,7 @@ function EditForm({
     if (existing) {
       reset({
         name: existing.name,
-        type: existing.type,
+        category_id: existing.category_id,
         description: existing.description ?? '',
         price: Number(existing.price ?? 0),
         is_active: existing.is_active,
@@ -376,7 +512,7 @@ function EditForm({
           <Stack spacing={2.5}>
             {duplicateError && (
               <Banner variant='error'>
-                {t('products:errors.duplicate_name_type')}
+                {t('products:errors.duplicate_name_category')}
               </Banner>
             )}
 
@@ -390,23 +526,14 @@ function EditForm({
 
             <Controller
               control={control}
-              name='type'
+              name='category_id'
               render={({ field }) => (
-                <Field
-                  label={t('products:fields.type')}
-                  hint={t('products:fields.type_hint')}
-                  error={errors.type?.message}
-                >
-                  <Combobox
-                    freeSolo
-                    options={existingTypes}
-                    value={field.value}
-                    inputValue={field.value}
-                    onInputChange={(_, v) => field.onChange(v)}
-                    onChange={(_, v) => field.onChange(v ?? '')}
-                    placeholder={t('products:fields.type_placeholder')}
-                  />
-                </Field>
+                <CategoryCombobox
+                  value={field.value || null}
+                  onChange={(id) => field.onChange(id ?? '')}
+                  required
+                  errorText={errors.category_id?.message}
+                />
               )}
             />
 
@@ -480,24 +607,6 @@ function EditForm({
                 </Box>
               </Stack>
             )}
-
-            <Controller
-              control={control}
-              name='is_scan_only'
-              render={({ field }) => (
-                <Field hint={t('products:fields.is_scan_only_help')}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={field.value}
-                        onChange={(e) => field.onChange(e.target.checked)}
-                      />
-                    }
-                    label={t('products:fields.is_scan_only')}
-                  />
-                </Field>
-              )}
-            />
 
             {existing && (
               <>

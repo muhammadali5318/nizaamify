@@ -16,13 +16,13 @@
     "datetime": "تاریخ اور وقت",
     "customer": "گاہک",
     "payment_type": "ادائیگی",
-    "items": "اشیاء",
     "service_charge": "سروس",
     "total": "کل",
-    "notes": "نوٹس"
+    "notes": "نوٹس",
+    "actions": "عمل"
   },
   "partial_breakdown": "{{paid}} ادا · {{credit}} ادھار",
-  "has_notes_tooltip": "نوٹس موجود ہیں",
+  "view_details": "فروخت کی تفصیلات دیکھیں",
   "detail": {
     "title": "فروخت #{{shortId}}",
     "back": "فروخت پر واپس جائیں",

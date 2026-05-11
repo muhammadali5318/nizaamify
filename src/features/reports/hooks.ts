@@ -1,31 +1,25 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from 'src/lib/supabase'
 
+/**
+ * v2.6c: server-side bucket. Reads from public.daily_sales_7 view which
+ * aggregates invoice_financials.revenue per day for the current shop over
+ * the last 7 days. The view returns one row per day even if there were no
+ * sales (total = 0), so the chart x-axis is always 7 buckets wide.
+ * Frontend just renders the rows — no JS money arithmetic.
+ */
 export function useDailySalesLast7() {
   return useQuery({
     queryKey: ['reports', 'daily_sales_7'],
     queryFn: async () => {
-      const since = new Date()
-      since.setUTCDate(since.getUTCDate() - 6)
-      since.setUTCHours(0, 0, 0, 0)
       const { data, error } = await supabase
-        .from('invoices')
-        .select('total, created_at')
-        .gte('created_at', since.toISOString())
+        .from('daily_sales_7')
+        .select('day, total_sales')
+        .order('day', { ascending: true })
       if (error) throw error
-      const buckets = new Map<string, number>()
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(since)
-        d.setUTCDate(d.getUTCDate() + i)
-        buckets.set(d.toISOString().slice(0, 10), 0)
-      }
-      for (const row of data ?? []) {
-        const key = new Date(row.created_at).toISOString().slice(0, 10)
-        buckets.set(key, (buckets.get(key) ?? 0) + Number(row.total))
-      }
-      return Array.from(buckets.entries()).map(([date, total]) => ({
-        date,
-        total
+      return (data ?? []).map((r) => ({
+        date: r.day as string,
+        total: Number(r.total_sales)
       }))
     }
   })
@@ -46,34 +40,24 @@ export function useMonthlySummaryLast6() {
   })
 }
 
+/**
+ * v2.6c: server-side aggregate. Reads from public.expenses_by_category_mtd
+ * which groups expenses by category for the current shop, month-to-date.
+ * No JS bucketing — the SUM happens in Postgres.
+ */
 export function useExpenseBreakdownThisMonth() {
   return useQuery({
     queryKey: ['reports', 'expense_breakdown_month'],
     queryFn: async () => {
-      const now = new Date()
-      const start = new Date(
-        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
-      )
-        .toISOString()
-        .slice(0, 10)
-      const end = new Date(
-        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)
-      )
-        .toISOString()
-        .slice(0, 10)
       const { data, error } = await supabase
-        .from('expenses')
-        .select('category, amount')
-        .gte('expense_date', start)
-        .lt('expense_date', end)
+        .from('expenses_by_category_mtd')
+        .select('category, total_amount')
+        .order('total_amount', { ascending: false })
       if (error) throw error
-      const totals = new Map<string, number>()
-      for (const r of data ?? []) {
-        totals.set(r.category, (totals.get(r.category) ?? 0) + Number(r.amount))
-      }
-      return Array.from(totals.entries())
-        .map(([category, amount]) => ({ category, amount }))
-        .sort((a, b) => b.amount - a.amount)
+      return (data ?? []).map((r) => ({
+        category: r.category,
+        amount: Number(r.total_amount)
+      }))
     }
   })
 }

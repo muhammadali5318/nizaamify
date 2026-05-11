@@ -1,6 +1,6 @@
 {
   "title": "Products",
-  "search_placeholder": "Search products by name or type",
+  "search_placeholder": "Search products by name",
   "add_product": "Add product",
   "new_product": "+ New product",
   "edit_product": "Edit product",
@@ -9,9 +9,7 @@
   "no_results": "No products match your search",
   "fields": {
     "name": "Name",
-    "type": "Type",
-    "type_placeholder": "e.g. LCD Panel, Battery, Charging Cable",
-    "type_hint": "Used together with the name to uniquely identify the product",
+    "category": "Category",
     "description": "Description",
     "description_optional": "Description (optional)",
     "description_placeholder": "Optional notes about this product",
@@ -30,10 +28,25 @@
     "is_scan_only": "Scan-only",
     "is_scan_only_help": "When enabled, the cashier cannot type a quantity at the register — they must scan or click a pack. Useful for products where loose-unit sales aren't allowed."
   },
+  "category": {
+    "label": "Category",
+    "placeholder": "Search a category…",
+    "add_new": "+ Create new category",
+    "no_results": "No matching categories",
+    "dialog_title": "New category",
+    "field_label": "Name",
+    "count_one": "{{count}} product",
+    "count_other": "{{count}} products",
+    "filter_all": "All categories",
+    "filter_label": "Category",
+    "errors": {
+      "required": "Category name is required",
+      "duplicate": "A category with this name already exists in this shop."
+    }
+  },
   "badges": {
     "low_stock": "Low",
-    "out_of_stock": "Out",
-    "default_type_warning": "Type was set to 'General' during migration — please review"
+    "out_of_stock": "Out"
   },
   "helpers": {
     "cost_readonly": "Average cost updates automatically when you record a stock-in.",
@@ -41,7 +54,8 @@
     "name_normalized": "Names are matched case-insensitively and ignoring extra spaces."
   },
   "tooltip": {
-    "avg_cost_explainer": "Weighted average cost across all stock-ins. Updates automatically when you record a stock-in."
+    "avg_cost_explainer": "Weighted average cost across all stock-ins. Updates automatically when you record a stock-in.",
+    "view_details": "View details"
   },
   "actions": {
     "save": "Save",
@@ -49,23 +63,57 @@
     "restore": "Restore",
     "back": "Back to products",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "view": "View details"
   },
   "errors": {
     "name_required": "Product name is required",
-    "type_required": "Product type is required",
+    "category_required": "Please select a category",
     "price_invalid": "Selling price must be 0 or greater",
     "cost_invalid": "Cost must be 0 or greater",
     "stock_invalid": "Stock must be 0 or greater",
     "opening_stock_invalid": "Opening quantity must be 0 or greater",
     "opening_cost_invalid": "Opening cost must be 0 or greater",
-    "duplicate_name_type": "A product with this name and type already exists.",
+    "duplicate_name_category": "A product with this name already exists in this category.",
     "save_failed": "Could not save product. Please try again."
   },
   "messages": {
     "saved": "Product saved",
+    "created": "Product created",
     "archived": "Product archived",
     "restored": "Product restored"
+  },
+  "detail": {
+    "title": "Product details",
+    "loading": "Loading product…",
+    "not_found": "Product not found.",
+    "section_fields": "Details",
+    "section_packs": "Packs",
+    "section_activity": "Recent activity",
+    "field": {
+      "name": "Name",
+      "category": "Category",
+      "sell_price": "Sell price",
+      "stock": "Stock",
+      "avg_cost": "Avg cost",
+      "last_purchase": "Last purchase",
+      "scan_only": "Scan only",
+      "scan_only_yes": "Yes",
+      "scan_only_no": "No",
+      "created": "Created",
+      "last_updated": "Last updated",
+      "description": "Description"
+    },
+    "edit_button": "Edit",
+    "edit_dialog_title": "Edit product",
+    "add_to_cart": "+ Add to cart",
+    "activity": {
+      "stock_in": "Stock-in {{date}} — +{{qty}} {{unit}} from {{supplier}}",
+      "stock_in_no_supplier": "Stock-in {{date}} — +{{qty}} {{unit}}",
+      "sale": "Sale {{date}} — {{qty}} {{unit}} to {{customer}}",
+      "sale_walkin": "Sale {{date}} — {{qty}} {{unit}}",
+      "empty": "No activity yet."
+    }
   },
   "packs": {
     "section_title": "Packs",

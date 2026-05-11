@@ -14,8 +14,10 @@ import DashboardPage from 'src/features/dashboard/DashboardPage'
 import SettingsPage from 'src/features/settings/SettingsPage'
 import SupportPage from 'src/features/settings/SupportPage'
 import TiersPage from 'src/features/tiers/TiersPage'
+import VariantAttributesPage from 'src/features/variants/VariantAttributesPage'
 import ProductsListPage from 'src/features/products/ProductsListPage'
 import ProductFormPage from 'src/features/products/ProductFormPage'
+import ProductDetailPage from 'src/features/products/ProductDetailPage'
 import PurchasesListPage from 'src/features/purchases/PurchasesListPage'
 import NewPurchasePage from 'src/features/purchases/NewPurchasePage'
 import PurchaseDetailPage from 'src/features/purchases/PurchaseDetailPage'
@@ -107,6 +109,10 @@ export function Router() {
         { path: paths.settings, element: <SettingsPage /> },
         { path: paths.support, element: <SupportPage /> },
         { path: paths.tiers, element: <TiersPage /> },
+        {
+          path: paths.variantAttributes,
+          element: <VariantAttributesPage />
+        },
         // Subscription-gated
         {
           path: paths.dashboard,
@@ -136,7 +142,7 @@ export function Router() {
           path: paths.productDetail,
           element: (
             <RequireActiveSubscription>
-              <ProductFormPage />
+              <ProductDetailPage />
             </RequireActiveSubscription>
           )
         },

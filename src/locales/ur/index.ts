@@ -15,6 +15,8 @@ import sales from './sales.json'
 import suppliers from './suppliers.json'
 import units from './units.json'
 import tiers from './tiers.json'
+import variant_attributes from './variant_attributes.json'
+import variants from './variants.json'
 
 export default {
   common,
@@ -33,5 +35,7 @@ export default {
   sales,
   suppliers,
   units,
-  tiers
+  tiers,
+  variant_attributes,
+  variants
 }

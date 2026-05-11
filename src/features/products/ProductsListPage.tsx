@@ -4,18 +4,14 @@ import MenuItem from '@mui/material/MenuItem'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import IconButton from '@mui/material/IconButton'
 import AddIcon from '@mui/icons-material/Add'
-import EditIcon from '@mui/icons-material/Edit'
-import ArchiveIcon from '@mui/icons-material/Archive'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import { paths } from 'src/paths'
-import { useArchiveProduct, type ProductSearchRow } from './hooks'
-import { useNotifier } from 'src/components/notistack/NotificationProvider'
-import { Button, ConfirmDialog, Tooltip } from 'src/components/ui'
+import { Button } from 'src/components/ui'
 import { PageHeader } from 'src/components/layout'
 import ProductTable, { type StockDisplayMode } from './ProductTable'
+import CategoryFilter from './CategoryFilter'
 
 const STOCK_DISPLAY_KEY = 'nizaamify.products.stock_display_mode'
 
@@ -28,9 +24,7 @@ function readStoredMode(): StockDisplayMode {
 export default function ProductsListPage() {
   const { t } = useTranslation(['products', 'common', 'units'])
   const navigate = useNavigate()
-  const archive = useArchiveProduct()
-  const notify = useNotifier()
-  const [confirm, setConfirm] = useState<ProductSearchRow | null>(null)
+  const [params, setParams] = useSearchParams()
   const [stockMode, setStockMode] = useState<StockDisplayMode>(() =>
     readStoredMode()
   )
@@ -40,15 +34,14 @@ export default function ProductsListPage() {
     window.localStorage.setItem(STOCK_DISPLAY_KEY, stockMode)
   }, [stockMode])
 
-  const onArchive = async () => {
-    if (!confirm) return
-    try {
-      await archive.mutateAsync({ id: confirm.id, isActive: false })
-      notify.success(t('products:messages.archived'))
-      setConfirm(null)
-    } catch {
-      notify.error(t('products:errors.save_failed'))
-    }
+  const categoryId = params.get('category_id')
+  const handleCategoryChange = (next: string | null) => {
+    const updated = new URLSearchParams(params)
+    if (next) updated.set('category_id', next)
+    else updated.delete('category_id')
+    // Drop the page param so filter changes don't strand the user on page 5
+    updated.delete('page')
+    setParams(updated, { replace: true })
   }
 
   return (
@@ -57,6 +50,10 @@ export default function ProductsListPage() {
         title={t('products:title')}
         actions={
           <Stack direction='row' spacing={1.5} alignItems='center'>
+            <CategoryFilter
+              value={categoryId}
+              onChange={handleCategoryChange}
+            />
             <Stack direction='row' spacing={0.75} alignItems='center'>
               <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
                 {t('units:stock_display.label')}
@@ -92,44 +89,16 @@ export default function ProductsListPage() {
         }
       />
 
+      {/* v2.5 §3: drop the Actions column. The eye icon + row click are the
+          only per-row affordances; edit moved to the detail page. */}
       <ProductTable
         showAvgCost
         showLastPurchase
+        showCategoryColumn
+        showViewIcon
+        onView={(row) => navigate(paths.gotoProduct(row.id))}
         stockDisplayMode={stockMode}
-        renderActions={(row) => (
-          <Stack direction='row' spacing={0.5}>
-            <Tooltip title={t('products:actions.edit')}>
-              <IconButton
-                size='small'
-                onClick={() => navigate(paths.gotoProduct(row.id))}
-                aria-label={t('products:actions.edit')}
-              >
-                <EditIcon fontSize='small' />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title={t('products:actions.archive')}>
-              <IconButton
-                size='small'
-                onClick={() => setConfirm(row)}
-                aria-label={t('products:actions.archive')}
-              >
-                <ArchiveIcon fontSize='small' />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-        )}
-      />
-
-      <ConfirmDialog
-        open={!!confirm}
-        onClose={() => setConfirm(null)}
-        onConfirm={onArchive}
-        title={t('products:actions.archive')}
-        description={confirm?.name}
-        confirmLabel={t('products:actions.archive')}
-        cancelLabel={t('products:actions.back')}
-        loading={archive.isPending}
-        destructive
+        categoryId={categoryId}
       />
     </Box>
   )

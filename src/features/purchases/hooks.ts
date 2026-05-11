@@ -26,10 +26,18 @@ export type OverheadCategory =
  * `record_purchase` accepts either; the pack variant is required for v2.0
  * stock-in-only packs (price=null) where qty is in cartons not base units.
  */
+// v2.6+v2.7: lines may carry variant_id (multi-variant products) OR product_id
+// (single-variant fallback resolved server-side to the default variant).
 export type PurchaseLineInput =
-  | { product_id: string; qty: number; cost_at_purchase: number }
   | {
       product_id: string
+      variant_id?: string
+      qty: number
+      cost_at_purchase: number
+    }
+  | {
+      product_id: string
+      variant_id?: string
       pack_id: string
       pack_qty: number
       cost_at_purchase: number
@@ -151,6 +159,18 @@ export type PurchaseDetailItem = {
   qty_in_base: number
   product: { id: string; name: string; type: string } | null
   pack: { id: string; unit_name: string; is_active: boolean } | null
+  /** v2.6c: server-computed line subtotal (invoiced units × cost_at_purchase).
+   * Single source of truth = purchase_item_financials view. */
+  line_subtotal: number
+  /** v2.6c: server-computed effective line overhead. Uses
+   * line_overhead_amount when present, else falls back to
+   * overhead_per_unit × qty_in_base for legacy rows. */
+  line_overhead: number
+  /** v2.6c: server-computed line total (line_subtotal + line_overhead). */
+  line_total: number
+  /** v2.6c: server-computed cost delta (avg_cost_after − avg_cost_before).
+   * Null on legacy rows where snapshots are absent. */
+  cost_delta: number | null
 }
 
 export type PurchaseDetailOverhead = {
@@ -198,6 +218,28 @@ export function usePurchaseDetail(id: string | undefined) {
       if (error) throw error
       const cashier = (data.cashier as { email: string } | null) ?? null
       const supplier = (data.supplier as { name: string } | null) ?? null
+
+      // v2.6c: parallel fetch server-computed per-line financials.
+      // Single source of truth = purchase_item_financials view.
+      type PFinRow = {
+        purchase_item_id: string
+        line_subtotal: number | string
+        line_overhead: number | string
+        line_total: number | string
+        cost_delta: number | string | null
+      }
+      const { data: finRows, error: finErr } = await supabase
+        .from('purchase_item_financials')
+        .select(
+          'purchase_item_id, line_subtotal, line_overhead, line_total, cost_delta'
+        )
+        .eq('purchase_id', data.id)
+      if (finErr) throw finErr
+      const finById = new Map<string, PFinRow>()
+      for (const r of (finRows ?? []) as PFinRow[]) {
+        finById.set(r.purchase_item_id, r)
+      }
+
       return {
         id: data.id,
         shop_id: data.shop_id,
@@ -215,7 +257,14 @@ export function usePurchaseDetail(id: string | undefined) {
         supplier_name: supplier?.name ?? null,
         items: (
           (data.purchase_items ?? []) as unknown as Array<
-            Omit<PurchaseDetailItem, 'pack'> & {
+            Omit<
+              PurchaseDetailItem,
+              | 'pack'
+              | 'line_subtotal'
+              | 'line_overhead'
+              | 'line_total'
+              | 'cost_delta'
+            > & {
               pack: {
                 id: string
                 is_active: boolean
@@ -223,16 +272,26 @@ export function usePurchaseDetail(id: string | undefined) {
               } | null
             }
           >
-        ).map((it) => ({
-          ...it,
-          pack: it.pack
-            ? {
-                id: it.pack.id,
-                unit_name: it.pack.units_of_measure?.name ?? '',
-                is_active: it.pack.is_active
-              }
-            : null
-        })),
+        ).map((it) => {
+          const fin = finById.get(it.id)
+          return {
+            ...it,
+            pack: it.pack
+              ? {
+                  id: it.pack.id,
+                  unit_name: it.pack.units_of_measure?.name ?? '',
+                  is_active: it.pack.is_active
+                }
+              : null,
+            line_subtotal: Number(fin?.line_subtotal ?? 0),
+            line_overhead: Number(fin?.line_overhead ?? 0),
+            line_total: Number(fin?.line_total ?? 0),
+            cost_delta:
+              fin?.cost_delta === null || fin?.cost_delta === undefined
+                ? null
+                : Number(fin.cost_delta)
+          }
+        }),
         overhead:
           (data.purchase_overhead_items as unknown as PurchaseDetailOverhead[]) ??
           []
