@@ -17,9 +17,17 @@ import {
   type CreateProductValues,
   type EditProductValues
 } from './schemas'
-import { useCreateProduct, useProduct, useUpdateProduct } from './hooks'
+import {
+  useCreateProduct,
+  useCreateProductWithVariants,
+  useProduct,
+  useUpdateProduct
+} from './hooks'
 import PacksSection from './PacksSection'
 import CategoryCombobox from './CategoryCombobox'
+import VariantMatrixBuilder, {
+  type VariantMatrixState
+} from 'src/features/variants/VariantMatrixBuilder'
 import { paths } from 'src/paths'
 import { formatPKR } from 'src/features/subscription/env'
 import {
@@ -131,13 +139,28 @@ type CreateFormProps = {
 }
 
 function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
-  const { t } = useTranslation(['products', 'common'])
+  const { t } = useTranslation(['products', 'common', 'variants'])
   const navigate = useNavigate()
+  const createWithVariants = useCreateProductWithVariants()
+  const notify = useNotifier()
+
+  const [hasVariants, setHasVariants] = useState(false)
+  const [matrixState, setMatrixState] = useState<VariantMatrixState>({
+    attributeIds: [],
+    selectedValues: {},
+    included: {},
+    overrides: {}
+  })
+  const [defaultPrice, setDefaultPrice] = useState('0')
+  const [matrixError, setMatrixError] = useState<string | null>(null)
 
   const {
     control,
     register,
     handleSubmit,
+    watch,
+    trigger,
+    getValues,
     formState: { errors, isSubmitting }
   } = useForm<CreateProductValues>({
     resolver: zodResolver(createProductSchema(t)),
@@ -152,8 +175,79 @@ function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
     }
   })
 
+  const productName = watch('name')
+
+  const submitVariantsMode = async () => {
+    setMatrixError(null)
+    // Only validate the fields that the variants path actually consumes.
+    const ok = await trigger(['name', 'category_id', 'is_scan_only'])
+    if (!ok) return
+
+    if (matrixState.attributeIds.length === 0) {
+      setMatrixError(t('variants:errors.need_at_least_one_attribute'))
+      return
+    }
+    // Need at least one value per attribute
+    if (
+      matrixState.attributeIds.some(
+        (a) => (matrixState.selectedValues[a] ?? []).length === 0
+      )
+    ) {
+      setMatrixError(t('variants:errors.need_at_least_one_combination'))
+      return
+    }
+    // Build the variant payload from included combos
+    const included = Object.entries(matrixState.included)
+      .filter(([, on]) => on)
+      .map(([k]) => k)
+    if (included.length === 0) {
+      setMatrixError(t('variants:errors.need_at_least_one_combination'))
+      return
+    }
+
+    const priceNum = Number(defaultPrice)
+    const values = getValues()
+
+    try {
+      const variants = included.map((key) => {
+        const valueIds = key.split('|')
+        const override = matrixState.overrides[key] ?? {}
+        const variantPrice =
+          override.price !== undefined && override.price !== ''
+            ? Number(override.price)
+            : priceNum
+        return {
+          attribute_value_ids: valueIds,
+          sku: override.sku ?? undefined,
+          price: Number.isFinite(variantPrice) ? variantPrice : 0
+        }
+      })
+
+      const res = await createWithVariants.mutateAsync({
+        name: values.name,
+        category_id: values.category_id,
+        default_price: Number.isFinite(priceNum) ? priceNum : 0,
+        is_scan_only: values.is_scan_only,
+        attribute_ids: matrixState.attributeIds,
+        variants,
+        description: values.description?.trim() ? values.description : null
+      })
+      notify.success(t('products:messages.saved'))
+      navigate(paths.gotoProduct(res.product_id))
+    } catch (err) {
+      const msg = (err as { message?: string })?.message ?? ''
+      if (msg.includes('duplicate_variant_combination')) {
+        setMatrixError(t('variants:errors.duplicate_combination'))
+      } else if (msg.includes('uq_products_shop_name_category')) {
+        setMatrixError(t('products:errors.duplicate_name_category'))
+      } else {
+        notify.error(t('products:errors.save_failed'))
+      }
+    }
+  }
+
   return (
-    <Box sx={{ maxWidth: 672, mx: 'auto', width: '100%' }}>
+    <Box sx={{ maxWidth: 720, mx: 'auto', width: '100%' }}>
       <PageHeader title={t('products:add_product')} />
 
       <Card>
@@ -194,58 +288,83 @@ function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
               />
             </Field>
 
-            <Field
-              label={t('products:fields.selling_price')}
-              error={errors.price?.message}
-            >
-              <Input
-                type='number'
-                inputProps={{ step: '0.01', min: 0, inputMode: 'numeric' }}
-                {...register('price', { valueAsNumber: true })}
+            {/* v2.7: has_variants toggle. When ON, the variant matrix replaces
+                the single price + opening stock fields. */}
+            <Field hint={t('variants:has_variants_help')}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={hasVariants}
+                    onChange={(e) => setHasVariants(e.target.checked)}
+                  />
+                }
+                label={t('variants:has_variants_toggle')}
               />
             </Field>
 
-            <Box>
-              <Typography
-                variant='overline'
-                sx={{
-                  color: 'var(--text-muted)',
-                  display: 'block',
-                  mb: 1,
-                  textAlign: 'start'
-                }}
-              >
-                {t('products:fields.opening_stock')}
-              </Typography>
-              <Divider sx={{ borderColor: 'var(--border-subtle)' }} />
-            </Box>
+            {!hasVariants && (
+              <>
+                <Field
+                  label={t('products:fields.selling_price')}
+                  error={errors.price?.message}
+                >
+                  <Input
+                    type='number'
+                    inputProps={{ step: '0.01', min: 0, inputMode: 'numeric' }}
+                    {...register('price', { valueAsNumber: true })}
+                  />
+                </Field>
 
-            <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
-              {t('products:fields.opening_help')}
-            </Typography>
+                <Box>
+                  <Typography
+                    variant='overline'
+                    sx={{
+                      color: 'var(--text-muted)',
+                      display: 'block',
+                      mb: 1,
+                      textAlign: 'start'
+                    }}
+                  >
+                    {t('products:fields.opening_stock')}
+                  </Typography>
+                  <Divider sx={{ borderColor: 'var(--border-subtle)' }} />
+                </Box>
 
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <Field
-                label={t('products:fields.opening_qty')}
-                error={errors.opening_stock?.message}
-              >
-                <Input
-                  type='number'
-                  inputProps={{ step: '1', min: 0, inputMode: 'numeric' }}
-                  {...register('opening_stock', { valueAsNumber: true })}
-                />
-              </Field>
-              <Field
-                label={t('products:fields.opening_cost')}
-                error={errors.opening_cost?.message}
-              >
-                <Input
-                  type='number'
-                  inputProps={{ step: '0.01', min: 0, inputMode: 'numeric' }}
-                  {...register('opening_cost', { valueAsNumber: true })}
-                />
-              </Field>
-            </Stack>
+                <Typography
+                  variant='caption'
+                  sx={{ color: 'var(--text-muted)' }}
+                >
+                  {t('products:fields.opening_help')}
+                </Typography>
+
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                  <Field
+                    label={t('products:fields.opening_qty')}
+                    error={errors.opening_stock?.message}
+                  >
+                    <Input
+                      type='number'
+                      inputProps={{ step: '1', min: 0, inputMode: 'numeric' }}
+                      {...register('opening_stock', { valueAsNumber: true })}
+                    />
+                  </Field>
+                  <Field
+                    label={t('products:fields.opening_cost')}
+                    error={errors.opening_cost?.message}
+                  >
+                    <Input
+                      type='number'
+                      inputProps={{
+                        step: '0.01',
+                        min: 0,
+                        inputMode: 'numeric'
+                      }}
+                      {...register('opening_cost', { valueAsNumber: true })}
+                    />
+                  </Field>
+                </Stack>
+              </>
+            )}
 
             <Controller
               control={control}
@@ -265,6 +384,20 @@ function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
               )}
             />
 
+            {hasVariants && (
+              <>
+                <Divider sx={{ borderColor: 'var(--border-subtle)' }} />
+                <VariantMatrixBuilder
+                  state={matrixState}
+                  onChange={setMatrixState}
+                  productNameForSku={productName ?? ''}
+                  defaultPrice={defaultPrice}
+                  onDefaultPriceChange={setDefaultPrice}
+                  errorText={matrixError}
+                />
+              </>
+            )}
+
             <Stack direction='row' spacing={1.5} justifyContent='flex-end'>
               <Button
                 variant='secondary'
@@ -272,9 +405,19 @@ function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
               >
                 {t('products:actions.back')}
               </Button>
-              <Button type='submit' variant='primary' loading={isSubmitting}>
-                {t('products:actions.save')}
-              </Button>
+              {hasVariants ? (
+                <Button
+                  variant='primary'
+                  onClick={() => void submitVariantsMode()}
+                  loading={createWithVariants.isPending}
+                >
+                  {t('products:actions.save')}
+                </Button>
+              ) : (
+                <Button type='submit' variant='primary' loading={isSubmitting}>
+                  {t('products:actions.save')}
+                </Button>
+              )}
             </Stack>
           </Stack>
         </form>

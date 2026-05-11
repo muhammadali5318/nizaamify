@@ -1,0 +1,39 @@
+{
+  "title": "Variants",
+  "has_variants_toggle": "This product has variants (e.g., different colors, sizes)",
+  "has_variants_help": "Define the attributes (Color, Size, …) below to generate one row per combination.",
+  "select_attributes": "Select up to 3 attributes for this product",
+  "matrix_uncheck_help": "Uncheck combinations you don't carry.",
+  "default_price_label": "Default price (Rs)",
+  "default_price_help": "Pre-fills every variant. You can override per-variant below.",
+  "variants_count_one": "{{count}} variant",
+  "variants_count_other": "{{count}} variants",
+  "variants_will_be_created_one": "{{count}} variant will be created.",
+  "variants_will_be_created_other": "{{count}} variants will be created.",
+  "variants_list_title": "Variants list (review and adjust)",
+  "attribute": "Attribute",
+  "select_values": "Select values",
+  "no_values_yet": "No values yet. Define this attribute's values in Settings → Variant Attributes.",
+  "columns": {
+    "sku": "SKU",
+    "variant": "Variant",
+    "price": "Price",
+    "stock": "Stock",
+    "action": "Action"
+  },
+  "actions": {
+    "add_variant": "+ Add variant",
+    "add_attribute": "+ Add another attribute",
+    "add_value": "+ Add value",
+    "remove": "Remove"
+  },
+  "errors": {
+    "max_3_attributes": "A product can have at most 3 attributes.",
+    "duplicate_combination": "This combination already exists.",
+    "attribute_not_in_shop": "This attribute isn't defined for your shop. Create it in Settings.",
+    "variant_in_use_cannot_edit_attributes": "This variant has transaction history; attributes can't be changed.",
+    "attribute_composition_mismatch": "The new variant's attributes don't match the product's existing variants.",
+    "need_at_least_one_attribute": "Pick at least one attribute to generate variants.",
+    "need_at_least_one_combination": "Select at least one combination to create."
+  }
+}

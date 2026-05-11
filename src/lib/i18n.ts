@@ -30,7 +30,8 @@ void i18n
       'suppliers',
       'units',
       'tiers',
-      'variant_attributes'
+      'variant_attributes',
+      'variants'
     ],
     detection: {
       order: ['localStorage', 'navigator'],

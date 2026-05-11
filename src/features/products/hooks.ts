@@ -262,6 +262,49 @@ export type UpdateProductInput = {
   is_scan_only: boolean
 }
 
+export type CreateProductWithVariantsInput = {
+  name: string
+  category_id: string
+  default_price: number
+  is_scan_only: boolean
+  attribute_ids: string[]
+  variants: {
+    attribute_value_ids: string[]
+    sku?: string
+    price?: number
+    opening_stock?: number
+    opening_cost?: number
+  }[]
+  description?: string | null
+}
+
+export function useCreateProductWithVariants() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: CreateProductWithVariantsInput) => {
+      const { data, error } = await supabase.rpc(
+        'create_product_with_variants',
+        {
+          p_name: input.name,
+          p_category_id: input.category_id,
+          p_default_price: input.default_price,
+          p_is_scan_only: input.is_scan_only,
+          p_attribute_ids: input.attribute_ids,
+          p_variants: input.variants as unknown as never,
+          p_description: input.description ?? undefined
+        }
+      )
+      if (error) throw error
+      const row = Array.isArray(data) ? data[0] : data
+      return row as { product_id: string; variant_ids: string[] }
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['products'] })
+      void qc.invalidateQueries({ queryKey: ['variant_attributes'] })
+    }
+  })
+}
+
 export function useUpdateProduct() {
   const qc = useQueryClient()
   return useMutation({
