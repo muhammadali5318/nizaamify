@@ -70,6 +70,30 @@ export default function VariantsTable({ productId }: Props) {
       cell: (row) => <Typography variant='body2'>{row.stock}</Typography>
     },
     {
+      id: 'avg_cost',
+      header: t('products:fields.avg_cost'),
+      align: 'end',
+      hideOnMobile: true,
+      cell: (row) => (
+        <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
+          {formatPKR(Number(row.avg_cost ?? 0), locale)}
+        </Typography>
+      )
+    },
+    {
+      id: 'last_purchase',
+      header: t('products:fields.last_purchase_cost'),
+      align: 'end',
+      hideOnMobile: true,
+      cell: (row) => (
+        <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
+          {row.last_purchase_cost === null
+            ? '—'
+            : formatPKR(Number(row.last_purchase_cost), locale)}
+        </Typography>
+      )
+    },
+    {
       id: 'action',
       header: '',
       align: 'end',
