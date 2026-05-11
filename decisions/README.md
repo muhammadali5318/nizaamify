@@ -34,3 +34,7 @@ Granularity: one ADR per *reversal of a PRD assumption* or *cross-cutting archit
 - [0023 — v2.6 synthetic default variant for single-variant products](./0023-v26-default-variant-pattern.md)
 - [0024 — v2.6 deprecate (don't drop) legacy product_id and products.* columns](./0024-v26-deprecate-without-drop-product-id-columns.md)
 - [0025 — v2.6 `record_sale` / `record_purchase` accept variant_id OR product_id](./0025-v26-variant-id-or-product-id-rpc-contract.md)
+- [0026 — v2.7 shop-wide variant attribute pool](./0026-v27-shop-wide-variant-attributes-pool.md)
+- [0027 — v2.7 at most 3 variant attributes per product](./0027-v27-max-3-attributes-per-product.md)
+- [0028 — v2.7 stock-in expanding-line fallback chosen over full matrix UX](./0028-v27-stock-in-expanding-line-fallback.md)
+- [0029 — v2.7 POS variant picker dialog instead of direct [+] for multi-variant rows](./0029-v27-pos-variant-picker-affordance.md)

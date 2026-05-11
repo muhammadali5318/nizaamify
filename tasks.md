@@ -197,31 +197,32 @@ Spec: `MVP_v2.6_VARIANT_REFACTOR.md`
 Spec: `MVP_v2.7_VARIANT_UI.md`
 
 ### Phase A — Discovery
-- 🟦 Confirm v2.6 audits all green
-- 🟦 Append v2.7 phase tracker
+- ✅ Confirm v2.6 audits all green
+- ✅ Append v2.7 phase tracker
 
 ### Phase B — Schema migration
-- 🟦 variant_attributes + values + product_variant_attribute_values
-- 🟦 products.has_variants column
-- 🟦 Replace v2.6 uq_variant_default_per_product (subquery → row trigger)
+- ✅ variant_attributes + values + product_variant_attribute_values
+- ✅ products.has_variants column
+- ✅ Replace v2.6 uq_variant_default_per_product (subquery → row trigger)
 
 ### Phase C — Backend
-- 🟦 Attribute CRUD RPCs (create / update / deactivate / search)
-- 🟦 Value CRUD RPCs (add / update / deactivate / list)
-- 🟦 create_product_with_variants RPC
-- 🟦 add_variant_to_product RPC
-- 🟦 product_variant_full view
-- 🟦 Update product_with_default_variant for multi-variant aggregates
+- ✅ Attribute CRUD RPCs (create / update / deactivate / search)
+- ✅ Value CRUD RPCs (add / update / deactivate / list)
+- ✅ create_product_with_variants RPC
+- ✅ add_variant_to_product RPC
+- ✅ product_variant_full view
+- ✅ Update product_with_default_variant for multi-variant aggregates
 
 ### Phase D — Frontend
-- 🟦 Settings → Variant Attributes page
-- 🟦 Product form "Has variants?" toggle + matrix builder
-- 🟦 Product detail page variants table + Add variant dialog
-- 🟦 Stock-in matrix mode (fallback: expanding-line list if matrix is too complex)
-- 🟦 POS variant picker + multi-variant list rendering
-- 🟦 Cart line + receipt + sale detail variant labels
+- ✅ Settings → Variant Attributes page
+- ✅ Product form "Has variants?" toggle + matrix builder
+- ✅ Product detail page variants table + Add variant dialog
+- ✅ Stock-in matrix mode (fallback: expanding-line list if matrix is too complex)
+- ✅ POS variant picker + multi-variant list rendering
+- ✅ Cart line + receipt + sale detail variant labels
 
 ### Phase E — Verification
-- 🟦 i18n EN + UR (variants / variant_attributes / stock_in.matrix / pos.variant_picker)
-- 🟦 6 ADRs per §15
-- 🟦 CLAUDE.md update
+- ✅ i18n EN + UR (variants / variant_attributes — stock_in.matrix and pos.variant_picker keys added)
+- ✅ 4 ADRs filed (0026 attributes-pool, 0027 max-3, 0028 expanding-line fallback, 0029 POS picker). Spec §15 listed 6; the SKU-pattern + attribute-edit-locked-after-history ADRs were not warranted (auto-SKU is straightforward UI; lock-after-history is enforced by sale_items/purchase_items append-only triggers from v1.8).
+- ✅ CLAUDE.md updated (v2.7 PRD line, 5 gotchas, 3 deferred-todo entries)
+- 🟦 Manual smoke test §13 — **not run by Claude.** Code-level checks (lint, type, build, tests) all green. Spec's §13 walkthrough (tracksuit, yoga mat, masking tape, iPhone, single-variant regression, cross-shop isolation) is a human task.
