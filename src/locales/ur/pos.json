@@ -14,7 +14,11 @@
     "pick_variant": "ویرئنٹ منتخب کریں",
     "variants_badge_one": "{{count}} ویرئنٹ",
     "variants_badge_other": "{{count}} ویرئنٹس",
-    "price_range": "روپے {{min}} – {{max}}"
+    "variants_total_in_stock_one": "{{count}} کل",
+    "variants_total_in_stock_other": "{{count}} کل",
+    "price_range": "روپے {{min}} – {{max}}",
+    "per_variant": "فی ویرئنٹ",
+    "per_variant_tooltip": "ہر ویرئنٹ کی اپنی قیمت ہے۔ تفصیل کے لیے مصنوعات کھولیں۔"
   },
   "variant_picker": {
     "title": "{{productName}} — ویرئنٹ منتخب کریں",

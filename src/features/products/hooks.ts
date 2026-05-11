@@ -23,6 +23,10 @@ export type ProductSearchRow = {
   variant_count: number
   min_price: number | null
   max_price: number | null
+  /** Sum of variants[].stock across active variants. Always present (0 for
+   * single-variant products with no stock); use this for the multi-variant
+   * row's "X total" summary in product lists. */
+  total_stock_all_variants: number
 }
 
 export type SearchProductsArgs = {

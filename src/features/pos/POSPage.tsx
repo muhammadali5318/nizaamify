@@ -411,7 +411,8 @@ export default function POSPage() {
           has_variants: false,
           variant_count: 1,
           min_price: cached.default_price,
-          max_price: cached.default_price
+          max_price: cached.default_price,
+          total_stock_all_variants: cached.stock
         },
         1
       )
@@ -439,7 +440,8 @@ export default function POSPage() {
         has_variants: false,
         variant_count: 1,
         min_price: Number(data.price ?? 0),
-        max_price: Number(data.price ?? 0)
+        max_price: Number(data.price ?? 0),
+        total_stock_all_variants: data.stock
       },
       1
     )

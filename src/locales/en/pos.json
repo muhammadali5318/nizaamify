@@ -14,7 +14,11 @@
     "pick_variant": "Pick variant",
     "variants_badge_one": "{{count}} variant",
     "variants_badge_other": "{{count}} variants",
-    "price_range": "Rs {{min}} – {{max}}"
+    "variants_total_in_stock_one": "{{count}} total",
+    "variants_total_in_stock_other": "{{count}} total",
+    "price_range": "Rs {{min}} – {{max}}",
+    "per_variant": "per variant",
+    "per_variant_tooltip": "Each variant has its own value. Open the product to see the per-variant breakdown."
   },
   "variant_picker": {
     "title": "{{productName}} — Pick variant",
