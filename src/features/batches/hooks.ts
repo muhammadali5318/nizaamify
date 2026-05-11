@@ -129,6 +129,35 @@ export function useHasAnyBatchedProduct() {
   })
 }
 
+/** v2.8.2: partial write-off — remove `qty` units from a batch and from
+ *  variant.stock atomically. When qty equals qty_remaining, the
+ *  batch_auto_deactivate_when_empty trigger flips is_active=false in the
+ *  same UPDATE. The frontend doesn't need to special-case the full
+ *  write-off — always call this RPC. */
+export function useRecordPartialWriteoff() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (args: {
+      batch_id: string
+      qty: number
+      reason: string | null
+    }) => {
+      const { error } = await supabase.rpc('record_partial_writeoff', {
+        p_batch_id: args.batch_id,
+        p_qty: args.qty,
+        p_reason: args.reason ?? undefined
+      })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['batches'] })
+      void qc.invalidateQueries({ queryKey: ['products'] })
+      void qc.invalidateQueries({ queryKey: ['product'] })
+      void qc.invalidateQueries({ queryKey: ['alerts'] })
+    }
+  })
+}
+
 export function useDeactivateBatch() {
   const qc = useQueryClient()
   return useMutation({

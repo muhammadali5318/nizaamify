@@ -2,8 +2,15 @@ import { useState } from 'react'
 import Stack from '@mui/material/Stack'
 import { useTranslation } from 'react-i18next'
 import { useNotifier } from 'src/components/notistack/NotificationProvider'
-import { Banner, Button, Dialog, Field, Textarea } from 'src/components/ui'
-import { useDeactivateBatch } from './hooks'
+import {
+  Banner,
+  Button,
+  Dialog,
+  Field,
+  Input,
+  Textarea
+} from 'src/components/ui'
+import { useRecordPartialWriteoff } from './hooks'
 
 type Props = {
   batchId: string
@@ -22,13 +29,25 @@ export default function WriteOffBatchDialog({
 }: Props) {
   const { t } = useTranslation(['batches', 'common'])
   const notify = useNotifier()
-  const deactivate = useDeactivateBatch()
+  const writeoff = useRecordPartialWriteoff()
+  // v2.8.2: qty defaults to qty_remaining (legacy "write off whole batch"
+  // behavior). User can lower it for partial RTV / damage.
+  const [qty, setQty] = useState<string>(String(qtyRemaining))
   const [reason, setReason] = useState('')
 
+  const qtyNum = qty === '' ? NaN : Number(qty)
+  const qtyValid =
+    Number.isInteger(qtyNum) && qtyNum > 0 && qtyNum <= qtyRemaining
+
   const handleSubmit = async () => {
+    if (!qtyValid) {
+      notify.error(t('batches:errors.qty_invalid'))
+      return
+    }
     try {
-      await deactivate.mutateAsync({
+      await writeoff.mutateAsync({
         batch_id: batchId,
+        qty: qtyNum,
         reason: reason.trim() === '' ? null : reason.trim()
       })
       notify.success(t('common:actions.confirm'))
@@ -37,6 +56,10 @@ export default function WriteOffBatchDialog({
       notify.error(t('batches:errors.deactivate_failed'))
     }
   }
+
+  // When qty < remaining: partial. When qty == remaining: full (auto-
+  // deactivate trigger flips is_active=false). Same call either way.
+  const isFull = qtyNum === qtyRemaining
 
   return (
     <Dialog
@@ -49,14 +72,15 @@ export default function WriteOffBatchDialog({
           <Button
             variant='ghost'
             onClick={onClose}
-            disabled={deactivate.isPending}
+            disabled={writeoff.isPending}
           >
             {t('common:actions.cancel')}
           </Button>
           <Button
             variant='primary'
             onClick={handleSubmit}
-            loading={deactivate.isPending}
+            loading={writeoff.isPending}
+            disabled={!qtyValid}
           >
             {t('batches:actions.write_off_submit')}
           </Button>
@@ -66,10 +90,25 @@ export default function WriteOffBatchDialog({
       <Stack spacing={2} sx={{ pt: 1 }}>
         <Banner variant='warning'>
           {t('batches:actions.write_off_confirm_body', {
-            qty: qtyRemaining,
+            qty: Number.isFinite(qtyNum) ? qtyNum : qtyRemaining,
             productName
           })}
+          {isFull && ` ${t('batches:actions.write_off_full_note')}`}
         </Banner>
+
+        <Field
+          label={t('batches:actions.write_off_qty_label', {
+            max: qtyRemaining
+          })}
+          hint={t('batches:actions.write_off_qty_help')}
+        >
+          <Input
+            type='number'
+            inputProps={{ min: 1, max: qtyRemaining, step: 1 }}
+            value={qty}
+            onChange={(e) => setQty(e.target.value)}
+          />
+        </Field>
 
         <Field label={t('batches:actions.write_off_reason_label')}>
           <Textarea

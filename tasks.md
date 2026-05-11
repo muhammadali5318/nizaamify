@@ -336,3 +336,28 @@ Per `MVP_v2.8.1_PRICING_DECOUPLE.md`. Migration 0060 + frontend rework. The v2.8
 - ✅ All audit invariants green (v2.6 + v2.6c + v2.8 sets all pass; +1 new check: zero sale_items rows where variant.price IS NULL).
 - ✅ `npm run type-check` clean. `npm run lint` clean. `npm run build` clean.
 - ✅ CLAUDE.md updated (v2.8.1 PRD entry + gotcha).
+
+---
+
+## v2.8.2 — Partial write-off + auto-deactivate when empty — 2026-05-12
+
+Per `MVP_v2.8.2_PARTIAL_WRITEOFF.md`. Two gaps closed:
+- Partial RTV / damage / loss has no clean path in v2.8 (whole-batch write-off only).
+- Empty batches stay `is_active = true` until manual write-off — they clutter the active list.
+
+### Migration 0061
+- ✅ `record_partial_writeoff(batch_id, qty, reason)` — decrements `variant.stock` and `batch.qty_remaining` by exactly `qty`, appends a dated note. Validates ownership, active status, qty bounds.
+- ✅ `batch_auto_deactivate_when_empty` BEFORE UPDATE trigger — fires on `> 0 → 0` transition, flips `is_active = false`. Composes cleanly with the existing immutability + touch triggers (alphabetical order on `inventory_batches`).
+- ✅ `deactivate_batch` kept for back-compat (no callers in the new UI).
+
+### Frontend
+- ✅ `useRecordPartialWriteoff` hook added.
+- ✅ WriteOffBatchDialog rewritten: new "Qty to write off" input defaults to `qty_remaining`; always calls `record_partial_writeoff` (auto-deactivate trigger handles the full case). Disabled submit when qty is invalid. Warning banner adapts when the qty equals `qty_remaining`.
+- ✅ i18n: `batches:actions.write_off_qty_label`, `write_off_qty_help`, `write_off_full_note`, `batches:errors.qty_invalid` (en + ur).
+
+### Verification
+- ✅ ADR filed: `decisions/2026-05-12-partial-writeoff-and-auto-deactivate.md`.
+- ✅ New invariant `qty_remaining=0 AND is_active=true → 0 rows` returns 0.
+- ✅ All prior audits stay zero (v2.6 §6, v2.6c, v2.8 §9, v2.8.1).
+- ✅ Both triggers present on `inventory_batches`: auto-deactivate (new) + immutability (existing).
+- ✅ Type-check + lint + build green.

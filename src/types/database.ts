@@ -2668,6 +2668,10 @@ export type Database = {
           name: string
         }[]
       }
+      record_partial_writeoff: {
+        Args: { p_batch_id: string; p_qty: number; p_reason?: string }
+        Returns: undefined
+      }
       record_purchase: {
         Args: {
           p_is_opening?: boolean
