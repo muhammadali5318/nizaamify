@@ -152,6 +152,7 @@ function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
     overrides: {}
   })
   const [defaultPrice, setDefaultPrice] = useState('0')
+  const [defaultOpeningCost, setDefaultOpeningCost] = useState('')
   const [matrixError, setMatrixError] = useState<string | null>(null)
 
   const {
@@ -206,12 +207,39 @@ function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
     }
 
     const priceNum = Number(defaultPrice)
+    const openingCostNum =
+      defaultOpeningCost === '' ? NaN : Number(defaultOpeningCost)
     const values = getValues()
 
+    // Pre-flight: if any included variant has opening_stock > 0, we need an
+    // opening cost per unit. The create_product_with_variants RPC raises
+    // opening_cost_required_when_stock_positive on this path; catching it
+    // client-side gives a friendlier message + skips the round trip.
+    const variantsToCreate = included.map((key) => {
+      const override = matrixState.overrides[key] ?? {}
+      const qtyStr = override.opening_stock ?? '0'
+      const qty = qtyStr === '' ? 0 : Number(qtyStr)
+      return { key, override, qty }
+    })
+    const anyWithStock = variantsToCreate.some(
+      (v) => Number.isFinite(v.qty) && v.qty > 0
+    )
+    if (anyWithStock) {
+      if (!Number.isFinite(openingCostNum) || openingCostNum <= 0) {
+        setMatrixError(
+          t(
+            !Number.isFinite(openingCostNum)
+              ? 'variants:errors.opening_cost_required'
+              : 'variants:errors.opening_cost_must_be_positive'
+          )
+        )
+        return
+      }
+    }
+
     try {
-      const variants = included.map((key) => {
+      const variants = variantsToCreate.map(({ key, override, qty }) => {
         const valueIds = key.split('|')
-        const override = matrixState.overrides[key] ?? {}
         const variantPrice =
           override.price !== undefined && override.price !== ''
             ? Number(override.price)
@@ -219,7 +247,11 @@ function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
         return {
           attribute_value_ids: valueIds,
           sku: override.sku ?? undefined,
-          price: Number.isFinite(variantPrice) ? variantPrice : 0
+          price: Number.isFinite(variantPrice) ? variantPrice : 0,
+          opening_stock: Number.isFinite(qty) && qty > 0 ? qty : 0,
+          ...(Number.isFinite(qty) && qty > 0
+            ? { opening_cost: openingCostNum }
+            : {})
         }
       })
 
@@ -393,6 +425,8 @@ function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
                   productNameForSku={productName ?? ''}
                   defaultPrice={defaultPrice}
                   onDefaultPriceChange={setDefaultPrice}
+                  defaultOpeningCost={defaultOpeningCost}
+                  onDefaultOpeningCostChange={setDefaultOpeningCost}
                   errorText={matrixError}
                 />
               </>
