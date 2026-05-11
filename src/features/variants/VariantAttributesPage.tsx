@@ -10,6 +10,7 @@ import AddIcon from '@mui/icons-material/Add'
 import { useTranslation } from 'react-i18next'
 import {
   Badge,
+  Banner,
   Button,
   Card,
   ConfirmDialog,
@@ -156,6 +157,13 @@ export default function VariantAttributesPage() {
           </Button>
         }
       />
+
+      {/* Help banner: variant attribute is NOT a category. */}
+      <Box sx={{ mb: 2 }}>
+        <Banner variant='info'>
+          {t('variant_attributes:what_is_an_attribute')}
+        </Banner>
+      </Box>
 
       {isLoading ? (
         <Card>
@@ -324,7 +332,7 @@ function AttributeCard({
           </Typography>
         ) : values.length === 0 ? (
           <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
-            {t('variant_attributes:empty_state')}
+            {t('variant_attributes:empty_state_values')}
           </Typography>
         ) : (
           <Stack direction='row' spacing={0.75} flexWrap='wrap' useFlexGap>

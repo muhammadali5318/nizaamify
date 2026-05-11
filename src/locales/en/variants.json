@@ -1,7 +1,7 @@
 {
   "title": "Variants",
   "has_variants_toggle": "This product has variants (e.g., different colors, sizes)",
-  "has_variants_help": "Define the attributes (Color, Size, …) below to generate one row per combination.",
+  "has_variants_help": "Pick the attributes the product varies by (Color, Size) — NOT the kind of product (that's Category, above). The matrix below generates one variant per combination of values you pick.",
   "select_attributes": "Select up to 3 attributes for this product",
   "matrix_uncheck_help": "Uncheck combinations you don't carry.",
   "default_price_label": "Default price (Rs)",
@@ -33,7 +33,8 @@
     "attribute_not_in_shop": "This attribute isn't defined for your shop. Create it in Settings.",
     "variant_in_use_cannot_edit_attributes": "This variant has transaction history; attributes can't be changed.",
     "attribute_composition_mismatch": "The new variant's attributes don't match the product's existing variants.",
-    "need_at_least_one_attribute": "Pick at least one attribute to generate variants.",
+    "need_at_least_one_attribute": "Pick at least one attribute from the dropdown to generate variants.",
+    "need_values_for_each_attribute": "Click the value chips (Red, S, etc.) below each attribute to fill in the matrix. If an attribute has no values yet, add them in Settings → Variant Attributes first.",
     "need_at_least_one_combination": "Select at least one combination to create."
   }
 }

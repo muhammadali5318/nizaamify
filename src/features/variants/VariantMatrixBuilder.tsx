@@ -8,11 +8,9 @@ import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 import CloseIcon from '@mui/icons-material/Close'
-import AddIcon from '@mui/icons-material/Add'
 import { useTranslation } from 'react-i18next'
 import {
   Banner,
-  Button,
   Field,
   Input,
   Tooltip,
@@ -289,38 +287,37 @@ function AddAttributeMenu({
   onPick: (id: string) => void
 }) {
   const { t } = useTranslation(['variants'])
-  const [picked, setPicked] = useState('')
   if (attributes.length === 0) return null
+  // Picking from the dropdown immediately adds the attribute — there's no
+  // separate "Add" button click. (Earlier design had a button, which trapped
+  // users who expected the dropdown to take effect on its own.)
   return (
-    <Stack direction='row' spacing={1} alignItems='center'>
-      <TextField
-        select
-        size='small'
-        value={picked}
-        onChange={(e) => setPicked(e.target.value)}
-        label={t('variants:attribute')}
-        sx={{ minWidth: 200 }}
-      >
-        {attributes.map((a) => (
-          <MenuItem key={a.id} value={a.id}>
-            {a.name}
-          </MenuItem>
-        ))}
-      </TextField>
-      <Button
-        variant='secondary'
-        size='sm'
-        startIcon={<AddIcon />}
-        disabled={!picked}
-        onClick={() => {
-          if (!picked) return
-          onPick(picked)
-          setPicked('')
-        }}
-      >
-        {t('variants:actions.add_attribute')}
-      </Button>
-    </Stack>
+    <TextField
+      select
+      size='small'
+      value=''
+      onChange={(e) => {
+        const v = e.target.value
+        if (v) onPick(v)
+      }}
+      label={t('variants:actions.add_attribute')}
+      sx={{ minWidth: 280 }}
+    >
+      {attributes.map((a) => (
+        <MenuItem key={a.id} value={a.id}>
+          {a.name}
+          {a.value_count === 0 && (
+            <Typography
+              component='span'
+              variant='caption'
+              sx={{ ml: 1, color: 'var(--text-muted)' }}
+            >
+              ({t('variants:no_values_yet')})
+            </Typography>
+          )}
+        </MenuItem>
+      ))}
+    </TextField>
   )
 }
 

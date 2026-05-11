@@ -96,7 +96,10 @@ export default function VariantValueDialog({
             inputProps={{ maxLength: 80 }}
           />
         </Field>
-        <Field label={t('variant_attributes:fields.display_order')}>
+        <Field
+          label={t('variant_attributes:fields.display_order')}
+          hint={t('variant_attributes:value_display_order_hint')}
+        >
           <Input
             type='number'
             value={displayOrder}

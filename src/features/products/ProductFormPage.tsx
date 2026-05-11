@@ -193,7 +193,7 @@ function CreateForm({ duplicateError, onSubmit }: CreateFormProps) {
         (a) => (matrixState.selectedValues[a] ?? []).length === 0
       )
     ) {
-      setMatrixError(t('variants:errors.need_at_least_one_combination'))
+      setMatrixError(t('variants:errors.need_values_for_each_attribute'))
       return
     }
     // Build the variant payload from included combos

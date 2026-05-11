@@ -5,7 +5,11 @@
   "values_count_one": "{{count}} value",
   "values_count_other": "{{count}} values",
   "empty_state": "You haven't defined any variant attributes yet.",
+  "empty_state_values": "No values yet — add the choices for this attribute (e.g., Red, Blue, M, L).",
   "examples": "Examples: Color, Size, Storage, Volume, Dimension.",
+  "what_is_an_attribute": "A variant attribute is something a product can vary by — Color, Size, Storage. Don't confuse with category: Category is what kind of product it is (Tracksuits, Shoes), Attribute is how it varies (Color, Size).",
+  "display_order_hint": "Lower numbers render first in matrices. Use 1 for the primary axis (e.g., Color), 2 for the secondary (e.g., Size). Leave 0 if unsure.",
+  "value_display_order_hint": "Order this value appears in pickers (e.g., S=1, M=2, L=3, XL=4).",
   "fields": {
     "name": "Name",
     "display_order": "Display order",
