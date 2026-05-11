@@ -226,3 +226,36 @@ Spec: `MVP_v2.7_VARIANT_UI.md`
 - ✅ 4 ADRs filed (0026 attributes-pool, 0027 max-3, 0028 expanding-line fallback, 0029 POS picker). Spec §15 listed 6; the SKU-pattern + attribute-edit-locked-after-history ADRs were not warranted (auto-SKU is straightforward UI; lock-after-history is enforced by sale_items/purchase_items append-only triggers from v1.8).
 - ✅ CLAUDE.md updated (v2.7 PRD line, 5 gotchas, 3 deferred-todo entries)
 - 🟦 Manual smoke test §13 — **not run by Claude.** Code-level checks (lint, type, build, tests) all green. Spec's §13 walkthrough (tracksuit, yoga mat, masking tape, iPhone, single-variant regression, cross-shop isolation) is a human task.
+
+---
+
+## Stage 1 — Profit calculation bug (P0, minimal fix) — 2026-05-12
+
+**Sales reported:** `f9f13521` (5% sale-level discount) showing wrong profit 1,000 instead of 500. `62c622cd` (no discount) correct at 1,000.
+
+### Phase 1A — Forensic discovery
+- ✅ Fetched both invoices + their sale_items via MCP
+- ✅ Hand-computed expected profit per v2.2/v2.3 stacking discipline
+- ✅ Located TWO profit code paths: SaleDetailPage.tsx:173 (per-line) + monthly_summary.gross_profit view (Dashboard/Reports). Both ignore sale-level discount; monthly_summary additionally ignores line discounts.
+
+### Phase 1B — Classification
+- ✅ Class 1 (profit ignores sale-level discount) at two independent sites; byproduct of Class 5 (paths disagree)
+- ✅ Decision file: `decisions/2026-05-12-profit-calculation-bug-root-cause.md`
+
+### Phase 1C — Minimal fix
+- ✅ SaleDetailPage.tsx: pre-compute per-line allocation of sale_discount_amount (largest-remainder, sums to exact value); subtract each line's share from revenue before computing per-line profit
+- ✅ Monthly_summary view left alone — Stage 2's invoice_financials view replaces it (folded-in scope)
+
+### Phase 1D — Verification gate
+- ✅ Sale #f9f13521 hand-computed expected profit (500) matches new formula; Sale #62c622cd profit (1,000) unchanged
+- ✅ No regression: build / type / lint green; existing v1.3–v2.5 acceptance criteria unchanged (only a display-side change)
+- ✅ CLAUDE.md gotcha added
+- 🟦 **Stage 2 (folded-in scope) will fix the dashboard/reports gross_profit by reading from invoice_financials view; until that lands, the dashboard MTD figure remains over-stated by Σ sale_discount + Σ line_discount in the period.**
+
+### Stage 2 hardening (folded-in from Stage 1)
+- 🟦 invoice_financials view (single source of truth)
+- 🟦 3 financial audit queries
+- 🟦 record_sale transaction integrity ADR
+- 🟦 cost_at_sale snapshot timing ADR
+- 🟦 Decimal precision audit
+- 🟦 No JS Number on money paths audit
