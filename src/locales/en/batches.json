@@ -61,6 +61,7 @@
     "batch_not_in_variant_or_inactive": "The selected batch is not valid for this product.",
     "no_batch_stock_available": "This product is out of stock across all batches.",
     "deactivate_failed": "Could not write off this batch.",
+    "expiry_or_warranty_required": "Enter an expiry date OR supplier warranty days — a batched product needs at least one or there's nothing to alert on.",
     "qty_invalid": "Enter a whole number between 1 and the remaining quantity."
   }
 }

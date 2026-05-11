@@ -452,21 +452,30 @@ export default function NewPurchasePage() {
           )
           continue
         }
-        // v2.8.3: expiry is genuinely optional. Either leave the date
-        // blank, or tick "No expiry date" to be explicit. Both produce
-        // a null expiry_date in the batch row. The toggle is just a
-        // clearer declarative affordance for warranty-only products.
+        // v2.8.3: expiry OR supplier_warranty_days must be set —
+        // batched products without either have nothing to alert on, so
+        // the has_batches flag is meaningless. Pre-check here for a
+        // friendly error; record_purchase + a CHECK constraint enforce
+        // it at the DB level.
         const warrantyDays = Number(ln.batch_warranty_days ?? '0')
+        const expiryStr = ln.batch_no_expiry
+          ? null
+          : (ln.batch_expiry ?? '').trim() || null
+        const warrantyDaysVal =
+          Number.isFinite(warrantyDays) && warrantyDays > 0
+            ? warrantyDays
+            : null
+        if (expiryStr === null && warrantyDaysVal === null) {
+          fieldErrors[`item_${i}_batch_expiry`] = t(
+            'batches:errors.expiry_or_warranty_required'
+          )
+          continue
+        }
         batchPayload = {
           batch_no: batchNo,
           manufactured_date: (ln.batch_manufactured ?? '').trim() || null,
-          expiry_date: ln.batch_no_expiry
-            ? null
-            : (ln.batch_expiry ?? '').trim() || null,
-          supplier_warranty_days:
-            Number.isFinite(warrantyDays) && warrantyDays > 0
-              ? warrantyDays
-              : null
+          expiry_date: expiryStr,
+          supplier_warranty_days: warrantyDaysVal
         }
       }
 
@@ -920,7 +929,10 @@ export default function NewPurchasePage() {
                       </Field>
                     </Box>
                     <Box sx={{ flex: '1 1 150px' }}>
-                      <Field label={t('batches:fields.expiry_date')}>
+                      <Field
+                        label={t('batches:fields.expiry_date')}
+                        error={errors[`item_${i}_batch_expiry`]}
+                      >
                         <TextField
                           type='date'
                           size='small'
