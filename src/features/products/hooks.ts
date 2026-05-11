@@ -104,6 +104,88 @@ export function useProduct(id: string | undefined) {
   })
 }
 
+export type ProductActivityRow = {
+  kind: 'stock_in' | 'sale'
+  at: string
+  qty: number
+  party: string | null // supplier or customer name; null = walk-in / no supplier
+}
+
+const ACTIVITY_LIMIT = 10
+
+/**
+ * Last 10 stock-in / sale lines for a product, newest first. Used by the
+ * /products/:id detail page and the POS drawer (§1.2 / §1.3 of v2.5 spec).
+ * Two simple `from(...)` queries + an in-JS merge keep this honest — no
+ * server-side RPC needed for ten rows.
+ */
+export function useProductActivity(productId: string | undefined) {
+  return useQuery({
+    queryKey: ['product', 'activity', productId],
+    enabled: !!productId,
+    queryFn: async (): Promise<ProductActivityRow[]> => {
+      if (!productId) return []
+      const [piRes, siRes] = await Promise.all([
+        supabase
+          .from('purchase_items')
+          .select(
+            'qty, qty_in_base, purchase:purchases(purchase_date, supplier:suppliers(name))'
+          )
+          .eq('product_id', productId)
+          .order('purchase(purchase_date)', { ascending: false })
+          .limit(ACTIVITY_LIMIT),
+        supabase
+          .from('sale_items')
+          .select('qty, invoice:invoices(created_at, customer:customers(name))')
+          .eq('product_id', productId)
+          .order('invoice(created_at)', { ascending: false })
+          .limit(ACTIVITY_LIMIT)
+      ])
+      if (piRes.error) throw piRes.error
+      if (siRes.error) throw siRes.error
+
+      type PurchaseRow = {
+        qty: number
+        qty_in_base: number | null
+        purchase: {
+          purchase_date: string
+          supplier: { name: string } | null
+        } | null
+      }
+      type SaleRow = {
+        qty: number
+        invoice: {
+          created_at: string
+          customer: { name: string } | null
+        } | null
+      }
+
+      const stockIns: ProductActivityRow[] = (piRes.data as PurchaseRow[])
+        .filter((r) => r.purchase)
+        .map((r) => ({
+          kind: 'stock_in' as const,
+          at: r.purchase!.purchase_date,
+          qty: Number(r.qty_in_base ?? r.qty),
+          party: r.purchase!.supplier?.name ?? null
+        }))
+
+      const sales: ProductActivityRow[] = (siRes.data as SaleRow[])
+        .filter((r) => r.invoice)
+        .map((r) => ({
+          kind: 'sale' as const,
+          at: r.invoice!.created_at,
+          qty: Number(r.qty),
+          party: r.invoice!.customer?.name ?? null
+        }))
+
+      return [...stockIns, ...sales]
+        .sort((a, b) => b.at.localeCompare(a.at))
+        .slice(0, ACTIVITY_LIMIT)
+    },
+    staleTime: 30_000
+  })
+}
+
 export type CreateProductInput = {
   name: string
   category_id: string
@@ -224,4 +306,3 @@ export function useProducts(opts?: { includeArchived?: boolean }) {
     }
   })
 }
-

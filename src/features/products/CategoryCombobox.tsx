@@ -17,7 +17,9 @@ import CreateCategoryDialog from './CreateCategoryDialog'
 
 const ADD_NEW_ID = '__add_new'
 
-type Option = Category | { id: typeof ADD_NEW_ID; name: string; product_count: 0 }
+type Option =
+  | Category
+  | { id: typeof ADD_NEW_ID; name: string; product_count: 0 }
 
 type Props = {
   value: string | null

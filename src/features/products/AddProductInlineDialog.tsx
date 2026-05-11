@@ -78,7 +78,10 @@ export default function AddProductInlineDialog({
         typeof (err as { message?: unknown })?.message === 'string'
           ? (err as { message: string }).message
           : ''
-      if (msg.includes('duplicate') || msg.includes('uq_products_shop_name_category')) {
+      if (
+        msg.includes('duplicate') ||
+        msg.includes('uq_products_shop_name_category')
+      ) {
         setTopError(t('products:errors.duplicate_name_category'))
       } else {
         setTopError(t('products:errors.save_failed', 'Could not save product'))

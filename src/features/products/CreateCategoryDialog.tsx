@@ -77,6 +77,7 @@ export default function CreateCategoryDialog({
           error={error ?? undefined}
         >
           <Input
+            // eslint-disable-next-line jsx-a11y/no-autofocus -- modal capture-focus is the established pattern across our dialogs
             autoFocus
             value={name}
             onChange={(e) => {
