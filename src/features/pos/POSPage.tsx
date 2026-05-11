@@ -26,6 +26,7 @@ import { useTiers } from 'src/features/tiers/hooks'
 import OverrideDiscountDialog, {
   type OverrideValue
 } from './OverrideDiscountDialog'
+import PosProductDrawer from './PosProductDrawer'
 import {
   Badge,
   Banner,
@@ -233,6 +234,10 @@ export default function POSPage() {
   // tier no longer auto-discounts.
   const [saleDiscount, setSaleDiscount] = useState<OverrideValue | null>(null)
   const [overrideOpen, setOverrideOpen] = useState(false)
+  /** v2.5 §1.3: product detail drawer. The id alone is enough — the drawer
+   * fetches the product via useProduct, which keeps the cart untouched
+   * regardless of detail-page state. */
+  const [drawerProductId, setDrawerProductId] = useState<string | null>(null)
 
   // Tier list is still read so we can show the tier chip on the customer card.
   const { data: tiers = [] } = useTiers()
@@ -332,6 +337,55 @@ export default function POSPage() {
         stock: row.stock
       }
     })
+  }
+
+  /** Drawer "Add to cart" button. We don't have a ProductSearchRow handy here,
+   * so adapt from the product table's latest data by id — or fall back to a
+   * one-shot fetch via `from('products')`. The drawer body has the product
+   * cached via useProduct, so the row lookup is fast. */
+  const handleAddProductById = async (productId: string) => {
+    const cached = cart.find((c) => c.product_id === productId)
+    if (cached) {
+      handleAddProduct(
+        {
+          id: cached.product_id,
+          name: cached.name,
+          type: cached.type,
+          category_id: '',
+          description: null,
+          price: cached.default_price,
+          avg_cost: cached.avg_cost,
+          last_purchase_cost: null,
+          stock: cached.stock,
+          is_active: true,
+          relevance: 0
+        },
+        1
+      )
+      return
+    }
+    const { data, error } = await supabase
+      .from('products')
+      .select('id, name, type, category_id, price, avg_cost, stock, is_active')
+      .eq('id', productId)
+      .single()
+    if (error || !data) return
+    handleAddProduct(
+      {
+        id: data.id,
+        name: data.name,
+        type: data.type,
+        category_id: data.category_id,
+        description: null,
+        price: Number(data.price ?? 0),
+        avg_cost: Number(data.avg_cost),
+        last_purchase_cost: null,
+        stock: data.stock,
+        is_active: data.is_active,
+        relevance: 0
+      },
+      1
+    )
   }
 
   const submit = async () => {
@@ -467,7 +521,10 @@ export default function POSPage() {
             onlyInStock
             showAvgCost
             loadBreakdownsForActions
+            showViewIcon
+            onView={(row) => setDrawerProductId(row.id)}
             actionsHeader={t('pos:picker.add_column_header')}
+            actionsAlign='center'
             renderActions={(row, breakdown) => {
               // v2.3 §6.3.2/§6.3.3 (revised): all "add to cart" affordances
               // live in the rightmost column. Primary [+] sits on top; pack
@@ -480,8 +537,12 @@ export default function POSPage() {
               return (
                 <Stack
                   spacing={0.5}
-                  alignItems='flex-end'
+                  alignItems='center'
                   sx={{ width: '100%' }}
+                  // Stop the click from bubbling up to the row's onView so
+                  // the + button (and quick-add chips) don't also open the
+                  // detail drawer.
+                  onClick={(e) => e.stopPropagation()}
                 >
                   {isScanOnly ? (
                     <Typography
@@ -650,6 +711,14 @@ export default function POSPage() {
         onReset={() => {
           setSaleDiscount(null)
           setOverrideOpen(false)
+        }}
+      />
+
+      <PosProductDrawer
+        productId={drawerProductId}
+        onClose={() => setDrawerProductId(null)}
+        onAddToCart={(productId) => {
+          void handleAddProductById(productId)
         }}
       />
     </Box>

@@ -10,7 +10,7 @@
     "out_of_stock": "Out of stock",
     "stock_capped": "Cannot add more — only {{count}} in stock",
     "scan_only_label": "Scan only",
-    "add_column_header": "Add"
+    "add_column_header": "Add to cart"
   },
   "cart": {
     "title": "Cart",

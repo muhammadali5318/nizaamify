@@ -10,7 +10,7 @@
     "out_of_stock": "اسٹاک ختم",
     "stock_capped": "مزید نہیں — اسٹاک میں صرف {{count}}",
     "scan_only_label": "صرف اسکین",
-    "add_column_header": "شامل کریں"
+    "add_column_header": "کارٹ میں شامل کریں"
   },
   "cart": {
     "title": "کارٹ",
