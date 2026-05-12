@@ -1,6 +1,18 @@
 {
   "title": "Products",
   "search_placeholder": "Search products by name",
+  "list": {
+    "set_price_warning": "Set price",
+    "set_price_aria": "This product needs a selling price",
+    "price_range_with_unpriced": "Rs {{min}} – set price"
+  },
+  "filters": {
+    "needs_pricing": "Needs pricing",
+    "needs_pricing_count_one": "Needs pricing ({{count}})",
+    "needs_pricing_count_other": "Needs pricing ({{count}})",
+    "all_priced_empty": "All products are priced.",
+    "clear_filter": "Clear filter"
+  },
   "add_product": "Add product",
   "new_product": "+ New product",
   "edit_product": "Edit product",
@@ -15,6 +27,10 @@
     "description_placeholder": "Optional notes about this product",
     "price": "Selling price (PKR)",
     "selling_price": "Selling price",
+    "price_optional_help": "Optional — leave blank to set later. POS will hide the product until a price is set.",
+    "price_placeholder": "Optional",
+    "set_price": "Set selling price",
+    "price_not_set_banner": "Selling price not set — POS won't allow sales until it's set.",
     "cost": "Cost (PKR)",
     "initial_cost": "Initial cost (PKR)",
     "avg_cost": "Avg cost",
@@ -137,5 +153,25 @@
     "page": "Page {{page}} of {{totalPages}}",
     "previous": "Previous",
     "next": "Next"
+  },
+  "inventory_behavior": {
+    "section_title": "Inventory behavior",
+    "has_batches_toggle": "Has batches (track batch numbers, expiry, supplier warranty)",
+    "has_batches_help": "Enable for products like cosmetics, food, medicines, or anything with supplier warranty.",
+    "expiry_alert_days_label": "Expiry alert window (days)",
+    "expiry_alert_days_help": "Leave blank for shop default ({{default}} days)",
+    "warranty_alert_days_label": "Warranty alert window (days)",
+    "warranty_alert_days_help": "Leave blank for shop default ({{default}} days)",
+    "stock_in_first_hint": "Stock and cost are captured at stock-in time. Pick this product on the stock-in form and check \"This is opening stock\" for the first delivery.",
+    "expired_sale_policy": {
+      "label": "When selling expired stock",
+      "use_shop_default": "Use shop default (currently: {{policy}})",
+      "block": "Block",
+      "block_help": "Sales are blocked if only expired stock remains. Cashier must write off first.",
+      "warn": "Warn",
+      "warn_help": "Cashier sees a confirmation prompt before completing the sale.",
+      "allow": "Allow",
+      "allow_help": "Expired stock is sold like any other. No warnings."
+    }
   }
 }

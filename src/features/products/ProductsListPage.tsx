@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import Box from '@mui/material/Box'
+import Checkbox from '@mui/material/Checkbox'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import MenuItem from '@mui/material/MenuItem'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
@@ -35,11 +37,19 @@ export default function ProductsListPage() {
   }, [stockMode])
 
   const categoryId = params.get('category_id')
+  const needsPricing = params.get('needs_pricing') === '1'
   const handleCategoryChange = (next: string | null) => {
     const updated = new URLSearchParams(params)
     if (next) updated.set('category_id', next)
     else updated.delete('category_id')
     // Drop the page param so filter changes don't strand the user on page 5
+    updated.delete('page')
+    setParams(updated, { replace: true })
+  }
+  const handleNeedsPricingChange = (next: boolean) => {
+    const updated = new URLSearchParams(params)
+    if (next) updated.set('needs_pricing', '1')
+    else updated.delete('needs_pricing')
     updated.delete('page')
     setParams(updated, { replace: true })
   }
@@ -53,6 +63,19 @@ export default function ProductsListPage() {
             <CategoryFilter
               value={categoryId}
               onChange={handleCategoryChange}
+            />
+            {/* v2.8.3: surfaces products where any active variant has
+             *  price = null. URL-synced via ?needs_pricing=1. */}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size='small'
+                  checked={needsPricing}
+                  onChange={(e) => handleNeedsPricingChange(e.target.checked)}
+                />
+              }
+              label={t('products:filters.needs_pricing')}
+              sx={{ ml: 0 }}
             />
             <Stack direction='row' spacing={0.75} alignItems='center'>
               <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
@@ -99,6 +122,10 @@ export default function ProductsListPage() {
         onView={(row) => navigate(paths.gotoProduct(row.id))}
         stockDisplayMode={stockMode}
         categoryId={categoryId}
+        needsPricing={needsPricing}
+        emptyHelpKey={
+          needsPricing ? 'products:filters.all_priced_empty' : undefined
+        }
       />
     </Box>
   )

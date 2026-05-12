@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
+import Checkbox from '@mui/material/Checkbox'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
@@ -25,7 +27,8 @@ import {
 import {
   useRecordPurchase,
   type OverheadCategory,
-  type PurchaseLineInput
+  type PurchaseLineInput,
+  type PurchaseBatchInput
 } from './hooks'
 import CreatePackDialog from './CreatePackDialog'
 import StockInVariantMatrix, { type MatrixLine } from './StockInVariantMatrix'
@@ -64,6 +67,13 @@ type LineState = {
   lineTotal: string
   lastEdited: LastEdited | null
   warn?: string | null
+  /** v2.8: set by handleProductChange. When true, batch fields render below
+   * the line and the submit payload includes a `batch` object. */
+  has_batches?: boolean
+  batch_no?: string
+  batch_manufactured?: string
+  batch_expiry?: string
+  batch_warranty_days?: string
 }
 
 type OverheadState = {
@@ -153,7 +163,12 @@ function recompute(
 }
 
 export default function NewPurchasePage() {
-  const { t, i18n } = useTranslation(['purchases', 'common'])
+  const { t, i18n } = useTranslation([
+    'purchases',
+    'common',
+    'batches',
+    'variants'
+  ])
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
   const navigate = useNavigate()
   const record = useRecordPurchase()
@@ -163,6 +178,9 @@ export default function NewPurchasePage() {
   const [purchaseDate, setPurchaseDate] = useState(todayISO())
   const [supplierId, setSupplierId] = useState<string | null>(null)
   const [note, setNote] = useState('')
+  // v2.8.1: "This is opening stock" flag for the first stock-in of a
+  // product. Just toggles purchases.is_opening = true on submission.
+  const [isOpening, setIsOpening] = useState(false)
   const [lines, setLines] = useState<LineState[]>([emptyLine()])
   const [overhead, setOverhead] = useState<OverheadState[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -246,7 +264,7 @@ export default function NewPurchasePage() {
     try {
       const { data: product } = await supabase
         .from('products')
-        .select('has_variants, name')
+        .select('has_variants, has_batches, name')
         .eq('id', id)
         .single()
       if (product?.has_variants) {
@@ -265,9 +283,37 @@ export default function NewPurchasePage() {
         baseUnitName: 'Each'
       })
       const defaultIdx = units.findIndex((u) => u.isDefaultPurchase)
+      const hasBatches = !!product?.has_batches
+      let suggested: string | undefined
+      // v2.8: pre-fill batch_no via suggest_batch_no when product is batched.
+      if (hasBatches) {
+        const { data: defaultVariant } = await supabase
+          .from('product_variants')
+          .select('id')
+          .eq('product_id', id)
+          .eq('is_default', true)
+          .eq('is_active', true)
+          .maybeSingle()
+        if (defaultVariant) {
+          try {
+            const { data: bno } = await supabase.rpc('suggest_batch_no', {
+              p_variant_id: defaultVariant.id,
+              p_received_at: purchaseDate
+            })
+            suggested = bno as string
+          } catch {
+            // non-fatal; the user can type a batch number
+          }
+        }
+      }
       setLine(i, {
         available_units: units,
-        selected_unit_idx: defaultIdx >= 0 ? defaultIdx : 0
+        selected_unit_idx: defaultIdx >= 0 ? defaultIdx : 0,
+        has_batches: hasBatches,
+        batch_no: suggested ?? '',
+        batch_manufactured: '',
+        batch_expiry: '',
+        batch_warranty_days: '0'
       })
     } catch {
       notify.error(t('purchases:errors.submit_failed'))
@@ -387,6 +433,43 @@ export default function NewPurchasePage() {
         continue
       }
       const unit = ln.available_units[ln.selected_unit_idx]
+
+      // v2.8: when product is batched, require batch_no (required), expiry
+      // unless "no expiry" toggled, and pack the batch object for the RPC.
+      let batchPayload: PurchaseBatchInput | undefined
+      if (ln.has_batches) {
+        const batchNo = (ln.batch_no ?? '').trim()
+        if (batchNo === '') {
+          fieldErrors[`item_${i}_batch_no`] = t(
+            'batches:errors.batch_no_required'
+          )
+          continue
+        }
+        // v2.8.3: expiry OR supplier_warranty_days must be set —
+        // batched products without either have nothing to alert on, so
+        // the has_batches flag is meaningless. Pre-check here for a
+        // friendly error; record_purchase + a CHECK constraint enforce
+        // it at the DB level.
+        const warrantyDays = Number(ln.batch_warranty_days ?? '0')
+        const expiryStr = (ln.batch_expiry ?? '').trim() || null
+        const warrantyDaysVal =
+          Number.isFinite(warrantyDays) && warrantyDays > 0
+            ? warrantyDays
+            : null
+        if (expiryStr === null && warrantyDaysVal === null) {
+          fieldErrors[`item_${i}_batch_expiry`] = t(
+            'batches:errors.expiry_or_warranty_required'
+          )
+          continue
+        }
+        batchPayload = {
+          batch_no: batchNo,
+          manufactured_date: (ln.batch_manufactured ?? '').trim() || null,
+          expiry_date: expiryStr,
+          supplier_warranty_days: warrantyDaysVal
+        }
+      }
+
       // record_purchase accepts both shapes (Phase C). Pack lines need
       // pack_id+pack_qty so the server can resolve base_qty for stock math.
       if (unit && unit.kind === 'pack' && unit.packId) {
@@ -395,14 +478,16 @@ export default function NewPurchasePage() {
           variant_id: ln.variant_id || undefined,
           pack_id: unit.packId,
           pack_qty: q,
-          cost_at_purchase: c
+          cost_at_purchase: c,
+          batch: batchPayload
         })
       } else {
         items.push({
           product_id: ln.product_id,
           variant_id: ln.variant_id || undefined,
           qty: q,
-          cost_at_purchase: c
+          cost_at_purchase: c,
+          batch: batchPayload
         })
       }
     }
@@ -442,7 +527,8 @@ export default function NewPurchasePage() {
         purchase_date: purchaseDate,
         note: note.trim() || null,
         items,
-        overhead_items: overheadItems
+        overhead_items: overheadItems,
+        is_opening: isOpening
       })
       notify.success(t('purchases:messages.saved'))
       navigate(paths.gotoPurchase(id))
@@ -525,6 +611,28 @@ export default function NewPurchasePage() {
               inputProps={{ maxLength: 1000 }}
             />
           </Field>
+
+          {/* v2.8.1 — "This is opening stock" checkbox. Audit-only flag;
+           *  flips purchases.is_opening = true so dashboards / reports
+           *  can identify the first delivery for each product. */}
+          <Box>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size='small'
+                  checked={isOpening}
+                  onChange={(e) => setIsOpening(e.target.checked)}
+                />
+              }
+              label={t('purchases:form.is_opening_label')}
+            />
+            <Typography
+              variant='caption'
+              sx={{ display: 'block', color: 'var(--text-muted)' }}
+            >
+              {t('purchases:form.is_opening_help')}
+            </Typography>
+          </Box>
         </Stack>
       </Card>
 
@@ -757,6 +865,93 @@ export default function NewPurchasePage() {
                 >
                   {t(`purchases:form.${ln.warn}`)}
                 </Typography>
+              )}
+              {/* v2.8: batch info block. Appears only when the picked
+               *  product has has_batches=true. Mirrors record_purchase's
+               *  expected payload shape. */}
+              {ln.has_batches && !ln.is_multi_variant_placeholder && (
+                <Box
+                  sx={{
+                    mt: 1,
+                    p: 1.5,
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-md)',
+                    backgroundColor: 'var(--surface-muted)'
+                  }}
+                >
+                  <Typography
+                    variant='overline'
+                    sx={{ color: 'var(--text-muted)', display: 'block', mb: 1 }}
+                  >
+                    {t('batches:stock_in_section_title')}
+                  </Typography>
+                  <Stack
+                    direction={{ xs: 'column', sm: 'row' }}
+                    spacing={1.5}
+                    alignItems={{ xs: 'stretch', sm: 'flex-end' }}
+                  >
+                    <Box sx={{ flex: '1 1 200px' }}>
+                      <Field
+                        label={t('batches:fields.batch_no')}
+                        error={errors[`item_${i}_batch_no`]}
+                      >
+                        <TextField
+                          size='small'
+                          fullWidth
+                          value={ln.batch_no ?? ''}
+                          onChange={(e) =>
+                            setLine(i, { batch_no: e.target.value })
+                          }
+                        />
+                      </Field>
+                    </Box>
+                    <Box sx={{ flex: '1 1 150px' }}>
+                      <Field label={t('batches:fields.manufactured_date')}>
+                        <TextField
+                          type='date'
+                          size='small'
+                          fullWidth
+                          slotProps={{ inputLabel: { shrink: true } }}
+                          value={ln.batch_manufactured ?? ''}
+                          onChange={(e) =>
+                            setLine(i, { batch_manufactured: e.target.value })
+                          }
+                        />
+                      </Field>
+                    </Box>
+                    <Box sx={{ flex: '1 1 150px' }}>
+                      <Field
+                        label={t('batches:fields.expiry_date')}
+                        error={errors[`item_${i}_batch_expiry`]}
+                      >
+                        <TextField
+                          type='date'
+                          size='small'
+                          fullWidth
+                          slotProps={{ inputLabel: { shrink: true } }}
+                          value={ln.batch_expiry ?? ''}
+                          onChange={(e) =>
+                            setLine(i, { batch_expiry: e.target.value })
+                          }
+                        />
+                      </Field>
+                    </Box>
+                    <Box sx={{ flex: '1 1 140px' }}>
+                      <Field label={t('batches:fields.supplier_warranty_days')}>
+                        <TextField
+                          type='number'
+                          size='small'
+                          fullWidth
+                          inputProps={{ min: 0, step: 1 }}
+                          value={ln.batch_warranty_days ?? '0'}
+                          onChange={(e) =>
+                            setLine(i, { batch_warranty_days: e.target.value })
+                          }
+                        />
+                      </Field>
+                    </Box>
+                  </Stack>
+                </Box>
               )}
             </Box>
           ))}

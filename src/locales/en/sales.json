@@ -47,7 +47,9 @@
     "no_khata_entries": "No linked khata entries.",
     "service_only": "No products — service charge only",
     "notes_label": "Notes",
-    "below_avg_cost_warning": "This price is below average cost. Selling at a loss."
+    "below_avg_cost_warning": "This price is below average cost. Selling at a loss.",
+    "sold_expired_badge": "Expired stock",
+    "receipt_disclaimer_default": "Some items in this sale were past their expiry date. No returns or refunds on expired items."
   },
   "items": {
     "columns": {

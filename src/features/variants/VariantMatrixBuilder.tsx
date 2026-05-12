@@ -35,7 +35,6 @@ export type MatrixVariantSpec = {
   label: string
   sku: string
   price: string
-  opening_stock: string
 }
 
 export type VariantMatrixState = {
@@ -43,11 +42,9 @@ export type VariantMatrixState = {
   selectedValues: Record<string, string[]>
   /** Inclusion flags by combo key. true when the combo will be created. */
   included: Record<string, boolean>
-  /** SKU + price + opening_stock overrides per combo. */
-  overrides: Record<
-    string,
-    { sku?: string; price?: string; opening_stock?: string }
-  >
+  /** SKU + price overrides per combo. (v2.8.1: opening_stock removed —
+   *  initial inventory now goes through stock-in.) */
+  overrides: Record<string, { sku?: string; price?: string }>
 }
 
 type Props = {
@@ -56,11 +53,6 @@ type Props = {
   productNameForSku: string
   defaultPrice: string
   onDefaultPriceChange: (next: string) => void
-  /** v2.7 polish: default opening cost-per-unit applied to every variant
-   * whose Opening qty > 0. Required (server-side) when any variant has
-   * opening stock; ignored otherwise. */
-  defaultOpeningCost: string
-  onDefaultOpeningCostChange: (next: string) => void
   errorText?: string | null
 }
 
@@ -97,8 +89,6 @@ export default function VariantMatrixBuilder({
   productNameForSku,
   defaultPrice,
   onDefaultPriceChange,
-  defaultOpeningCost,
-  onDefaultOpeningCostChange,
   errorText
 }: Props) {
   const { t } = useTranslation(['variants', 'common'])
@@ -179,8 +169,6 @@ export default function VariantMatrixBuilder({
           productNameForSku={productNameForSku}
           defaultPrice={defaultPrice}
           onDefaultPriceChange={onDefaultPriceChange}
-          defaultOpeningCost={defaultOpeningCost}
-          onDefaultOpeningCostChange={onDefaultOpeningCostChange}
         />
       )}
     </Stack>
@@ -341,9 +329,7 @@ function CombinationMatrix({
   onChange,
   productNameForSku,
   defaultPrice,
-  onDefaultPriceChange,
-  defaultOpeningCost,
-  onDefaultOpeningCostChange
+  onDefaultPriceChange
 }: {
   attributeIds: string[]
   selectedValues: Record<string, string[]>
@@ -352,8 +338,6 @@ function CombinationMatrix({
   productNameForSku: string
   defaultPrice: string
   onDefaultPriceChange: (next: string) => void
-  defaultOpeningCost: string
-  onDefaultOpeningCostChange: (next: string) => void
 }) {
   const { t } = useTranslation(['variants', 'common'])
   const { data: attributes = [] } = useVariantAttributes()
@@ -384,8 +368,7 @@ function CombinationMatrix({
         attribute_value_ids: value_ids,
         label: labels.join(' / '),
         sku: override.sku ?? autoSkuFor(productNameForSku, labels),
-        price: override.price ?? defaultPrice,
-        opening_stock: override.opening_stock ?? '0'
+        price: override.price ?? defaultPrice
       }
     })
   }, [
@@ -439,17 +422,7 @@ function CombinationMatrix({
             inputProps={{ step: '0.01', min: 0, inputMode: 'numeric' }}
             value={defaultPrice}
             onChange={(e) => onDefaultPriceChange(e.target.value)}
-          />
-        </Field>
-        <Field
-          label={t('variants:default_opening_cost_label')}
-          hint={t('variants:default_opening_cost_help')}
-        >
-          <Input
-            type='number'
-            inputProps={{ step: '0.01', min: 0, inputMode: 'numeric' }}
-            value={defaultOpeningCost}
-            onChange={(e) => onDefaultOpeningCostChange(e.target.value)}
+            placeholder='Optional'
           />
         </Field>
       </Stack>
@@ -492,11 +465,7 @@ function ComboTable({
       included: { ...state.included, [key]: included }
     })
   }
-  const setOverride = (
-    key: string,
-    field: 'sku' | 'price' | 'opening_stock',
-    value: string
-  ) => {
+  const setOverride = (key: string, field: 'sku' | 'price', value: string) => {
     onChange({
       ...state,
       overrides: {
@@ -549,21 +518,6 @@ function ComboTable({
           inputProps={{ step: '0.01', min: 0, inputMode: 'numeric' }}
           value={row.price}
           onChange={(e) => setOverride(row.key, 'price', e.target.value)}
-        />
-      )
-    },
-    {
-      id: 'opening_stock',
-      header: t('variants:columns.opening_stock'),
-      align: 'end',
-      cell: (row) => (
-        <Input
-          type='number'
-          inputProps={{ step: '1', min: 0, inputMode: 'numeric' }}
-          value={row.opening_stock}
-          onChange={(e) =>
-            setOverride(row.key, 'opening_stock', e.target.value)
-          }
         />
       )
     }

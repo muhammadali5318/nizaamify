@@ -1,0 +1,82 @@
+{
+  "title": "Batches",
+  "active_batches": "Active batches",
+  "inactive_batches": "Inactive batches",
+  "fields": {
+    "batch_no": "Batch no",
+    "manufactured_date": "Manufactured",
+    "expiry_date": "Expiry",
+    "supplier_warranty_days": "Supplier warranty (days)",
+    "qty_received": "Qty received",
+    "qty_remaining": "Qty remaining",
+    "cost_per_unit": "Cost per unit",
+    "received_at": "Received",
+    "warranty_expires_at": "Warranty expires",
+    "supplier": "Supplier"
+  },
+  "indicators": {
+    "oldest": "auto-pick",
+    "selected": "selected",
+    "pick_batch": "Pick batch",
+    "reset_to_fefo": "Use auto-pick",
+    "next_up": "Will be used",
+    "auto_hint": "Auto-pick uses the batch closest to its expiry date so older stock leaves first.",
+    "active_batches_count_one": "{{count}} active batch",
+    "active_batches_count_other": "{{count}} active batches",
+    "inactive_batches_count_one": "{{count}} inactive batch",
+    "inactive_batches_count_other": "{{count}} inactive batches",
+    "show_inactive": "+ Show inactive",
+    "hide_inactive": "Hide inactive",
+    "from_batches": "From batches {{batches}}"
+  },
+  "actions": {
+    "write_off": "Write off",
+    "write_off_confirm_title": "Write off batch {{batchNo}}",
+    "write_off_confirm_body": "This removes {{qty}} unit(s) from stock. Provide a reason.",
+    "write_off_reason_label": "Reason",
+    "write_off_reason_placeholder": "Expired / Damaged / Returned to vendor / ...",
+    "write_off_qty_label": "Qty to write off (max {{max}})",
+    "write_off_qty_help": "Default removes the whole batch. Lower for partial RTV or damage.",
+    "write_off_full_note": "(this empties the batch — it will be marked inactive)",
+    "write_off_submit": "Write off batch",
+    "use_this_batch": "Use this batch"
+  },
+  "stock_in_section_title": "Batch info",
+  "batch_picker_title": "Pick batch for {{productName}}",
+  "settings": {
+    "section_title": "Inventory alerts",
+    "section_subtitle": "Default windows for expiry and supplier-warranty alerts.",
+    "default_expiry_label": "Default expiry alert window (days)",
+    "default_warranty_label": "Default supplier warranty alert window (days)",
+    "save": "Save defaults",
+    "saved": "Defaults updated",
+    "save_failed": "Could not update defaults."
+  },
+  "expired_sales": {
+    "section_title": "Expired stock sales",
+    "section_subtitle": "How POS handles sales drawn from past-expiry stock.",
+    "default_policy_label": "Default policy when selling expired stock",
+    "policy_block": "Block",
+    "policy_warn": "Warn (recommended)",
+    "policy_allow": "Allow",
+    "receipt_disclaimer_label": "Add disclaimer to receipts for expired-stock sales",
+    "receipt_disclaimer_help": "When enabled, receipts will note any expired-batch lines.",
+    "save": "Save expired-sale settings",
+    "saved": "Expired-sale settings updated",
+    "save_failed": "Could not update expired-sale settings."
+  },
+  "errors": {
+    "batch_required_for_batched_product": "Batch info is required for this product.",
+    "batch_no_required": "Batch number is required.",
+    "duplicate_batch_no": "A batch with this number already exists for this product.",
+    "cannot_enable_batches_with_stock": "Sell or write off existing stock before enabling batch tracking.",
+    "cannot_disable_batches_with_active_batches": "Deactivate all batches before disabling batch tracking.",
+    "selected_batch_insufficient": "Not enough stock in this batch.",
+    "selected_batch_insufficient_long": "Not enough stock in this batch — only {{available}} of the {{needed}} units you need. Pick a different batch or use auto-pick.",
+    "batch_not_in_variant_or_inactive": "The selected batch is not valid for this product.",
+    "no_batch_stock_available": "This product is out of stock across all batches.",
+    "deactivate_failed": "Could not write off this batch.",
+    "expiry_or_warranty_required": "Enter an expiry date OR supplier warranty days — a batched product needs at least one or there's nothing to alert on.",
+    "qty_invalid": "Enter a whole number between 1 and the remaining quantity."
+  }
+}

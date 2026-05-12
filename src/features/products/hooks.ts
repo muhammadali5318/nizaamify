@@ -12,7 +12,8 @@ export type ProductSearchRow = {
   type: string
   category_id: string
   description: string | null
-  price: number
+  /** v2.8.1: nullable — products may exist without a sell price. */
+  price: number | null
   avg_cost: number
   last_purchase_cost: number | null
   stock: number
@@ -27,6 +28,18 @@ export type ProductSearchRow = {
    * single-variant products with no stock); use this for the multi-variant
    * row's "X total" summary in product lists. */
   total_stock_all_variants: number
+  /** v2.8.3: true when any active variant of this product has price = null.
+   * Drives the "Set price" surfacing in the catalog list + the Needs-pricing
+   * filter. */
+  has_null_price_variant: boolean
+  /** v2.8.5: true when this product tracks inventory batches. Drives the
+   * POS cart "Pick batch" affordance on cart lines. */
+  has_batches: boolean
+  /** v2.8.5: id of the default variant. Single-variant products carry
+   * variant_id=null in the cart by design (record_sale resolves from
+   * product_id); for the batch picker we need the actual variant id to
+   * query inventory_batches by. */
+  default_variant_id: string | null
 }
 
 export type SearchProductsArgs = {
@@ -35,6 +48,9 @@ export type SearchProductsArgs = {
   pageSize: number
   onlyInStock?: boolean
   categoryId?: string | null
+  /** v2.8.3: filter to products where at least one active variant has
+   * price = null. URL-synced via the catalog filter chip. */
+  needsPricing?: boolean
 }
 
 export type RecentPurchaseProduct = {
@@ -62,12 +78,19 @@ export function useRecentPurchaseProducts(limit = 10) {
 }
 
 export function useSearchProducts(args: SearchProductsArgs) {
-  const { query, page, pageSize, onlyInStock = false, categoryId = null } = args
+  const {
+    query,
+    page,
+    pageSize,
+    onlyInStock = false,
+    categoryId = null,
+    needsPricing = false
+  } = args
   return useQuery({
     queryKey: [
       'products',
       'search',
-      { query, page, pageSize, onlyInStock, categoryId }
+      { query, page, pageSize, onlyInStock, categoryId, needsPricing }
     ],
     queryFn: async () => {
       const offset = page * pageSize
@@ -77,12 +100,14 @@ export function useSearchProducts(args: SearchProductsArgs) {
           p_limit: pageSize,
           p_offset: offset,
           p_only_in_stock: onlyInStock,
-          p_category_id: categoryId ?? undefined
+          p_category_id: categoryId ?? undefined,
+          p_needs_pricing: needsPricing
         }),
         supabase.rpc('search_products_count', {
           p_query: query || undefined,
           p_only_in_stock: onlyInStock,
-          p_category_id: categoryId ?? undefined
+          p_category_id: categoryId ?? undefined,
+          p_needs_pricing: needsPricing
         })
       ])
       if (rowsRes.error) throw rowsRes.error
@@ -113,7 +138,7 @@ export function useProduct(id: string | undefined) {
       const { data, error } = await supabase
         .from('products')
         .select(
-          'id, shop_id, name, type, category_id, description, is_active, is_scan_only, base_unit_id, has_variants, created_at, updated_at, default_variant:product_variants(id, sku, stock, price, cost, avg_cost, last_purchase_cost, is_default, is_active)'
+          'id, shop_id, name, type, category_id, description, is_active, is_scan_only, base_unit_id, has_variants, has_batches, expiry_alert_days, warranty_alert_days, expired_sale_policy, created_at, updated_at, default_variant:product_variants(id, sku, stock, price, cost, avg_cost, last_purchase_cost, is_default, is_active)'
         )
         .eq('id', id)
         .single()
@@ -400,29 +425,35 @@ export type CreateProductInput = {
   name: string
   category_id: string
   description: string | null
-  price: number
-  opening_stock: number
-  opening_cost: number
+  /** v2.8.1: selling price is now optional at create time. null → variant
+   * created unsellable; POS hides it; product detail shows a "Set selling
+   * price" banner. */
+  price: number | null
   is_scan_only: boolean
+  /** v2.8.1: batch tracking can be enabled at create time. */
+  has_batches?: boolean
+  expiry_alert_days?: number | null
+  warranty_alert_days?: number | null
 }
 
 export function useCreateProduct() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (values: CreateProductInput) => {
-      // v2.6: RPC returns table(product_id, variant_id); is_scan_only is a
-      // first-class parameter now, so the post-insert UPDATE is gone.
+      // v2.8.1: opening stock + opening cost are removed from product
+      // creation. Stock-in is the only path that adds inventory.
       const { data, error } = await supabase.rpc(
         'create_product_with_opening_stock',
         {
           p_name: values.name,
           p_category_id: values.category_id,
           p_description: values.description ?? undefined,
-          p_price: values.price,
-          p_opening_stock: values.opening_stock,
-          p_opening_cost:
-            values.opening_stock > 0 ? values.opening_cost : undefined,
-          p_is_scan_only: values.is_scan_only
+          p_price: values.price ?? undefined,
+          p_opening_stock: 0,
+          p_is_scan_only: values.is_scan_only,
+          p_has_batches: values.has_batches ?? false,
+          p_expiry_alert_days: values.expiry_alert_days ?? undefined,
+          p_warranty_alert_days: values.warranty_alert_days ?? undefined
         }
       )
       if (error) throw error
@@ -444,22 +475,33 @@ export type UpdateProductInput = {
   price: number
   is_active: boolean
   is_scan_only: boolean
+  /** v2.8 — null leaves unchanged when omitted from the patch. */
+  has_batches?: boolean
+  expiry_alert_days?: number | null
+  warranty_alert_days?: number | null
+  /** v2.8.4 — null = use shop default; explicit enum overrides. */
+  expired_sale_policy?: 'block' | 'warn' | 'allow' | null
 }
 
 export type CreateProductWithVariantsInput = {
   name: string
   category_id: string
-  default_price: number
+  /** v2.8.1: optional at create time — set blank and price the variants
+   * later via the product detail page. */
+  default_price: number | null
   is_scan_only: boolean
   attribute_ids: string[]
   variants: {
     attribute_value_ids: string[]
     sku?: string
-    price?: number
-    opening_stock?: number
-    opening_cost?: number
+    /** Per-row override. Falls back to default_price; null if both omitted. */
+    price?: number | null
   }[]
   description?: string | null
+  /** v2.8.1: batch tracking + alert window overrides */
+  has_batches?: boolean
+  expiry_alert_days?: number | null
+  warranty_alert_days?: number | null
 }
 
 export function useCreateProductWithVariants() {
@@ -471,11 +513,14 @@ export function useCreateProductWithVariants() {
         {
           p_name: input.name,
           p_category_id: input.category_id,
-          p_default_price: input.default_price,
+          p_default_price: input.default_price ?? undefined,
           p_is_scan_only: input.is_scan_only,
           p_attribute_ids: input.attribute_ids,
           p_variants: input.variants as unknown as never,
-          p_description: input.description ?? undefined
+          p_description: input.description ?? undefined,
+          p_has_batches: input.has_batches ?? false,
+          p_expiry_alert_days: input.expiry_alert_days ?? undefined,
+          p_warranty_alert_days: input.warranty_alert_days ?? undefined
         }
       )
       if (error) throw error
@@ -506,17 +551,74 @@ export function useUpdateProduct() {
         .single()
       if (catErr) throw catErr
 
+      // v2.8: guard rails for has_batches toggle — frontend pre-checks
+      // happen in the dialog, but enforce again here so a stale form
+      // can't slip past.
+      if (rest.has_batches !== undefined) {
+        const { data: existing } = await supabase
+          .from('products')
+          .select('has_batches')
+          .eq('id', id)
+          .maybeSingle()
+        const currentFlag = existing?.has_batches ?? false
+        if (rest.has_batches !== currentFlag) {
+          if (rest.has_batches === true) {
+            // Going false → true: every variant must have stock = 0.
+            const { count } = await supabase
+              .from('product_variants')
+              .select('id', { count: 'exact', head: true })
+              .eq('product_id', id)
+              .gt('stock', 0)
+            if ((count ?? 0) > 0) {
+              throw new Error('cannot_enable_batches_with_stock')
+            }
+          } else {
+            // Going true → false: no active batches anywhere on this product.
+            const { count } = await supabase
+              .from('inventory_batches')
+              .select('id', {
+                count: 'exact',
+                head: true
+              })
+              .eq('is_active', true)
+              .in(
+                'variant_id',
+                (
+                  await supabase
+                    .from('product_variants')
+                    .select('id')
+                    .eq('product_id', id)
+                ).data?.map((v) => v.id) ?? []
+              )
+            if ((count ?? 0) > 0) {
+              throw new Error('cannot_disable_batches_with_active_batches')
+            }
+          }
+        }
+      }
+
+      const patch: ProductUpdate = {
+        name: rest.name,
+        type: cat.name,
+        category_id: rest.category_id,
+        description: rest.description,
+        price: rest.price,
+        is_active: rest.is_active,
+        is_scan_only: rest.is_scan_only
+      }
+      if (rest.has_batches !== undefined) patch.has_batches = rest.has_batches
+      if (rest.expiry_alert_days !== undefined) {
+        patch.expiry_alert_days = rest.expiry_alert_days
+      }
+      if (rest.warranty_alert_days !== undefined) {
+        patch.warranty_alert_days = rest.warranty_alert_days
+      }
+      if (rest.expired_sale_policy !== undefined) {
+        patch.expired_sale_policy = rest.expired_sale_policy
+      }
       const { error: prodErr } = await supabase
         .from('products')
-        .update({
-          name: rest.name,
-          type: cat.name,
-          category_id: rest.category_id,
-          description: rest.description,
-          price: rest.price,
-          is_active: rest.is_active,
-          is_scan_only: rest.is_scan_only
-        } as ProductUpdate)
+        .update(patch)
         .eq('id', id)
       if (prodErr) throw prodErr
 

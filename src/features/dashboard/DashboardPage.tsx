@@ -14,6 +14,9 @@ import { useTargetForMonth, currentMonthISO } from 'src/features/targets/hooks'
 import { formatPKR } from 'src/features/subscription/env'
 import { Button, Card, Spinner } from 'src/components/ui'
 import { PageHeader } from 'src/components/layout'
+import InventoryAlertsWidget from 'src/features/batches/InventoryAlertsWidget'
+import ExpiredStockWidget from 'src/features/batches/ExpiredStockWidget'
+import ExpiredSalesWidget from 'src/features/sales/ExpiredSalesWidget'
 
 function StatCard({
   label,
@@ -218,6 +221,19 @@ export default function DashboardPage() {
             </Button>
           </Stack>
         </Card>
+
+        {/* v2.8 inventory alerts — auto-hides for shops without batched
+         *  products, so it's safe to mount unconditionally. */}
+        <InventoryAlertsWidget />
+
+        {/* v2.8.3 expired stock — auto-hides when no expired-with-stock
+         *  batches exist. Sits below the v2.8 alerts to keep severity
+         *  ordering "preventive (amber) → corrective (red)". */}
+        <ExpiredStockWidget />
+
+        {/* v2.8.4 expired-stock sales — historical audit, opt-out by zero
+         *  occurrences. Auto-hides when the count is zero. */}
+        <ExpiredSalesWidget />
       </Stack>
     </Box>
   )

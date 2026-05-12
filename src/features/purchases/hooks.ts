@@ -28,12 +28,21 @@ export type OverheadCategory =
  */
 // v2.6+v2.7: lines may carry variant_id (multi-variant products) OR product_id
 // (single-variant fallback resolved server-side to the default variant).
+// v2.8: when the variant's product has has_batches = true, the line MUST also
+// carry a `batch` object. record_purchase raises otherwise.
+export type PurchaseBatchInput = {
+  batch_no: string
+  manufactured_date?: string | null
+  expiry_date?: string | null
+  supplier_warranty_days?: number | null
+}
 export type PurchaseLineInput =
   | {
       product_id: string
       variant_id?: string
       qty: number
       cost_at_purchase: number
+      batch?: PurchaseBatchInput
     }
   | {
       product_id: string
@@ -41,6 +50,7 @@ export type PurchaseLineInput =
       pack_id: string
       pack_qty: number
       cost_at_purchase: number
+      batch?: PurchaseBatchInput
     }
 
 export type RecordPurchaseInput = {
@@ -53,6 +63,10 @@ export type RecordPurchaseInput = {
     amount: number
     description?: string | null
   }[]
+  /** v2.8.1: when true, the resulting purchase row carries is_opening=true.
+   * Used for the first stock-in of a product (catalog upload → first
+   * delivery). Audit-only flag — `record_purchase` math is unchanged. */
+  is_opening?: boolean
 }
 
 export function useRecordPurchase() {
@@ -71,7 +85,7 @@ export function useRecordPurchase() {
             ? object
             : never,
         p_overhead_items: input.overhead_items as unknown as object,
-        p_is_opening: false
+        p_is_opening: input.is_opening ?? false
       })
       if (error) throw error
       return data as string
@@ -80,6 +94,13 @@ export function useRecordPurchase() {
       void qc.invalidateQueries({ queryKey: ['purchases'] })
       void qc.invalidateQueries({ queryKey: ['purchase'] })
       void qc.invalidateQueries({ queryKey: ['products'] })
+      // v2.8.5: same stale-cache fix as useRecordSale — purchases mint new
+      // batches and bump qty_remaining on existing ones; the product detail
+      // page and POS batch picker both need to see the new state without
+      // a hard reload.
+      void qc.invalidateQueries({ queryKey: ['product'] })
+      void qc.invalidateQueries({ queryKey: ['batches'] })
+      void qc.invalidateQueries({ queryKey: ['alerts'] })
     }
   })
 }

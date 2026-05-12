@@ -1,0 +1,82 @@
+{
+  "title": "بیچز",
+  "active_batches": "فعال بیچز",
+  "inactive_batches": "غیر فعال بیچز",
+  "fields": {
+    "batch_no": "بیچ نمبر",
+    "manufactured_date": "تیاری کی تاریخ",
+    "expiry_date": "ایکسپائری",
+    "supplier_warranty_days": "سپلائر وارنٹی (دن)",
+    "qty_received": "موصول مقدار",
+    "qty_remaining": "بقایا مقدار",
+    "cost_per_unit": "فی یونٹ لاگت",
+    "received_at": "موصول ہوا",
+    "warranty_expires_at": "وارنٹی ختم ہو رہی ہے",
+    "supplier": "سپلائر"
+  },
+  "indicators": {
+    "oldest": "خودکار انتخاب",
+    "selected": "منتخب",
+    "pick_batch": "بیچ منتخب کریں",
+    "reset_to_fefo": "خودکار پر واپس کریں",
+    "next_up": "یہ استعمال ہوگا",
+    "auto_hint": "خودکار انتخاب وہ بیچ منتخب کرتا ہے جس کی ایکسپائری سب سے قریب ہے، تاکہ پرانا اسٹاک پہلے فروخت ہو۔",
+    "active_batches_count_one": "{{count}} فعال بیچ",
+    "active_batches_count_other": "{{count}} فعال بیچز",
+    "inactive_batches_count_one": "{{count}} غیر فعال بیچ",
+    "inactive_batches_count_other": "{{count}} غیر فعال بیچز",
+    "show_inactive": "+ غیر فعال دکھائیں",
+    "hide_inactive": "غیر فعال چھپائیں",
+    "from_batches": "بیچز {{batches}} سے"
+  },
+  "actions": {
+    "write_off": "رائٹ آف",
+    "write_off_confirm_title": "بیچ {{batchNo}} رائٹ آف کریں",
+    "write_off_confirm_body": "یہ اسٹاک سے {{qty}} یونٹ ہٹا دے گا۔ وجہ بتائیں۔",
+    "write_off_reason_label": "وجہ",
+    "write_off_reason_placeholder": "ایکسپائر / خراب / واپس کیا گیا / ...",
+    "write_off_qty_label": "رائٹ آف کرنے کی مقدار (زیادہ سے زیادہ {{max}})",
+    "write_off_qty_help": "ڈیفالٹ سے پورا بیچ ہٹے گا۔ جزوی RTV یا نقصان کے لیے کم کریں۔",
+    "write_off_full_note": "(یہ بیچ خالی کر دے گا — اسے غیر فعال نشان زد کر دیا جائے گا)",
+    "write_off_submit": "بیچ رائٹ آف کریں",
+    "use_this_batch": "یہ بیچ استعمال کریں"
+  },
+  "stock_in_section_title": "بیچ کی معلومات",
+  "batch_picker_title": "{{productName}} کے لیے بیچ منتخب کریں",
+  "settings": {
+    "section_title": "انوینٹری الرٹس",
+    "section_subtitle": "ایکسپائری اور سپلائر وارنٹی الرٹس کے لیے ڈیفالٹ مدتیں۔",
+    "default_expiry_label": "ڈیفالٹ ایکسپائری الرٹ مدت (دن)",
+    "default_warranty_label": "ڈیفالٹ سپلائر وارنٹی الرٹ مدت (دن)",
+    "save": "ڈیفالٹ محفوظ کریں",
+    "saved": "ڈیفالٹ اپ ڈیٹ ہو گئے",
+    "save_failed": "ڈیفالٹ اپ ڈیٹ نہ ہو سکے۔"
+  },
+  "expired_sales": {
+    "section_title": "ایکسپائرڈ اسٹاک کی فروخت",
+    "section_subtitle": "ایکسپائرڈ اسٹاک سے فروخت کو POS کس طرح سنبھالتا ہے۔",
+    "default_policy_label": "ایکسپائرڈ اسٹاک فروخت کرتے وقت ڈیفالٹ پالیسی",
+    "policy_block": "بلاک کریں",
+    "policy_warn": "تنبیہ کریں (تجویز کردہ)",
+    "policy_allow": "اجازت دیں",
+    "receipt_disclaimer_label": "ایکسپائرڈ اسٹاک کی فروخت کی رسیدوں پر ڈسکلیمر شامل کریں",
+    "receipt_disclaimer_help": "فعال ہونے پر رسید میں ایکسپائرڈ بیچ والی لائنوں کا ذکر آئے گا۔",
+    "save": "ایکسپائرڈ-سیل سیٹنگز محفوظ کریں",
+    "saved": "ایکسپائرڈ-سیل سیٹنگز اپ ڈیٹ ہو گئیں",
+    "save_failed": "ایکسپائرڈ-سیل سیٹنگز اپ ڈیٹ نہ ہو سکیں۔"
+  },
+  "errors": {
+    "batch_required_for_batched_product": "اس مصنوع کے لیے بیچ کی معلومات ضروری ہے۔",
+    "batch_no_required": "بیچ نمبر ضروری ہے۔",
+    "duplicate_batch_no": "اس مصنوع کے لیے اس نمبر کا بیچ پہلے سے موجود ہے۔",
+    "cannot_enable_batches_with_stock": "بیچ ٹریکنگ فعال کرنے سے پہلے موجودہ اسٹاک فروخت یا رائٹ آف کریں۔",
+    "cannot_disable_batches_with_active_batches": "بیچ ٹریکنگ بند کرنے سے پہلے تمام بیچ غیر فعال کریں۔",
+    "selected_batch_insufficient": "اس بیچ میں اتنا اسٹاک نہیں۔",
+    "selected_batch_insufficient_long": "اس بیچ میں اتنا اسٹاک نہیں — صرف {{available}} یونٹ موجود ہیں جبکہ آپ کو {{needed}} درکار ہیں۔ کوئی اور بیچ منتخب کریں یا خودکار انتخاب استعمال کریں۔",
+    "batch_not_in_variant_or_inactive": "منتخب بیچ اس مصنوع کے لیے درست نہیں۔",
+    "no_batch_stock_available": "تمام بیچز میں یہ مصنوع ختم ہے۔",
+    "deactivate_failed": "یہ بیچ رائٹ آف نہیں ہو سکا۔",
+    "expiry_or_warranty_required": "ایکسپائری تاریخ یا سپلائر وارنٹی کے دن میں سے کم از کم ایک درج کریں — بیچ ٹریک شدہ مصنوع کے لیے کم از کم ایک ضروری ہے ورنہ کوئی الرٹ نہیں۔",
+    "qty_invalid": "1 اور بقایا مقدار کے درمیان ایک عدد درج کریں۔"
+  }
+}

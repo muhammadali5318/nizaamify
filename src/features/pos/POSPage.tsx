@@ -11,13 +11,23 @@ import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
+import { paths } from 'src/paths'
 import ProductTable from 'src/features/products/ProductTable'
 import type {
   ProductSearchRow,
   ProductVariantRow
 } from 'src/features/products/hooks'
-import { useRecordSale } from './hooks'
+import { useRecordSale, usePreflightExpiredSaleCheck } from './hooks'
+import { useShopExpiredSaleSettings } from 'src/features/batches/hooks'
+import BlockedExpiredSaleDialog, {
+  type BlockedExpiredSaleRow
+} from './BlockedExpiredSaleDialog'
+import ConfirmExpiredSaleDialog, {
+  type ExpiredSaleConfirmRow
+} from './ConfirmExpiredSaleDialog'
+import PosBatchPicker from './PosBatchPicker'
 import Receipt, { type ReceiptLine } from './Receipt'
 import QtyStepper from './QtyStepper'
 import { formatPKR } from 'src/features/subscription/env'
@@ -64,11 +74,31 @@ type CartItem = {
   /** v2.2 per-line discount. Both null = no discount. */
   line_discount_type: DiscountType | null
   line_discount_value: number | null
+  /** v2.8.5: true when the product is batched (`products.has_batches`).
+   *  Drives the "Pick batch" cart-line affordance. */
+  has_batches: boolean
+  /** v2.8.5: resolved variant id used by the batch picker hook. For
+   *  single-variant cart lines `variant_id` is null by design (server
+   *  resolves), but the batch picker needs the default variant id to
+   *  query inventory_batches. */
+  resolved_variant_id: string | null
+  /** v2.8.5: manually-picked batch override. null = FEFO. Carried into
+   *  record_sale items + preflight_expired_sale_check. */
+  batch_id: string | null
+  /** v2.8.5: display strings for the picked batch (batch_no + expiry).
+   *  Cached at pick time so we don't refetch on every render. */
+  batch_no: string | null
+  batch_expiry_date: string | null
 }
 
 type AddItem = Omit<
   CartItem,
-  'qty' | 'line_discount_type' | 'line_discount_value'
+  | 'qty'
+  | 'line_discount_type'
+  | 'line_discount_value'
+  | 'batch_id'
+  | 'batch_no'
+  | 'batch_expiry_date'
 >
 
 /** Unique key for a cart line: variant_id when present (multi-variant), else
@@ -89,6 +119,15 @@ type CartAction =
       discount_value: number
     }
   | { type: 'clear_line_discount'; key: string }
+  | {
+      // v2.8.5: manual batch override.
+      type: 'set_batch'
+      key: string
+      batch_id: string
+      batch_no: string
+      batch_expiry_date: string | null
+    }
+  | { type: 'clear_batch'; key: string }
   | { type: 'reset' }
 
 function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
@@ -108,7 +147,10 @@ function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
           ...action.item,
           qty: Math.min(delta, action.item.stock),
           line_discount_type: null,
-          line_discount_value: null
+          line_discount_value: null,
+          batch_id: null,
+          batch_no: null,
+          batch_expiry_date: null
         }
       ]
     }
@@ -146,6 +188,23 @@ function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
               line_discount_type: null,
               line_discount_value: null
             }
+          : c
+      )
+    case 'set_batch':
+      return state.map((c) =>
+        lineKey(c) === action.key
+          ? {
+              ...c,
+              batch_id: action.batch_id,
+              batch_no: action.batch_no,
+              batch_expiry_date: action.batch_expiry_date
+            }
+          : c
+      )
+    case 'clear_batch':
+      return state.map((c) =>
+        lineKey(c) === action.key
+          ? { ...c, batch_id: null, batch_no: null, batch_expiry_date: null }
           : c
       )
     case 'reset':
@@ -197,8 +256,19 @@ export default function POSPage() {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
+  const navigate = useNavigate()
   const { data: shopName } = useShopName()
+  const { data: shopExpiredSettings } = useShopExpiredSaleSettings()
   const recordSale = useRecordSale()
+  const preflightExpired = usePreflightExpiredSaleCheck()
+  const [blockDialog, setBlockDialog] = useState<{
+    open: boolean
+    rows: BlockedExpiredSaleRow[]
+  }>({ open: false, rows: [] })
+  const [warnDialog, setWarnDialog] = useState<{
+    open: boolean
+    rows: ExpiredSaleConfirmRow[]
+  }>({ open: false, rows: [] })
 
   const [cart, dispatch] = useReducer(cartReducer, [])
   const [serviceCharge, setServiceCharge] = useState('0')
@@ -224,6 +294,10 @@ export default function POSPage() {
     onCredit: number
     customer: string | undefined
     notes: string
+    /** v2.8.4: opted-in shops show a disclaimer footer when any line was
+     *  drawn from an expired batch. Computed from sale_items after the
+     *  RPC returns. */
+    showExpiredDisclaimer: boolean
   }>({
     open: false,
     invoiceId: '',
@@ -234,7 +308,8 @@ export default function POSPage() {
     amountPaid: 0,
     onCredit: 0,
     customer: undefined,
-    notes: ''
+    notes: '',
+    showExpiredDisclaimer: false
   })
   const [error, setError] = useState<string | null>(null)
 
@@ -353,7 +428,9 @@ export default function POSPage() {
         default_price: Number(row.price),
         price: Number(row.price),
         avg_cost: Number(row.avg_cost),
-        stock: row.stock
+        stock: row.stock,
+        has_batches: row.has_batches,
+        resolved_variant_id: row.default_variant_id ?? null
       }
     })
   }
@@ -381,7 +458,9 @@ export default function POSPage() {
         default_price: Number(variant.price),
         price: Number(variant.price),
         avg_cost: Number(variant.avg_cost),
-        stock: variant.stock
+        stock: variant.stock,
+        has_batches: row.has_batches,
+        resolved_variant_id: variant.variant_id
       }
     })
   }
@@ -412,40 +491,64 @@ export default function POSPage() {
           variant_count: 1,
           min_price: cached.default_price,
           max_price: cached.default_price,
-          total_stock_all_variants: cached.stock
+          total_stock_all_variants: cached.stock,
+          has_null_price_variant: false,
+          has_batches: cached.has_batches,
+          default_variant_id: cached.resolved_variant_id
         },
         1
       )
       return
     }
     const { data, error } = await supabase
-      .from('products')
-      .select('id, name, type, category_id, price, avg_cost, stock, is_active')
-      .eq('id', productId)
+      .from('product_with_default_variant')
+      .select(
+        'product_id, name, legacy_type_column, category_id, price, avg_cost, stock, product_is_active, has_batches, variant_id'
+      )
+      .eq('product_id', productId)
       .single()
     if (error || !data) return
     handleAddProduct(
       {
-        id: data.id,
-        name: data.name,
-        type: data.type,
-        category_id: data.category_id,
+        id: data.product_id as string,
+        name: data.name as string,
+        type: (data.legacy_type_column as string) ?? '',
+        category_id: data.category_id as string,
         description: null,
         price: Number(data.price ?? 0),
-        avg_cost: Number(data.avg_cost),
+        avg_cost: Number(data.avg_cost ?? 0),
         last_purchase_cost: null,
-        stock: data.stock,
-        is_active: data.is_active,
+        stock: (data.stock as number) ?? 0,
+        is_active: !!data.product_is_active,
         relevance: 0,
         has_variants: false,
         variant_count: 1,
         min_price: Number(data.price ?? 0),
         max_price: Number(data.price ?? 0),
-        total_stock_all_variants: data.stock
+        total_stock_all_variants: (data.stock as number) ?? 0,
+        has_null_price_variant: false,
+        has_batches: !!data.has_batches,
+        default_variant_id: (data.variant_id as string | null) ?? null
       },
       1
     )
   }
+
+  /** Builds the `record_sale` items payload from the current cart. */
+  const buildItemsPayload = () =>
+    cart.map((c) => ({
+      ...(c.variant_id
+        ? { variant_id: c.variant_id }
+        : { product_id: c.product_id }),
+      qty: c.qty,
+      price_at_sale: c.price,
+      // v2.2: omit line_discount fields when no discount on this line so the
+      // server stores NULL/0 (matches the consistency check).
+      line_discount_type: c.line_discount_type,
+      line_discount_value: c.line_discount_value,
+      // v2.8.5: manually-picked batch override. null = FEFO.
+      ...(c.batch_id ? { batch_id: c.batch_id } : {})
+    }))
 
   const submit = async () => {
     setError(null)
@@ -462,21 +565,97 @@ export default function POSPage() {
       return
     }
 
+    // v2.8.4 preflight — ask the server which lines (if any) would draw
+    // from expired stock and what each variant's effective policy is.
+    if (cart.length > 0) {
+      try {
+        const preflightItems = cart.map((c) => ({
+          ...(c.variant_id
+            ? { variant_id: c.variant_id }
+            : { product_id: c.product_id }),
+          qty: c.qty,
+          // v2.8.5: include the manually-picked batch_id so the preflight
+          // checks the specific batch (manual override path) instead of
+          // computing the FEFO non-expired sum.
+          ...(c.batch_id ? { batch_id: c.batch_id } : {})
+        }))
+        const rows = await preflightExpired.mutateAsync({
+          items: preflightItems
+        })
+        const labelFor = (variantId: string) => {
+          const cartLine = cart.find(
+            (c) => (c.variant_id ?? null) === variantId
+          )
+          if (cartLine) {
+            return cartLine.variant_label
+              ? `${cartLine.name} — ${cartLine.variant_label}`
+              : cartLine.name
+          }
+          // Fallback for single-variant items: the preflight returns the
+          // resolved default variant_id; match by product_id via cart.
+          const fallback = cart.find((c) => c.variant_id === null)
+          return fallback?.name ?? ''
+        }
+        const cartLineFor = (variantId: string) => {
+          // For single-variant items the cart line has variant_id=null;
+          // preflight returns the resolved variant. We match all cart
+          // lines whose variant matches; if none, fall back to the
+          // single-variant index in this preflight row's order.
+          const direct = cart.find((c) => (c.variant_id ?? null) === variantId)
+          return direct ?? null
+        }
+        const blockedRows: BlockedExpiredSaleRow[] = []
+        const warnRows: ExpiredSaleConfirmRow[] = []
+        rows.forEach((r, idx) => {
+          if (!r.would_draw_expired) return
+          // Map back to cart line for label + qty + product_id.
+          const direct = cartLineFor(r.variant_id)
+          const cartLine = direct ?? cart[idx] ?? null
+          const productLabel = direct
+            ? labelFor(r.variant_id)
+            : cartLine
+              ? cartLine.variant_label
+                ? `${cartLine.name} — ${cartLine.variant_label}`
+                : cartLine.name
+              : ''
+          const qty = cartLine?.qty ?? 0
+          if (r.policy === 'block') {
+            blockedRows.push({
+              productLabel,
+              qty,
+              productId: cartLine?.product_id ?? null
+            })
+          } else if (r.policy === 'warn') {
+            warnRows.push({ productLabel, qty })
+          }
+          // policy === 'allow' is a silent pass; no dialog needed.
+        })
+        if (blockedRows.length > 0) {
+          setBlockDialog({ open: true, rows: blockedRows })
+          return
+        }
+        if (warnRows.length > 0) {
+          setWarnDialog({ open: true, rows: warnRows })
+          return
+        }
+      } catch (err) {
+        // Preflight failure is not blocking — fall through to record_sale,
+        // which still enforces the policy server-side and will raise if
+        // confirmation is missing.
+
+        console.warn('preflight_expired_sale_check failed', err)
+      }
+    }
+
+    await performRecordSale(false)
+  }
+
+  /** Performs the actual record_sale RPC call. Split out so the warn-mode
+   *  confirmation dialog can re-invoke it with `confirmExpired = true`. */
+  const performRecordSale = async (confirmExpired: boolean) => {
+    setError(null)
     try {
-      // record_sale items: pass variant_id (preferred) OR product_id (legacy →
-      // default variant) per v2.6 ADR-0025. The cart's variant_id is null for
-      // single-variant adds; in that case product_id alone is correct.
-      const items = cart.map((c) => ({
-        ...(c.variant_id
-          ? { variant_id: c.variant_id }
-          : { product_id: c.product_id }),
-        qty: c.qty,
-        price_at_sale: c.price,
-        // v2.2: omit line_discount fields when no discount on this line so the
-        // server stores NULL/0 (matches the consistency check).
-        line_discount_type: c.line_discount_type,
-        line_discount_value: c.line_discount_value
-      }))
+      const items = buildItemsPayload()
       const invoiceId = await recordSale.mutateAsync({
         customer_id: customerId,
         amount_paid: amountPaid,
@@ -484,11 +663,24 @@ export default function POSPage() {
         notes: notes.trim() || null,
         items,
         sale_discount_type: saleDiscount?.type ?? null,
-        sale_discount_value: saleDiscount?.value ?? null
+        sale_discount_value: saleDiscount?.value ?? null,
+        confirm_expired_sale: confirmExpired
       })
+      const invoiceIdStr = invoiceId as unknown as string
+      // v2.8.4: surface the receipt disclaimer when the shop has opted in
+      // AND at least one sale_items line was drawn from expired stock.
+      let showExpiredDisclaimer = false
+      if (shopExpiredSettings?.expired_sale_receipt_disclaimer) {
+        const { count } = await supabase
+          .from('sale_items')
+          .select('id', { count: 'exact', head: true })
+          .eq('invoice_id', invoiceIdStr)
+          .eq('sold_expired', true)
+        showExpiredDisclaimer = (count ?? 0) > 0
+      }
       setReceipt({
         open: true,
-        invoiceId: invoiceId as unknown as string,
+        invoiceId: invoiceIdStr,
         lines: cart.map((c) => ({
           key: lineKey(c),
           name: c.variant_label ? `${c.name} — ${c.variant_label}` : c.name,
@@ -501,7 +693,8 @@ export default function POSPage() {
         amountPaid,
         onCredit,
         customer: selectedCustomer?.name,
-        notes: notes.trim()
+        notes: notes.trim(),
+        showExpiredDisclaimer
       })
       dispatch({ type: 'reset' })
       setServiceCharge('0')
@@ -510,6 +703,8 @@ export default function POSPage() {
       setSaleDiscount(null)
       setAmountPaidOverride(null)
       setCartOpen(false)
+      setBlockDialog({ open: false, rows: [] })
+      setWarnDialog({ open: false, rows: [] })
       notify.success(t('pos:messages.saved'))
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : ''
@@ -529,6 +724,30 @@ export default function POSPage() {
         setError(t('pos:errors.sale_discount_percent_out_of_range'))
       } else if (msg.includes('sale_discount_fixed_exceeds_items_subtotal')) {
         setError(t('pos:errors.sale_discount_fixed_exceeds_items'))
+      } else if (msg.includes('expired_stock_blocked')) {
+        // Server-side rejection of a manual override to an expired batch
+        // in block-policy mode. Surface as a block-style banner since the
+        // preflight should normally have caught this.
+        setError(t('pos:expired_sale.block_dialog_writeoff_hint'))
+      } else if (msg.includes('insufficient_non_expired_stock')) {
+        setError(t('pos:expired_sale.block_dialog_writeoff_hint'))
+      } else if (msg.includes('expired_stock_needs_confirmation')) {
+        // Preflight result raced with a concurrent sale — re-open the warn
+        // dialog. Reuse the warn rows if we have any; otherwise build a
+        // generic single-row prompt.
+        setWarnDialog((prev) =>
+          prev.rows.length > 0
+            ? { ...prev, open: true }
+            : {
+                open: true,
+                rows: cart.map((c) => ({
+                  productLabel: c.variant_label
+                    ? `${c.name} — ${c.variant_label}`
+                    : c.name,
+                  qty: c.qty
+                }))
+              }
+        )
       } else {
         setError(t('pos:errors.submit_failed'))
       }
@@ -760,6 +979,7 @@ export default function POSPage() {
         amountPaid={receipt.amountPaid}
         onCredit={receipt.onCredit}
         notes={receipt.notes}
+        showExpiredDisclaimer={receipt.showExpiredDisclaimer}
       />
 
       <OverrideDiscountDialog
@@ -798,6 +1018,31 @@ export default function POSPage() {
           if (!variantPickerRow) return
           handleAddVariant(variantPickerRow, variant)
           setVariantPickerRow(null)
+        }}
+      />
+
+      <BlockedExpiredSaleDialog
+        open={blockDialog.open}
+        onClose={() => setBlockDialog({ open: false, rows: [] })}
+        rows={blockDialog.rows}
+        onOpenProduct={(productId) => {
+          // eslint-disable-next-line no-console
+          console.info('[v2.8.4] navigating to product', productId)
+          setBlockDialog({ open: false, rows: [] })
+          // Defer the navigate one tick so the dialog's exit animation
+          // can't race the route change (some MUI builds swallow the
+          // route push if it fires while the modal portal is unmounting).
+          setTimeout(() => navigate(paths.gotoProduct(productId)), 0)
+        }}
+      />
+
+      <ConfirmExpiredSaleDialog
+        open={warnDialog.open}
+        onClose={() => setWarnDialog({ open: false, rows: [] })}
+        rows={warnDialog.rows}
+        submitting={recordSale.isPending}
+        onConfirm={() => {
+          void performRecordSale(true)
         }}
       />
     </Box>
@@ -865,7 +1110,15 @@ function CartPanel({
   locale,
   onAtMaxAttempt
 }: CartPanelProps) {
-  const { t } = useTranslation(['pos', 'common'])
+  const { t } = useTranslation(['pos', 'batches', 'common'])
+  // v2.8.5: which cart-line currently has the batch picker open. lineKey
+  // identifies the row; null means closed.
+  const [batchPickerForKey, setBatchPickerForKey] = useState<string | null>(
+    null
+  )
+  const batchPickerLine = batchPickerForKey
+    ? (cart.find((c) => lineKey(c) === batchPickerForKey) ?? null)
+    : null
 
   return (
     <>
@@ -1197,6 +1450,88 @@ function CartPanel({
                   t={t}
                 />
 
+                {/* v2.8.5: Pick batch affordance — visible only when the
+                 *  product is batched. Renders the picked batch_no + EXPIRED
+                 *  badge when an override is active. Cart lines without a
+                 *  manual pick let FEFO decide server-side. */}
+                {c.has_batches && (
+                  <Stack
+                    direction='row'
+                    spacing={0.75}
+                    alignItems='center'
+                    flexWrap='wrap'
+                    sx={{ mt: 0.75 }}
+                  >
+                    <Typography
+                      variant='caption'
+                      sx={{
+                        color: 'var(--text-muted)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em'
+                      }}
+                    >
+                      {t('pos:cart.batch_label')}
+                    </Typography>
+                    {c.batch_id ? (
+                      <>
+                        <Typography
+                          variant='caption'
+                          sx={{
+                            fontFamily: 'monospace',
+                            color: 'var(--text-primary)'
+                          }}
+                        >
+                          {c.batch_no}
+                        </Typography>
+                        {c.batch_expiry_date &&
+                          new Date(c.batch_expiry_date).setHours(0, 0, 0, 0) <
+                            new Date().setHours(0, 0, 0, 0) && (
+                            <Badge
+                              variant='error'
+                              label={t('pos:cart.batch_expired_label')}
+                            />
+                          )}
+                        <Button
+                          variant='link'
+                          size='sm'
+                          onClick={() => setBatchPickerForKey(lineKey(c))}
+                        >
+                          {t('pos:cart.pick_batch')}
+                        </Button>
+                        <Button
+                          variant='link'
+                          size='sm'
+                          onClick={() =>
+                            dispatch({
+                              type: 'clear_batch',
+                              key: lineKey(c)
+                            })
+                          }
+                        >
+                          {t('pos:cart.reset_to_fefo')}
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Typography
+                          variant='caption'
+                          sx={{ color: 'var(--text-muted)' }}
+                        >
+                          {t('pos:cart.batch_oldest')}
+                        </Typography>
+                        <Button
+                          variant='link'
+                          size='sm'
+                          onClick={() => setBatchPickerForKey(lineKey(c))}
+                          disabled={!c.resolved_variant_id}
+                        >
+                          {t('pos:cart.pick_batch')}
+                        </Button>
+                      </>
+                    )}
+                  </Stack>
+                )}
+
                 {belowCost && (
                   <Box sx={{ mt: 0.75 }}>
                     <Banner variant='warning'>
@@ -1209,6 +1544,37 @@ function CartPanel({
           })}
         </Stack>
       )}
+
+      {/* v2.8.5: single picker dialog reused across cart lines — opened
+       *  from any batched line's "Pick batch" link. */}
+      <PosBatchPicker
+        open={batchPickerLine !== null}
+        onClose={() => setBatchPickerForKey(null)}
+        variantId={batchPickerLine?.resolved_variant_id ?? null}
+        productName={
+          batchPickerLine
+            ? batchPickerLine.variant_label
+              ? `${batchPickerLine.name} — ${batchPickerLine.variant_label}`
+              : batchPickerLine.name
+            : ''
+        }
+        currentBatchId={batchPickerLine?.batch_id ?? null}
+        requiredQty={batchPickerLine?.qty ?? 1}
+        onPick={(picked) => {
+          if (!batchPickerLine) return
+          dispatch({
+            type: 'set_batch',
+            key: lineKey(batchPickerLine),
+            batch_id: picked.batch_id,
+            batch_no: picked.batch_no,
+            batch_expiry_date: picked.batch_expiry_date
+          })
+        }}
+        onResetToFefo={() => {
+          if (!batchPickerLine) return
+          dispatch({ type: 'clear_batch', key: lineKey(batchPickerLine) })
+        }}
+      />
 
       {/* Subtotal first, then sale discount (v2.3 manual only), then service. */}
       <Stack

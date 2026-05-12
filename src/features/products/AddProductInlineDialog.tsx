@@ -66,8 +66,6 @@ export default function AddProductInlineDialog({
         category_id: categoryId as string,
         description: null,
         price: priceNum,
-        opening_stock: 0,
-        opening_cost: 0,
         is_scan_only: false
       })
       notify.success(t('products:messages.created', 'Product created'))

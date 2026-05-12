@@ -113,7 +113,33 @@ export default function SaleDetailPage() {
       id: 'product',
       header: t('sales:detail.product'),
       cardRole: 'heading',
-      cell: (it) => it.product?.name ?? t('sales:detail.deleted_product')
+      cell: (it) => (
+        <Stack spacing={0.25}>
+          <Stack direction='row' spacing={0.75} alignItems='center'>
+            <span>{it.product?.name ?? t('sales:detail.deleted_product')}</span>
+            {/* v2.8.4: snapshot of whether this line drew from an expired
+             *  batch. Persists even if the batch is later written off. */}
+            {it.sold_expired && (
+              <Badge
+                variant='error'
+                label={t('sales:detail.sold_expired_badge')}
+              />
+            )}
+          </Stack>
+          {/* v2.8: batch_no surfaced when the line drew from a batch. */}
+          {it.batch?.batch_no && (
+            <span
+              style={{
+                fontFamily: 'monospace',
+                fontSize: '0.75rem',
+                color: 'var(--text-muted)'
+              }}
+            >
+              {it.batch.batch_no}
+            </span>
+          )}
+        </Stack>
+      )
     },
     {
       id: 'qty',

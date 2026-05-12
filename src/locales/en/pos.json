@@ -45,11 +45,19 @@
     "modified_price_badge": "Modified",
     "was_price": "was {{price}}",
     "below_avg_cost_warning": "Below average cost — selling at a loss.",
+    "batch_label": "Batch",
+    "batch_oldest": "auto-pick",
+    "batch_selected": "selected",
+    "batch_next_up": "Will be used",
+    "batch_auto_hint": "Auto-pick uses the batch closest to its expiry date so older stock leaves first.",
+    "pick_batch": "Pick batch",
+    "reset_to_fefo": "Reset to auto-pick",
     "stock_remaining": "Stock: {{count}} left",
     "remove_line": "Remove",
     "quick_add_each": "+1 {{unitName}}",
     "quick_add_pack": "+1 {{unitName}} ({{baseQty}})",
-    "scan_only_help": "Scan-only — use the pack buttons"
+    "scan_only_help": "Scan-only — use the pack buttons",
+    "batch_expired_label": "EXPIRED"
   },
   "payment": {
     "title": "Payment",
@@ -148,5 +156,21 @@
   },
   "messages": {
     "saved": "Sale completed"
+  },
+  "expired_sale": {
+    "block_dialog_title": "Cannot complete sale — expired stock",
+    "block_dialog_body": "The following products only have expired stock available:",
+    "block_dialog_action_open": "Open product",
+    "block_dialog_action_cancel": "Cancel",
+    "block_dialog_writeoff_hint": "This shop's policy blocks sales of expired stock for these products. Write off the expired batches first, then restock.",
+    "warn_dialog_title": "Confirm expired stock sale",
+    "warn_dialog_body": "The following products will be drawn from expired stock:",
+    "warn_dialog_continue": "Yes, complete sale",
+    "warn_dialog_cancel": "Cancel",
+    "expired_days_ago_one": "expired {{count}} day ago",
+    "expired_days_ago_other": "expired {{count}} days ago",
+    "units_summary_one": "{{count}} unit",
+    "units_summary_other": "{{count}} units",
+    "manual_override_expired": "Selected batch is expired"
   }
 }

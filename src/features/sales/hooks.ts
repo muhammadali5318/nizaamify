@@ -31,6 +31,12 @@ export type SaleDetailItem = {
   /** v2.6b: server-computed line profit. */
   line_profit: number
   product: { id: string; name: string } | null
+  /** v2.8: which batch this line drew from. NULL for non-batched products. */
+  batch_id: string | null
+  batch: { id: string; batch_no: string } | null
+  /** v2.8.4: snapshot-true when this line drew from an expired batch.
+   *  Immutable per the append-only sale_items_no_modify trigger. */
+  sold_expired: boolean
 }
 
 export type SaleDetail = Invoice & {
@@ -136,7 +142,9 @@ export function useSale(id: string | undefined) {
           sale_items (
             id, product_id, qty, price_at_sale, cost_at_sale,
             line_discount_type, line_discount_value, line_discount_amount,
-            product:products ( id, name )
+            batch_id, sold_expired,
+            product:products ( id, name ),
+            batch:inventory_batches ( id, batch_no )
           )
           `
         )
@@ -270,5 +278,75 @@ export function useSale(id: string | undefined) {
         ledger
       } as SaleDetail
     }
+  })
+}
+
+/** v2.8.4: sale_items rows that drew from expired stock, joined to
+ *  invoice + product for display. Used by the dashboard widget (top 5)
+ *  and the /inventory/expired-sales list page (full table). */
+export type ExpiredSaleRow = {
+  sale_item_id: string
+  invoice_id: string
+  invoice_created_at: string
+  product_name: string
+  qty: number
+  /** Days the batch was past expiry at the sale's created_at. NULL when
+   *  batch_id is null (shouldn't happen for sold_expired=true but kept
+   *  safe). */
+  days_expired_at_sale: number | null
+}
+
+export function useExpiredSales(limit = 50) {
+  return useQuery({
+    queryKey: ['sales', 'expired', limit],
+    queryFn: async (): Promise<ExpiredSaleRow[]> => {
+      // Pull last-30-days of expired-stock sale lines. We over-fetch a bit
+      // here to keep the query simple; the widget slices to 5 and the
+      // list page paginates client-side.
+      const cutoffIso = new Date(
+        Date.now() - 30 * 24 * 60 * 60 * 1000
+      ).toISOString()
+      const { data, error } = await supabase
+        .from('sale_items')
+        .select(
+          'id, invoice_id, qty, product:products(name), invoice:invoices!inner(id, created_at), batch:inventory_batches(expiry_date)'
+        )
+        .eq('sold_expired', true)
+        .gte('invoice.created_at', cutoffIso)
+        .order('invoice(created_at)', { ascending: false })
+        .limit(limit)
+      if (error) throw error
+      type Row = {
+        id: string
+        invoice_id: string
+        qty: number
+        product: { name: string } | null
+        invoice: { id: string; created_at: string } | null
+        batch: { expiry_date: string | null } | null
+      }
+      const rows = (data ?? []) as unknown as Row[]
+      return rows.map((r) => {
+        const invoiceDate = r.invoice?.created_at ?? null
+        const expiryDate = r.batch?.expiry_date ?? null
+        let daysExpired: number | null = null
+        if (invoiceDate && expiryDate) {
+          const inv = new Date(invoiceDate).getTime()
+          const exp = new Date(expiryDate).getTime()
+          daysExpired = Math.max(
+            0,
+            Math.floor((inv - exp) / (24 * 60 * 60 * 1000))
+          )
+        }
+        return {
+          sale_item_id: r.id,
+          invoice_id: r.invoice_id,
+          invoice_created_at: invoiceDate ?? '',
+          product_name: r.product?.name ?? '',
+          qty: Number(r.qty),
+          days_expired_at_sale: daysExpired
+        }
+      })
+    },
+    staleTime: 60_000
   })
 }
