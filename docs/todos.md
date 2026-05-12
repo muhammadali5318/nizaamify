@@ -31,7 +31,7 @@ Tracking pad for deferred work. Move items to a real issue tracker when one exis
 - v2.2 polish: edit-line bottom sheet on mobile (per-line discount UI is desktop-inline only); `khata` list does not surface tier (only customer detail does)
 - v2.4 polish: dashboard stat tiles could carry a delta indicator (matches design-inspiration screenshots) once the dashboard summary RPC starts returning a previous-period comparison; auth/onboarding hero illustrations could use a dedicated dark-mode SVG variant
 - v2.5 polish: bulk re-categorize action (no UI exists; admin re-categorizes one at a time via the edit modal). Category hierarchy and per-category pricing rules are out of scope for this MVP — both are v3 conversations.
-- v2.8 polish: ProductFormPage's create flow doesn't expose `has_batches` yet — the user creates the product first then flips the toggle via the edit dialog (which enforces variant.stock = 0 before flipping ON). Polish ticket should add the toggle to the create form and gate `opening_stock > 0` so the chicken-and-egg "stock exists with no batch" never happens. POS cart batch indicator + "Pick batch" picker (ADR-0029) is the manual-override UX — FEFO works automatically without it. Multi-variant batched products: the batches table currently renders for single-variant + has_batches only; multi-variant + has_batches displays nothing batch-related on the detail page. All three are spec'd in v2.8 §5 but deferred from this build.
+- v2.8 polish: ProductFormPage's create flow doesn't expose `has_batches` yet — the user creates the product first then flips the toggle via the edit dialog (which enforces variant.stock = 0 before flipping ON). Polish ticket should add the toggle to the create form and gate `opening_stock > 0` so the chicken-and-egg "stock exists with no batch" never happens. Multi-variant batched products: the batches table currently renders for single-variant + has_batches only; multi-variant + has_batches displays nothing batch-related on the detail page. Both spec'd in v2.8 §5 but deferred. (POS cart "Pick batch" picker shipped in v2.8.5.)
 
 ## Future versions
 
@@ -39,8 +39,14 @@ Tracking pad for deferred work. Move items to a real issue tracker when one exis
 - v2.8 deferred items (spec §12): serial tracking (v2.9), inventory_adjustments + RTV (v2.10), customer-facing warranty, bulk batch import, batch-level reorder points, email/SMS expiry notifications, mutual-exclusion DB CHECK with `has_serials` (lands with v2.9). (Already-expired stock visibility now shipped in v2.8.3.)
 - `batches_warranty_expired` view (analog of `batches_already_expired` for the warranty case) is still deferred to v2.10 as part of the RTV workflow. When supplier warranty lapses, the shop owner needs an RTV-window-closing flow, not a passive alert.
 
+## v2.8.4 deferred items
+
+- Pharmacy-mode shop profile abstraction (block default + always-on receipt disclaimer + extra audit) — deferred until a pharmacy customer materializes. Until then, pharmacies override the shop default to `block` and turn on the receipt-disclaimer toggle.
+- Bulk policy update across products. A shop with 500 SKUs that wants per-product overrides edits one at a time. The shop default + per-product override pattern handles most cases (set the default, override the exceptions); a bulk UI is on the list only when a customer asks.
+
 ## Verification debt
 
 - v2.6 deferred verification: full re-run of v1.3–v2.5 manual test matrices per §11 of the v2.6 spec. Code-level checks (lint, type, build, tests) are green; live-data smoke tests (POS sale, stock-in with overhead, pack-based stock-in, partial payments) need a human to walk through.
 - v2.7 deferred verification: §13 manual smoke matrix (tracksuit, yoga mat, masking tape, iPhone, single-variant regression, cross-shop isolation). Code-level checks (lint, type, build, tests) are green.
 - v2.8 deferred verification: full §10 manual smoke matrix (cosmetics shop FEFO, multi-batch line split, override, supplier warranty alerts, write-off, cross-shop). Code-level checks (lint, type, build, audits 1–12) are green; live-data flows need a human to walk through.
+- v2.8.4 deferred verification: spec §6 manual smoke matrix (cases 6.1–6.19 — default policy resolution, block/warn/allow paths, manual-batch override, mixed cart, receipt disclaimer on/off, sale-detail badge persistence, dashboard widget rollup, cross-shop RLS, non-batched regression, batched-no-expired regression). Code-level checks (lint, type, build) are green; live-data flows need a human to walk through.

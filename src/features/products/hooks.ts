@@ -32,6 +32,14 @@ export type ProductSearchRow = {
    * Drives the "Set price" surfacing in the catalog list + the Needs-pricing
    * filter. */
   has_null_price_variant: boolean
+  /** v2.8.5: true when this product tracks inventory batches. Drives the
+   * POS cart "Pick batch" affordance on cart lines. */
+  has_batches: boolean
+  /** v2.8.5: id of the default variant. Single-variant products carry
+   * variant_id=null in the cart by design (record_sale resolves from
+   * product_id); for the batch picker we need the actual variant id to
+   * query inventory_batches by. */
+  default_variant_id: string | null
 }
 
 export type SearchProductsArgs = {
@@ -130,7 +138,7 @@ export function useProduct(id: string | undefined) {
       const { data, error } = await supabase
         .from('products')
         .select(
-          'id, shop_id, name, type, category_id, description, is_active, is_scan_only, base_unit_id, has_variants, has_batches, expiry_alert_days, warranty_alert_days, created_at, updated_at, default_variant:product_variants(id, sku, stock, price, cost, avg_cost, last_purchase_cost, is_default, is_active)'
+          'id, shop_id, name, type, category_id, description, is_active, is_scan_only, base_unit_id, has_variants, has_batches, expiry_alert_days, warranty_alert_days, expired_sale_policy, created_at, updated_at, default_variant:product_variants(id, sku, stock, price, cost, avg_cost, last_purchase_cost, is_default, is_active)'
         )
         .eq('id', id)
         .single()
@@ -471,6 +479,8 @@ export type UpdateProductInput = {
   has_batches?: boolean
   expiry_alert_days?: number | null
   warranty_alert_days?: number | null
+  /** v2.8.4 — null = use shop default; explicit enum overrides. */
+  expired_sale_policy?: 'block' | 'warn' | 'allow' | null
 }
 
 export type CreateProductWithVariantsInput = {
@@ -602,6 +612,9 @@ export function useUpdateProduct() {
       }
       if (rest.warranty_alert_days !== undefined) {
         patch.warranty_alert_days = rest.warranty_alert_days
+      }
+      if (rest.expired_sale_policy !== undefined) {
+        patch.expired_sale_policy = rest.expired_sale_policy
       }
       const { error: prodErr } = await supabase
         .from('products')

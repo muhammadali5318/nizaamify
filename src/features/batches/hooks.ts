@@ -198,9 +198,16 @@ export function useDeactivateBatch() {
   })
 }
 
+export type ExpiredSalePolicy = 'block' | 'warn' | 'allow'
+
 export type ShopAlertDefaults = {
   default_expiry_alert_days: number
   default_warranty_alert_days: number
+}
+
+export type ShopExpiredSaleSettings = {
+  default_expired_sale_policy: ExpiredSalePolicy
+  expired_sale_receipt_disclaimer: boolean
 }
 
 export function useShopAlertDefaults() {
@@ -241,6 +248,49 @@ export function useUpdateShopAlertDefaults() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['shop'] })
       void qc.invalidateQueries({ queryKey: ['alerts'] })
+    }
+  })
+}
+
+/** v2.8.4: shop-level expired-sale policy + receipt disclaimer toggle. */
+export function useShopExpiredSaleSettings() {
+  return useQuery({
+    queryKey: ['shop', 'expired_sale_settings'],
+    queryFn: async (): Promise<ShopExpiredSaleSettings | null> => {
+      const { data, error } = await supabase
+        .from('shops')
+        .select('default_expired_sale_policy, expired_sale_receipt_disclaimer')
+        .maybeSingle()
+      if (error) throw error
+      if (!data) return null
+      return {
+        default_expired_sale_policy:
+          data.default_expired_sale_policy as ExpiredSalePolicy,
+        expired_sale_receipt_disclaimer: data.expired_sale_receipt_disclaimer
+      }
+    },
+    staleTime: 60_000
+  })
+}
+
+export function useUpdateShopExpiredSaleSettings() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (args: ShopExpiredSaleSettings) => {
+      const { error } = await supabase
+        .from('shops')
+        .update({
+          default_expired_sale_policy: args.default_expired_sale_policy,
+          expired_sale_receipt_disclaimer: args.expired_sale_receipt_disclaimer
+        })
+        .eq(
+          'owner_user_id',
+          (await supabase.auth.getUser()).data.user?.id ?? ''
+        )
+      if (error) throw error
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['shop'] })
     }
   })
 }

@@ -162,6 +162,16 @@
     "expiry_alert_days_help": "Leave blank for shop default ({{default}} days)",
     "warranty_alert_days_label": "Warranty alert window (days)",
     "warranty_alert_days_help": "Leave blank for shop default ({{default}} days)",
-    "stock_in_first_hint": "Stock and cost are captured at stock-in time. Pick this product on the stock-in form and check \"This is opening stock\" for the first delivery."
+    "stock_in_first_hint": "Stock and cost are captured at stock-in time. Pick this product on the stock-in form and check \"This is opening stock\" for the first delivery.",
+    "expired_sale_policy": {
+      "label": "When selling expired stock",
+      "use_shop_default": "Use shop default (currently: {{policy}})",
+      "block": "Block",
+      "block_help": "Sales are blocked if only expired stock remains. Cashier must write off first.",
+      "warn": "Warn",
+      "warn_help": "Cashier sees a confirmation prompt before completing the sale.",
+      "allow": "Allow",
+      "allow_help": "Expired stock is sold like any other. No warnings."
+    }
   }
 }

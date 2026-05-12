@@ -51,5 +51,23 @@
     "expires_in_days_other": "{{count}} دن میں ایکسپائر",
     "warranty_ends_in_days_one": "{{count}} دن میں وارنٹی ختم",
     "warranty_ends_in_days_other": "{{count}} دن میں وارنٹی ختم"
+  },
+  "expired_sales_widget": {
+    "title": "حالیہ ایکسپائرڈ اسٹاک کی فروخت",
+    "summary_one": "پچھلے 30 دن: {{count}} فروخت ایکسپائرڈ بیچز سے ہوئی",
+    "summary_other": "پچھلے 30 دن: {{count}} فروختیں ایکسپائرڈ بیچز سے ہوئیں",
+    "view_all": "سب دیکھیں",
+    "row_expired_days_one": "فروخت کے وقت {{count}} دن ایکسپائرڈ",
+    "row_expired_days_other": "فروخت کے وقت {{count}} دن ایکسپائرڈ",
+    "row_units_one": "{{count}} یونٹ",
+    "row_units_other": "{{count}} یونٹ",
+    "page_title": "ایکسپائرڈ اسٹاک کی فروختیں",
+    "page_subtitle": "ایسی پچھلی فروختیں جو ایکسپائر شدہ بیچز سے ہوئیں۔",
+    "empty": "ابھی تک کوئی ایکسپائرڈ اسٹاک فروخت ریکارڈ نہیں ہوئی۔",
+    "col_date": "تاریخ",
+    "col_invoice": "فروخت",
+    "col_product": "مصنوع",
+    "col_qty": "مقدار",
+    "col_days_expired": "فروخت کے وقت ایکسپائر دن"
   }
 }

@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
 import Box from '@mui/material/Box'
+import Checkbox from '@mui/material/Checkbox'
 import Divider from '@mui/material/Divider'
+import FormControl from '@mui/material/FormControl'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Radio from '@mui/material/Radio'
+import RadioGroup from '@mui/material/RadioGroup'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
@@ -12,7 +17,10 @@ import { PageHeader } from 'src/components/layout'
 import { paths } from 'src/paths'
 import {
   useShopAlertDefaults,
-  useUpdateShopAlertDefaults
+  useShopExpiredSaleSettings,
+  useUpdateShopAlertDefaults,
+  useUpdateShopExpiredSaleSettings,
+  type ExpiredSalePolicy
 } from 'src/features/batches/hooks'
 import { useNotifier } from 'src/components/notistack/NotificationProvider'
 
@@ -28,8 +36,12 @@ export default function SettingsPage() {
   const notify = useNotifier()
   const alertDefaults = useShopAlertDefaults()
   const updateDefaults = useUpdateShopAlertDefaults()
+  const expiredSaleSettings = useShopExpiredSaleSettings()
+  const updateExpiredSale = useUpdateShopExpiredSaleSettings()
   const [expiryDays, setExpiryDays] = useState<string>('30')
   const [warrantyDays, setWarrantyDays] = useState<string>('30')
+  const [policy, setPolicy] = useState<ExpiredSalePolicy>('warn')
+  const [disclaimer, setDisclaimer] = useState<boolean>(false)
 
   useEffect(() => {
     if (alertDefaults.data) {
@@ -37,6 +49,13 @@ export default function SettingsPage() {
       setWarrantyDays(String(alertDefaults.data.default_warranty_alert_days))
     }
   }, [alertDefaults.data])
+
+  useEffect(() => {
+    if (expiredSaleSettings.data) {
+      setPolicy(expiredSaleSettings.data.default_expired_sale_policy)
+      setDisclaimer(expiredSaleSettings.data.expired_sale_receipt_disclaimer)
+    }
+  }, [expiredSaleSettings.data])
 
   const saveAlertDefaults = async () => {
     const e = Number(expiryDays)
@@ -53,6 +72,18 @@ export default function SettingsPage() {
       notify.success(t('batches:settings.saved'))
     } catch {
       notify.error(t('batches:settings.save_failed'))
+    }
+  }
+
+  const saveExpiredSaleSettings = async () => {
+    try {
+      await updateExpiredSale.mutateAsync({
+        default_expired_sale_policy: policy,
+        expired_sale_receipt_disclaimer: disclaimer
+      })
+      notify.success(t('batches:expired_sales.saved'))
+    } catch {
+      notify.error(t('batches:expired_sales.save_failed'))
     }
   }
 
@@ -148,6 +179,79 @@ export default function SettingsPage() {
                 loading={updateDefaults.isPending}
               >
                 {t('batches:settings.save')}
+              </Button>
+            </Box>
+          </Stack>
+
+          {/* v2.8.4 — shop-level expired-sale policy + opt-in receipt disclaimer. */}
+          <Divider />
+          <Stack spacing={1.5}>
+            <Box>
+              <Typography variant='body1' sx={{ fontWeight: 600 }}>
+                {t('batches:expired_sales.section_title')}
+              </Typography>
+              <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
+                {t('batches:expired_sales.section_subtitle')}
+              </Typography>
+            </Box>
+            <FormControl>
+              <Typography
+                variant='body2'
+                sx={{ mb: 0.5, color: 'var(--text-muted)' }}
+              >
+                {t('batches:expired_sales.default_policy_label')}
+              </Typography>
+              <RadioGroup
+                value={policy}
+                onChange={(_, v) => setPolicy(v as ExpiredSalePolicy)}
+              >
+                <FormControlLabel
+                  value='block'
+                  control={<Radio size='small' />}
+                  label={t('batches:expired_sales.policy_block')}
+                />
+                <FormControlLabel
+                  value='warn'
+                  control={<Radio size='small' />}
+                  label={t('batches:expired_sales.policy_warn')}
+                />
+                <FormControlLabel
+                  value='allow'
+                  control={<Radio size='small' />}
+                  label={t('batches:expired_sales.policy_allow')}
+                />
+              </RadioGroup>
+            </FormControl>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size='small'
+                  checked={disclaimer}
+                  onChange={(_, v) => setDisclaimer(v)}
+                />
+              }
+              label={
+                <Box>
+                  <Typography variant='body2'>
+                    {t('batches:expired_sales.receipt_disclaimer_label')}
+                  </Typography>
+                  <Typography
+                    variant='caption'
+                    sx={{ color: 'var(--text-muted)' }}
+                  >
+                    {t('batches:expired_sales.receipt_disclaimer_help')}
+                  </Typography>
+                </Box>
+              }
+            />
+            <Box>
+              <Button
+                variant='primary'
+                size='sm'
+                onClick={() => void saveExpiredSaleSettings()}
+                loading={updateExpiredSale.isPending}
+              >
+                {t('batches:expired_sales.save')}
               </Button>
             </Box>
           </Stack>

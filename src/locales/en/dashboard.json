@@ -51,5 +51,23 @@
     "expires_in_days_other": "expires in {{count}} days",
     "warranty_ends_in_days_one": "warranty ends in {{count}} day",
     "warranty_ends_in_days_other": "warranty ends in {{count}} days"
+  },
+  "expired_sales_widget": {
+    "title": "Recent expired-stock sales",
+    "summary_one": "Last 30 days: {{count}} sale drew from expired batches",
+    "summary_other": "Last 30 days: {{count}} sales drew from expired batches",
+    "view_all": "View all",
+    "row_expired_days_one": "expired {{count}} day at sale time",
+    "row_expired_days_other": "expired {{count}} days at sale time",
+    "row_units_one": "{{count}} unit",
+    "row_units_other": "{{count}} units",
+    "page_title": "Expired-stock sales",
+    "page_subtitle": "Past sales that drew from batches already past their expiry date.",
+    "empty": "No expired-stock sales recorded yet.",
+    "col_date": "Date",
+    "col_invoice": "Sale",
+    "col_product": "Product",
+    "col_qty": "Qty",
+    "col_days_expired": "Days expired at sale"
   }
 }

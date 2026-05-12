@@ -224,6 +224,8 @@ Full version history is in `docs/build-trail.md` — load when you need long-for
 - **v2.8.1** — pricing/stock decoupled from product creation
 - **v2.8.2** — partial write-off + auto-deactivate when empty
 - **v2.8.3** — expired-stock + null-price visibility surfaces
+- **v2.8.4** — expired-sale policy enforcement (block/warn/allow), shop default + per-product override; `record_sale` refuses or requires explicit cashier confirmation; `sale_items.sold_expired` snapshot + opt-in receipt disclaimer + audit widget at `/inventory/expired-sales`
+- **v2.8.5** — POS "Pick batch" cart-line manual-override UI; `search_products` returns `has_batches` + `default_variant_id`; cart-line EXPIRED indicator on picked-expired batches
 
 ## Open ToDos / Known gaps
 

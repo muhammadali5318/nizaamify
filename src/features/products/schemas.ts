@@ -6,6 +6,11 @@ const optionalPositiveInt = z
   .union([z.number().int().positive(), z.null()])
   .nullable()
 
+/** v2.8.4: per-product expired-sale policy override; null = use shop default. */
+const expiredSalePolicyEnum = z
+  .union([z.enum(['block', 'warn', 'allow']), z.null()])
+  .nullable()
+
 export const createProductSchema = (t: TFunction) =>
   z.object({
     name: z.string().min(1, t('products:errors.name_required')).max(200),
@@ -27,7 +32,8 @@ export const createProductSchema = (t: TFunction) =>
     is_scan_only: z.boolean().default(false),
     has_batches: z.boolean().default(false),
     expiry_alert_days: optionalPositiveInt.optional(),
-    warranty_alert_days: optionalPositiveInt.optional()
+    warranty_alert_days: optionalPositiveInt.optional(),
+    expired_sale_policy: expiredSalePolicyEnum.optional()
   })
 
 export const editProductSchema = (t: TFunction) =>
@@ -53,7 +59,8 @@ export const editProductSchema = (t: TFunction) =>
     is_scan_only: z.boolean().default(false),
     has_batches: z.boolean().default(false),
     expiry_alert_days: optionalPositiveInt.optional(),
-    warranty_alert_days: optionalPositiveInt.optional()
+    warranty_alert_days: optionalPositiveInt.optional(),
+    expired_sale_policy: expiredSalePolicyEnum.optional()
   })
 
 export type CreateProductValues = z.infer<

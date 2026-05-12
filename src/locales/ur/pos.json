@@ -46,15 +46,18 @@
     "was_price": "پہلے {{price}}",
     "below_avg_cost_warning": "اوسط لاگت سے کم — نقصان پر فروخت۔",
     "batch_label": "بیچ",
-    "batch_oldest": "سب سے پرانا",
+    "batch_oldest": "خودکار انتخاب",
     "batch_selected": "منتخب",
+    "batch_next_up": "یہ استعمال ہوگا",
+    "batch_auto_hint": "خودکار انتخاب وہ بیچ منتخب کرتا ہے جس کی ایکسپائری سب سے قریب ہے، تاکہ پرانا اسٹاک پہلے فروخت ہو۔",
     "pick_batch": "بیچ منتخب کریں",
-    "reset_to_fefo": "FEFO پر واپس کریں",
+    "reset_to_fefo": "خودکار پر واپس کریں",
     "stock_remaining": "اسٹاک: {{count}} باقی",
     "remove_line": "ہٹائیں",
     "quick_add_each": "+1 {{unitName}}",
     "quick_add_pack": "+1 {{unitName}} ({{baseQty}})",
-    "scan_only_help": "صرف اسکین — پیک بٹن استعمال کریں"
+    "scan_only_help": "صرف اسکین — پیک بٹن استعمال کریں",
+    "batch_expired_label": "ایکسپائرڈ"
   },
   "payment": {
     "title": "ادائیگی",
@@ -153,5 +156,21 @@
   },
   "messages": {
     "saved": "فروخت مکمل ہو گئی"
+  },
+  "expired_sale": {
+    "block_dialog_title": "فروخت مکمل نہیں ہو سکتی — ایکسپائرڈ اسٹاک",
+    "block_dialog_body": "درج ذیل مصنوعات کا صرف ایکسپائرڈ اسٹاک دستیاب ہے:",
+    "block_dialog_action_open": "مصنوع کھولیں",
+    "block_dialog_action_cancel": "منسوخ کریں",
+    "block_dialog_writeoff_hint": "اس شاپ کی پالیسی ان مصنوعات کے ایکسپائرڈ اسٹاک کی فروخت کو بلاک کرتی ہے۔ پہلے ایکسپائرڈ بیچز کو رائٹ-آف کریں، پھر دوبارہ اسٹاک کریں۔",
+    "warn_dialog_title": "ایکسپائرڈ اسٹاک کی فروخت کی تصدیق کریں",
+    "warn_dialog_body": "درج ذیل مصنوعات ایکسپائرڈ اسٹاک سے نکالی جائیں گی:",
+    "warn_dialog_continue": "جی ہاں، فروخت مکمل کریں",
+    "warn_dialog_cancel": "منسوخ کریں",
+    "expired_days_ago_one": "{{count}} دن پہلے ایکسپائر",
+    "expired_days_ago_other": "{{count}} دن پہلے ایکسپائر",
+    "units_summary_one": "{{count}} یونٹ",
+    "units_summary_other": "{{count}} یونٹ",
+    "manual_override_expired": "منتخب کردہ بیچ ایکسپائرڈ ہے"
   }
 }

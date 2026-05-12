@@ -94,6 +94,13 @@ export function useRecordPurchase() {
       void qc.invalidateQueries({ queryKey: ['purchases'] })
       void qc.invalidateQueries({ queryKey: ['purchase'] })
       void qc.invalidateQueries({ queryKey: ['products'] })
+      // v2.8.5: same stale-cache fix as useRecordSale — purchases mint new
+      // batches and bump qty_remaining on existing ones; the product detail
+      // page and POS batch picker both need to see the new state without
+      // a hard reload.
+      void qc.invalidateQueries({ queryKey: ['product'] })
+      void qc.invalidateQueries({ queryKey: ['batches'] })
+      void qc.invalidateQueries({ queryKey: ['alerts'] })
     }
   })
 }

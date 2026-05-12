@@ -36,6 +36,9 @@ type Props = {
   amountPaid: number
   onCredit: number
   notes?: string
+  /** v2.8.4: render the expired-stock disclaimer footer. Caller decides
+   *  (shop opt-in × any sold_expired line). */
+  showExpiredDisclaimer?: boolean
 }
 
 const paymentBadgeVariant: Record<ReceiptPaymentType, BadgeVariant> = {
@@ -57,9 +60,10 @@ export default function Receipt({
   total,
   amountPaid,
   onCredit,
-  notes
+  notes,
+  showExpiredDisclaimer
 }: Props) {
-  const { t, i18n } = useTranslation(['pos', 'common'])
+  const { t, i18n } = useTranslation(['pos', 'common', 'sales'])
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
 
   const subtotal = lines.reduce((s, ln) => s + ln.qty * ln.price, 0)
@@ -250,6 +254,24 @@ export default function Receipt({
           label={summaryLabel}
         />
       </Box>
+
+      {showExpiredDisclaimer && (
+        <Box
+          sx={{
+            mt: 2,
+            p: 1.5,
+            border: '1px solid var(--status-warning-text)',
+            borderRadius: 'var(--radius)'
+          }}
+        >
+          <Typography
+            variant='caption'
+            sx={{ color: 'var(--status-warning-text)', display: 'block' }}
+          >
+            {t('sales:detail.receipt_disclaimer_default')}
+          </Typography>
+        </Box>
+      )}
     </Dialog>
   )
 }

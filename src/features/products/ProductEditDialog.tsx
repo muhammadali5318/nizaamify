@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import Stack from '@mui/material/Stack'
 import FormControlLabel from '@mui/material/FormControlLabel'
+import FormControl from '@mui/material/FormControl'
+import Radio from '@mui/material/Radio'
+import RadioGroup from '@mui/material/RadioGroup'
 import Switch from '@mui/material/Switch'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -18,8 +21,13 @@ import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
 import { editProductSchema, type EditProductValues } from './schemas'
 import { useUpdateProduct, type Product } from './hooks'
-import { useShopAlertDefaults } from 'src/features/batches/hooks'
+import {
+  useShopAlertDefaults,
+  useShopExpiredSaleSettings
+} from 'src/features/batches/hooks'
 import CategoryCombobox from './CategoryCombobox'
+
+type PolicyRadioValue = 'default' | 'block' | 'warn' | 'allow'
 
 type SupabaseLikeError = {
   code?: string
@@ -52,6 +60,7 @@ export default function ProductEditDialog({
   const notify = useNotifier()
   const update = useUpdateProduct()
   const { data: shopDefaults } = useShopAlertDefaults()
+  const { data: shopExpiredSettings } = useShopExpiredSaleSettings()
   const [duplicateError, setDuplicateError] = useState(false)
   const [batchToggleError, setBatchToggleError] = useState<string | null>(null)
 
@@ -73,7 +82,8 @@ export default function ProductEditDialog({
       is_scan_only: false,
       has_batches: false,
       expiry_alert_days: null,
-      warranty_alert_days: null
+      warranty_alert_days: null,
+      expired_sale_policy: null
     }
   })
 
@@ -90,7 +100,10 @@ export default function ProductEditDialog({
         is_scan_only: product.is_scan_only ?? false,
         has_batches: product.has_batches ?? false,
         expiry_alert_days: product.expiry_alert_days ?? null,
-        warranty_alert_days: product.warranty_alert_days ?? null
+        warranty_alert_days: product.warranty_alert_days ?? null,
+        expired_sale_policy:
+          (product.expired_sale_policy as 'block' | 'warn' | 'allow' | null) ??
+          null
       })
       setDuplicateError(false)
       setBatchToggleError(null)
@@ -112,7 +125,8 @@ export default function ProductEditDialog({
         is_scan_only: values.is_scan_only,
         has_batches: values.has_batches,
         expiry_alert_days: values.expiry_alert_days,
-        warranty_alert_days: values.warranty_alert_days
+        warranty_alert_days: values.warranty_alert_days,
+        expired_sale_policy: values.expired_sale_policy ?? null
       })
       notify.success(t('products:messages.saved'))
       onSaved?.()
@@ -314,6 +328,119 @@ export default function ProductEditDialog({
                       />
                     </Field>
                   )}
+                />
+
+                {/* v2.8.4 — per-product expired-sale policy override.
+                 * null = use shop default; explicit enum overrides. */}
+                <Controller
+                  control={control}
+                  name='expired_sale_policy'
+                  render={({ field }) => {
+                    const shopPolicy =
+                      shopExpiredSettings?.default_expired_sale_policy ?? 'warn'
+                    const radioValue: PolicyRadioValue =
+                      field.value === null || field.value === undefined
+                        ? 'default'
+                        : (field.value as 'block' | 'warn' | 'allow')
+                    return (
+                      <FormControl>
+                        <Typography
+                          variant='body2'
+                          sx={{ mb: 0.5, fontWeight: 600 }}
+                        >
+                          {t(
+                            'products:inventory_behavior.expired_sale_policy.label'
+                          )}
+                        </Typography>
+                        <RadioGroup
+                          value={radioValue}
+                          onChange={(_, v) => {
+                            field.onChange(
+                              v === 'default'
+                                ? null
+                                : (v as 'block' | 'warn' | 'allow')
+                            )
+                          }}
+                        >
+                          <FormControlLabel
+                            value='default'
+                            control={<Radio size='small' />}
+                            label={t(
+                              'products:inventory_behavior.expired_sale_policy.use_shop_default',
+                              {
+                                policy: t(
+                                  `products:inventory_behavior.expired_sale_policy.${shopPolicy}`
+                                )
+                              }
+                            )}
+                          />
+                          <FormControlLabel
+                            value='block'
+                            control={<Radio size='small' />}
+                            label={
+                              <Stack spacing={0}>
+                                <Typography variant='body2'>
+                                  {t(
+                                    'products:inventory_behavior.expired_sale_policy.block'
+                                  )}
+                                </Typography>
+                                <Typography
+                                  variant='caption'
+                                  sx={{ color: 'var(--text-muted)' }}
+                                >
+                                  {t(
+                                    'products:inventory_behavior.expired_sale_policy.block_help'
+                                  )}
+                                </Typography>
+                              </Stack>
+                            }
+                          />
+                          <FormControlLabel
+                            value='warn'
+                            control={<Radio size='small' />}
+                            label={
+                              <Stack spacing={0}>
+                                <Typography variant='body2'>
+                                  {t(
+                                    'products:inventory_behavior.expired_sale_policy.warn'
+                                  )}
+                                </Typography>
+                                <Typography
+                                  variant='caption'
+                                  sx={{ color: 'var(--text-muted)' }}
+                                >
+                                  {t(
+                                    'products:inventory_behavior.expired_sale_policy.warn_help'
+                                  )}
+                                </Typography>
+                              </Stack>
+                            }
+                          />
+                          <FormControlLabel
+                            value='allow'
+                            control={<Radio size='small' />}
+                            label={
+                              <Stack spacing={0}>
+                                <Typography variant='body2'>
+                                  {t(
+                                    'products:inventory_behavior.expired_sale_policy.allow'
+                                  )}
+                                </Typography>
+                                <Typography
+                                  variant='caption'
+                                  sx={{ color: 'var(--text-muted)' }}
+                                >
+                                  {t(
+                                    'products:inventory_behavior.expired_sale_policy.allow_help'
+                                  )}
+                                </Typography>
+                              </Stack>
+                            }
+                          />
+                        </RadioGroup>
+                      </FormControl>
+                    )
+                  }}
                 />
               </Stack>
             )}

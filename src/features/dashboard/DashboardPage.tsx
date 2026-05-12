@@ -16,6 +16,7 @@ import { Button, Card, Spinner } from 'src/components/ui'
 import { PageHeader } from 'src/components/layout'
 import InventoryAlertsWidget from 'src/features/batches/InventoryAlertsWidget'
 import ExpiredStockWidget from 'src/features/batches/ExpiredStockWidget'
+import ExpiredSalesWidget from 'src/features/sales/ExpiredSalesWidget'
 
 function StatCard({
   label,
@@ -229,6 +230,10 @@ export default function DashboardPage() {
          *  batches exist. Sits below the v2.8 alerts to keep severity
          *  ordering "preventive (amber) → corrective (red)". */}
         <ExpiredStockWidget />
+
+        {/* v2.8.4 expired-stock sales — historical audit, opt-out by zero
+         *  occurrences. Auto-hides when the count is zero. */}
+        <ExpiredSalesWidget />
       </Stack>
     </Box>
   )

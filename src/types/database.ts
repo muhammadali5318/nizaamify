@@ -887,6 +887,9 @@ export type Database = {
           cost: number
           created_at: string
           description: string | null
+          expired_sale_policy:
+            | Database['public']['Enums']['expired_sale_policy']
+            | null
           expiry_alert_days: number | null
           has_batches: boolean
           has_variants: boolean
@@ -909,6 +912,9 @@ export type Database = {
           cost: number
           created_at?: string
           description?: string | null
+          expired_sale_policy?:
+            | Database['public']['Enums']['expired_sale_policy']
+            | null
           expiry_alert_days?: number | null
           has_batches?: boolean
           has_variants?: boolean
@@ -931,6 +937,9 @@ export type Database = {
           cost?: number
           created_at?: string
           description?: string | null
+          expired_sale_policy?:
+            | Database['public']['Enums']['expired_sale_policy']
+            | null
           expiry_alert_days?: number | null
           has_batches?: boolean
           has_variants?: boolean
@@ -1306,6 +1315,7 @@ export type Database = {
           price_at_sale: number
           product_id: string
           qty: number
+          sold_expired: boolean
           variant_id: string
         }
         Insert: {
@@ -1319,6 +1329,7 @@ export type Database = {
           price_at_sale: number
           product_id: string
           qty: number
+          sold_expired?: boolean
           variant_id: string
         }
         Update: {
@@ -1332,6 +1343,7 @@ export type Database = {
           price_at_sale?: number
           product_id?: string
           qty?: number
+          sold_expired?: boolean
           variant_id?: string
         }
         Relationships: [
@@ -1528,8 +1540,10 @@ export type Database = {
       shops: {
         Row: {
           created_at: string
+          default_expired_sale_policy: Database['public']['Enums']['expired_sale_policy']
           default_expiry_alert_days: number
           default_warranty_alert_days: number
+          expired_sale_receipt_disclaimer: boolean
           id: string
           owner_user_id: string
           shop_address: string
@@ -1540,8 +1554,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          default_expired_sale_policy?: Database['public']['Enums']['expired_sale_policy']
           default_expiry_alert_days?: number
           default_warranty_alert_days?: number
+          expired_sale_receipt_disclaimer?: boolean
           id?: string
           owner_user_id: string
           shop_address: string
@@ -1552,8 +1568,10 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          default_expired_sale_policy?: Database['public']['Enums']['expired_sale_policy']
           default_expiry_alert_days?: number
           default_warranty_alert_days?: number
+          expired_sale_receipt_disclaimer?: boolean
           id?: string
           owner_user_id?: string
           shop_address?: string
@@ -2223,6 +2241,7 @@ export type Database = {
           category_id: string | null
           cost: number | null
           description: string | null
+          has_batches: boolean | null
           has_null_price_variant: boolean | null
           has_variants: boolean | null
           is_scan_only: boolean | null
@@ -2761,6 +2780,15 @@ export type Database = {
         }[]
       }
       normalize_product_text: { Args: { s: string }; Returns: string }
+      preflight_expired_sale_check: {
+        Args: { p_items?: Json }
+        Returns: {
+          expired_batch_ids: string[]
+          policy: Database['public']['Enums']['expired_sale_policy']
+          variant_id: string
+          would_draw_expired: boolean
+        }[]
+      }
       receive_payment: {
         Args: { p_amount: number; p_customer_id: string; p_notes?: string }
         Returns: string
@@ -2814,6 +2842,7 @@ export type Database = {
       record_sale: {
         Args: {
           p_amount_paid?: number
+          p_confirm_expired_sale?: boolean
           p_customer_id?: string
           p_items?: Json
           p_notes?: string
@@ -2868,7 +2897,9 @@ export type Database = {
         Returns: {
           avg_cost: number
           category_id: string
+          default_variant_id: string
           description: string
+          has_batches: boolean
           has_null_price_variant: boolean
           has_variants: boolean
           id: string
@@ -2992,6 +3023,7 @@ export type Database = {
       }
     }
     Enums: {
+      expired_sale_policy: 'block' | 'warn' | 'allow'
       subscription_status: 'trial' | 'active' | 'expired' | 'suspended'
     }
     CompositeTypes: {
@@ -3120,6 +3152,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      expired_sale_policy: ['block', 'warn', 'allow'],
       subscription_status: ['trial', 'active', 'expired', 'suspended']
     }
   }

@@ -392,3 +392,83 @@ Per `MVP_v2.8.3_VISIBILITY_FIXES.md`. Two visibility surfaces, one migration, no
 - ✅ All prior audits still zero (v2.6 §6, v2.6c, v2.8, v2.8.1, v2.8.2). New v2.8.3 audit (§1.6) returns 0.
 - ✅ Type-check + lint + build green.
 - 🟦 Spec §6 manual smoke matrix — code-level checks green; live-data walkthrough is a human task.
+
+## v2.8.4 — Expired sale policy enforcement — 2026-05-13
+
+Per `MVP_v2.8.4_EXPIRED_SALE_POLICY.md`. Closes the v2.8.3 visibility-vs-prevention gap. Two migrations (0064 schema, 0065 RPC rewrites), zero data rewrites.
+
+### Phase A — Discovery
+- ✅ CLAUDE.md, v2.8 spec, v2.8.1–v2.8.3 specs and ADRs surveyed.
+- ✅ Current `record_sale` body inspected (migration 0058 §C); FEFO walk + manual-override branch noted.
+- ✅ `sale_items_no_modify` trigger (migration 0020 §B) confirmed as a blanket reject — `sold_expired` is automatically immutable; no new trigger logic needed.
+- ✅ Spec ambiguity in §3.3 pre-flight (would naively flag non-batched products as expired) resolved by gating on `products.has_batches = true` before any batch math.
+- ✅ FEFO Pass 2 ordering ("least-expired first") interpreted as `ORDER BY expiry_date DESC` (largest past date = closest to today = least-expired).
+
+### Phase B — Schema migration (0064)
+- ✅ `expired_sale_policy` enum `('block', 'warn', 'allow')` guarded by `do $$ ... exception when duplicate_object`.
+- ✅ `shops.default_expired_sale_policy` NOT NULL DEFAULT `'warn'`.
+- ✅ `shops.expired_sale_receipt_disclaimer` NOT NULL DEFAULT `false`.
+- ✅ `products.expired_sale_policy` nullable (null = use shop default via `coalesce(...)`).
+- ✅ `sale_items.sold_expired` NOT NULL DEFAULT `false` + partial index `(sold_expired) WHERE sold_expired`.
+- ✅ Generated TS types regenerated; advisors clean (only the documented `security_definer_view`, `auth_leaked_password_protection`, and `authenticated_security_definer_function_executable` warnings per ADR-0011).
+
+### Phase C — Backend RPCs (0065)
+- ✅ `record_sale` DROP + CREATE with appended `p_confirm_expired_sale boolean default false` parameter. Effective policy resolved per cart line via `coalesce(p.expired_sale_policy, shop.default_expired_sale_policy, 'warn')`.
+- ✅ Manual-batch override path: computes `v_batch_expired`; `block` raises `expired_stock_blocked`; `warn` without confirmation raises `expired_stock_needs_confirmation`; `warn` with confirmation sets `sold_expired = true`; `allow` sets `sold_expired = v_batch_expired`.
+- ✅ FEFO `allow` branch: single pass over the unfiltered candidate list; per-chunk `sold_expired = (batch.expiry_date IS NOT NULL AND batch.expiry_date < current_date)`.
+- ✅ FEFO non-`allow` branch: Pass 1 over non-expired (`expiry_date IS NULL OR expiry_date >= current_date`, ASC by expiry) with `sold_expired = false`; on shortfall, `block` raises `insufficient_non_expired_stock`, `warn` without confirmation raises `expired_stock_needs_confirmation`, `warn` with confirmation runs Pass 2 over expired batches `ORDER BY expiry_date DESC` with `sold_expired = true`.
+- ✅ `sale_items` inserts include `sold_expired` from a parallel `v_sold_expired_arr boolean[]` array.
+- ✅ New `preflight_expired_sale_check(p_items jsonb)` returns `(variant_id, would_draw_expired, expired_batch_ids, policy)` — gated on `products.has_batches = true`; non-batched items return `would_draw_expired = false`. FEFO path sums non-expired stock vs requested qty; manual-override path checks the specific batch's expiry.
+- ✅ Grants: `revoke from public, anon; grant to authenticated` on both new function signatures.
+
+### Phase D — Frontend
+- ✅ Settings page (`SettingsPage.tsx`): new "Expired stock sales" subsection with `RadioGroup` for default policy + Checkbox for receipt disclaimer. New hooks `useShopExpiredSaleSettings` + `useUpdateShopExpiredSaleSettings`.
+- ✅ Product edit dialog (`ProductEditDialog.tsx`): per-product policy radio inside the "Inventory behavior" section, visible only when `has_batches = true`. "Use shop default (currently: X)" + Block / Warn / Allow with help text. Wired through extended `UpdateProductInput.expired_sale_policy`.
+- ✅ Zod schemas (`schemas.ts`): `expired_sale_policy` optional enum + null on both create and edit schemas.
+- ✅ POS submit flow (`POSPage.tsx`): preflight RPC called before `record_sale`; rows with `would_draw_expired = true` route to `BlockedExpiredSaleDialog` (any `policy='block'`) or `ConfirmExpiredSaleDialog` (any `policy='warn'`). Block-first ordering. Block "Open product" navigates to product detail; warn "Yes, complete sale" forwards `confirm_expired_sale = true` to `record_sale`.
+- ✅ Error mapping: `expired_stock_blocked` and `insufficient_non_expired_stock` surface the block-style banner; `expired_stock_needs_confirmation` re-opens the warn dialog (race protection).
+- ✅ Receipt (`Receipt.tsx`): new `showExpiredDisclaimer` prop. POSPage computes it from `shop.expired_sale_receipt_disclaimer` AND a post-`record_sale` count query on `sale_items.sold_expired = true`.
+- ✅ Sale detail (`SaleDetailPage.tsx`): "Expired stock" `Badge` (error variant) inline with the product name when `sold_expired = true`. `useSale` hook widened to select `sold_expired` from `sale_items`.
+- ✅ `ExpiredSalesWidget` mounted on DashboardPage below `ExpiredStockWidget`. Hides when count = 0. Per-row click navigates to sale detail. "View all" links to the audit route when count > 5.
+- ✅ `ExpiredSalesListPage` at `/inventory/expired-sales` (`paths.expiredSales` + router wiring). Full DataTable with date, sale, product, qty, days-expired-at-sale columns.
+- ✅ Cart EXPIRED indicator (spec §4.4) — applies only to manually-picked batches, which POS doesn't ship yet (per `docs/todos.md` v2.8 polish line). No-op for v2.8.4.
+- ✅ i18n keys (en + ur): `products:inventory_behavior.expired_sale_policy.*`, `batches:expired_sales.*`, `pos:expired_sale.*` + `pos:cart.batch_expired_label`, `sales:detail.sold_expired_badge` + `sales:detail.receipt_disclaimer_default`, `dashboard:expired_sales_widget.*`.
+
+### Phase E — Verification
+- ✅ 5 ADRs filed: `2026-05-13-expired-sale-policy-three-modes`, `2026-05-13-warn-as-default-policy`, `2026-05-13-preflight-rpc-for-expired-stock-check`, `2026-05-13-sold-expired-flag-snapshotted-not-derived`, `2026-05-13-receipt-disclaimer-opt-in`.
+- ✅ Type-check + lint + build green.
+- ✅ No new audit query needed — `sold_expired` is snapshot truth with no derivable invariant; all prior audits remain zero.
+- ✅ CLAUDE.md, `docs/build-trail.md`, `docs/gotchas.md` (6 new gotchas), `docs/todos.md` (2 deferred items + verification debt entry) updated.
+- 🟦 Spec §6 manual smoke matrix (cases 6.1–6.19) — code-level checks green; live-data walkthrough is a human task.
+
+## v2.8.5 — POS Pick batch picker — 2026-05-13
+
+Unblocked by v2.8.4. Ships the manual-override UI deferred from v2.8 §4.4 so spec §6.9 / §6.10 can be exercised from the POS instead of the SQL editor.
+
+### Phase A — Backend (migration 0067)
+- ✅ `product_with_default_variant` view gains `has_batches` (appended — Postgres views can't insert columns mid-list under CREATE OR REPLACE).
+- ✅ `search_products` RETURNS TABLE gains `has_batches boolean` + `default_variant_id uuid` via DROP + CREATE for the signature change.
+- ✅ Re-grant (`revoke from public, anon; grant to authenticated`).
+- ✅ TS types regenerated.
+
+### Phase B — Frontend
+- ✅ `ProductSearchRow` widened with `has_batches` + `default_variant_id`.
+- ✅ `CartItem` gains `has_batches`, `resolved_variant_id`, `batch_id`, `batch_no`, `batch_expiry_date`. `AddItem` type updated.
+- ✅ New cart reducer actions `set_batch` + `clear_batch`. `add` initializer sets batch fields to null.
+- ✅ `buildItemsPayload()` + preflight items mapping conditionally include `batch_id` when set.
+- ✅ `handleAddProduct`, `handleAddVariant`, `handleAddProductById` all populate `has_batches` + `resolved_variant_id` on the cart line. Fallback path queries `product_with_default_variant` view instead of `products` so the new fields come through.
+- ✅ New `PosBatchPicker.tsx` — Dialog wrapper; lists `useActiveBatchesForVariant` rows; EXPIRED red badge on past-expiry; brand badge on the selected row; insufficient-qty rows dimmed + click-disabled; "Reset to FEFO" footer action.
+- ✅ CartPanel local state `batchPickerForKey` tracks which line's picker is open; single `<PosBatchPicker>` mounted at the bottom of the cart list. Per-line "Pick batch" / "Reset to FEFO" link row renders only when `has_batches = true`. Picked batch_no + expiry badge inline on the cart line.
+
+### Phase C — Verification
+- ✅ Type-check + lint + build green.
+- ✅ ADR `2026-05-13-pos-batch-picker-ships-as-v285-polish` filed.
+- ✅ CLAUDE.md / build-trail / gotchas / todos updated.
+- 🟦 Manual smoke: rerun v2.8.4 §6.9 (warn override expired → confirm) and §6.10 (block override expired → reject) via the POS UI; verify cart-line EXPIRED badge, picker dialog, Reset to auto-pick. Live-data walkthrough is a human task.
+
+### Phase D — UX polish (post-shipping feedback)
+- ✅ Picker highlights the auto-pick row when no manual override is active — brand-bordered row + "Will be used" `Badge` + an info `Banner` at the top of the picker explaining "Auto-pick uses the batch closest to its expiry date so older stock leaves first."
+- ✅ Dropped all user-facing "FEFO" / "oldest" wording. Now "auto-pick" (en) / "خودکار انتخاب" (ur). New i18n keys: `pos:cart.batch_next_up`, `pos:cart.batch_auto_hint`, `batches:indicators.next_up`, `batches:indicators.auto_hint`. Reset action now reads "Reset to auto-pick" / "Use auto-pick" depending on context.
+- ✅ Insufficient-stock card layout fix in `PosBatchPicker`: switched the two-column row layout to a vertical stack (batch_no + badges row, then meta row, then full-width hint). Hint text rewritten in plain language with `{available}` / `{needed}` interpolation and a soft red-tinted background; new key `batches:errors.selected_batch_insufficient_long`.
+- ✅ Cache-invalidation fix: `useRecordSale` + `useRecordPurchase` now invalidate `['product']` (singular), `['batches']`, and `['alerts']` on success — without these the POS batch picker, product-detail page, and dashboard alert widgets all showed stale qty_remaining until a hard reload. Gotcha added to `docs/gotchas.md` so future RPC hooks that mutate stock or batches follow the same pattern.
+- ✅ Gotchas updated: future contributors won't reintroduce "FEFO" in visible strings, and the auto-pick highlight is documented as purely visual (no auto-dispatch on render).
