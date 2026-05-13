@@ -605,8 +605,10 @@ aq05 as (
   -- an `access_revoked` audit row for the shop is history, not an
   -- orphan. The check still catches the real failure mode: a cashier_id
   -- with neither a current membership row nor any audit lineage.
-  -- TODO(v2.10): when soft-delete lands, drop the audit-exception clause
-  -- in favor of a usa.is_active=false read.
+  -- TODO(v2.10): replace audit-row exception with usa.is_active=false
+  -- check after soft-delete refactor ships as part of contacts
+  -- unification (Phase A). The audit-history clause is the bridge
+  -- until then.
   select count(*) as n from (
     select i.id, i.cashier_id, i.shop_id
       from public.invoices i
