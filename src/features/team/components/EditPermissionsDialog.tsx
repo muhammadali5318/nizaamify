@@ -40,6 +40,7 @@ import {
   useUserPermissions,
   type CatalogRow
 } from 'src/features/team/hooks'
+import { sortPermissionsForSave } from 'src/features/team/permissionSaveOrder'
 import { mapErrorToI18nKey } from 'src/lib/errorMap'
 
 type PermState = Record<string, boolean>
@@ -182,9 +183,13 @@ export function EditPermissionsDialog({
   const handleSave = async () => {
     if (!member || dirtyKeys.length === 0) return
     setError(null)
-    setSavingTotal(dirtyKeys.length)
-    for (let i = 0; i < dirtyKeys.length; i++) {
-      const key = dirtyKeys[i]
+    // Order: revokes (dependent → dependency) then grants (prereq → dependent),
+    // so each per-key call is consistent with current DB state. See
+    // src/features/team/permissionSaveOrder.ts.
+    const orderedKeys = sortPermissionsForSave(dirtyKeys, state, catalog)
+    setSavingTotal(orderedKeys.length)
+    for (let i = 0; i < orderedKeys.length; i++) {
+      const key = orderedKeys[i]
       setSavingIndex(i)
       try {
         await modify.mutateAsync({
