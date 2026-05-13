@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router'
 import { paths } from 'src/paths'
 import { useSale } from './hooks'
 import { formatPKR } from 'src/features/subscription/env'
+import { usePermission } from 'src/lib/permissions'
 import {
   Badge,
   type BadgeVariant,
@@ -21,7 +22,10 @@ type SaleItem = {
   id: string
   qty: number
   price_at_sale: number | string
-  cost_at_sale: number | string
+  /** v2.10a: NULL when caller lacks view_sale_cost (column rendered only
+   *  when canViewSaleCost === true, so the runtime value is non-null
+   *  inside the gated column cells). */
+  cost_at_sale: number | string | null
   /** v2.2 line discount snapshot. */
   line_discount_type?: 'percent' | 'fixed' | null
   line_discount_value?: number | null
@@ -30,8 +34,10 @@ type SaleItem = {
   allocated_sale_discount: number | string
   line_value: number | string
   line_revenue: number | string
-  line_cost: number | string
-  line_profit: number | string
+  /** v2.10a: NULL when caller lacks view_sale_cost. */
+  line_cost: number | string | null
+  /** v2.10a: NULL when caller lacks view_sale_cost. */
+  line_profit: number | string | null
   product?: { name?: string } | null
 }
 
@@ -54,6 +60,18 @@ export default function SaleDetailPage() {
   const navigate = useNavigate()
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
   const { data: sale, isLoading, error } = useSale(id)
+  // v2.9.1 hot-patch — cost/profit columns gated on view_sale_cost.
+  // Migration 0091's permissive row-read policy admits salesperson row
+  // visibility but the cost columns are still on the row; HIDE them at
+  // the render layer per B.2 (CRUD = HIDE for cost-sensitive columns).
+  // view_profit_margin gates margin % displays — none exist on this page
+  // today (only line absolute-profit, which is view_sale_cost-gated).
+  //
+  // HOOKS ORDER: must be called BEFORE any early return below. React's
+  // rule-of-hooks panics on conditional ordering ("Rendered more hooks
+  // than during the previous render") if a useQuery hook fires on some
+  // renders but not others.
+  const canViewSaleCost = usePermission('view_sale_cost')
 
   if (isLoading) return <FullPageSpinner />
 
@@ -153,13 +171,18 @@ export default function SaleDetailPage() {
       align: 'end',
       cell: (it) => formatPKR(Number(it.price_at_sale), locale)
     },
-    {
-      id: 'unit_cost',
-      header: t('sales:detail.unit_cost'),
-      align: 'end',
-      hideOnMobile: true,
-      cell: (it) => formatPKR(Number(it.cost_at_sale), locale)
-    },
+    ...(canViewSaleCost
+      ? [
+          {
+            id: 'unit_cost',
+            header: t('sales:detail.unit_cost'),
+            align: 'end' as const,
+            hideOnMobile: true,
+            cell: (it: SaleItem) =>
+              formatPKR(Number(it.cost_at_sale ?? 0), locale)
+          }
+        ]
+      : []),
     {
       id: 'discount',
       header: t('sales:items.columns.discount'),
@@ -191,31 +214,35 @@ export default function SaleDetailPage() {
       // v2.6c: line_value = price*qty − line_discount, server-computed.
       cell: (it) => formatPKR(Number(it.line_value), locale)
     },
-    {
-      id: 'line_profit',
-      header: t('sales:detail.line_profit'),
-      align: 'end',
-      hideOnMobile: true,
-      cell: (it) => {
-        // v2.6b: single source of truth is sale_item_financials.line_profit.
-        // No display-side arithmetic — read the server's computed value.
-        const profit = Number(it.line_profit)
-        return (
-          <Box
-            component='span'
-            sx={{
-              color:
-                profit < 0
-                  ? 'var(--status-error-text)'
-                  : 'var(--status-success-text)',
-              fontWeight: 500
-            }}
-          >
-            {formatPKR(profit, locale)}
-          </Box>
-        )
-      }
-    }
+    ...(canViewSaleCost
+      ? [
+          {
+            id: 'line_profit',
+            header: t('sales:detail.line_profit'),
+            align: 'end' as const,
+            hideOnMobile: true,
+            cell: (it: SaleItem) => {
+              // v2.6b: single source of truth is sale_item_financials.line_profit.
+              // No display-side arithmetic — read the server's computed value.
+              const profit = Number(it.line_profit ?? 0)
+              return (
+                <Box
+                  component='span'
+                  sx={{
+                    color:
+                      profit < 0
+                        ? 'var(--status-error-text)'
+                        : 'var(--status-success-text)',
+                    fontWeight: 500
+                  }}
+                >
+                  {formatPKR(profit, locale)}
+                </Box>
+              )
+            }
+          }
+        ]
+      : [])
   ]
 
   const ledgerColumns: DataTableColumn<LedgerRow>[] = [
