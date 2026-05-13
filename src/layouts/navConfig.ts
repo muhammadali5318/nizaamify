@@ -11,8 +11,11 @@ import TrackChangesIcon from '@mui/icons-material/TrackChanges'
 import AssessmentIcon from '@mui/icons-material/Assessment'
 import SettingsIcon from '@mui/icons-material/Settings'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
+import PeopleAltIcon from '@mui/icons-material/PeopleAltOutlined'
 import { useTranslation } from 'react-i18next'
 import { paths } from 'src/paths'
+import { RBAC_TEAM_UI_ENABLED } from 'src/lib/featureFlags'
+import { usePermission } from 'src/lib/permissions'
 
 type NavItem = {
   to: string
@@ -27,6 +30,23 @@ type NavSection = {
 
 export function useNavSections(): NavSection[] {
   const { t } = useTranslation('common')
+  // Team entry gated on both the feature flag (B.9 pilot rollout) and the
+  // view_team permission. Owners on a pilot deploy see it; everyone else
+  // doesn't even know it exists.
+  const canViewTeam = usePermission('view_team')
+
+  const settingsItems: NavItem[] = [
+    { to: paths.settings, label: 'Settings', icon: SettingsIcon }
+  ]
+  if (RBAC_TEAM_UI_ENABLED && canViewTeam) {
+    settingsItems.push({ to: paths.team, label: 'Team', icon: PeopleAltIcon })
+  }
+  settingsItems.push({
+    to: paths.support,
+    label: 'Support',
+    icon: HelpOutlineIcon
+  })
+
   return [
     {
       title: t('app_tagline'),
@@ -46,10 +66,7 @@ export function useNavSections(): NavSection[] {
     },
     {
       title: 'Settings',
-      items: [
-        { to: paths.settings, label: 'Settings', icon: SettingsIcon },
-        { to: paths.support, label: 'Support', icon: HelpOutlineIcon }
-      ]
+      items: settingsItems
     }
   ]
 }

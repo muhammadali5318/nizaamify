@@ -41,5 +41,7 @@
   "messages": {
     "saved": "Customer saved",
     "deleted": "Customer deleted"
-  }
+  },
+  "has_khata": "Has khata",
+  "no_khata": "No khata"
 }

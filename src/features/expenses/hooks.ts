@@ -39,28 +39,20 @@ export function useExpenses(opts?: { month?: string }) {
 export function useCreateExpense() {
   const qc = useQueryClient()
   return useMutation({
+    // v2.9.1 D.7 — migrated to create_expense RPC (migration 0075). Server
+    // resolves shop_id from active-shop header + writes created_by from
+    // auth.uid(); gates on create_expense permission.
     mutationFn: async (args: {
       category: string
       amount: number
       expense_date: string
       note: string | null
     }) => {
-      const { data: shop, error: shopErr } = await supabase
-        .from('shops')
-        .select('id')
-        .single()
-      if (shopErr) throw shopErr
-      const {
-        data: { user }
-      } = await supabase.auth.getUser()
-      if (!user) throw new Error('not authenticated')
-      const { error } = await supabase.from('expenses').insert({
-        shop_id: shop.id,
-        category: args.category,
-        amount: args.amount,
-        expense_date: args.expense_date,
-        note: args.note,
-        created_by: user.id
+      const { error } = await supabase.rpc('create_expense', {
+        p_category: args.category,
+        p_amount: args.amount,
+        p_expense_date: args.expense_date,
+        p_note: args.note
       })
       if (error) throw error
     },

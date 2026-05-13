@@ -32,7 +32,10 @@ void i18n
       'tiers',
       'variant_attributes',
       'variants',
-      'batches'
+      'batches',
+      'shop_switcher',
+      'team',
+      'invitation'
     ],
     detection: {
       order: ['localStorage', 'navigator'],

@@ -23,6 +23,7 @@ import {
   type ExpiredSalePolicy
 } from 'src/features/batches/hooks'
 import { useNotifier } from 'src/components/notistack/NotificationProvider'
+import { usePermission } from 'src/lib/permissions'
 
 export default function SettingsPage() {
   const { t } = useTranslation([
@@ -38,6 +39,13 @@ export default function SettingsPage() {
   const updateDefaults = useUpdateShopAlertDefaults()
   const expiredSaleSettings = useShopExpiredSaleSettings()
   const updateExpiredSale = useUpdateShopExpiredSaleSettings()
+  // v2.9.1 D.8 — section gates. Per B.2: management knobs = grey-out;
+  // owner-only sections (shop-wide settings) = HIDDEN entirely from
+  // non-owner staff (don't show knobs they can't use).
+  const canManageTiers = usePermission('manage_customer_tiers')
+  const canManageVariantAttrs = usePermission('manage_variant_attributes')
+  const canEditShopSettings = usePermission('edit_shop_settings')
+
   const [expiryDays, setExpiryDays] = useState<string>('30')
   const [warrantyDays, setWarrantyDays] = useState<string>('30')
   const [policy, setPolicy] = useState<ExpiredSalePolicy>('warn')
@@ -101,160 +109,196 @@ export default function SettingsPage() {
             </Typography>
             <LanguageSelector />
           </Stack>
-          <Divider />
-          <Stack
-            direction='row'
-            justifyContent='space-between'
-            alignItems='center'
-          >
-            <Box>
-              <Typography variant='body1' sx={{ fontWeight: 600 }}>
-                {t('tiers:title')}
-              </Typography>
-              <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
-                {t('tiers:subtitle')}
-              </Typography>
-            </Box>
-            <Button variant='secondary' onClick={() => navigate(paths.tiers)}>
-              {t('common:actions.edit')}
-            </Button>
-          </Stack>
-          <Divider />
-          <Stack
-            direction='row'
-            justifyContent='space-between'
-            alignItems='center'
-          >
-            <Box>
-              <Typography variant='body1' sx={{ fontWeight: 600 }}>
-                {t('variant_attributes:title')}
-              </Typography>
-              <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
-                {t('variant_attributes:subtitle')}
-              </Typography>
-            </Box>
-            <Button
-              variant='secondary'
-              onClick={() => navigate(paths.variantAttributes)}
-            >
-              {t('common:actions.edit')}
-            </Button>
-          </Stack>
-
-          {/* v2.8 — shop-level inventory alert defaults. Per-product
-           *  overrides live on each product's edit dialog. */}
-          <Divider />
-          <Stack spacing={1.5}>
-            <Box>
-              <Typography variant='body1' sx={{ fontWeight: 600 }}>
-                {t('batches:settings.section_title')}
-              </Typography>
-              <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
-                {t('batches:settings.section_subtitle')}
-              </Typography>
-            </Box>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <Field label={t('batches:settings.default_expiry_label')}>
-                <Input
-                  type='number'
-                  inputProps={{ min: 1, step: 1 }}
-                  value={expiryDays}
-                  onChange={(e) => setExpiryDays(e.target.value)}
-                />
-              </Field>
-              <Field label={t('batches:settings.default_warranty_label')}>
-                <Input
-                  type='number'
-                  inputProps={{ min: 1, step: 1 }}
-                  value={warrantyDays}
-                  onChange={(e) => setWarrantyDays(e.target.value)}
-                />
-              </Field>
-            </Stack>
-            <Box>
-              <Button
-                variant='primary'
-                size='sm'
-                onClick={() => void saveAlertDefaults()}
-                loading={updateDefaults.isPending}
+          {canManageTiers && (
+            <>
+              <Divider />
+              <Stack
+                direction='row'
+                justifyContent='space-between'
+                alignItems='center'
               >
-                {t('batches:settings.save')}
-              </Button>
-            </Box>
-          </Stack>
-
-          {/* v2.8.4 — shop-level expired-sale policy + opt-in receipt disclaimer. */}
-          <Divider />
-          <Stack spacing={1.5}>
-            <Box>
-              <Typography variant='body1' sx={{ fontWeight: 600 }}>
-                {t('batches:expired_sales.section_title')}
-              </Typography>
-              <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
-                {t('batches:expired_sales.section_subtitle')}
-              </Typography>
-            </Box>
-            <FormControl>
-              <Typography
-                variant='body2'
-                sx={{ mb: 0.5, color: 'var(--text-muted)' }}
-              >
-                {t('batches:expired_sales.default_policy_label')}
-              </Typography>
-              <RadioGroup
-                value={policy}
-                onChange={(_, v) => setPolicy(v as ExpiredSalePolicy)}
-              >
-                <FormControlLabel
-                  value='block'
-                  control={<Radio size='small' />}
-                  label={t('batches:expired_sales.policy_block')}
-                />
-                <FormControlLabel
-                  value='warn'
-                  control={<Radio size='small' />}
-                  label={t('batches:expired_sales.policy_warn')}
-                />
-                <FormControlLabel
-                  value='allow'
-                  control={<Radio size='small' />}
-                  label={t('batches:expired_sales.policy_allow')}
-                />
-              </RadioGroup>
-            </FormControl>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  size='small'
-                  checked={disclaimer}
-                  onChange={(_, v) => setDisclaimer(v)}
-                />
-              }
-              label={
                 <Box>
-                  <Typography variant='body2'>
-                    {t('batches:expired_sales.receipt_disclaimer_label')}
+                  <Typography variant='body1' sx={{ fontWeight: 600 }}>
+                    {t('tiers:title')}
                   </Typography>
                   <Typography
                     variant='caption'
                     sx={{ color: 'var(--text-muted)' }}
                   >
-                    {t('batches:expired_sales.receipt_disclaimer_help')}
+                    {t('tiers:subtitle')}
                   </Typography>
                 </Box>
-              }
-            />
-            <Box>
-              <Button
-                variant='primary'
-                size='sm'
-                onClick={() => void saveExpiredSaleSettings()}
-                loading={updateExpiredSale.isPending}
+                <Button
+                  variant='secondary'
+                  onClick={() => navigate(paths.tiers)}
+                >
+                  {t('common:actions.edit')}
+                </Button>
+              </Stack>
+            </>
+          )}
+          {canManageVariantAttrs && (
+            <>
+              <Divider />
+              <Stack
+                direction='row'
+                justifyContent='space-between'
+                alignItems='center'
               >
-                {t('batches:expired_sales.save')}
-              </Button>
-            </Box>
-          </Stack>
+                <Box>
+                  <Typography variant='body1' sx={{ fontWeight: 600 }}>
+                    {t('variant_attributes:title')}
+                  </Typography>
+                  <Typography
+                    variant='caption'
+                    sx={{ color: 'var(--text-muted)' }}
+                  >
+                    {t('variant_attributes:subtitle')}
+                  </Typography>
+                </Box>
+                <Button
+                  variant='secondary'
+                  onClick={() => navigate(paths.variantAttributes)}
+                >
+                  {t('common:actions.edit')}
+                </Button>
+              </Stack>
+            </>
+          )}
+
+          {/* v2.8 — shop-level inventory alert defaults. Per-product
+           *  overrides live on each product's edit dialog.
+           *
+           *  v2.9.1 D.8: HIDDEN section for non-owner staff (B.2
+           *  owner-only-settings rule). edit_shop_settings is owner-only
+           *  by default per the v2.9 catalog. */}
+          {canEditShopSettings && (
+            <>
+              <Divider />
+              <Stack spacing={1.5}>
+                <Box>
+                  <Typography variant='body1' sx={{ fontWeight: 600 }}>
+                    {t('batches:settings.section_title')}
+                  </Typography>
+                  <Typography
+                    variant='caption'
+                    sx={{ color: 'var(--text-muted)' }}
+                  >
+                    {t('batches:settings.section_subtitle')}
+                  </Typography>
+                </Box>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                  <Field label={t('batches:settings.default_expiry_label')}>
+                    <Input
+                      type='number'
+                      inputProps={{ min: 1, step: 1 }}
+                      value={expiryDays}
+                      onChange={(e) => setExpiryDays(e.target.value)}
+                    />
+                  </Field>
+                  <Field label={t('batches:settings.default_warranty_label')}>
+                    <Input
+                      type='number'
+                      inputProps={{ min: 1, step: 1 }}
+                      value={warrantyDays}
+                      onChange={(e) => setWarrantyDays(e.target.value)}
+                    />
+                  </Field>
+                </Stack>
+                <Box>
+                  <Button
+                    variant='primary'
+                    size='sm'
+                    onClick={() => void saveAlertDefaults()}
+                    loading={updateDefaults.isPending}
+                  >
+                    {t('batches:settings.save')}
+                  </Button>
+                </Box>
+              </Stack>
+            </>
+          )}
+
+          {/* v2.8.4 — shop-level expired-sale policy + opt-in receipt disclaimer.
+           *  v2.9.1 D.8: HIDDEN for non-owner staff (same rule as alert defaults). */}
+          {canEditShopSettings && (
+            <>
+              <Divider />
+              <Stack spacing={1.5}>
+                <Box>
+                  <Typography variant='body1' sx={{ fontWeight: 600 }}>
+                    {t('batches:expired_sales.section_title')}
+                  </Typography>
+                  <Typography
+                    variant='caption'
+                    sx={{ color: 'var(--text-muted)' }}
+                  >
+                    {t('batches:expired_sales.section_subtitle')}
+                  </Typography>
+                </Box>
+                <FormControl>
+                  <Typography
+                    variant='body2'
+                    sx={{ mb: 0.5, color: 'var(--text-muted)' }}
+                  >
+                    {t('batches:expired_sales.default_policy_label')}
+                  </Typography>
+                  <RadioGroup
+                    value={policy}
+                    onChange={(_, v) => setPolicy(v as ExpiredSalePolicy)}
+                  >
+                    <FormControlLabel
+                      value='block'
+                      control={<Radio size='small' />}
+                      label={t('batches:expired_sales.policy_block')}
+                    />
+                    <FormControlLabel
+                      value='warn'
+                      control={<Radio size='small' />}
+                      label={t('batches:expired_sales.policy_warn')}
+                    />
+                    <FormControlLabel
+                      value='allow'
+                      control={<Radio size='small' />}
+                      label={t('batches:expired_sales.policy_allow')}
+                    />
+                  </RadioGroup>
+                </FormControl>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      size='small'
+                      checked={disclaimer}
+                      onChange={(_, v) => setDisclaimer(v)}
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant='body2'>
+                        {t('batches:expired_sales.receipt_disclaimer_label')}
+                      </Typography>
+                      <Typography
+                        variant='caption'
+                        sx={{ color: 'var(--text-muted)' }}
+                      >
+                        {t('batches:expired_sales.receipt_disclaimer_help')}
+                      </Typography>
+                    </Box>
+                  }
+                />
+                <Box>
+                  <Button
+                    variant='primary'
+                    size='sm'
+                    onClick={() => void saveExpiredSaleSettings()}
+                    loading={updateExpiredSale.isPending}
+                  >
+                    {t('batches:expired_sales.save')}
+                  </Button>
+                </Box>
+              </Stack>
+            </>
+          )}
         </Stack>
       </Card>
     </Box>

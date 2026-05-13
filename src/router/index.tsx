@@ -35,14 +35,18 @@ import SupplierFormPage from 'src/features/suppliers/SupplierFormPage'
 import ExpensesPage from 'src/features/expenses/ExpensesPage'
 import TargetsPage from 'src/features/targets/TargetsPage'
 import ReportsPage from 'src/features/reports/ReportsPage'
+import TeamPage from 'src/features/team/TeamPage'
+import AcceptInvitationPage from 'src/features/team/AcceptInvitationPage'
 
 import {
   RedirectIfActiveSubscription,
   RedirectIfAuthed,
   RedirectIfOnboarded,
   RequireActiveSubscription,
+  RequireAnyPermission,
   RequireAuth,
-  RequireOnboarded
+  RequireOnboarded,
+  RequirePermission
 } from 'src/lib/guards'
 
 export function Router() {
@@ -96,6 +100,18 @@ export function Router() {
         </RequireAuth>
       )
     },
+    {
+      // /invite/accept is intentionally NOT wrapped in RequireOnboarded
+      // or the AppShell wrapper: invitees may be auth'd but not onboarded
+      // (they bypass the owner wizard; the page self-updates onboarding_
+      // completed after a successful accept).
+      path: paths.acceptInvitation,
+      element: (
+        <RequireAuth>
+          <AcceptInvitationPage />
+        </RequireAuth>
+      )
+    },
 
     {
       element: (
@@ -110,10 +126,29 @@ export function Router() {
         // Always-accessible (any subscription state)
         { path: paths.settings, element: <SettingsPage /> },
         { path: paths.support, element: <SupportPage /> },
-        { path: paths.tiers, element: <TiersPage /> },
+        {
+          path: paths.tiers,
+          element: (
+            <RequirePermission permission='manage_customer_tiers'>
+              <TiersPage />
+            </RequirePermission>
+          )
+        },
         {
           path: paths.variantAttributes,
-          element: <VariantAttributesPage />
+          element: (
+            <RequirePermission permission='manage_variant_attributes'>
+              <VariantAttributesPage />
+            </RequirePermission>
+          )
+        },
+        {
+          path: paths.team,
+          element: (
+            <RequirePermission permission='view_team'>
+              <TeamPage />
+            </RequirePermission>
+          )
         },
         // Subscription-gated
         {
@@ -128,7 +163,9 @@ export function Router() {
           path: paths.products,
           element: (
             <RequireActiveSubscription>
-              <ProductsListPage />
+              <RequirePermission permission='view_products'>
+                <ProductsListPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -136,7 +173,9 @@ export function Router() {
           path: paths.newProduct,
           element: (
             <RequireActiveSubscription>
-              <ProductFormPage />
+              <RequirePermission permission='create_product'>
+                <ProductFormPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -144,7 +183,9 @@ export function Router() {
           path: paths.productDetail,
           element: (
             <RequireActiveSubscription>
-              <ProductDetailPage />
+              <RequirePermission permission='view_products'>
+                <ProductDetailPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -152,15 +193,26 @@ export function Router() {
           path: paths.expiredInventory,
           element: (
             <RequireActiveSubscription>
-              <ExpiredStockListPage />
+              <RequirePermission permission='view_inventory_batches'>
+                <ExpiredStockListPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
         {
+          // Per E.3 matrix discrepancy #1 + page audit doc §6: this page is
+          // an audit/management surface ("who sold expired stock?"). Requires
+          // both view_inventory_batches AND view_all_sales — salespersons
+          // (who have view_inventory_batches but not view_all_sales by
+          // default) shouldn't see other staff's sales.
           path: paths.expiredSales,
           element: (
             <RequireActiveSubscription>
-              <ExpiredSalesListPage />
+              <RequirePermission permission='view_all_sales'>
+                <RequirePermission permission='view_inventory_batches'>
+                  <ExpiredSalesListPage />
+                </RequirePermission>
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -168,7 +220,9 @@ export function Router() {
           path: paths.purchases,
           element: (
             <RequireActiveSubscription>
-              <PurchasesListPage />
+              <RequirePermission permission='view_purchases'>
+                <PurchasesListPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -176,7 +230,9 @@ export function Router() {
           path: paths.newPurchase,
           element: (
             <RequireActiveSubscription>
-              <NewPurchasePage />
+              <RequirePermission permission='record_purchase'>
+                <NewPurchasePage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -184,7 +240,9 @@ export function Router() {
           path: paths.purchaseDetail,
           element: (
             <RequireActiveSubscription>
-              <PurchaseDetailPage />
+              <RequirePermission permission='view_purchases'>
+                <PurchaseDetailPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -192,7 +250,11 @@ export function Router() {
           path: paths.sales,
           element: (
             <RequireActiveSubscription>
-              <SalesListPage />
+              <RequireAnyPermission
+                permissions={['record_sale', 'view_all_sales']}
+              >
+                <SalesListPage />
+              </RequireAnyPermission>
             </RequireActiveSubscription>
           )
         },
@@ -200,7 +262,11 @@ export function Router() {
           path: paths.saleDetail,
           element: (
             <RequireActiveSubscription>
-              <SaleDetailPage />
+              <RequireAnyPermission
+                permissions={['record_sale', 'view_all_sales']}
+              >
+                <SaleDetailPage />
+              </RequireAnyPermission>
             </RequireActiveSubscription>
           )
         },
@@ -208,7 +274,9 @@ export function Router() {
           path: paths.pos,
           element: (
             <RequireActiveSubscription>
-              <POSPage />
+              <RequirePermission permission='record_sale'>
+                <POSPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -216,7 +284,9 @@ export function Router() {
           path: paths.customers,
           element: (
             <RequireActiveSubscription>
-              <CustomersListPage />
+              <RequirePermission permission='view_customers'>
+                <CustomersListPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -224,7 +294,9 @@ export function Router() {
           path: paths.newCustomer,
           element: (
             <RequireActiveSubscription>
-              <CustomerFormPage />
+              <RequirePermission permission='create_customer_basic'>
+                <CustomerFormPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -232,7 +304,9 @@ export function Router() {
           path: paths.customerEdit,
           element: (
             <RequireActiveSubscription>
-              <CustomerFormPage />
+              <RequirePermission permission='edit_customer'>
+                <CustomerFormPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -240,7 +314,9 @@ export function Router() {
           path: paths.customerDetail,
           element: (
             <RequireActiveSubscription>
-              <CustomerDetailPage />
+              <RequirePermission permission='view_customers'>
+                <CustomerDetailPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -248,7 +324,9 @@ export function Router() {
           path: paths.khata,
           element: (
             <RequireActiveSubscription>
-              <KhataPage />
+              <RequirePermission permission='view_customer_khata'>
+                <KhataPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -256,7 +334,9 @@ export function Router() {
           path: paths.suppliers,
           element: (
             <RequireActiveSubscription>
-              <SuppliersListPage />
+              <RequirePermission permission='view_suppliers'>
+                <SuppliersListPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -264,7 +344,9 @@ export function Router() {
           path: paths.newSupplier,
           element: (
             <RequireActiveSubscription>
-              <SupplierFormPage />
+              <RequirePermission permission='manage_suppliers'>
+                <SupplierFormPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -272,7 +354,9 @@ export function Router() {
           path: paths.supplierEdit,
           element: (
             <RequireActiveSubscription>
-              <SupplierFormPage />
+              <RequirePermission permission='manage_suppliers'>
+                <SupplierFormPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -280,7 +364,9 @@ export function Router() {
           path: paths.expenses,
           element: (
             <RequireActiveSubscription>
-              <ExpensesPage />
+              <RequirePermission permission='view_expenses'>
+                <ExpensesPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -288,7 +374,9 @@ export function Router() {
           path: paths.targets,
           element: (
             <RequireActiveSubscription>
-              <TargetsPage />
+              <RequirePermission permission='view_monthly_targets'>
+                <TargetsPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         },
@@ -296,7 +384,9 @@ export function Router() {
           path: paths.reports,
           element: (
             <RequireActiveSubscription>
-              <ReportsPage />
+              <RequirePermission permission='view_reports'>
+                <ReportsPage />
+              </RequirePermission>
             </RequireActiveSubscription>
           )
         }

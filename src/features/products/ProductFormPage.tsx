@@ -18,6 +18,7 @@ import {
   type EditProductValues
 } from './schemas'
 import {
+  useArchiveProduct,
   useCreateProduct,
   useCreateProductWithVariants,
   useProduct,
@@ -66,6 +67,10 @@ export default function ProductFormPage() {
   const { data: existing } = useProduct(isNew ? undefined : id)
   const create = useCreateProduct()
   const update = useUpdateProduct()
+  // v2.9.1 task #23: is_active changes route through archive_product (RPC
+  // mig 0087 §2.3) which cascades to all variants. update_product no
+  // longer touches is_active per the archive/edit semantic separation.
+  const archive = useArchiveProduct()
   const [duplicateError, setDuplicateError] = useState(false)
 
   if (isNew) {
@@ -117,12 +122,17 @@ export default function ProductFormPage() {
             category_id: values.category_id,
             description: values.description?.trim() ? values.description : null,
             price: (values.price ?? 0) as number,
-            is_active: values.is_active,
             is_scan_only: values.is_scan_only,
             has_batches: values.has_batches,
             expiry_alert_days: values.expiry_alert_days ?? null,
             warranty_alert_days: values.warranty_alert_days ?? null
           })
+          if (values.is_active !== existing.is_active) {
+            await archive.mutateAsync({
+              id: existing.id,
+              isActive: values.is_active
+            })
+          }
           notify.success(t('products:messages.saved'))
           navigate(paths.products)
         } catch (err: unknown) {

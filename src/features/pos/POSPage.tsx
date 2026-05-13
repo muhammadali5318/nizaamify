@@ -53,6 +53,7 @@ import {
   Tooltip
 } from 'src/components/ui'
 import { PageHeader } from 'src/components/layout'
+import { usePermission } from 'src/lib/permissions'
 
 export type DiscountType = 'percent' | 'fixed'
 
@@ -255,6 +256,20 @@ export default function POSPage() {
   const notify = useNotifier()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+
+  // v2.9.1 D.5 — POS internals follow B.2's HIDE rule: non-permitted UI
+  // just disappears (clean visual is paramount on this high-traffic page;
+  // tooltips would create noise). Per-permission gates live near their
+  // consumers (e.g. CartPanel calls usePermission('view_product_cost')
+  // directly for the below-cost warning).
+  //
+  // confirm_expired_sale_at_pos is granted to all 3 presets by default,
+  // BUT an owner can revoke it from a specific user. Without the gate, a
+  // revoked user would see the warn-confirm dialog, click "Yes, complete
+  // sale", and get server-denied — confusing UX. With the gate, the
+  // warn-path is escalated to the block-path for that user, so they see
+  // the same "blocked" surface as a shop-level block-policy line.
+  const canConfirmExpiredAtPos = usePermission('confirm_expired_sale_at_pos')
 
   const navigate = useNavigate()
   const { data: shopName } = useShopName()
@@ -626,7 +641,18 @@ export default function POSPage() {
               productId: cartLine?.product_id ?? null
             })
           } else if (r.policy === 'warn') {
-            warnRows.push({ productLabel, qty })
+            // v2.9.1 D.5: if the user can't confirm expired sales at POS,
+            // route warn-policy lines to the block dialog (server would
+            // reject the confirm regardless; this avoids the dead-end UX).
+            if (canConfirmExpiredAtPos) {
+              warnRows.push({ productLabel, qty })
+            } else {
+              blockedRows.push({
+                productLabel,
+                qty,
+                productId: cartLine?.product_id ?? null
+              })
+            }
           }
           // policy === 'allow' is a silent pass; no dialog needed.
         })
@@ -1111,6 +1137,8 @@ function CartPanel({
   onAtMaxAttempt
 }: CartPanelProps) {
   const { t } = useTranslation(['pos', 'batches', 'common'])
+  // v2.9.1 D.5 — POS internal HIDE gate for the "below avg cost" warning.
+  const canViewProductCost = usePermission('view_product_cost')
   // v2.8.5: which cart-line currently has the batch picker open. lineKey
   // identifies the row; null means closed.
   const [batchPickerForKey, setBatchPickerForKey] = useState<string | null>(
@@ -1532,7 +1560,7 @@ function CartPanel({
                   </Stack>
                 )}
 
-                {belowCost && (
+                {belowCost && canViewProductCost && (
                   <Box sx={{ mt: 0.75 }}>
                     <Banner variant='warning'>
                       {t('pos:cart.below_avg_cost_warning')}

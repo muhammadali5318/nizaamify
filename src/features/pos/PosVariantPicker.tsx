@@ -6,6 +6,7 @@ import Divider from '@mui/material/Divider'
 import { useTranslation } from 'react-i18next'
 import { Badge, Dialog, EmptyState } from 'src/components/ui'
 import { formatPKR } from 'src/features/subscription/env'
+import { usePermission } from 'src/lib/permissions'
 import {
   useProductVariants,
   type ProductVariantRow
@@ -232,6 +233,8 @@ function VariantCard({
   showAttributeLabel: string
 }) {
   const { t } = useTranslation(['pos', 'products'])
+  // v2.9.1 D.5 — avg_cost hidden for users without view_product_cost (HIDE rule)
+  const canViewProductCost = usePermission('view_product_cost')
   const outOfStock = variant.stock <= 0
   const lowStock = !outOfStock && variant.stock <= LOW_STOCK_THRESHOLD
   const notSellable = variant.price === null
@@ -338,19 +341,21 @@ function VariantCard({
           </Typography>
         </Stack>
 
-        <Stack
-          direction='row'
-          alignItems='baseline'
-          justifyContent='space-between'
-          spacing={1}
-        >
-          <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
-            {t('products:fields.avg_cost')}
-          </Typography>
-          <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
-            {formatPKR(Number(variant.avg_cost ?? 0), locale)}
-          </Typography>
-        </Stack>
+        {canViewProductCost && (
+          <Stack
+            direction='row'
+            alignItems='baseline'
+            justifyContent='space-between'
+            spacing={1}
+          >
+            <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
+              {t('products:fields.avg_cost')}
+            </Typography>
+            <Typography variant='caption' sx={{ color: 'var(--text-muted)' }}>
+              {formatPKR(Number(variant.avg_cost ?? 0), locale)}
+            </Typography>
+          </Stack>
+        )}
       </Stack>
     </Box>
   )

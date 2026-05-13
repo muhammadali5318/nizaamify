@@ -22,9 +22,15 @@ const VARIANT_TOKENS: Record<BadgeVariant, { bg: string; fg: string }> = {
   neutral: { bg: 'var(--surface-muted)', fg: 'var(--text-secondary)' }
 }
 
-/** Compact status pill (spec §6). 22px height, text-caption. */
+/** Compact status pill (spec §6). 22px height, text-caption.
+ *
+ * Accepts either `label="..."` (canonical MUI Chip pattern) or `children`
+ * (JSX-friendly pattern). When both are passed, `label` wins. v2.9.1
+ * shipped multiple `<Badge>text</Badge>` call sites that rendered empty
+ * chips because MUI Chip ignores children — the children→label fallback
+ * here fixes all of them without per-site edits. */
 export const Badge = forwardRef<HTMLDivElement, BadgeProps>(function Badge(
-  { variant = 'neutral', sx, ...rest },
+  { variant = 'neutral', sx, label, children, ...rest },
   ref
 ) {
   const { bg, fg } = VARIANT_TOKENS[variant]
@@ -32,6 +38,7 @@ export const Badge = forwardRef<HTMLDivElement, BadgeProps>(function Badge(
     <Chip
       ref={ref}
       size='small'
+      label={label ?? children}
       sx={[
         { backgroundColor: bg, color: fg, fontWeight: 500 },
         ...(Array.isArray(sx) ? sx : sx ? [sx] : [])

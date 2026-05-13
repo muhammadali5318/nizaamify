@@ -13,6 +13,7 @@ import {
   Input
 } from 'src/components/ui'
 import { PageHeader } from 'src/components/layout'
+import { PermissionGated } from 'src/components/ui/PermissionGated'
 
 export default function TargetsPage() {
   const { t } = useTranslation(['targets', 'common'])
@@ -88,13 +89,15 @@ export default function TargetsPage() {
           </Field>
 
           <Stack direction='row' justifyContent='flex-end'>
-            <Button
-              variant='primary'
-              onClick={submit}
-              loading={upsert.isPending}
-            >
-              {t('targets:actions.save')}
-            </Button>
+            <PermissionGated permission='manage_monthly_targets'>
+              <Button
+                variant='primary'
+                onClick={submit}
+                loading={upsert.isPending}
+              >
+                {t('targets:actions.save')}
+              </Button>
+            </PermissionGated>
           </Stack>
         </Stack>
       </Card>

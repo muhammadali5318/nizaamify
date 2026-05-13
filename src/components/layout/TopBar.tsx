@@ -22,6 +22,7 @@ import { useSession } from 'src/features/auth/AuthProvider'
 import LanguageSelector from 'src/components/language-selector/LanguageSelector'
 import { Button, Tooltip } from 'src/components/ui'
 import { useThemeMode } from 'src/lib/themeMode'
+import { ShopSwitcher } from './ShopSwitcher'
 
 export interface TopBarProps {
   /** Width reserved for the desktop sidebar (px). Drives the AppBar offset. */
@@ -86,6 +87,7 @@ export function TopBar({
             <MenuIcon />
           </IconButton>
         )}
+        <ShopSwitcher />
         <Box sx={{ flex: 1 }} />
         <Tooltip
           title={

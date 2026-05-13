@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from 'src/lib/supabase'
+import { getActiveShopId } from 'src/lib/activeShop'
 import { useSession } from './AuthProvider'
 
 export function useProfile() {
@@ -20,20 +21,31 @@ export function useProfile() {
   })
 }
 
+/**
+ * Returns the active shop's id + name for the current user. v2.9.1 rewrite:
+ * uses the `get_active_shop` RPC (migration 0087) so non-owner team members
+ * resolve correctly via the `app-shop-id` header (or single-shop fallback).
+ * Previously filtered by `owner_user_id = auth.uid()` directly on the shops
+ * table, which silently returned no rows for non-owners. Shape preserved
+ * (`{ id, shop_name }`) for backward compatibility with existing callers.
+ */
 export function useShop() {
   const { user } = useSession()
   return useQuery({
-    queryKey: ['shop', user?.id],
+    queryKey: ['shop', user?.id, getActiveShopId()],
     enabled: !!user,
     queryFn: async () => {
       if (!user) return null
-      const { data, error } = await supabase
-        .from('shops')
-        .select('id, shop_name')
-        .eq('owner_user_id', user.id)
-        .single()
+      const { data, error } = await supabase.rpc('get_active_shop')
       if (error) throw error
-      return data as { id: string; shop_name: string }
+      const row = (
+        data as Array<{
+          shop_id: string
+          shop_name: string
+          is_owner: boolean
+        }> | null
+      )?.[0]
+      return row ? { id: row.shop_id, shop_name: row.shop_name } : null
     }
   })
 }
