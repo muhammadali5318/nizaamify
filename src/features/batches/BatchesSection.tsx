@@ -15,6 +15,7 @@ import {
   type DataTableColumn
 } from 'src/components/ui'
 import { formatPKR } from 'src/features/subscription/env'
+import { usePermission } from 'src/lib/permissions'
 import { useAllBatchesForVariant } from './hooks'
 import WriteOffBatchDialog from './WriteOffBatchDialog'
 
@@ -40,6 +41,9 @@ type Row = {
 export default function BatchesSection({ variantId, productName }: Props) {
   const { t, i18n } = useTranslation(['batches', 'common'])
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
+  // v2.9.1: per-batch cost_per_unit gates on view_batch_cost. Owner+manager
+  // have it; salesperson does not. HOOKS ORDER: top.
+  const canViewBatchCost = usePermission('view_batch_cost')
   const { data = [], isLoading } = useAllBatchesForVariant(variantId)
   const [showInactive, setShowInactive] = useState(false)
   const [writeOff, setWriteOff] = useState<Row | null>(null)
@@ -116,13 +120,17 @@ export default function BatchesSection({ variantId, productName }: Props) {
         </Typography>
       )
     },
-    {
-      id: 'cost',
-      header: t('batches:fields.cost_per_unit'),
-      align: 'end',
-      hideOnMobile: true,
-      cell: (r) => formatPKR(r.cost_per_unit, locale)
-    },
+    ...(canViewBatchCost
+      ? [
+          {
+            id: 'cost',
+            header: t('batches:fields.cost_per_unit'),
+            align: 'end' as const,
+            hideOnMobile: true,
+            cell: (r: Row) => formatPKR(r.cost_per_unit, locale)
+          }
+        ]
+      : []),
     {
       id: 'action',
       header: '',

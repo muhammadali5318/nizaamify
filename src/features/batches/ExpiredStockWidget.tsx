@@ -7,6 +7,7 @@ import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined
 import { useTranslation } from 'react-i18next'
 import { Link as RouterLink, useNavigate } from 'react-router'
 import { Badge, Button, Card } from 'src/components/ui'
+import { usePermission } from 'src/lib/permissions'
 import { paths } from 'src/paths'
 import { useAlreadyExpired } from './hooks'
 import BulkWriteOffDialog from './BulkWriteOffDialog'
@@ -22,11 +23,16 @@ import BulkWriteOffDialog from './BulkWriteOffDialog'
  */
 export default function ExpiredStockWidget() {
   const { t } = useTranslation(['dashboard', 'batches', 'common'])
+  // v2.9.1: hide for users lacking view_inventory_batches — same gate as
+  // the /inventory/expired list route. No cost columns rendered here, so
+  // no separate view_batch_cost gate needed.
+  const canViewInventoryBatches = usePermission('view_inventory_batches')
   const navigate = useNavigate()
   const expired = useAlreadyExpired(50)
   const [bulkOpen, setBulkOpen] = useState(false)
 
   const rows = expired.data ?? []
+  if (!canViewInventoryBatches) return null
   if (rows.length === 0) return null
 
   return (

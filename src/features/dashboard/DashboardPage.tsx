@@ -14,6 +14,8 @@ import { useTargetForMonth, currentMonthISO } from 'src/features/targets/hooks'
 import { formatPKR } from 'src/features/subscription/env'
 import { Button, Card, Spinner } from 'src/components/ui'
 import { PageHeader } from 'src/components/layout'
+import { PermissionGated } from 'src/components/ui/PermissionGated'
+import { usePermission } from 'src/lib/permissions'
 import InventoryAlertsWidget from 'src/features/batches/InventoryAlertsWidget'
 import ExpiredStockWidget from 'src/features/batches/ExpiredStockWidget'
 import ExpiredSalesWidget from 'src/features/sales/ExpiredSalesWidget'
@@ -93,6 +95,12 @@ function TargetBar({
 export default function DashboardPage() {
   const { t, i18n } = useTranslation(['dashboard', 'common'])
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
+  // v2.9.1 hot-patch — permission gates for cost / profit / financial tiles.
+  // HOOKS ORDER: top of the component body, BEFORE any early returns. Mirrors
+  // the SaleDetailPage pattern that hit React's "hooks order" rule.
+  const canViewCustomerOutstanding = usePermission('view_customer_outstanding')
+  const canViewSaleCost = usePermission('view_sale_cost')
+  const canViewMonthlyTargets = usePermission('view_monthly_targets')
   const today = useTodaySales()
   const month = currentMonthISO()
   const summary = useMonthlySummary(month)
@@ -115,110 +123,142 @@ export default function DashboardPage() {
         useFlexGap
         mb={3}
       >
+        {/* v2.9.1: today_sales + mtd_sales are revenue rollups (no cost data),
+         *  visible to anyone who reaches the dashboard. */}
         <StatCard
           label={t('dashboard:today_sales')}
           value={formatPKR(today.data?.total_sales ?? 0, locale)}
           helper={`${today.data?.sales_count ?? 0} ${t('dashboard:today').toLowerCase()}`}
           loading={today.isLoading}
         />
-        <StatCard
-          label={t('dashboard:outstanding_total')}
-          value={formatPKR(outstanding.data ?? 0, locale)}
-          loading={outstanding.isLoading}
-        />
+        {/* v2.9.1: outstanding aggregate gated on view_customer_outstanding.
+         *  No has_khata boolean fallback for aggregates — HIDE the tile. */}
+        {canViewCustomerOutstanding && (
+          <StatCard
+            label={t('dashboard:outstanding_total')}
+            value={formatPKR(outstanding.data ?? 0, locale)}
+            loading={outstanding.isLoading}
+          />
+        )}
         <StatCard
           label={t('dashboard:mtd_sales')}
           value={formatPKR(totalSales, locale)}
           loading={summary.isLoading}
         />
-        <StatCard
-          label={t('dashboard:mtd_net_profit')}
-          value={formatPKR(netProfit, locale)}
-          helper={`${t('dashboard:mtd_gross_profit')}: ${formatPKR(grossProfit, locale)}`}
-          loading={summary.isLoading}
-        />
+        {/* v2.9.1: net+gross profit gated on view_sale_cost. HIDE entirely
+         *  when missing — no boolean substitute for profit aggregates. */}
+        {canViewSaleCost && (
+          <StatCard
+            label={t('dashboard:mtd_net_profit')}
+            value={formatPKR(netProfit, locale)}
+            helper={`${t('dashboard:mtd_gross_profit')}: ${formatPKR(grossProfit, locale)}`}
+            loading={summary.isLoading}
+          />
+        )}
       </Stack>
 
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-        <Card sx={{ flex: 1, minWidth: 280 }}>
-          <Typography variant='h3' sx={{ mb: 2 }}>
-            {t('dashboard:target_progress')}
-          </Typography>
-          {target.isLoading ? (
-            <Spinner size='inline' />
-          ) : !target.data ? (
-            <Stack spacing={1.5}>
-              <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
-                {t('dashboard:no_target')}
-              </Typography>
-              <Button
-                component={RouterLink}
-                to={paths.targets}
-                variant='secondary'
-                size='sm'
-                sx={{ alignSelf: 'flex-start' }}
-              >
-                {t('dashboard:set_target')}
-              </Button>
-            </Stack>
-          ) : (
-            <Stack spacing={2}>
-              <TargetBar
-                label={`${t('dashboard:mtd_sales')} — ${formatPKR(target.data.target_sale, locale)}`}
-                achieved={totalSales}
-                target={Number(target.data.target_sale)}
-              />
-              <TargetBar
-                label={`${t('dashboard:mtd_gross_profit')} — ${formatPKR(target.data.target_gross_profit, locale)}`}
-                achieved={grossProfit}
-                target={Number(target.data.target_gross_profit)}
-              />
-              <TargetBar
-                label={`${t('dashboard:mtd_net_profit')} — ${formatPKR(target.data.target_net_profit, locale)}`}
-                achieved={netProfit}
-                target={Number(target.data.target_net_profit)}
-              />
-            </Stack>
-          )}
-        </Card>
+        {/* v2.9.1: target progress block gated on view_monthly_targets. HIDE
+         *  the whole card if missing — every value in it (target_sale,
+         *  target_gross_profit, target_net_profit, current MTD sales) is
+         *  catalog-gated. Cost-derived bars also gated on view_sale_cost. */}
+        {canViewMonthlyTargets && (
+          <Card sx={{ flex: 1, minWidth: 280 }}>
+            <Typography variant='h3' sx={{ mb: 2 }}>
+              {t('dashboard:target_progress')}
+            </Typography>
+            {target.isLoading ? (
+              <Spinner size='inline' />
+            ) : !target.data ? (
+              <Stack spacing={1.5}>
+                <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
+                  {t('dashboard:no_target')}
+                </Typography>
+                <PermissionGated permission='manage_monthly_targets'>
+                  <Button
+                    component={RouterLink}
+                    to={paths.targets}
+                    variant='secondary'
+                    size='sm'
+                    sx={{ alignSelf: 'flex-start' }}
+                  >
+                    {t('dashboard:set_target')}
+                  </Button>
+                </PermissionGated>
+              </Stack>
+            ) : (
+              <Stack spacing={2}>
+                <TargetBar
+                  label={`${t('dashboard:mtd_sales')} — ${formatPKR(target.data.target_sale, locale)}`}
+                  achieved={totalSales}
+                  target={Number(target.data.target_sale)}
+                />
+                {canViewSaleCost && (
+                  <TargetBar
+                    label={`${t('dashboard:mtd_gross_profit')} — ${formatPKR(target.data.target_gross_profit, locale)}`}
+                    achieved={grossProfit}
+                    target={Number(target.data.target_gross_profit)}
+                  />
+                )}
+                {canViewSaleCost && (
+                  <TargetBar
+                    label={`${t('dashboard:mtd_net_profit')} — ${formatPKR(target.data.target_net_profit, locale)}`}
+                    achieved={netProfit}
+                    target={Number(target.data.target_net_profit)}
+                  />
+                )}
+              </Stack>
+            )}
+          </Card>
+        )}
 
+        {/* v2.9.1: quick actions become permission-aware — grey-out (B.2 CRUD
+         *  rule) for the management actions a salesperson lacks. */}
         <Card sx={{ flex: 1, minWidth: 280 }}>
           <Typography variant='h3' sx={{ mb: 2 }}>
             {t('dashboard:quick_actions.title')}
           </Typography>
           <Stack direction='row' spacing={1.5} flexWrap='wrap' useFlexGap>
-            <Button
-              component={RouterLink}
-              to={paths.pos}
-              variant='primary'
-              startIcon={<PointOfSaleIcon />}
-            >
-              {t('dashboard:quick_actions.new_sale')}
-            </Button>
-            <Button
-              component={RouterLink}
-              to={paths.newPurchase}
-              variant='secondary'
-              startIcon={<LocalShippingIcon />}
-            >
-              {t('dashboard:quick_actions.new_purchase')}
-            </Button>
-            <Button
-              component={RouterLink}
-              to={paths.expenses}
-              variant='secondary'
-              startIcon={<ReceiptLongIcon />}
-            >
-              {t('dashboard:quick_actions.add_expense')}
-            </Button>
-            <Button
-              component={RouterLink}
-              to={paths.khata}
-              variant='secondary'
-              startIcon={<AccountBalanceWalletIcon />}
-            >
-              {t('dashboard:quick_actions.view_khata')}
-            </Button>
+            <PermissionGated permission='record_sale'>
+              <Button
+                component={RouterLink}
+                to={paths.pos}
+                variant='primary'
+                startIcon={<PointOfSaleIcon />}
+              >
+                {t('dashboard:quick_actions.new_sale')}
+              </Button>
+            </PermissionGated>
+            <PermissionGated permission='record_purchase'>
+              <Button
+                component={RouterLink}
+                to={paths.newPurchase}
+                variant='secondary'
+                startIcon={<LocalShippingIcon />}
+              >
+                {t('dashboard:quick_actions.new_purchase')}
+              </Button>
+            </PermissionGated>
+            <PermissionGated permission='create_expense'>
+              <Button
+                component={RouterLink}
+                to={paths.expenses}
+                variant='secondary'
+                startIcon={<ReceiptLongIcon />}
+              >
+                {t('dashboard:quick_actions.add_expense')}
+              </Button>
+            </PermissionGated>
+            <PermissionGated permission='view_customer_khata'>
+              <Button
+                component={RouterLink}
+                to={paths.khata}
+                variant='secondary'
+                startIcon={<AccountBalanceWalletIcon />}
+              >
+                {t('dashboard:quick_actions.view_khata')}
+              </Button>
+            </PermissionGated>
           </Stack>
         </Card>
 

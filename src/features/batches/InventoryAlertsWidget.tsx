@@ -6,6 +6,7 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import { useTranslation } from 'react-i18next'
 import { Badge, Card } from 'src/components/ui'
+import { usePermission } from 'src/lib/permissions'
 import {
   useExpiringSoon,
   useHasAnyBatchedProduct,
@@ -20,10 +21,15 @@ import {
  */
 export default function InventoryAlertsWidget() {
   const { t } = useTranslation(['dashboard', 'batches', 'common'])
+  // v2.9.1: catalog permission gate. Hide entirely if user lacks
+  // view_inventory_batches — same surface-level rule as the /inventory/expired
+  // route. Hook stays at top of body per React's rule-of-hooks.
+  const canViewInventoryBatches = usePermission('view_inventory_batches')
   const hasAnyBatched = useHasAnyBatchedProduct()
   const expiring = useExpiringSoon(10)
   const warranty = useWarrantyExpiringSoon(10)
 
+  if (!canViewInventoryBatches) return null
   if (!hasAnyBatched.data) return null
 
   const expCount = expiring.data?.length ?? 0

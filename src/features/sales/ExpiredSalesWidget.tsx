@@ -5,6 +5,7 @@ import HistoryEduOutlinedIcon from '@mui/icons-material/HistoryEduOutlined'
 import { useTranslation } from 'react-i18next'
 import { Link as RouterLink, useNavigate } from 'react-router'
 import { Badge, Button, Card } from 'src/components/ui'
+import { usePermission } from 'src/lib/permissions'
 import { paths } from 'src/paths'
 import { useExpiredSales } from './hooks'
 
@@ -15,11 +16,17 @@ import { useExpiredSales } from './hooks'
  */
 export default function ExpiredSalesWidget() {
   const { t, i18n } = useTranslation(['dashboard', 'common'])
+  // v2.9.1: matches the /inventory/expired-sales route gate (view_all_sales +
+  // view_inventory_batches). Hide entirely if either is missing — salesperson
+  // sees no other staff's expired sales.
+  const canViewAllSales = usePermission('view_all_sales')
+  const canViewInventoryBatches = usePermission('view_inventory_batches')
   const navigate = useNavigate()
   const expired = useExpiredSales(50)
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
 
   const rows = expired.data ?? []
+  if (!canViewAllSales || !canViewInventoryBatches) return null
   if (rows.length === 0) return null
 
   const fmtDate = (iso: string) =>

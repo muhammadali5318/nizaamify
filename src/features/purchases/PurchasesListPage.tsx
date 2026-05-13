@@ -19,8 +19,10 @@ import {
   type DataTableColumn
 } from 'src/components/ui'
 import { PageHeader } from 'src/components/layout'
+import { PermissionGated } from 'src/components/ui/PermissionGated'
 import { formatPKR } from 'src/features/subscription/env'
 import SupplierCombobox from 'src/features/suppliers/SupplierCombobox'
+import { usePermission } from 'src/lib/permissions'
 import { useSearchPurchases, type PurchaseListRow } from './hooks'
 
 const PAGE_SIZE = 10
@@ -60,6 +62,10 @@ export default function PurchasesListPage() {
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  // v2.9.1: route already gated on view_purchases (owner+manager). Inside,
+  // cost-specific columns (items_subtotal, overhead, total_cost) gate on
+  // view_product_cost — handles override-revoked users.
+  const canViewProductCost = usePermission('view_product_cost')
 
   // URL-driven state
   const initialPreset = (searchParams.get('preset') as Preset | null) ?? 'mtd'
@@ -167,33 +173,38 @@ export default function PurchasesListPage() {
         align: 'end',
         cell: (p) => Number(p.items_count)
       },
-      {
-        id: 'items_subtotal',
-        header: t('purchases:list.columns.items_subtotal'),
-        align: 'end',
-        hideOnMobile: true,
-        cell: (p) => formatPKR(Number(p.items_subtotal), locale)
-      },
-      {
-        id: 'overhead',
-        header: t('purchases:list.columns.overhead'),
-        align: 'end',
-        hideOnMobile: true,
-        cell: (p) =>
-          Number(p.overhead_subtotal) > 0
-            ? formatPKR(Number(p.overhead_subtotal), locale)
-            : '—'
-      },
-      {
-        id: 'total',
-        header: t('purchases:list.columns.total'),
-        align: 'end',
-        cell: (p) => (
-          <Typography variant='body1' sx={{ fontWeight: 600 }}>
-            {formatPKR(Number(p.total_cost), locale)}
-          </Typography>
-        )
-      },
+      ...(canViewProductCost
+        ? [
+            {
+              id: 'items_subtotal',
+              header: t('purchases:list.columns.items_subtotal'),
+              align: 'end' as const,
+              hideOnMobile: true,
+              cell: (p: PurchaseListRow) =>
+                formatPKR(Number(p.items_subtotal), locale)
+            },
+            {
+              id: 'overhead',
+              header: t('purchases:list.columns.overhead'),
+              align: 'end' as const,
+              hideOnMobile: true,
+              cell: (p: PurchaseListRow) =>
+                Number(p.overhead_subtotal) > 0
+                  ? formatPKR(Number(p.overhead_subtotal), locale)
+                  : '—'
+            },
+            {
+              id: 'total',
+              header: t('purchases:list.columns.total'),
+              align: 'end' as const,
+              cell: (p: PurchaseListRow) => (
+                <Typography variant='body1' sx={{ fontWeight: 600 }}>
+                  {formatPKR(Number(p.total_cost), locale)}
+                </Typography>
+              )
+            }
+          ]
+        : []),
       {
         id: 'note',
         header: t('purchases:list.columns.note'),
@@ -214,7 +225,7 @@ export default function PurchasesListPage() {
           )
       }
     ],
-    [locale, serialById, t]
+    [locale, serialById, t, canViewProductCost]
   )
 
   return (
@@ -223,13 +234,18 @@ export default function PurchasesListPage() {
         title={t('purchases:title')}
         subtitle={t('purchases:subtitle')}
         actions={
-          <Button
-            variant='primary'
-            startIcon={<AddIcon />}
-            onClick={() => navigate(paths.newPurchase)}
-          >
-            {t('purchases:add_purchase')}
-          </Button>
+          // v2.9.1: grey-out per B.2 (CRUD action). The route guard for
+          // /purchases/new already enforces, but the page-level affordance
+          // surfaces the disabled state.
+          <PermissionGated permission='record_purchase'>
+            <Button
+              variant='primary'
+              startIcon={<AddIcon />}
+              onClick={() => navigate(paths.newPurchase)}
+            >
+              {t('purchases:add_purchase')}
+            </Button>
+          </PermissionGated>
         }
       />
 

@@ -13,6 +13,7 @@ import {
   type DataTableColumn
 } from 'src/components/ui'
 import { formatPKR } from 'src/features/subscription/env'
+import { usePermission } from 'src/lib/permissions'
 import {
   usePurchaseDetail,
   type PurchaseDetailItem,
@@ -24,6 +25,12 @@ export default function PurchaseDetailPage() {
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
   const navigate = useNavigate()
   const { id } = useParams()
+  // v2.9.1: route admits view_purchases. Line costs (cost_at_purchase,
+  // line_subtotal, line_overhead, line_total, avg_cost_before/after,
+  // cost_delta, overhead amounts, grand totals) all gate on view_product_cost.
+  // HOOKS ORDER: top of body, before any early returns (matches the
+  // SaleDetailPage trap fixed in the prior hot-patch).
+  const canViewProductCost = usePermission('view_product_cost')
   const { data: purchase, isLoading } = usePurchaseDetail(id)
 
   if (isLoading) {
@@ -93,34 +100,42 @@ export default function PurchaseDetailPage() {
         return it.qty
       }
     },
-    {
-      id: 'unit_cost',
-      header: t('purchases:fields.cost'),
-      align: 'end',
-      cell: (it) => formatPKR(Number(it.cost_at_purchase), locale)
-    },
-    {
-      id: 'subtotal',
-      header: t('purchases:detail.line_subtotal'),
-      align: 'end',
-      cell: (it) => formatPKR(Number(it.line_subtotal), locale)
-    },
-    {
-      id: 'overhead',
-      header: t('purchases:detail.line_overhead'),
-      align: 'end',
-      hideOnMobile: true,
-      cell: (it) => {
-        const v = Number(it.line_overhead)
-        return v > 0 ? formatPKR(v, locale) : '—'
-      }
-    },
-    {
-      id: 'line_total',
-      header: t('purchases:fields.total'),
-      align: 'end',
-      cell: (it) => formatPKR(Number(it.line_total), locale)
-    }
+    // v2.9.1: cost columns gated on view_product_cost.
+    ...(canViewProductCost
+      ? [
+          {
+            id: 'unit_cost',
+            header: t('purchases:fields.cost'),
+            align: 'end' as const,
+            cell: (it: PurchaseDetailItem) =>
+              formatPKR(Number(it.cost_at_purchase), locale)
+          },
+          {
+            id: 'subtotal',
+            header: t('purchases:detail.line_subtotal'),
+            align: 'end' as const,
+            cell: (it: PurchaseDetailItem) =>
+              formatPKR(Number(it.line_subtotal), locale)
+          },
+          {
+            id: 'overhead',
+            header: t('purchases:detail.line_overhead'),
+            align: 'end' as const,
+            hideOnMobile: true,
+            cell: (it: PurchaseDetailItem) => {
+              const v = Number(it.line_overhead)
+              return v > 0 ? formatPKR(v, locale) : '—'
+            }
+          },
+          {
+            id: 'line_total',
+            header: t('purchases:fields.total'),
+            align: 'end' as const,
+            cell: (it: PurchaseDetailItem) =>
+              formatPKR(Number(it.line_total), locale)
+          }
+        ]
+      : [])
   ]
 
   const inventoryColumns: DataTableColumn<PurchaseDetailItem>[] = [
@@ -272,7 +287,7 @@ export default function PurchaseDetailPage() {
           <Typography variant='h3'>{t('purchases:detail.items')}</Typography>
         </Box>
         <Box sx={{ p: 2 }}>
-          {Number(purchase.overhead_subtotal) > 0 && (
+          {canViewProductCost && Number(purchase.overhead_subtotal) > 0 && (
             <Banner variant='info' sx={{ mb: 2 }}>
               {t('purchases:detail.overhead_distribution_note')}
             </Banner>
@@ -284,26 +299,31 @@ export default function PurchaseDetailPage() {
             ariaLabel={t('purchases:detail.items')}
           />
         </Box>
-        <Stack
-          direction='row'
-          justifyContent='space-between'
-          sx={{
-            p: 2,
-            borderTop: '1px solid var(--border-subtle)',
-            backgroundColor: 'var(--surface-subtle)'
-          }}
-        >
-          <Typography variant='body1' sx={{ fontWeight: 600 }}>
-            {t('purchases:form.items_subtotal')}
-          </Typography>
-          <Typography variant='body1' sx={{ fontWeight: 600 }}>
-            {formatPKR(Number(purchase.items_subtotal), locale)}
-          </Typography>
-        </Stack>
+        {/* v2.9.1: subtotal row gated on view_product_cost. */}
+        {canViewProductCost && (
+          <Stack
+            direction='row'
+            justifyContent='space-between'
+            sx={{
+              p: 2,
+              borderTop: '1px solid var(--border-subtle)',
+              backgroundColor: 'var(--surface-subtle)'
+            }}
+          >
+            <Typography variant='body1' sx={{ fontWeight: 600 }}>
+              {t('purchases:form.items_subtotal')}
+            </Typography>
+            <Typography variant='body1' sx={{ fontWeight: 600 }}>
+              {formatPKR(Number(purchase.items_subtotal), locale)}
+            </Typography>
+          </Stack>
+        )}
       </Card>
 
-      {/* Additional costs */}
-      {overhead.length > 0 && (
+      {/* Additional costs + grand total + inventory effect — all gated on
+       *  view_product_cost. A purchase row with no costs visible is just the
+       *  header (date, supplier, recorder); cost-bearing surfaces hide entirely. */}
+      {canViewProductCost && overhead.length > 0 && (
         <Card sx={{ mb: 2 }} noPadding>
           <Box sx={{ p: 2, borderBottom: '1px solid var(--border-subtle)' }}>
             <Typography variant='h3'>
@@ -338,66 +358,70 @@ export default function PurchaseDetailPage() {
       )}
 
       {/* Grand total */}
-      <Card sx={{ mb: 2 }}>
-        <Typography variant='h3' sx={{ mb: 2 }}>
-          {t('purchases:form.grand_total')}
-        </Typography>
-        <Stack spacing={1}>
-          <Stack direction='row' justifyContent='space-between'>
-            <Typography variant='body2'>
-              {t('purchases:form.items_subtotal')}
-            </Typography>
-            <Typography variant='body2'>
-              {formatPKR(Number(purchase.items_subtotal), locale)}
-            </Typography>
-          </Stack>
-          <Stack direction='row' justifyContent='space-between'>
-            <Typography variant='body2'>
-              {t('purchases:form.overhead_subtotal')}
-            </Typography>
-            <Typography variant='body2'>
-              {formatPKR(Number(purchase.overhead_subtotal), locale)}
-            </Typography>
-          </Stack>
-          <Stack
-            direction='row'
-            justifyContent='space-between'
-            sx={{
-              pt: 1,
-              borderTop: '1px solid var(--border-subtle)'
-            }}
-          >
-            <Typography variant='body1' sx={{ fontWeight: 700 }}>
-              {t('purchases:form.grand_total')}
-            </Typography>
-            <Typography variant='body1' sx={{ fontWeight: 700 }}>
-              {formatPKR(Number(purchase.total_cost), locale)}
-            </Typography>
-          </Stack>
-        </Stack>
-      </Card>
-
-      {/* Effect on inventory */}
-      <Card sx={{ mb: 2 }} noPadding>
-        <Box sx={{ p: 2, borderBottom: '1px solid var(--border-subtle)' }}>
-          <Typography variant='h3'>
-            {t('purchases:detail.effect_on_inventory')}
+      {canViewProductCost && (
+        <Card sx={{ mb: 2 }}>
+          <Typography variant='h3' sx={{ mb: 2 }}>
+            {t('purchases:form.grand_total')}
           </Typography>
-        </Box>
-        <Box sx={{ p: 2 }}>
-          {!hasSnapshots && (
-            <Banner variant='info' sx={{ mb: 2 }}>
-              {t('purchases:detail.no_snapshot_help')}
-            </Banner>
-          )}
-          <DataTable
-            columns={inventoryColumns}
-            rows={items}
-            getRowId={(it) => it.id}
-            ariaLabel={t('purchases:detail.effect_on_inventory')}
-          />
-        </Box>
-      </Card>
+          <Stack spacing={1}>
+            <Stack direction='row' justifyContent='space-between'>
+              <Typography variant='body2'>
+                {t('purchases:form.items_subtotal')}
+              </Typography>
+              <Typography variant='body2'>
+                {formatPKR(Number(purchase.items_subtotal), locale)}
+              </Typography>
+            </Stack>
+            <Stack direction='row' justifyContent='space-between'>
+              <Typography variant='body2'>
+                {t('purchases:form.overhead_subtotal')}
+              </Typography>
+              <Typography variant='body2'>
+                {formatPKR(Number(purchase.overhead_subtotal), locale)}
+              </Typography>
+            </Stack>
+            <Stack
+              direction='row'
+              justifyContent='space-between'
+              sx={{
+                pt: 1,
+                borderTop: '1px solid var(--border-subtle)'
+              }}
+            >
+              <Typography variant='body1' sx={{ fontWeight: 700 }}>
+                {t('purchases:form.grand_total')}
+              </Typography>
+              <Typography variant='body1' sx={{ fontWeight: 700 }}>
+                {formatPKR(Number(purchase.total_cost), locale)}
+              </Typography>
+            </Stack>
+          </Stack>
+        </Card>
+      )}
+
+      {/* Effect on inventory — avg_cost_before/after, cost_delta all cost data. */}
+      {canViewProductCost && (
+        <Card sx={{ mb: 2 }} noPadding>
+          <Box sx={{ p: 2, borderBottom: '1px solid var(--border-subtle)' }}>
+            <Typography variant='h3'>
+              {t('purchases:detail.effect_on_inventory')}
+            </Typography>
+          </Box>
+          <Box sx={{ p: 2 }}>
+            {!hasSnapshots && (
+              <Banner variant='info' sx={{ mb: 2 }}>
+                {t('purchases:detail.no_snapshot_help')}
+              </Banner>
+            )}
+            <DataTable
+              columns={inventoryColumns}
+              rows={items}
+              getRowId={(it) => it.id}
+              ariaLabel={t('purchases:detail.effect_on_inventory')}
+            />
+          </Box>
+        </Card>
+      )}
     </Box>
   )
 }

@@ -21,6 +21,7 @@ import {
   Tooltip,
   type DataTableColumn
 } from 'src/components/ui'
+import { usePermission } from 'src/lib/permissions'
 
 export type StockDisplayMode = 'base' | 'compact' | 'compound'
 
@@ -132,6 +133,12 @@ export default function ProductTable({
 }: ProductTableProps) {
   const { t, i18n } = useTranslation(['products', 'common', 'pos'])
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
+  // v2.9.1: avg_cost + last_purchase_cost columns gate on view_product_cost.
+  // Callers pass showAvgCost/showLastPurchase to enable the columns; both
+  // permission and prop must be true for rendering. HOOKS ORDER: top.
+  const canViewProductCost = usePermission('view_product_cost')
+  const showAvgCostCol = showAvgCost && canViewProductCost
+  const showLastPurchaseCol = showLastPurchase && canViewProductCost
 
   const [params, setParams] = useSearchParams()
   const initialQuery = syncUrl ? (params.get('q') ?? '') : ''
@@ -381,7 +388,7 @@ export default function ProductTable({
         return formatPKR(Number(row.price), locale)
       }
     },
-    ...(showAvgCost
+    ...(showAvgCostCol
       ? [
           {
             id: 'avg_cost',
@@ -420,7 +427,7 @@ export default function ProductTable({
           }
         ]
       : []),
-    ...(showLastPurchase
+    ...(showLastPurchaseCol
       ? [
           {
             id: 'last_purchase',

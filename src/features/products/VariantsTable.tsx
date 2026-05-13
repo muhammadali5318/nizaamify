@@ -16,6 +16,7 @@ import {
   type DataTableColumn
 } from 'src/components/ui'
 import { formatPKR } from 'src/features/subscription/env'
+import { usePermission } from 'src/lib/permissions'
 import { useProductVariants, type ProductVariantRow } from './hooks'
 import VariantEditDialog from './VariantEditDialog'
 import AddVariantDialog from './AddVariantDialog'
@@ -27,6 +28,9 @@ type Props = {
 export default function VariantsTable({ productId }: Props) {
   const { t, i18n } = useTranslation(['variants', 'common', 'products'])
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
+  // v2.9.1: avg_cost + last_purchase_cost per variant gate on view_product_cost.
+  // HOOKS ORDER: top.
+  const canViewProductCost = usePermission('view_product_cost')
   const { data: variants = [], isLoading } = useProductVariants(productId)
   const [editVariant, setEditVariant] = useState<ProductVariantRow | null>(null)
   const [addOpen, setAddOpen] = useState(false)
@@ -60,30 +64,34 @@ export default function VariantsTable({ productId }: Props) {
       align: 'end',
       cell: (row) => <Typography variant='body2'>{row.stock}</Typography>
     },
-    {
-      id: 'avg_cost',
-      header: t('products:fields.avg_cost'),
-      align: 'end',
-      hideOnMobile: true,
-      cell: (row) => (
-        <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
-          {formatPKR(Number(row.avg_cost ?? 0), locale)}
-        </Typography>
-      )
-    },
-    {
-      id: 'last_purchase',
-      header: t('products:fields.last_purchase_cost'),
-      align: 'end',
-      hideOnMobile: true,
-      cell: (row) => (
-        <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
-          {row.last_purchase_cost === null
-            ? '—'
-            : formatPKR(Number(row.last_purchase_cost), locale)}
-        </Typography>
-      )
-    },
+    ...(canViewProductCost
+      ? [
+          {
+            id: 'avg_cost',
+            header: t('products:fields.avg_cost'),
+            align: 'end' as const,
+            hideOnMobile: true,
+            cell: (row: ProductVariantRow) => (
+              <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
+                {formatPKR(Number(row.avg_cost ?? 0), locale)}
+              </Typography>
+            )
+          },
+          {
+            id: 'last_purchase',
+            header: t('products:fields.last_purchase_cost'),
+            align: 'end' as const,
+            hideOnMobile: true,
+            cell: (row: ProductVariantRow) => (
+              <Typography variant='body2' sx={{ color: 'var(--text-muted)' }}>
+                {row.last_purchase_cost === null
+                  ? '—'
+                  : formatPKR(Number(row.last_purchase_cost), locale)}
+              </Typography>
+            )
+          }
+        ]
+      : []),
     {
       id: 'action',
       header: '',

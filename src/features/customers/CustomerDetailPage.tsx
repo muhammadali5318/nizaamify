@@ -28,6 +28,8 @@ import {
   Tooltip,
   type DataTableColumn
 } from 'src/components/ui'
+import { PermissionGated } from 'src/components/ui/PermissionGated'
+import { usePermission } from 'src/lib/permissions'
 
 const truncate = (s: string, n = 60) =>
   s.length > n ? `${s.slice(0, n - 1)}…` : s
@@ -47,6 +49,18 @@ export default function CustomerDetailPage() {
     : null
   const { data: entries, isLoading: loadingEntries } = useLedgerEntries(id)
   const [paymentOpen, setPaymentOpen] = useState(false)
+  // v2.9.1 D.6 — grey-out action gates per B.2 (CRUD page).
+  const canReverseLedger = usePermission('reverse_ledger_entry')
+  // v2.9.1 hot-patch — catalog: view_customer_outstanding controls whether
+  // the numeric balance is visible. Without it, only a has_khata boolean
+  // ("Has outstanding khata: Yes/No") is shown. Same column-leak caveat
+  // as the cost columns (raw API still exposes the numeric); v2.10
+  // cleanup target = conditional-projection via customer_outstanding view.
+  const canViewCustomerOutstanding = usePermission('view_customer_outstanding')
+  // v2.9.1 hot-patch — view_customer_khata gates the full ledger history
+  // (debits + credits). Owner+manager have it by default; salesperson does
+  // not. When missing, HIDE the entire ledger section.
+  const canViewCustomerKhata = usePermission('view_customer_khata')
   const [reverseTarget, setReverseTarget] = useState<LedgerEntryView | null>(
     null
   )
@@ -194,6 +208,7 @@ export default function CustomerDetailPage() {
         const isReversal = !!e.reverses_entry_id
         const isReversed = !!e.reversed_by_entry_id
         if (isReversal || isReversed) return null
+        if (!canReverseLedger) return null
         return (
           <Tooltip title={t('khata:entry.reverse_action')}>
             <IconButton
@@ -254,38 +269,63 @@ export default function CustomerDetailPage() {
               >
                 {t('khata:fields.outstanding')}
               </Typography>
-              <Typography
-                variant='h2'
-                component='span'
-                sx={{
-                  fontWeight: 700,
-                  color:
-                    outstandingAmount > 0
-                      ? 'var(--status-warning-text)'
-                      : outstandingAmount < 0
-                        ? 'var(--status-error-text)'
-                        : 'var(--status-success-text)'
-                }}
-              >
-                {formatPKR(outstandingAmount, locale)}
-              </Typography>
+              {canViewCustomerOutstanding ? (
+                <Typography
+                  variant='h2'
+                  component='span'
+                  sx={{
+                    fontWeight: 700,
+                    color:
+                      outstandingAmount > 0
+                        ? 'var(--status-warning-text)'
+                        : outstandingAmount < 0
+                          ? 'var(--status-error-text)'
+                          : 'var(--status-success-text)'
+                  }}
+                >
+                  {formatPKR(outstandingAmount, locale)}
+                </Typography>
+              ) : (
+                // No view_customer_outstanding — render the has_khata boolean
+                // per catalog ("user sees only a has_khata boolean without
+                // the numeric value").
+                <Typography
+                  variant='h3'
+                  component='span'
+                  sx={{
+                    fontWeight: 600,
+                    color:
+                      outstandingAmount > 0
+                        ? 'var(--status-warning-text)'
+                        : 'var(--text-secondary)'
+                  }}
+                >
+                  {outstandingAmount > 0
+                    ? t('customers:has_khata')
+                    : t('customers:no_khata')}
+                </Typography>
+              )}
             </Box>
             <Stack direction='row' spacing={1}>
-              <Button
-                variant='secondary'
-                startIcon={<EditIcon />}
-                onClick={() => navigate(paths.gotoCustomerEdit(customer.id))}
-              >
-                {t('customers:actions.edit')}
-              </Button>
-              <Button
-                variant='primary'
-                startIcon={<PaymentsIcon />}
-                disabled={outstandingAmount <= 0}
-                onClick={() => setPaymentOpen(true)}
-              >
-                {t('khata:receive_payment.open')}
-              </Button>
+              <PermissionGated permission='edit_customer'>
+                <Button
+                  variant='secondary'
+                  startIcon={<EditIcon />}
+                  onClick={() => navigate(paths.gotoCustomerEdit(customer.id))}
+                >
+                  {t('customers:actions.edit')}
+                </Button>
+              </PermissionGated>
+              <PermissionGated permission='receive_payment'>
+                <Button
+                  variant='primary'
+                  startIcon={<PaymentsIcon />}
+                  disabled={outstandingAmount <= 0}
+                  onClick={() => setPaymentOpen(true)}
+                >
+                  {t('khata:receive_payment.open')}
+                </Button>
+              </PermissionGated>
             </Stack>
           </Stack>
         </Stack>
@@ -334,25 +374,31 @@ export default function CustomerDetailPage() {
         )}
       </Card>
 
-      <Card noPadding>
-        <Box sx={{ p: 2, borderBottom: '1px solid var(--border-subtle)' }}>
-          <Typography variant='h3'>{t('khata:history.title')}</Typography>
-        </Box>
-        <Box sx={{ p: 2 }}>
-          <DataTable
-            columns={ledgerColumns}
-            rows={entriesWithBalance}
-            getRowId={(e) => e.id}
-            loading={loadingEntries}
-            empty={
-              <Box sx={{ py: 4 }}>
-                <EmptyState title={t('khata:history.empty')} />
-              </Box>
-            }
-            ariaLabel={t('khata:history.title')}
-          />
-        </Box>
-      </Card>
+      {/* v2.9.1: ledger section gated on view_customer_khata. HIDE entirely
+       *  when missing — salesperson sees only customer header + outstanding
+       *  badge (the latter falls back to has_khata when view_customer_
+       *  outstanding is also missing). */}
+      {canViewCustomerKhata && (
+        <Card noPadding>
+          <Box sx={{ p: 2, borderBottom: '1px solid var(--border-subtle)' }}>
+            <Typography variant='h3'>{t('khata:history.title')}</Typography>
+          </Box>
+          <Box sx={{ p: 2 }}>
+            <DataTable
+              columns={ledgerColumns}
+              rows={entriesWithBalance}
+              getRowId={(e) => e.id}
+              loading={loadingEntries}
+              empty={
+                <Box sx={{ py: 4 }}>
+                  <EmptyState title={t('khata:history.empty')} />
+                </Box>
+              }
+              ariaLabel={t('khata:history.title')}
+            />
+          </Box>
+        </Card>
+      )}
 
       <ReceivePaymentDialog
         open={paymentOpen}
