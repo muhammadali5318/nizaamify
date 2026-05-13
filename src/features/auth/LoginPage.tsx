@@ -7,6 +7,7 @@ import { Link as RouterLink, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { loginSchema, type LoginValues } from './schemas'
 import { supabase } from 'src/lib/supabase'
+import { consumeAccessRevokedFlag } from 'src/lib/accessRevoked'
 import { paths } from 'src/paths'
 import AuthLayout from './AuthLayout'
 import { Banner, Button, Field, Input } from 'src/components/ui'
@@ -21,6 +22,11 @@ export default function LoginPage() {
   const { t } = useTranslation(['auth', 'common'])
   const navigate = useNavigate()
   const [serverError, setServerError] = useState<string | null>(null)
+  // Read the access-revoked flag once on mount and freeze the result.
+  // Calling consume in render would clear the flag on the first render
+  // and miss it on the strict-mode double-invoke; useState's initializer
+  // runs exactly once.
+  const [accessRevoked] = useState<boolean>(() => consumeAccessRevokedFlag())
 
   const {
     register,
@@ -51,6 +57,9 @@ export default function LoginPage() {
     >
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <Stack spacing={2.5}>
+          {accessRevoked && !serverError && (
+            <Banner variant='warning'>{t('auth:login.access_revoked')}</Banner>
+          )}
           {serverError && <Banner variant='error'>{serverError}</Banner>}
 
           <Field
