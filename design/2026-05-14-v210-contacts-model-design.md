@@ -1,0 +1,504 @@
+# v2.10 Contacts — Model Design (Locked Schema)
+
+**Status:** Locked at end of Phase B (2026-05-14). Source of truth for
+Phase C migrations 0096–0105.
+**Companion docs:** `2026-05-14-v210-contacts-attack-surface.md`,
+`2026-05-14-v210-contacts-implementation-plan.md`.
+**Audit basis:** `audit/2026-05-14-v210-contacts-pre-design-audit.md`.
+
+This document is the locked schema after Phase B. Decisions trace to the
+B.0–B.6 sub-decisions listed in §0.
+
+---
+
+## 0. Decisions locked in Phase B
+
+| # | Decision | Locked value |
+|---|---|---|
+| B.0.1 | Supplier-side ledger structure | Unified `ledger_entries` table with `direction` enum |
+| B.0.2 | Payable ledger entries created by | `record_purchase` gaining `p_amount_paid` |
+| B.0.3 | Non-owner control for supplier payments | New `pay_supplier` permission + `shops.salesperson_supplier_payment_cap_pkr` (default 0) |
+| B.0.4 | Credit limit columns | Skipped in v2.10 (defer to future version) |
+| B.1.1 | `contacts` schema | See §1 |
+| B.1.2 | Promotion audit on direct creation with `'both'` | Fields stay NULL (only flips populate them) |
+| B.1.3 | Collateral schema changes | See §2 |
+| B.2 | Net position computation | View-computed from cached sides; no third cached column |
+| B.3 | Promotion modal copy | Draft 2 ("more explicit"); en + ur; mirror form for opposite-direction promotion |
+| B.4 | Permission preset defaults | "Strict (folded, owner-conservative)"; 12 new keys (see attack-surface doc) |
+| B.5 | `/contacts` filters and `/khata` location | Defaults Type=All / Active=Active / Outstanding=All; `/khata` becomes unified with customer/supplier toggle |
+| B.6 | `_v28` shim retirement scope | Narrow (14 customer/supplier-touching shims only); broad cleanup queued for v2.11 |
+
+Three rules cover most v2.10 decisions:
+
+1. **Unified ledger, unified contacts, unified history.** One table per
+   concept; the `direction`/`contact_type` columns carry the asymmetry.
+2. **Cached on the row, computed in the view.** Each side caches its own
+   outstanding balance; net position and projections happen at read time.
+3. **Owner-conservative defaults.** Supplier-side cost data and
+   financial-scope-changing operations default to owner-only;
+   admin can opt non-owners in per-shop.
+
+---
+
+## 1. `contacts` table
+
+```sql
+CREATE TABLE contacts (
+  id                            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  shop_id                       uuid NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+
+  -- Identity
+  name                          text NOT NULL,
+  phone                         text NOT NULL,
+  address                       text,
+  notes                         text,
+
+  -- Type
+  contact_type                  text NOT NULL
+                                  CHECK (contact_type IN ('customer','supplier','both')),
+
+  -- Customer side
+  customer_tier_id              uuid REFERENCES customer_tiers(id),
+  customer_outstanding_balance  numeric(12,2) NOT NULL DEFAULT 0,
+
+  -- Supplier side
+  supplier_outstanding_balance  numeric(12,2) NOT NULL DEFAULT 0,
+
+  -- Lifecycle
+  is_active                     boolean NOT NULL DEFAULT true,
+
+  -- Audit (v2.9.1 _by_user_id pattern)
+  created_at                    timestamptz NOT NULL DEFAULT now(),
+  updated_at                    timestamptz NOT NULL DEFAULT now(),
+  created_by_user_id            uuid,
+  updated_by_user_id            uuid,
+  promoted_to_both_at           timestamptz,
+  promoted_to_both_by_user_id   uuid,
+
+  -- Invariants
+  CONSTRAINT contacts_phone_unique_per_shop UNIQUE (shop_id, phone),
+
+  CONSTRAINT customer_tier_only_for_customers CHECK (
+    customer_tier_id IS NULL OR contact_type IN ('customer','both')
+  ),
+
+  CONSTRAINT promotion_audit_paired CHECK (
+    (promoted_to_both_at IS NULL    AND promoted_to_both_by_user_id IS NULL)
+    OR
+    (promoted_to_both_at IS NOT NULL AND promoted_to_both_by_user_id IS NOT NULL)
+  )
+);
+
+CREATE INDEX idx_contacts_shop_type
+  ON contacts (shop_id, contact_type)
+  WHERE is_active;
+
+CREATE INDEX idx_contacts_shop_outstanding_customer
+  ON contacts (shop_id)
+  WHERE customer_outstanding_balance > 0 AND is_active;
+
+CREATE INDEX idx_contacts_shop_outstanding_supplier
+  ON contacts (shop_id)
+  WHERE supplier_outstanding_balance > 0 AND is_active;
+```
+
+### 1.1 Field rationale (non-obvious)
+
+- `phone` is **NOT NULL** (was nullable on `suppliers.contact`). The L1
+  unique key requires presence; in practice every Pakistani SMB contact
+  has a phone.
+- `customer_outstanding_balance` and `supplier_outstanding_balance` are
+  **both NOT NULL DEFAULT 0** regardless of `contact_type`. The unused
+  side of a single-role contact carries 0. Simplifies trigger logic
+  (always update the row's relevant column without conditional INSERT).
+- `customer_tier_id` is NULLable and FK-constrained; the CHECK on
+  contact_type prevents supplier-only contacts from holding a tier.
+- `promotion_audit_paired` CHECK ensures the two audit fields move
+  together — protects against partial updates.
+- Three indexes:
+  - `idx_contacts_shop_type` — drives the `/contacts` page's type-filter
+    chips.
+  - `idx_contacts_shop_outstanding_customer` — drives the `/khata`
+    customer-side toggle.
+  - `idx_contacts_shop_outstanding_supplier` — drives the `/khata`
+    supplier-side toggle.
+
+### 1.2 Triggers on `contacts`
+
+```sql
+-- touch updated_at
+CREATE TRIGGER contacts_touch
+  BEFORE UPDATE ON contacts
+  FOR EACH ROW EXECUTE FUNCTION touch_updated_at();
+
+-- tier_change_gate: ported from check_customer_tier_change_gate, but
+-- applies only when contact_type touches customer
+CREATE TRIGGER v210_contacts_tier_change_gate
+  BEFORE UPDATE ON contacts
+  FOR EACH ROW
+  WHEN (OLD.customer_tier_id IS DISTINCT FROM NEW.customer_tier_id)
+  EXECUTE FUNCTION check_contact_tier_change_gate();
+
+-- promotion audit guard: when contact_type flips to 'both', ensure
+-- audit fields are populated. promote_contact RPC writes them; this
+-- trigger blocks bare UPDATEs that flip contact_type without the audit.
+CREATE TRIGGER v210_contacts_promotion_audit_required
+  BEFORE UPDATE ON contacts
+  FOR EACH ROW
+  WHEN (OLD.contact_type <> 'both' AND NEW.contact_type = 'both')
+  EXECUTE FUNCTION enforce_promotion_audit_populated();
+```
+
+---
+
+## 2. Collateral schema changes
+
+### 2.1 `ledger_entries` — unified ledger
+
+```sql
+ALTER TABLE ledger_entries RENAME COLUMN customer_id TO contact_id;
+
+ALTER TABLE ledger_entries ADD COLUMN direction text NOT NULL
+  DEFAULT 'receivable'
+  CHECK (direction IN ('receivable','payable'));
+
+-- existing 5 ledger rows (all customer-side) backfilled by DEFAULT
+ALTER TABLE ledger_entries ALTER COLUMN direction DROP DEFAULT;
+
+-- indexes follow the rename
+ALTER INDEX idx_ledger_entries_customer_created
+  RENAME TO idx_ledger_entries_contact_created;
+ALTER INDEX idx_ledger_entries_customer_occurred
+  RENAME TO idx_ledger_entries_contact_occurred;
+ALTER INDEX ledger_shop_customer_idx
+  RENAME TO ledger_shop_contact_idx;
+
+-- direction-filtered partial indexes for the two khata toggles
+CREATE INDEX idx_ledger_entries_receivable
+  ON ledger_entries (contact_id, occurred_at DESC)
+  WHERE direction = 'receivable';
+
+CREATE INDEX idx_ledger_entries_payable
+  ON ledger_entries (contact_id, occurred_at DESC)
+  WHERE direction = 'payable';
+```
+
+**Trigger update:** `ledger_entries_update_balance` retargets from
+`customers.outstanding_balance` to one of `contacts.customer_outstanding_balance`
+or `contacts.supplier_outstanding_balance` based on `direction`:
+
+```
+IF NEW.direction = 'receivable' THEN
+  -- customer side: debit increases balance, credit decreases
+  UPDATE contacts SET customer_outstanding_balance = ... WHERE id = NEW.contact_id;
+ELSE  -- 'payable'
+  -- supplier side: debit (we owe more) increases, credit (we paid) decreases
+  UPDATE contacts SET supplier_outstanding_balance = ... WHERE id = NEW.contact_id;
+END IF;
+```
+
+The append-only invariant (`ledger_entries_immutable` trigger) extends
+to cover the new `direction` column — once written, immutable.
+
+### 2.2 `purchases` — credit purchases support
+
+```sql
+ALTER TABLE purchases ADD COLUMN amount_paid numeric(12,2)
+  NOT NULL DEFAULT 0;
+
+ALTER TABLE purchases ADD COLUMN outstanding numeric(12,2)
+  GENERATED ALWAYS AS (GREATEST(0::numeric, total_cost - amount_paid)) STORED;
+
+ALTER TABLE purchases RENAME COLUMN supplier_id TO contact_id;
+
+-- existing 6 production purchases backfill: amount_paid = total_cost
+-- (since all v1.x/v2.9 purchases were implicitly fully paid)
+-- This is done in the data migration step 0098.
+
+-- index rename
+ALTER INDEX idx_purchases_supplier RENAME TO idx_purchases_contact;
+```
+
+### 2.3 `shops` — non-owner supplier payment cap
+
+```sql
+ALTER TABLE shops ADD COLUMN salesperson_supplier_payment_cap_pkr
+  numeric(12,2) NOT NULL DEFAULT 0;
+```
+
+### 2.4 `invoices` — passthrough rename
+
+```sql
+ALTER TABLE invoices RENAME COLUMN customer_id TO contact_id;
+
+ALTER INDEX idx_invoices_customer_created
+  RENAME TO idx_invoices_contact_created;
+```
+
+### 2.5 `inventory_batches` — passthrough rename
+
+```sql
+ALTER TABLE inventory_batches RENAME COLUMN supplier_id TO contact_id;
+
+-- batch_immutable_fields trigger body updated: references contact_id
+-- instead of supplier_id.
+
+-- new index (was missing on supplier_id per audit §1.6)
+CREATE INDEX idx_inventory_batches_contact
+  ON inventory_batches (contact_id)
+  WHERE contact_id IS NOT NULL;
+```
+
+### 2.6 `customer_balance_reconciliation` view → `contact_balance_reconciliation`
+
+Renamed and updated to use `contact_id` + the new ledger schema. The
+direction filter applies on read.
+
+```sql
+DROP VIEW customer_balance_reconciliation;
+
+CREATE VIEW contact_balance_reconciliation AS
+SELECT
+  c.id AS contact_id,
+  c.shop_id,
+  c.customer_outstanding_balance AS stored_customer_balance,
+  c.supplier_outstanding_balance AS stored_supplier_balance,
+  COALESCE((SELECT SUM(CASE WHEN type='debit' THEN amount ELSE -amount END)
+            FROM ledger_entries le
+            WHERE le.contact_id = c.id AND le.direction = 'receivable'), 0)::numeric(12,2)
+    AS computed_customer_balance,
+  COALESCE((SELECT SUM(CASE WHEN type='debit' THEN amount ELSE -amount END)
+            FROM ledger_entries le
+            WHERE le.contact_id = c.id AND le.direction = 'payable'), 0)::numeric(12,2)
+    AS computed_supplier_balance,
+  -- drift columns
+  (c.customer_outstanding_balance - <subquery>)::numeric(12,2) AS customer_drift,
+  (c.supplier_outstanding_balance - <subquery>)::numeric(12,2) AS supplier_drift
+FROM contacts c;
+```
+
+---
+
+## 3. New views
+
+### 3.1 `contacts_view` — conditional-projection per v2.9.2
+
+Replaces `customers_view` + `suppliers_view`. Single view; permission
+projection per side.
+
+```sql
+CREATE VIEW contacts_view
+WITH (security_invoker = false) AS
+WITH caller_perms AS MATERIALIZED (
+  SELECT
+    (SELECT current_active_shop_id()) AS active_shop_id,
+    (SELECT user_has_permission((SELECT current_active_shop_id()),
+      'view_contacts')) AS can_view,
+    (SELECT user_has_permission((SELECT current_active_shop_id()),
+      'view_contact_contact_info')) AS can_see_contact_info,
+    (SELECT user_has_permission((SELECT current_active_shop_id()),
+      'view_contact_customer_data')) AS can_see_customer_data,
+    (SELECT user_has_permission((SELECT current_active_shop_id()),
+      'view_contact_supplier_data')) AS can_see_supplier_data,
+    (SELECT user_has_permission((SELECT current_active_shop_id()),
+      'view_contact_net_position')) AS can_see_net
+)
+SELECT
+  c.id,
+  c.shop_id,
+  c.name,
+  c.contact_type,
+  -- Contact info (phone/address) conditionally projected
+  CASE WHEN cp.can_see_contact_info THEN c.phone    ELSE NULL END AS phone,
+  CASE WHEN cp.can_see_contact_info THEN c.address  ELSE NULL END AS address,
+  c.customer_tier_id,
+  -- Customer side
+  CASE WHEN cp.can_see_customer_data THEN c.customer_outstanding_balance ELSE NULL END
+    AS customer_outstanding_balance,
+  (c.customer_outstanding_balance > 0) AS has_customer_khata,
+  -- Supplier side
+  CASE WHEN cp.can_see_supplier_data THEN c.supplier_outstanding_balance ELSE NULL END
+    AS supplier_outstanding_balance,
+  (c.supplier_outstanding_balance > 0) AS has_supplier_payable,
+  -- Net position: requires both, conditional projection of the arithmetic
+  CASE
+    WHEN cp.can_see_net
+    THEN (c.customer_outstanding_balance - c.supplier_outstanding_balance)::numeric(12,2)
+    ELSE NULL
+  END AS net_outstanding,
+  c.is_active,
+  c.notes,
+  c.created_at,
+  c.updated_at,
+  c.created_by_user_id,
+  c.promoted_to_both_at,
+  c.promoted_to_both_by_user_id
+FROM contacts c
+CROSS JOIN caller_perms cp
+WHERE c.shop_id = cp.active_shop_id AND cp.can_view;
+```
+
+### 3.2 `customer_outstanding` (rebuilt for direction='receivable')
+
+```sql
+CREATE OR REPLACE VIEW customer_outstanding AS
+WITH caller_perms AS MATERIALIZED (
+  SELECT (SELECT current_active_shop_id()) AS active_shop_id,
+         (SELECT user_has_permission((SELECT current_active_shop_id()),
+           'view_contact_customer_data')) AS can_see
+)
+SELECT
+  c.shop_id,
+  c.id AS contact_id,
+  c.name,
+  c.phone,
+  CASE WHEN cp.can_see THEN
+    (COALESCE(SUM(CASE WHEN le.type='debit'  THEN le.amount ELSE 0 END), 0)
+   - COALESCE(SUM(CASE WHEN le.type='credit' THEN le.amount ELSE 0 END), 0))::numeric(12,2)
+  ELSE NULL END AS outstanding,
+  MAX(le.created_at) AS last_activity_at
+FROM contacts c
+LEFT JOIN ledger_entries le
+  ON le.contact_id = c.id AND le.direction = 'receivable'
+CROSS JOIN caller_perms cp
+WHERE c.shop_id = cp.active_shop_id
+  AND c.contact_type IN ('customer','both')
+GROUP BY c.shop_id, c.id, c.name, c.phone, cp.can_see;
+```
+
+### 3.3 `supplier_outstanding` (new — mirror of customer_outstanding)
+
+```sql
+CREATE VIEW supplier_outstanding AS
+WITH caller_perms AS MATERIALIZED (
+  SELECT (SELECT current_active_shop_id()) AS active_shop_id,
+         (SELECT user_has_permission((SELECT current_active_shop_id()),
+           'view_contact_supplier_data')) AS can_see
+)
+SELECT
+  c.shop_id,
+  c.id AS contact_id,
+  c.name,
+  c.phone,
+  CASE WHEN cp.can_see THEN
+    (COALESCE(SUM(CASE WHEN le.type='debit'  THEN le.amount ELSE 0 END), 0)
+   - COALESCE(SUM(CASE WHEN le.type='credit' THEN le.amount ELSE 0 END), 0))::numeric(12,2)
+  ELSE NULL END AS outstanding,
+  MAX(le.created_at) AS last_activity_at
+FROM contacts c
+LEFT JOIN ledger_entries le
+  ON le.contact_id = c.id AND le.direction = 'payable'
+CROSS JOIN caller_perms cp
+WHERE c.shop_id = cp.active_shop_id
+  AND c.contact_type IN ('supplier','both')
+GROUP BY c.shop_id, c.id, c.name, c.phone, cp.can_see;
+```
+
+### 3.4 `purchases_view` — extended
+
+Update `purchases_view` to project `amount_paid`, `outstanding`,
+`contact_id`, `contact_name`. Permission still `view_purchases`.
+
+### 3.5 `invoices_view`, `invoice_financials`, `invoice_with_discount_detail`
+
+Mechanical rename: `customer_id` → `contact_id` throughout. No projection
+logic change.
+
+### 3.6 `inventory_batches_view`
+
+Mechanical rename: `supplier_id` → `contact_id`. Same conditional cost
+projection.
+
+### 3.7 `batches_warranty_expiring_soon`
+
+Update LEFT JOIN target from `suppliers` to `contacts`. The
+`supplier_name` exposed column becomes `contact_name`.
+
+---
+
+## 4. RPC catalog after v2.10
+
+### 4.1 New RPCs
+
+| RPC | DEFINER | Permission gate | Purpose |
+|---|---|---|---|
+| `create_contact_basic(p_name, p_phone, p_contact_type)` | DEFINER | `create_contact_basic` + contact_type-specific gates | Returns new contact_id; phone-collision returns specific error code (see promotion flow) |
+| `create_contact_full(p_name, p_phone, p_address, p_notes, p_contact_type, p_customer_tier_id)` | DEFINER | `create_contact_full` | Full creation including tier |
+| `update_contact(p_id, p_name, p_phone, p_address, p_notes, p_customer_tier_id)` | DEFINER | `edit_contact` (+ `assign_contact_tier` if tier changes) | Update non-type fields |
+| `archive_contact(p_id)` | DEFINER | `edit_contact` | Set `is_active = false` |
+| `promote_contact(p_id, p_target_type)` | DEFINER | `promote_contact` | Flip type from single-side → `'both'` and write audit fields. Source side and target side validation |
+| `pay_supplier(p_contact_id, p_amount, p_notes)` | DEFINER | `pay_supplier` + cap check | Posts payable credit entry; same shape as `receive_payment` |
+| `get_contact_unified_history(p_contact_id, p_from, p_to, p_filter)` | DEFINER | `view_contacts` + side-specific gates | Returns sales / purchases / payments interleaved by date |
+
+### 4.2 Modified RPCs
+
+| RPC | Change |
+|---|---|
+| `record_sale` | `p_customer_id` → `p_contact_id` |
+| `record_purchase` | `p_supplier_id` → `p_contact_id`; new `p_amount_paid` param |
+| `receive_payment` | `p_customer_id` → `p_contact_id` |
+| `reverse_ledger_entry` | No signature change; permission gate splits by `direction` of reversed entry |
+| `list_customers` → `list_contacts` | Adds `p_contact_type` filter |
+| `recent_customers` + `recent_suppliers` → `recent_contacts` | Single RPC; `p_contact_type` filter |
+| `search_suppliers` → folded into `list_contacts` filter | Deprecated |
+| `search_purchases` | `p_supplier_id` → `p_contact_id` |
+| `search_khata_customers` → `search_khata_contacts` | `p_direction` parameter ('receivable' / 'payable') |
+| `search_khata_customers_count` → `search_khata_contacts_count` | Same |
+
+### 4.3 Retired RPCs (and their `_v28` shims per B.6 narrow scope)
+
+| Retired | Reason |
+|---|---|
+| `create_customer_basic`, `create_customer_full` + `_v28` shims (if exist) | Folded into `create_contact_basic`/`_full` |
+| `update_customer` | Folded into `update_contact` |
+| `create_supplier_inline` + `_v28` | Folded into `create_contact_basic` |
+| `update_supplier` | Folded into `update_contact` |
+| `archive_supplier` | Folded into `archive_contact` |
+| `recent_customers` + `_v28`, `recent_suppliers` + `_v28` | Folded into `recent_contacts` |
+| `list_customers` + `_v28`, `search_suppliers` + `_v28` | Folded into `list_contacts` |
+| `search_khata_customers` + `_v28`, `search_khata_customers_count` + `_v28` | Renamed (direction param added) |
+| `receive_payment_v28`, `record_sale_v28`, `record_purchase_v28`, `search_purchases_v28`, `search_purchases_count_v28` | Inner shims become dead pointers when `customers`/`suppliers` are dropped; retired per B.6 |
+
+Total `_v28` shims retired in v2.10: **14** (per audit §2.2 + tier-side
+`define_tier_v28` / `update_tier_v28` / `deactivate_tier_v28` /
+`set_default_tier_v28` if the contact-touching path warrants it —
+finalized in Phase C migration 0103). Remaining 27 unrelated `_v28`
+shims stay; v2.11 cleanup migration handles them per the queued ADR.
+
+---
+
+## 5. Trigger inventory after v2.10
+
+| Trigger | Table | Purpose |
+|---|---|---|
+| `contacts_touch` | `contacts` | Sets `updated_at` |
+| `v210_contacts_tier_change_gate` | `contacts` | Per-row CHECK on tier-change permission |
+| `v210_contacts_promotion_audit_required` | `contacts` | Blocks bare flips to `'both'` without promote_contact path |
+| `ledger_entries_update_balance` | `ledger_entries` | Direction-aware cache update |
+| `ledger_entries_immutable` | `ledger_entries` | Append-only invariant (extended to cover `direction`) |
+| `ledger_audit_at_insert` | `ledger_entries` | Audit `_by_user_id` write at INSERT |
+| `batch_immutable_fields` | `inventory_batches` | Updated to reference `contact_id` |
+| `purchases_touch` | `purchases` | Existing |
+
+---
+
+## 6. Open items deferred to Phase C
+
+These are implementation-level details that don't need pre-decision but
+will surface during Phase C migration drafting:
+
+1. Exact migration-time conflict policy if production already holds
+   data (the production data wipe per Finding 1 makes this moot for the
+   v2.10+v2.11 ship moment, but the migration script must still handle
+   the staging environment which may seed test data).
+2. Whether `inventory_batches.contact_id` should become NOT NULL after
+   migration (currently NULLable on `supplier_id`). Defer to Phase C.
+3. Whether `define_tier` / `update_tier` / `deactivate_tier` /
+   `set_default_tier` `_v28` shims fall under the B.6 narrow retirement
+   scope. They touch `customer_tiers` but not `customers` or
+   `suppliers` — likely stay until v2.11 broad cleanup.
+
+---
+
+**End of model design. See attack-surface and implementation-plan docs
+for security perimeter and migration sequence.**
