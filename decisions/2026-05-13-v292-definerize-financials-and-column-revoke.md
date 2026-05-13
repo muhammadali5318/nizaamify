@@ -1,14 +1,17 @@
-# ADR — v2.10a: DEFINER-ize the v2.6c financial views + column-level grant pattern for sale_items.cost_at_sale
+# ADR — v2.9.2: DEFINER-ize the v2.6c financial views + column-level grant pattern for sale_items.cost_at_sale
 
 **Date:** 2026-05-13
 **Status:** Accepted
-**Migration:** `0092_v210_definerize_financial_views_and_revoke_cost_at_sale.sql` + `0093_v210_column_grant_pattern_for_sale_items.sql`
+**Migration (in source):** `0092_v292_definerize_financial_views_and_revoke_cost_at_sale.sql` + `0093_v292_column_grant_pattern_for_sale_items.sql`
+**Migration (production):** applied under historical name `0092_v210_*` + `0093_v210_*` (the supabase_migrations.schema_migrations table records the pre-rename names; the rename is a forward source fix)
+
+> **NAMING NOTE.** This work was authored under the working label "v2.10a" during a session where the security-hardening pass collided with the v2.10 feature ticket (returns/refunds/warranty). Renamed to v2.9.2 to free the v2.10 namespace for the feature work. See `decisions/2026-05-13-v292-naming-collision-with-returns-feature.md` for the rename rationale and the discipline lesson.
 
 ## Context
 
 Migration 0091 (v2.9.1 hot-patch) added permissive row-read policies on `invoices` and `sale_items` so salespersons (with `view_all_sales` but not `view_sale_cost`) could see their own sales rows. The trade-off accepted at the time, documented in the 0091 header:
 
-> RLS only gates rows, not columns. A salesperson with row visibility can read `sale_items.cost_at_sale` via raw Supabase JS even though the React UI doesn't render it. Acceptable for the v2.9.1 pilot; v2.10 cleanup must refactor hooks to use `*_view` + REVOKE SELECT cost columns at the grant layer.
+> RLS only gates rows, not columns. A salesperson with row visibility can read `sale_items.cost_at_sale` via raw Supabase JS even though the React UI doesn't render it. Acceptable for the v2.9.1 pilot; v2.9.2 (drafted as v2.10) cleanup must refactor hooks to use `*_view` + REVOKE SELECT cost columns at the grant layer.
 
 This ADR ships that cleanup.
 
@@ -74,7 +77,7 @@ select id from public.sale_items limit 1;
 
 **A. Skip cost_at_sale; only close the customer.outstanding_balance leak.** Partial coverage, leaves the bigger leak open. Rejected — the v2.9.1 acknowledgment specifically targeted `cost_at_sale`.
 
-**B. Refactor every hook to read from v2.9 `sale_items_view` / `invoices_view` (PostgREST nested joins).** PostgREST nested joins between views require explicit relationship metadata; building that out adds surface area without closing the v2.6c financial-view path. Rejected as too broad for v2.10a.
+**B. Refactor every hook to read from v2.9 `sale_items_view` / `invoices_view` (PostgREST nested joins).** PostgREST nested joins between views require explicit relationship metadata; building that out adds surface area without closing the v2.6c financial-view path. Rejected as too broad for v2.9.2's first slice.
 
 **C. Stay with `security_invoker = true` financial views and add a permission-check WHERE clause that filters rows to zero for non-cost-viewers.** This would close the cost leak via the financial views but also zero out revenue rollups for salespersons on Dashboard and Reports — salespersons would see "Total sales: 0" which is wrong (they should see their cashier-scoped revenue). Rejected.
 
@@ -92,13 +95,13 @@ select id from public.sale_items limit 1;
 - The Supabase security advisor will flag `sale_item_financials` and `invoice_financials` as `security_definer_view` warnings. Accepted, per ADR-0011 pattern — these warnings are baseline.
 - Any future migration that adds a column to `public.sale_items` MUST also `grant select (<new_col>) on public.sale_items to authenticated;`. The mig 0093 header documents this contract; missing the grant makes the column invisible to the application.
 - TypeScript shape change — `SaleDetailItem.{cost_at_sale, line_cost, line_profit}` are now nullable. Future readers must null-check before arithmetic. The component reads these only inside permission-gated cells, so the runtime path stays sound.
-- v2.10a does NOT close the analogous leaks on:
+- v2.9.2 (this ADR + migs 0094 + 0095) does NOT close the analogous leaks on:
   - `customers.outstanding_balance` (raw-API readable)
   - `inventory_batches.cost_per_unit` (raw-API readable)
   - `products.{cost, avg_cost, last_purchase_cost}` and `product_variants.*` cost columns (raw-API readable)
   - `purchase_items.cost_at_purchase` and overhead columns (raw-API readable for users with `view_purchases`)
 
-  v2.10b will extend the column-grant pattern to those tables once the v2.10a pattern proves stable in pilot. Tracking in `docs/todos.md`.
+  v2.9.3 (post-pilot) will extend the column-grant pattern to those tables once v2.9.2 proves stable in pilot. Tracking in `docs/todos.md`.
 
 ### Rollback
 
@@ -120,5 +123,5 @@ The cost-leak returns; mig 0091's permissive policies remain the only gate.
 
 - [[ADR-0011]] — DEFINER advisor warnings are accepted baseline.
 - [[ADR-0015]] — v1.8 hardening: views should use `security_invoker = true` *by default*. This ADR partially reverses that for permission-conditional views; see also ADR for v2.9 mig 0074 conditional projection.
-- [[v2.9.1 leaky-purchase-cost-acknowledgment]] — same pattern for purchase-side cost columns, also deferred to v2.10b.
+- [[v2.9.1 leaky-purchase-cost-acknowledgment]] — same pattern for purchase-side cost columns, deferred to v2.9.3 post-pilot.
 - [[v2.9.1 ledger audit at insert]] (mig 0086) — analogous DEFINER pattern for append-only rows.

@@ -1,6 +1,15 @@
--- 0092_v210_definerize_financial_views_and_revoke_cost_at_sale.sql
+-- 0092_v292_definerize_financial_views_and_revoke_cost_at_sale.sql
 --
--- v2.10a — Close the cost-column leak acknowledged in migration 0091.
+-- v2.9.2 — Close the cost-column leak acknowledged in migration 0091.
+--
+-- NAMING NOTE: This work was authored under the label "v2.10a" during a
+-- session where the security-hardening pass collided with the v2.10
+-- feature ticket (returns/refunds/warranty). Renamed to v2.9.2 per
+-- `decisions/2026-05-13-v292-naming-collision-with-returns-feature.md`.
+-- The migration was APPLIED to production under the historical name
+-- `0092_v210_definerize_financial_views_and_revoke_cost_at_sale` and
+-- the supabase_migrations.schema_migrations table reflects that. The
+-- local file rename is a forward fix; production history is intact.
 --
 -- CONTEXT
 -- -------
@@ -10,9 +19,9 @@
 --
 --   RLS only gates rows, not columns. A salesperson with row visibility
 --   can read `sale_items.cost_at_sale` via raw Supabase JS even though the
---   React UI doesn't render it. Acceptable for the v2.9.1 pilot; v2.10
---   cleanup must refactor hooks to use *_view + REVOKE SELECT cost
---   columns at the grant layer.
+--   React UI doesn't render it. Acceptable for the v2.9.1 pilot; v2.9.2
+--   (originally drafted as v2.10) cleanup must refactor hooks to use
+--   *_view + REVOKE SELECT cost columns at the grant layer.
 --
 -- This migration ships that cleanup. Two-front fix:
 --

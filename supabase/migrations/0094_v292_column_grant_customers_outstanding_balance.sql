@@ -1,7 +1,19 @@
--- 0094_v210b_column_grant_customers_outstanding_balance.sql
+-- 0094_v292_column_grant_customers_outstanding_balance.sql
 --
--- v2.10b target 1 — close the `customers.outstanding_balance` raw-API
--- leak using the column-grant pattern proven in v2.10a (mig 0093).
+-- v2.9.2 target 2 — close the `customers.outstanding_balance` raw-API
+-- leak using the column-grant pattern proven in mig 0093 (sale_items).
+--
+-- NAMING NOTE: Authored as "v2.10b target 1" and APPLIED to production
+-- as `0094_v210b_column_grant_customers_outstanding_balance`. Renamed
+-- to v2.9.2 per `decisions/2026-05-13-v292-naming-collision-with-returns-feature.md`.
+-- supabase_migrations.schema_migrations retains the v210b name.
+--
+-- The "target N" numbering within v2.9.2 went: target 1 = sale_items
+-- .cost_at_sale (migs 0092 + 0093); target 2 = customers
+-- .outstanding_balance (this mig 0094); target 3 = inventory_batches
+-- .cost_per_unit (mig 0095); targets 4 + 5 (products/variants cost +
+-- purchase_items cost) deferred to v2.9.3 post-pilot per
+-- `docs/todos.md`.
 --
 -- BEFORE: salesperson with view_all_customers but not
 -- view_customer_outstanding could `.from('customers').select('outstanding_balance')`
@@ -25,7 +37,7 @@
 -- Any future migration that adds a column to public.customers MUST also
 -- `grant select (<new_col>) on public.customers to authenticated;` or
 -- the column is invisible to the application. The current column
--- inventory below is the baseline as of v2.10b:
+-- inventory below is the baseline as of v2.9.2:
 --
 --   id, shop_id, name, phone, address, tier_id,
 --   [outstanding_balance],
