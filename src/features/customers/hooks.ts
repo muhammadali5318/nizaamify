@@ -7,7 +7,20 @@ import {
 import { supabase } from 'src/lib/supabase'
 import type { Database } from 'src/types/database'
 
-export type Customer = Database['public']['Tables']['customers']['Row']
+/**
+ * v2.10b — `customers.outstanding_balance` is revoked at the column-grant
+ * layer (mig 0094). `useCustomer` / `useCustomers` / `useCreateCustomer`
+ * read from `customers_view` (DEFINER, projects outstanding_balance
+ * conditionally on view_customer_outstanding) so callers without that
+ * permission get NULL instead of a 42501 error.
+ */
+export type Customer = Omit<
+  Database['public']['Tables']['customers']['Row'],
+  'outstanding_balance'
+> & {
+  outstanding_balance: number | null
+  has_khata?: boolean | null
+}
 
 export type CustomerListRow = {
   id: string
@@ -34,16 +47,22 @@ export function escapeIlike(s: string): string {
   return s.replace(/[\\%_]/g, (m) => `\\${m}`).replace(/'/g, "''")
 }
 
+// v2.10b — read columns explicitly from customers_view. Selecting '*'
+// against the raw `customers` table would error after mig 0094 because
+// `outstanding_balance` is no longer granted to authenticated.
+const CUSTOMER_VIEW_COLUMNS =
+  'id, shop_id, name, phone, address, tier_id, is_active, notes, created_at, updated_at, created_by_user_id, outstanding_balance, has_khata'
+
 export function useCustomers() {
   return useQuery({
     queryKey: ['customers'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('customers')
-        .select('*')
+        .from('customers_view')
+        .select(CUSTOMER_VIEW_COLUMNS)
         .order('name')
       if (error) throw error
-      return data
+      return (data ?? []) as unknown as Customer[]
     }
   })
 }
@@ -55,12 +74,12 @@ export function useCustomer(id: string | undefined) {
     queryFn: async () => {
       if (!id) return null
       const { data, error } = await supabase
-        .from('customers')
-        .select('*')
+        .from('customers_view')
+        .select(CUSTOMER_VIEW_COLUMNS)
         .eq('id', id)
         .single()
       if (error) throw error
-      return data
+      return data as unknown as Customer
     }
   })
 }
@@ -75,25 +94,24 @@ export function useCreateCustomer() {
       notes?: string | null
       tier_id?: string | null
     }) => {
-      const { data: shop, error: shopErr } = await supabase
-        .from('shops')
-        .select('id')
-        .single()
-      if (shopErr) throw shopErr
-      const { data, error } = await supabase
-        .from('customers')
-        .insert({
-          name: values.name,
-          phone: values.phone,
-          address: values.address ?? null,
-          notes: values.notes ?? null,
-          tier_id: values.tier_id ?? null,
-          shop_id: shop.id
-        })
-        .select('*')
-        .single()
+      const { data: newId, error } = await supabase.rpc(
+        'create_customer_full',
+        {
+          p_name: values.name,
+          p_phone: values.phone,
+          p_address: values.address ?? null,
+          p_notes: values.notes ?? null,
+          p_tier_id: values.tier_id ?? null
+        }
+      )
       if (error) throw error
-      return data
+      const { data, error: fetchErr } = await supabase
+        .from('customers_view')
+        .select(CUSTOMER_VIEW_COLUMNS)
+        .eq('id', newId as string)
+        .single()
+      if (fetchErr) throw fetchErr
+      return data as unknown as Customer
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['customers'] })
@@ -107,6 +125,10 @@ export function useCreateCustomer() {
 export function useUpdateCustomer() {
   const qc = useQueryClient()
   return useMutation({
+    // v2.9.1 D.6 — migrated from direct customers UPDATE to the
+    // update_customer DEFINER RPC (migration 0087). Server gates on
+    // edit_customer; tier change additionally gates on assign_customer_tier.
+    // Writes updated_by_user_id audit column (added in 0087 schema additive).
     mutationFn: async (values: {
       id: string
       name: string
@@ -115,21 +137,18 @@ export function useUpdateCustomer() {
       notes?: string | null
       tier_id?: string | null
     }) => {
-      const { id, ...rest } = values
-      const { data, error } = await supabase
-        .from('customers')
-        .update({
-          name: rest.name,
-          phone: rest.phone,
-          address: rest.address ?? null,
-          notes: rest.notes ?? null,
-          tier_id: rest.tier_id ?? null
-        })
-        .eq('id', id)
-        .select('*')
-        .single()
+      const { error } = await supabase.rpc('update_customer', {
+        p_id: values.id,
+        p_name: values.name,
+        p_phone: values.phone,
+        p_address: values.address ?? null,
+        p_notes: values.notes ?? null,
+        p_tier_id: values.tier_id ?? null
+      })
       if (error) throw error
-      return data
+      // RPC returns void; callers that expected the updated row must
+      // re-read via useCustomer. Invalidation below drives that refetch.
+      return values.id
     },
     onSuccess: (_data, vars) => {
       void qc.invalidateQueries({ queryKey: ['customers'] })
@@ -141,25 +160,10 @@ export function useUpdateCustomer() {
   })
 }
 
-export function useDeleteCustomer() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from('customers').delete().eq('id', id)
-      if (error) throw error
-      return id
-    },
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['customers'] })
-      void qc.invalidateQueries({ queryKey: ['customer-search'] })
-      void qc.invalidateQueries({ queryKey: ['customer-recent'] })
-      void qc.invalidateQueries({ queryKey: ['customer-list'] })
-    }
-  })
-}
-
 // Counts invoices and ledger entries linked to a customer.
-// Used to gate the Delete action on customer screens.
+// Previously gated the Delete action; retained because callers may
+// still use it for "has activity?" displays. v2.9 sweep removed
+// the delete capability — see ADR 2026-05-12-v2-9-0-1-frontend-sweep.
 export function useCustomerHistoryCount(id: string | undefined) {
   return useQuery({
     queryKey: ['customer-history', id],

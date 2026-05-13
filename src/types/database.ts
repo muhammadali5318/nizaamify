@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: '14.5'
   }
   public: {
     Tables: {
@@ -53,33 +53,33 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "customer_tiers_created_by_user_id_fkey"
-            columns: ["created_by_user_id"]
+            foreignKeyName: 'customer_tiers_created_by_user_id_fkey'
+            columns: ['created_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "customer_tiers_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'customer_tiers_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "customer_tiers_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'customer_tiers_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "customer_tiers_updated_by_user_id_fkey"
-            columns: ["updated_by_user_id"]
+            foreignKeyName: 'customer_tiers_updated_by_user_id_fkey'
+            columns: ['updated_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
         ]
       }
       customers: {
@@ -130,33 +130,33 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "customers_created_by_user_id_fkey"
-            columns: ["created_by_user_id"]
+            foreignKeyName: 'customers_created_by_user_id_fkey'
+            columns: ['created_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "customers_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'customers_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "customers_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'customers_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "customers_tier_id_fkey"
-            columns: ["tier_id"]
+            foreignKeyName: 'customers_tier_id_fkey'
+            columns: ['tier_id']
             isOneToOne: false
-            referencedRelation: "customer_tiers"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'customer_tiers'
+            referencedColumns: ['id']
+          }
         ]
       }
       expenses: {
@@ -192,26 +192,26 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "expenses_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: 'expenses_created_by_fkey'
+            columns: ['created_by']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "expenses_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'expenses_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "expenses_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'expenses_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       inventory_batches: {
@@ -277,96 +277,96 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "inventory_batches_last_modified_by_user_id_fkey"
-            columns: ["last_modified_by_user_id"]
+            foreignKeyName: 'inventory_batches_last_modified_by_user_id_fkey'
+            columns: ['last_modified_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "inventory_batches_purchase_item_id_fkey"
-            columns: ["purchase_item_id"]
+            foreignKeyName: 'inventory_batches_purchase_item_id_fkey'
+            columns: ['purchase_item_id']
             isOneToOne: false
-            referencedRelation: "purchase_item_financials"
-            referencedColumns: ["purchase_item_id"]
+            referencedRelation: 'purchase_item_financials'
+            referencedColumns: ['purchase_item_id']
           },
           {
-            foreignKeyName: "inventory_batches_purchase_item_id_fkey"
-            columns: ["purchase_item_id"]
+            foreignKeyName: 'inventory_batches_purchase_item_id_fkey'
+            columns: ['purchase_item_id']
             isOneToOne: false
-            referencedRelation: "purchase_items"
-            referencedColumns: ["id"]
+            referencedRelation: 'purchase_items'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "inventory_batches_purchase_item_id_fkey"
-            columns: ["purchase_item_id"]
+            foreignKeyName: 'inventory_batches_purchase_item_id_fkey'
+            columns: ['purchase_item_id']
             isOneToOne: false
-            referencedRelation: "purchase_items_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'purchase_items_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "inventory_batches_supplier_id_fkey"
-            columns: ["supplier_id"]
+            foreignKeyName: 'inventory_batches_supplier_id_fkey'
+            columns: ['supplier_id']
             isOneToOne: false
-            referencedRelation: "suppliers"
-            referencedColumns: ["id"]
+            referencedRelation: 'suppliers'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "inventory_batches_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "inventory_batches_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "inventory_batches_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "inventory_batches_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "inventory_batches_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "inventory_batches_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "inventory_batches_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "inventory_batches_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["variant_id"]
-          },
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['variant_id']
+          }
         ]
       }
       invoices: {
@@ -426,61 +426,61 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "invoices_cashier_id_fkey"
-            columns: ["cashier_id"]
+            foreignKeyName: 'invoices_cashier_id_fkey'
+            columns: ['cashier_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "invoices_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customer_balance_reconciliation"
-            referencedColumns: ["customer_id"]
+            referencedRelation: 'customer_balance_reconciliation'
+            referencedColumns: ['customer_id']
           },
           {
-            foreignKeyName: "invoices_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customer_outstanding"
-            referencedColumns: ["customer_id"]
+            referencedRelation: 'customer_outstanding'
+            referencedColumns: ['customer_id']
           },
           {
-            foreignKeyName: "invoices_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
+            referencedRelation: 'customers'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "invoices_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customers_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'customers_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "invoices_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'invoices_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "invoices_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'invoices_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "invoices_tier_id_fkey"
-            columns: ["tier_id"]
+            foreignKeyName: 'invoices_tier_id_fkey'
+            columns: ['tier_id']
             isOneToOne: false
-            referencedRelation: "customer_tiers"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'customer_tiers'
+            referencedColumns: ['id']
+          }
         ]
       }
       ledger_entries: {
@@ -528,96 +528,96 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ledger_entries_created_by_user_id_fkey"
-            columns: ["created_by_user_id"]
+            foreignKeyName: 'ledger_entries_created_by_user_id_fkey'
+            columns: ['created_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ledger_entries_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'ledger_entries_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customer_balance_reconciliation"
-            referencedColumns: ["customer_id"]
+            referencedRelation: 'customer_balance_reconciliation'
+            referencedColumns: ['customer_id']
           },
           {
-            foreignKeyName: "ledger_entries_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'ledger_entries_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customer_outstanding"
-            referencedColumns: ["customer_id"]
+            referencedRelation: 'customer_outstanding'
+            referencedColumns: ['customer_id']
           },
           {
-            foreignKeyName: "ledger_entries_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'ledger_entries_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
+            referencedRelation: 'customers'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ledger_entries_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'ledger_entries_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customers_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'customers_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ledger_entries_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'ledger_entries_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoice_financials"
-            referencedColumns: ["invoice_id"]
+            referencedRelation: 'invoice_financials'
+            referencedColumns: ['invoice_id']
           },
           {
-            foreignKeyName: "ledger_entries_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'ledger_entries_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoice_with_discount_detail"
-            referencedColumns: ["id"]
+            referencedRelation: 'invoice_with_discount_detail'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ledger_entries_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'ledger_entries_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoices"
-            referencedColumns: ["id"]
+            referencedRelation: 'invoices'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ledger_entries_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'ledger_entries_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoices_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'invoices_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ledger_entries_reverses_entry_id_fkey"
-            columns: ["reverses_entry_id"]
+            foreignKeyName: 'ledger_entries_reverses_entry_id_fkey'
+            columns: ['reverses_entry_id']
             isOneToOne: false
-            referencedRelation: "ledger_entries"
-            referencedColumns: ["id"]
+            referencedRelation: 'ledger_entries'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ledger_entries_reverses_entry_id_fkey"
-            columns: ["reverses_entry_id"]
+            foreignKeyName: 'ledger_entries_reverses_entry_id_fkey'
+            columns: ['reverses_entry_id']
             isOneToOne: false
-            referencedRelation: "ledger_entries_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'ledger_entries_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ledger_entries_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'ledger_entries_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "ledger_entries_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'ledger_entries_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       monthly_targets: {
@@ -656,26 +656,26 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "monthly_targets_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'monthly_targets_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "monthly_targets_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'monthly_targets_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "monthly_targets_updated_by_user_id_fkey"
-            columns: ["updated_by_user_id"]
+            foreignKeyName: 'monthly_targets_updated_by_user_id_fkey'
+            columns: ['updated_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
         ]
       }
       pending_invitations: {
@@ -694,7 +694,7 @@ export type Database = {
           permissions: Json
           preset_applied: string
           shop_id: string
-          status: Database["public"]["Enums"]["invitation_status"]
+          status: Database['public']['Enums']['invitation_status']
         }
         Insert: {
           accepted_at?: string | null
@@ -711,7 +711,7 @@ export type Database = {
           permissions: Json
           preset_applied: string
           shop_id: string
-          status?: Database["public"]["Enums"]["invitation_status"]
+          status?: Database['public']['Enums']['invitation_status']
         }
         Update: {
           accepted_at?: string | null
@@ -728,37 +728,37 @@ export type Database = {
           permissions?: Json
           preset_applied?: string
           shop_id?: string
-          status?: Database["public"]["Enums"]["invitation_status"]
+          status?: Database['public']['Enums']['invitation_status']
         }
         Relationships: [
           {
-            foreignKeyName: "pending_invitations_accepted_by_user_id_fkey"
-            columns: ["accepted_by_user_id"]
+            foreignKeyName: 'pending_invitations_accepted_by_user_id_fkey'
+            columns: ['accepted_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "pending_invitations_invited_by_user_id_fkey"
-            columns: ["invited_by_user_id"]
+            foreignKeyName: 'pending_invitations_invited_by_user_id_fkey'
+            columns: ['invited_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "pending_invitations_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'pending_invitations_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "pending_invitations_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'pending_invitations_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       permissions_catalog: {
@@ -836,33 +836,33 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "product_categories_created_by_user_id_fkey"
-            columns: ["created_by_user_id"]
+            foreignKeyName: 'product_categories_created_by_user_id_fkey'
+            columns: ['created_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "product_categories_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'product_categories_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "product_categories_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'product_categories_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "product_categories_updated_by_user_id_fkey"
-            columns: ["updated_by_user_id"]
+            foreignKeyName: 'product_categories_updated_by_user_id_fkey'
+            columns: ['updated_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
         ]
       }
       product_packs: {
@@ -907,138 +907,138 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "product_packs_created_by_user_id_fkey"
-            columns: ["created_by_user_id"]
+            foreignKeyName: 'product_packs_created_by_user_id_fkey'
+            columns: ['created_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "product_packs_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_packs_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_packs_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_packs_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_packs_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_packs_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_packs_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_packs_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_packs_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_packs_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_packs_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_packs_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_packs_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_packs_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
+            referencedRelation: 'products'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "product_packs_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_packs_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'products_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "product_packs_unit_id_fkey"
-            columns: ["unit_id"]
+            foreignKeyName: 'product_packs_unit_id_fkey'
+            columns: ['unit_id']
             isOneToOne: false
-            referencedRelation: "units_of_measure"
-            referencedColumns: ["id"]
+            referencedRelation: 'units_of_measure'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "product_packs_updated_by_user_id_fkey"
-            columns: ["updated_by_user_id"]
+            foreignKeyName: 'product_packs_updated_by_user_id_fkey'
+            columns: ['updated_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "product_packs_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'product_packs_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "product_packs_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'product_packs_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "product_packs_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'product_packs_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "product_packs_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'product_packs_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "product_packs_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'product_packs_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "product_packs_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'product_packs_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "product_packs_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'product_packs_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "product_packs_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'product_packs_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["variant_id"]
-          },
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['variant_id']
+          }
         ]
       }
       product_variant_attribute_values: {
@@ -1056,68 +1056,68 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "product_variant_attribute_values_attribute_value_id_fkey"
-            columns: ["attribute_value_id"]
+            foreignKeyName: 'product_variant_attribute_values_attribute_value_id_fkey'
+            columns: ['attribute_value_id']
             isOneToOne: false
-            referencedRelation: "variant_attribute_values"
-            referencedColumns: ["id"]
+            referencedRelation: 'variant_attribute_values'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "product_variant_attribute_values_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'product_variant_attribute_values_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "product_variant_attribute_values_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'product_variant_attribute_values_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "product_variant_attribute_values_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'product_variant_attribute_values_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "product_variant_attribute_values_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'product_variant_attribute_values_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "product_variant_attribute_values_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'product_variant_attribute_values_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "product_variant_attribute_values_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'product_variant_attribute_values_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "product_variant_attribute_values_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'product_variant_attribute_values_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "product_variant_attribute_values_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'product_variant_attribute_values_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["variant_id"]
-          },
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['variant_id']
+          }
         ]
       }
       product_variants: {
@@ -1171,75 +1171,75 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "product_variants_created_by_user_id_fkey"
-            columns: ["created_by_user_id"]
+            foreignKeyName: 'product_variants_created_by_user_id_fkey'
+            columns: ['created_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
+            referencedRelation: 'products'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'products_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "product_variants_updated_by_user_id_fkey"
-            columns: ["updated_by_user_id"]
+            foreignKeyName: 'product_variants_updated_by_user_id_fkey'
+            columns: ['updated_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
         ]
       }
       products: {
@@ -1252,7 +1252,7 @@ export type Database = {
           created_by_user_id: string | null
           description: string | null
           expired_sale_policy:
-            | Database["public"]["Enums"]["expired_sale_policy"]
+            | Database['public']['Enums']['expired_sale_policy']
             | null
           expiry_alert_days: number | null
           has_batches: boolean
@@ -1279,7 +1279,7 @@ export type Database = {
           created_by_user_id?: string | null
           description?: string | null
           expired_sale_policy?:
-            | Database["public"]["Enums"]["expired_sale_policy"]
+            | Database['public']['Enums']['expired_sale_policy']
             | null
           expiry_alert_days?: number | null
           has_batches?: boolean
@@ -1306,7 +1306,7 @@ export type Database = {
           created_by_user_id?: string | null
           description?: string | null
           expired_sale_policy?:
-            | Database["public"]["Enums"]["expired_sale_policy"]
+            | Database['public']['Enums']['expired_sale_policy']
             | null
           expiry_alert_days?: number | null
           has_batches?: boolean
@@ -1326,47 +1326,47 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "products_base_unit_id_fkey"
-            columns: ["base_unit_id"]
+            foreignKeyName: 'products_base_unit_id_fkey'
+            columns: ['base_unit_id']
             isOneToOne: false
-            referencedRelation: "units_of_measure"
-            referencedColumns: ["id"]
+            referencedRelation: 'units_of_measure'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "products_category_id_fkey"
-            columns: ["category_id"]
+            foreignKeyName: 'products_category_id_fkey'
+            columns: ['category_id']
             isOneToOne: false
-            referencedRelation: "product_categories"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_categories'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "products_created_by_user_id_fkey"
-            columns: ["created_by_user_id"]
+            foreignKeyName: 'products_created_by_user_id_fkey'
+            columns: ['created_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "products_updated_by_user_id_fkey"
-            columns: ["updated_by_user_id"]
+            foreignKeyName: 'products_updated_by_user_id_fkey'
+            columns: ['updated_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
         ]
       }
       profiles: {
@@ -1450,173 +1450,173 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "purchase_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'purchase_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["batch_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['batch_id']
           },
           {
-            foreignKeyName: "purchase_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'purchase_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["batch_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['batch_id']
           },
           {
-            foreignKeyName: "purchase_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'purchase_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["batch_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['batch_id']
           },
           {
-            foreignKeyName: "purchase_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'purchase_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "inventory_batches"
-            referencedColumns: ["id"]
+            referencedRelation: 'inventory_batches'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'purchase_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "inventory_batches_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'inventory_batches_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_pack_id_fkey"
-            columns: ["pack_id"]
+            foreignKeyName: 'purchase_items_pack_id_fkey'
+            columns: ['pack_id']
             isOneToOne: false
-            referencedRelation: "product_packs"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_packs'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
+            referencedRelation: 'products'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'products_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_purchase_id_fkey"
-            columns: ["purchase_id"]
+            foreignKeyName: 'purchase_items_purchase_id_fkey'
+            columns: ['purchase_id']
             isOneToOne: false
-            referencedRelation: "purchases"
-            referencedColumns: ["id"]
+            referencedRelation: 'purchases'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_purchase_id_fkey"
-            columns: ["purchase_id"]
+            foreignKeyName: 'purchase_items_purchase_id_fkey'
+            columns: ['purchase_id']
             isOneToOne: false
-            referencedRelation: "purchases_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'purchases_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["variant_id"]
-          },
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['variant_id']
+          }
         ]
       }
       purchase_overhead_items: {
@@ -1646,19 +1646,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "purchase_overhead_items_purchase_id_fkey"
-            columns: ["purchase_id"]
+            foreignKeyName: 'purchase_overhead_items_purchase_id_fkey'
+            columns: ['purchase_id']
             isOneToOne: false
-            referencedRelation: "purchases"
-            referencedColumns: ["id"]
+            referencedRelation: 'purchases'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_overhead_items_purchase_id_fkey"
-            columns: ["purchase_id"]
+            foreignKeyName: 'purchase_overhead_items_purchase_id_fkey'
+            columns: ['purchase_id']
             isOneToOne: false
-            referencedRelation: "purchases_view"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'purchases_view'
+            referencedColumns: ['id']
+          }
         ]
       }
       purchases: {
@@ -1706,33 +1706,33 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "purchases_cashier_id_fkey"
-            columns: ["cashier_id"]
+            foreignKeyName: 'purchases_cashier_id_fkey'
+            columns: ['cashier_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchases_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'purchases_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "purchases_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'purchases_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchases_supplier_id_fkey"
-            columns: ["supplier_id"]
+            foreignKeyName: 'purchases_supplier_id_fkey'
+            columns: ['supplier_id']
             isOneToOne: false
-            referencedRelation: "suppliers"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'suppliers'
+            referencedColumns: ['id']
+          }
         ]
       }
       sale_items: {
@@ -1780,180 +1780,180 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "sale_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'sale_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["batch_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['batch_id']
           },
           {
-            foreignKeyName: "sale_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'sale_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["batch_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['batch_id']
           },
           {
-            foreignKeyName: "sale_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'sale_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["batch_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['batch_id']
           },
           {
-            foreignKeyName: "sale_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'sale_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "inventory_batches"
-            referencedColumns: ["id"]
+            referencedRelation: 'inventory_batches'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'sale_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "inventory_batches_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'inventory_batches_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoice_financials"
-            referencedColumns: ["invoice_id"]
+            referencedRelation: 'invoice_financials'
+            referencedColumns: ['invoice_id']
           },
           {
-            foreignKeyName: "sale_items_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoice_with_discount_detail"
-            referencedColumns: ["id"]
+            referencedRelation: 'invoice_with_discount_detail'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoices"
-            referencedColumns: ["id"]
+            referencedRelation: 'invoices'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoices_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'invoices_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
+            referencedRelation: 'products'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'products_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["variant_id"]
-          },
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['variant_id']
+          }
         ]
       }
       shop_owner_details: {
@@ -1989,25 +1989,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "shop_owner_details_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'shop_owner_details_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: true
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "shop_owner_details_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'shop_owner_details_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: true
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       shops: {
         Row: {
           created_at: string
-          default_expired_sale_policy: Database["public"]["Enums"]["expired_sale_policy"]
+          default_expired_sale_policy: Database['public']['Enums']['expired_sale_policy']
           default_expiry_alert_days: number
           default_warranty_alert_days: number
           expired_sale_receipt_disclaimer: boolean
@@ -2022,7 +2022,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          default_expired_sale_policy?: Database["public"]["Enums"]["expired_sale_policy"]
+          default_expired_sale_policy?: Database['public']['Enums']['expired_sale_policy']
           default_expiry_alert_days?: number
           default_warranty_alert_days?: number
           expired_sale_receipt_disclaimer?: boolean
@@ -2037,7 +2037,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          default_expired_sale_policy?: Database["public"]["Enums"]["expired_sale_policy"]
+          default_expired_sale_policy?: Database['public']['Enums']['expired_sale_policy']
           default_expiry_alert_days?: number
           default_warranty_alert_days?: number
           expired_sale_receipt_disclaimer?: boolean
@@ -2052,12 +2052,12 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "shops_owner_user_id_fkey"
-            columns: ["owner_user_id"]
+            foreignKeyName: 'shops_owner_user_id_fkey'
+            columns: ['owner_user_id']
             isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
         ]
       }
       subscriptions: {
@@ -2069,7 +2069,7 @@ export type Database = {
           last_payment_amount: number | null
           last_payment_date: string | null
           notes: string | null
-          status: Database["public"]["Enums"]["subscription_status"]
+          status: Database['public']['Enums']['subscription_status']
           trial_ends_at: string | null
           trial_started_at: string | null
           updated_at: string
@@ -2083,7 +2083,7 @@ export type Database = {
           last_payment_amount?: number | null
           last_payment_date?: string | null
           notes?: string | null
-          status?: Database["public"]["Enums"]["subscription_status"]
+          status?: Database['public']['Enums']['subscription_status']
           trial_ends_at?: string | null
           trial_started_at?: string | null
           updated_at?: string
@@ -2097,7 +2097,7 @@ export type Database = {
           last_payment_amount?: number | null
           last_payment_date?: string | null
           notes?: string | null
-          status?: Database["public"]["Enums"]["subscription_status"]
+          status?: Database['public']['Enums']['subscription_status']
           trial_ends_at?: string | null
           trial_started_at?: string | null
           updated_at?: string
@@ -2105,12 +2105,12 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "subscriptions_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: 'subscriptions_user_id_fkey'
+            columns: ['user_id']
             isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
         ]
       }
       suppliers: {
@@ -2155,33 +2155,33 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "suppliers_created_by_user_id_fkey"
-            columns: ["created_by_user_id"]
+            foreignKeyName: 'suppliers_created_by_user_id_fkey'
+            columns: ['created_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "suppliers_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'suppliers_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "suppliers_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'suppliers_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "suppliers_updated_by_user_id_fkey"
-            columns: ["updated_by_user_id"]
+            foreignKeyName: 'suppliers_updated_by_user_id_fkey'
+            columns: ['updated_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
         ]
       }
       units_of_measure: {
@@ -2214,19 +2214,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "units_of_measure_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'units_of_measure_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "units_of_measure_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'units_of_measure_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       user_shop_access: {
@@ -2262,26 +2262,26 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "user_shop_access_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'user_shop_access_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "user_shop_access_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'user_shop_access_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "user_shop_access_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: 'user_shop_access_user_id_fkey'
+            columns: ['user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
         ]
       }
       user_shop_permission_audit: {
@@ -2329,33 +2329,33 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "user_shop_permission_audit_actor_user_id_fkey"
-            columns: ["actor_user_id"]
+            foreignKeyName: 'user_shop_permission_audit_actor_user_id_fkey'
+            columns: ['actor_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "user_shop_permission_audit_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'user_shop_permission_audit_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "user_shop_permission_audit_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'user_shop_permission_audit_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "user_shop_permission_audit_target_user_id_fkey"
-            columns: ["target_user_id"]
+            foreignKeyName: 'user_shop_permission_audit_target_user_id_fkey'
+            columns: ['target_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
         ]
       }
       user_shop_permissions: {
@@ -2388,26 +2388,26 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "user_shop_permissions_granted_by_user_id_fkey"
-            columns: ["granted_by_user_id"]
+            foreignKeyName: 'user_shop_permissions_granted_by_user_id_fkey'
+            columns: ['granted_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "user_shop_permissions_permission_key_fkey"
-            columns: ["permission_key"]
+            foreignKeyName: 'user_shop_permissions_permission_key_fkey'
+            columns: ['permission_key']
             isOneToOne: false
-            referencedRelation: "permissions_catalog"
-            referencedColumns: ["key"]
+            referencedRelation: 'permissions_catalog'
+            referencedColumns: ['key']
           },
           {
-            foreignKeyName: "user_shop_permissions_user_shop_access_id_fkey"
-            columns: ["user_shop_access_id"]
+            foreignKeyName: 'user_shop_permissions_user_shop_access_id_fkey'
+            columns: ['user_shop_access_id']
             isOneToOne: false
-            referencedRelation: "user_shop_access"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'user_shop_access'
+            referencedColumns: ['id']
+          }
         ]
       }
       variant_attribute_values: {
@@ -2443,19 +2443,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "variant_attribute_values_attribute_id_fkey"
-            columns: ["attribute_id"]
+            foreignKeyName: 'variant_attribute_values_attribute_id_fkey'
+            columns: ['attribute_id']
             isOneToOne: false
-            referencedRelation: "variant_attributes"
-            referencedColumns: ["id"]
+            referencedRelation: 'variant_attributes'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "variant_attribute_values_created_by_user_id_fkey"
-            columns: ["created_by_user_id"]
+            foreignKeyName: 'variant_attribute_values_created_by_user_id_fkey'
+            columns: ['created_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
         ]
       }
       variant_attributes: {
@@ -2491,26 +2491,26 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "variant_attributes_created_by_user_id_fkey"
-            columns: ["created_by_user_id"]
+            foreignKeyName: 'variant_attributes_created_by_user_id_fkey'
+            columns: ['created_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "variant_attributes_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'variant_attributes_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "variant_attributes_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'variant_attributes_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
     }
@@ -2529,19 +2529,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       batches_expiring_soon: {
@@ -2559,19 +2559,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       batches_warranty_expiring_soon: {
@@ -2591,26 +2591,26 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "inventory_batches_supplier_id_fkey"
-            columns: ["supplier_id"]
+            foreignKeyName: 'inventory_batches_supplier_id_fkey'
+            columns: ['supplier_id']
             isOneToOne: false
-            referencedRelation: "suppliers"
-            referencedColumns: ["id"]
+            referencedRelation: 'suppliers'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       customer_balance_reconciliation: {
@@ -2637,19 +2637,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "customers_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'customers_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "customers_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'customers_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       customer_outstanding: {
@@ -2663,19 +2663,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "customers_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'customers_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "customers_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'customers_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       customers_view: {
@@ -2696,33 +2696,33 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "customers_created_by_user_id_fkey"
-            columns: ["created_by_user_id"]
+            foreignKeyName: 'customers_created_by_user_id_fkey'
+            columns: ['created_by_user_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "customers_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'customers_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "customers_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'customers_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "customers_tier_id_fkey"
-            columns: ["tier_id"]
+            foreignKeyName: 'customers_tier_id_fkey'
+            columns: ['tier_id']
             isOneToOne: false
-            referencedRelation: "customer_tiers"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'customer_tiers'
+            referencedColumns: ['id']
+          }
         ]
       }
       daily_sales_7: {
@@ -2742,19 +2742,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "invoices_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'invoices_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "invoices_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'invoices_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       expenses_by_category_mtd: {
@@ -2787,89 +2787,89 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "inventory_batches_purchase_item_id_fkey"
-            columns: ["purchase_item_id"]
+            foreignKeyName: 'inventory_batches_purchase_item_id_fkey'
+            columns: ['purchase_item_id']
             isOneToOne: false
-            referencedRelation: "purchase_item_financials"
-            referencedColumns: ["purchase_item_id"]
+            referencedRelation: 'purchase_item_financials'
+            referencedColumns: ['purchase_item_id']
           },
           {
-            foreignKeyName: "inventory_batches_purchase_item_id_fkey"
-            columns: ["purchase_item_id"]
+            foreignKeyName: 'inventory_batches_purchase_item_id_fkey'
+            columns: ['purchase_item_id']
             isOneToOne: false
-            referencedRelation: "purchase_items"
-            referencedColumns: ["id"]
+            referencedRelation: 'purchase_items'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "inventory_batches_purchase_item_id_fkey"
-            columns: ["purchase_item_id"]
+            foreignKeyName: 'inventory_batches_purchase_item_id_fkey'
+            columns: ['purchase_item_id']
             isOneToOne: false
-            referencedRelation: "purchase_items_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'purchase_items_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "inventory_batches_supplier_id_fkey"
-            columns: ["supplier_id"]
+            foreignKeyName: 'inventory_batches_supplier_id_fkey'
+            columns: ['supplier_id']
             isOneToOne: false
-            referencedRelation: "suppliers"
-            referencedColumns: ["id"]
+            referencedRelation: 'suppliers'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "inventory_batches_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "inventory_batches_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "inventory_batches_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "inventory_batches_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "inventory_batches_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "inventory_batches_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "inventory_batches_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "inventory_batches_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'inventory_batches_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["variant_id"]
-          },
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['variant_id']
+          }
         ]
       }
       invoice_financials: {
@@ -2893,47 +2893,47 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "invoices_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customer_balance_reconciliation"
-            referencedColumns: ["customer_id"]
+            referencedRelation: 'customer_balance_reconciliation'
+            referencedColumns: ['customer_id']
           },
           {
-            foreignKeyName: "invoices_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customer_outstanding"
-            referencedColumns: ["customer_id"]
+            referencedRelation: 'customer_outstanding'
+            referencedColumns: ['customer_id']
           },
           {
-            foreignKeyName: "invoices_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
+            referencedRelation: 'customers'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "invoices_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customers_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'customers_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "invoices_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'invoices_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "invoices_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'invoices_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       invoice_with_discount_detail: {
@@ -2959,61 +2959,61 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "invoices_cashier_id_fkey"
-            columns: ["cashier_id"]
+            foreignKeyName: 'invoices_cashier_id_fkey'
+            columns: ['cashier_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "invoices_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customer_balance_reconciliation"
-            referencedColumns: ["customer_id"]
+            referencedRelation: 'customer_balance_reconciliation'
+            referencedColumns: ['customer_id']
           },
           {
-            foreignKeyName: "invoices_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customer_outstanding"
-            referencedColumns: ["customer_id"]
+            referencedRelation: 'customer_outstanding'
+            referencedColumns: ['customer_id']
           },
           {
-            foreignKeyName: "invoices_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
+            referencedRelation: 'customers'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "invoices_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customers_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'customers_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "invoices_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'invoices_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "invoices_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'invoices_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "invoices_tier_id_fkey"
-            columns: ["tier_id"]
+            foreignKeyName: 'invoices_tier_id_fkey'
+            columns: ['tier_id']
             isOneToOne: false
-            referencedRelation: "customer_tiers"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'customer_tiers'
+            referencedColumns: ['id']
+          }
         ]
       }
       invoices_view: {
@@ -3039,61 +3039,61 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "invoices_cashier_id_fkey"
-            columns: ["cashier_id"]
+            foreignKeyName: 'invoices_cashier_id_fkey'
+            columns: ['cashier_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "invoices_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customer_balance_reconciliation"
-            referencedColumns: ["customer_id"]
+            referencedRelation: 'customer_balance_reconciliation'
+            referencedColumns: ['customer_id']
           },
           {
-            foreignKeyName: "invoices_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customer_outstanding"
-            referencedColumns: ["customer_id"]
+            referencedRelation: 'customer_outstanding'
+            referencedColumns: ['customer_id']
           },
           {
-            foreignKeyName: "invoices_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
+            referencedRelation: 'customers'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "invoices_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'invoices_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customers_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'customers_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "invoices_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'invoices_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "invoices_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'invoices_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "invoices_tier_id_fkey"
-            columns: ["tier_id"]
+            foreignKeyName: 'invoices_tier_id_fkey'
+            columns: ['tier_id']
             isOneToOne: false
-            referencedRelation: "customer_tiers"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'customer_tiers'
+            referencedColumns: ['id']
+          }
         ]
       }
       ledger_entries_view: {
@@ -3119,89 +3119,89 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ledger_entries_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'ledger_entries_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customer_balance_reconciliation"
-            referencedColumns: ["customer_id"]
+            referencedRelation: 'customer_balance_reconciliation'
+            referencedColumns: ['customer_id']
           },
           {
-            foreignKeyName: "ledger_entries_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'ledger_entries_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customer_outstanding"
-            referencedColumns: ["customer_id"]
+            referencedRelation: 'customer_outstanding'
+            referencedColumns: ['customer_id']
           },
           {
-            foreignKeyName: "ledger_entries_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'ledger_entries_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
+            referencedRelation: 'customers'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ledger_entries_customer_id_fkey"
-            columns: ["customer_id"]
+            foreignKeyName: 'ledger_entries_customer_id_fkey'
+            columns: ['customer_id']
             isOneToOne: false
-            referencedRelation: "customers_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'customers_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ledger_entries_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'ledger_entries_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoice_financials"
-            referencedColumns: ["invoice_id"]
+            referencedRelation: 'invoice_financials'
+            referencedColumns: ['invoice_id']
           },
           {
-            foreignKeyName: "ledger_entries_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'ledger_entries_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoice_with_discount_detail"
-            referencedColumns: ["id"]
+            referencedRelation: 'invoice_with_discount_detail'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ledger_entries_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'ledger_entries_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoices"
-            referencedColumns: ["id"]
+            referencedRelation: 'invoices'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ledger_entries_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'ledger_entries_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoices_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'invoices_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ledger_entries_reverses_entry_id_fkey"
-            columns: ["reverses_entry_id"]
+            foreignKeyName: 'ledger_entries_reverses_entry_id_fkey'
+            columns: ['reverses_entry_id']
             isOneToOne: false
-            referencedRelation: "ledger_entries"
-            referencedColumns: ["id"]
+            referencedRelation: 'ledger_entries'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ledger_entries_reverses_entry_id_fkey"
-            columns: ["reverses_entry_id"]
+            foreignKeyName: 'ledger_entries_reverses_entry_id_fkey'
+            columns: ['reverses_entry_id']
             isOneToOne: false
-            referencedRelation: "ledger_entries_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'ledger_entries_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ledger_entries_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'ledger_entries_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "ledger_entries_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'ledger_entries_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       monthly_summary: {
@@ -3227,19 +3227,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       product_variant_full: {
@@ -3263,26 +3263,26 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "products_category_id_fkey"
-            columns: ["category_id"]
+            foreignKeyName: 'products_category_id_fkey'
+            columns: ['category_id']
             isOneToOne: false
-            referencedRelation: "product_categories"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_categories'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       product_variants_view: {
@@ -3302,61 +3302,61 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
+            referencedRelation: 'products'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'product_variants_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products_view"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'products_view'
+            referencedColumns: ['id']
+          }
         ]
       }
       product_with_default_variant: {
@@ -3390,33 +3390,33 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "products_base_unit_id_fkey"
-            columns: ["base_unit_id"]
+            foreignKeyName: 'products_base_unit_id_fkey'
+            columns: ['base_unit_id']
             isOneToOne: false
-            referencedRelation: "units_of_measure"
-            referencedColumns: ["id"]
+            referencedRelation: 'units_of_measure'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "products_category_id_fkey"
-            columns: ["category_id"]
+            foreignKeyName: 'products_category_id_fkey'
+            columns: ['category_id']
             isOneToOne: false
-            referencedRelation: "product_categories"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_categories'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       products_view: {
@@ -3428,7 +3428,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           expired_sale_policy:
-            | Database["public"]["Enums"]["expired_sale_policy"]
+            | Database['public']['Enums']['expired_sale_policy']
             | null
           expiry_alert_days: number | null
           has_batches: boolean | null
@@ -3447,33 +3447,33 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "products_base_unit_id_fkey"
-            columns: ["base_unit_id"]
+            foreignKeyName: 'products_base_unit_id_fkey'
+            columns: ['base_unit_id']
             isOneToOne: false
-            referencedRelation: "units_of_measure"
-            referencedColumns: ["id"]
+            referencedRelation: 'units_of_measure'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "products_category_id_fkey"
-            columns: ["category_id"]
+            foreignKeyName: 'products_category_id_fkey'
+            columns: ['category_id']
             isOneToOne: false
-            referencedRelation: "product_categories"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_categories'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'products_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       purchase_item_financials: {
@@ -3539,138 +3539,138 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "purchase_items_pack_id_fkey"
-            columns: ["pack_id"]
+            foreignKeyName: 'purchase_items_pack_id_fkey'
+            columns: ['pack_id']
             isOneToOne: false
-            referencedRelation: "product_packs"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_packs'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
+            referencedRelation: 'products'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'products_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_purchase_id_fkey"
-            columns: ["purchase_id"]
+            foreignKeyName: 'purchase_items_purchase_id_fkey'
+            columns: ['purchase_id']
             isOneToOne: false
-            referencedRelation: "purchases"
-            referencedColumns: ["id"]
+            referencedRelation: 'purchases'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_purchase_id_fkey"
-            columns: ["purchase_id"]
+            foreignKeyName: 'purchase_items_purchase_id_fkey'
+            columns: ['purchase_id']
             isOneToOne: false
-            referencedRelation: "purchases_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'purchases_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["variant_id"]
-          },
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['variant_id']
+          }
         ]
       }
       purchase_items_view: {
@@ -3693,173 +3693,173 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "purchase_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'purchase_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["batch_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['batch_id']
           },
           {
-            foreignKeyName: "purchase_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'purchase_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["batch_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['batch_id']
           },
           {
-            foreignKeyName: "purchase_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'purchase_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["batch_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['batch_id']
           },
           {
-            foreignKeyName: "purchase_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'purchase_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "inventory_batches"
-            referencedColumns: ["id"]
+            referencedRelation: 'inventory_batches'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'purchase_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "inventory_batches_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'inventory_batches_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_pack_id_fkey"
-            columns: ["pack_id"]
+            foreignKeyName: 'purchase_items_pack_id_fkey'
+            columns: ['pack_id']
             isOneToOne: false
-            referencedRelation: "product_packs"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_packs'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
+            referencedRelation: 'products'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'purchase_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'products_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_purchase_id_fkey"
-            columns: ["purchase_id"]
+            foreignKeyName: 'purchase_items_purchase_id_fkey'
+            columns: ['purchase_id']
             isOneToOne: false
-            referencedRelation: "purchases"
-            referencedColumns: ["id"]
+            referencedRelation: 'purchases'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_purchase_id_fkey"
-            columns: ["purchase_id"]
+            foreignKeyName: 'purchase_items_purchase_id_fkey'
+            columns: ['purchase_id']
             isOneToOne: false
-            referencedRelation: "purchases_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'purchases_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'purchase_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["variant_id"]
-          },
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['variant_id']
+          }
         ]
       }
       purchase_overhead_items_view: {
@@ -3873,19 +3873,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "purchase_overhead_items_purchase_id_fkey"
-            columns: ["purchase_id"]
+            foreignKeyName: 'purchase_overhead_items_purchase_id_fkey'
+            columns: ['purchase_id']
             isOneToOne: false
-            referencedRelation: "purchases"
-            referencedColumns: ["id"]
+            referencedRelation: 'purchases'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchase_overhead_items_purchase_id_fkey"
-            columns: ["purchase_id"]
+            foreignKeyName: 'purchase_overhead_items_purchase_id_fkey'
+            columns: ['purchase_id']
             isOneToOne: false
-            referencedRelation: "purchases_view"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'purchases_view'
+            referencedColumns: ['id']
+          }
         ]
       }
       purchases_view: {
@@ -3905,33 +3905,33 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "purchases_cashier_id_fkey"
-            columns: ["cashier_id"]
+            foreignKeyName: 'purchases_cashier_id_fkey'
+            columns: ['cashier_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchases_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'purchases_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "purchases_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'purchases_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "purchases_supplier_id_fkey"
-            columns: ["supplier_id"]
+            foreignKeyName: 'purchases_supplier_id_fkey'
+            columns: ['supplier_id']
             isOneToOne: false
-            referencedRelation: "suppliers"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'suppliers'
+            referencedColumns: ['id']
+          }
         ]
       }
       sale_item_financials: {
@@ -3952,145 +3952,145 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "sale_items_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoice_financials"
-            referencedColumns: ["invoice_id"]
+            referencedRelation: 'invoice_financials'
+            referencedColumns: ['invoice_id']
           },
           {
-            foreignKeyName: "sale_items_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoice_with_discount_detail"
-            referencedColumns: ["id"]
+            referencedRelation: 'invoice_with_discount_detail'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoices"
-            referencedColumns: ["id"]
+            referencedRelation: 'invoices'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoices_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'invoices_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
+            referencedRelation: 'products'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'products_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["variant_id"]
-          },
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['variant_id']
+          }
         ]
       }
       sale_items_view: {
@@ -4112,191 +4112,191 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "sale_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'sale_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["batch_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['batch_id']
           },
           {
-            foreignKeyName: "sale_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'sale_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["batch_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['batch_id']
           },
           {
-            foreignKeyName: "sale_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'sale_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["batch_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['batch_id']
           },
           {
-            foreignKeyName: "sale_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'sale_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "inventory_batches"
-            referencedColumns: ["id"]
+            referencedRelation: 'inventory_batches'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_batch_id_fkey"
-            columns: ["batch_id"]
+            foreignKeyName: 'sale_items_batch_id_fkey'
+            columns: ['batch_id']
             isOneToOne: false
-            referencedRelation: "inventory_batches_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'inventory_batches_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoice_financials"
-            referencedColumns: ["invoice_id"]
+            referencedRelation: 'invoice_financials'
+            referencedColumns: ['invoice_id']
           },
           {
-            foreignKeyName: "sale_items_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoice_with_discount_detail"
-            referencedColumns: ["id"]
+            referencedRelation: 'invoice_with_discount_detail'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoices"
-            referencedColumns: ["id"]
+            referencedRelation: 'invoices'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: 'sale_items_invoice_id_fkey'
+            columns: ['invoice_id']
             isOneToOne: false
-            referencedRelation: "invoices_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'invoices_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["product_id"]
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['product_id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
+            referencedRelation: 'products'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: 'sale_items_product_id_fkey'
+            columns: ['product_id']
             isOneToOne: false
-            referencedRelation: "products_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'products_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_already_expired"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_already_expired'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "batches_warranty_expiring_soon"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'batches_warranty_expiring_soon'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_stock_display"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_stock_display'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variant_full"
-            referencedColumns: ["variant_id"]
+            referencedRelation: 'product_variant_full'
+            referencedColumns: ['variant_id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_variants_view"
-            referencedColumns: ["id"]
+            referencedRelation: 'product_variants_view'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "sale_items_variant_id_fkey"
-            columns: ["variant_id"]
+            foreignKeyName: 'sale_items_variant_id_fkey'
+            columns: ['variant_id']
             isOneToOne: false
-            referencedRelation: "product_with_default_variant"
-            referencedColumns: ["variant_id"]
-          },
+            referencedRelation: 'product_with_default_variant'
+            referencedColumns: ['variant_id']
+          }
         ]
       }
       shop_effective_subscription: {
         Row: {
           current_period_ends_at: string | null
           effective_status:
-            | Database["public"]["Enums"]["subscription_status"]
+            | Database['public']['Enums']['subscription_status']
             | null
           last_payment_date: string | null
           shop_id: string | null
-          status: Database["public"]["Enums"]["subscription_status"] | null
+          status: Database['public']['Enums']['subscription_status'] | null
           trial_ends_at: string | null
         }
         Relationships: []
@@ -4314,29 +4314,29 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "shop_owner_details_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'shop_owner_details_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: true
-            referencedRelation: "shop_effective_subscription"
-            referencedColumns: ["shop_id"]
+            referencedRelation: 'shop_effective_subscription'
+            referencedColumns: ['shop_id']
           },
           {
-            foreignKeyName: "shop_owner_details_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: 'shop_owner_details_shop_id_fkey'
+            columns: ['shop_id']
             isOneToOne: true
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'shops'
+            referencedColumns: ['id']
+          }
         ]
       }
       subscription_effective: {
         Row: {
           current_period_ends_at: string | null
           effective_status:
-            | Database["public"]["Enums"]["subscription_status"]
+            | Database['public']['Enums']['subscription_status']
             | null
           last_payment_date: string | null
-          status: Database["public"]["Enums"]["subscription_status"] | null
+          status: Database['public']['Enums']['subscription_status'] | null
           trial_ends_at: string | null
           user_id: string | null
         }
@@ -4344,7 +4344,7 @@ export type Database = {
           current_period_ends_at?: string | null
           effective_status?: never
           last_payment_date?: string | null
-          status?: Database["public"]["Enums"]["subscription_status"] | null
+          status?: Database['public']['Enums']['subscription_status'] | null
           trial_ends_at?: string | null
           user_id?: string | null
         }
@@ -4352,18 +4352,18 @@ export type Database = {
           current_period_ends_at?: string | null
           effective_status?: never
           last_payment_date?: string | null
-          status?: Database["public"]["Enums"]["subscription_status"] | null
+          status?: Database['public']['Enums']['subscription_status'] | null
           trial_ends_at?: string | null
           user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "subscriptions_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: 'subscriptions_user_id_fkey'
+            columns: ['user_id']
             isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
         ]
       }
       total_outstanding: {
@@ -4656,7 +4656,7 @@ export type Database = {
           invited_email: string
           preset_applied: string
           shop_name: string
-          status: Database["public"]["Enums"]["invitation_status"]
+          status: Database['public']['Enums']['invitation_status']
         }[]
       }
       get_my_pending_invitation: {
@@ -4673,7 +4673,7 @@ export type Database = {
       get_shop_settings: {
         Args: never
         Returns: {
-          default_expired_sale_policy: Database["public"]["Enums"]["expired_sale_policy"]
+          default_expired_sale_policy: Database['public']['Enums']['expired_sale_policy']
           default_expiry_alert_days: number
           default_warranty_alert_days: number
           expired_sale_receipt_disclaimer: boolean
@@ -4768,7 +4768,7 @@ export type Database = {
           invited_by_email: string
           invited_by_user_id: string
           preset_applied: string
-          status: Database["public"]["Enums"]["invitation_status"]
+          status: Database['public']['Enums']['invitation_status']
         }[]
       }
       list_permission_audit_for_shop: {
@@ -4803,7 +4803,7 @@ export type Database = {
         Args: { p_items?: Json }
         Returns: {
           expired_batch_ids: string[]
-          policy: Database["public"]["Enums"]["expired_sale_policy"]
+          policy: Database['public']['Enums']['expired_sale_policy']
           variant_id: string
           would_draw_expired: boolean
         }[]
@@ -4812,7 +4812,7 @@ export type Database = {
         Args: { p_items?: Json }
         Returns: {
           expired_batch_ids: string[]
-          policy: Database["public"]["Enums"]["expired_sale_policy"]
+          policy: Database['public']['Enums']['expired_sale_policy']
           variant_id: string
           would_draw_expired: boolean
         }[]
@@ -5265,7 +5265,7 @@ export type Database = {
         Args: {
           p_category_id?: string
           p_description?: string
-          p_expired_sale_policy?: Database["public"]["Enums"]["expired_sale_policy"]
+          p_expired_sale_policy?: Database['public']['Enums']['expired_sale_policy']
           p_expiry_alert_days?: number
           p_has_batches?: boolean
           p_id: string
@@ -5278,7 +5278,7 @@ export type Database = {
       }
       update_shop_settings: {
         Args: {
-          p_default_expired_sale_policy?: Database["public"]["Enums"]["expired_sale_policy"]
+          p_default_expired_sale_policy?: Database['public']['Enums']['expired_sale_policy']
           p_default_expiry_alert_days?: number
           p_default_warranty_alert_days?: number
           p_expired_sale_receipt_disclaimer?: boolean
@@ -5403,9 +5403,9 @@ export type Database = {
       }
     }
     Enums: {
-      expired_sale_policy: "block" | "warn" | "allow"
-      invitation_status: "pending" | "accepted" | "cancelled" | "expired"
-      subscription_status: "trial" | "active" | "expired" | "suspended"
+      expired_sale_policy: 'block' | 'warn' | 'allow'
+      invitation_status: 'pending' | 'accepted' | 'cancelled' | 'expired'
+      subscription_status: 'trial' | 'active' | 'expired' | 'suspended'
     }
     CompositeTypes: {
       [_ in never]: never
@@ -5413,33 +5413,33 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
+    : never = never
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] &
+        DefaultSchema['Views'])
+    ? (DefaultSchema['Tables'] &
+        DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -5448,23 +5448,23 @@ export type Tables<
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
+    | keyof DefaultSchema['Tables']
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    : never = never
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -5473,23 +5473,23 @@ export type TablesInsert<
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
+    | keyof DefaultSchema['Tables']
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    : never = never
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -5498,44 +5498,44 @@ export type TablesUpdate<
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
+    | keyof DefaultSchema['Enums']
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
+    : never = never
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
+    ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
+    | keyof DefaultSchema['CompositeTypes']
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+    : never = never
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
+    ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
     : never
 
 export const Constants = {
   public: {
     Enums: {
-      expired_sale_policy: ["block", "warn", "allow"],
-      invitation_status: ["pending", "accepted", "cancelled", "expired"],
-      subscription_status: ["trial", "active", "expired", "suspended"],
-    },
-  },
+      expired_sale_policy: ['block', 'warn', 'allow'],
+      invitation_status: ['pending', 'accepted', 'cancelled', 'expired'],
+      subscription_status: ['trial', 'active', 'expired', 'suspended']
+    }
+  }
 } as const
