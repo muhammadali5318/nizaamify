@@ -597,6 +597,16 @@ aq04 as (
 ),
 aq05 as (
   -- AQ-05: Every invoice cashier exists in user_shop_access for the shop.
+  -- Refined 2026-05-13 (post-v2.9.1-pilot, ADR 2026-05-13-v291-aq05-audit-history-exception):
+  -- revoke_user_access hard-deletes the user_shop_access row, so a
+  -- cashier whose access was legitimately revoked would appear orphaned
+  -- against the strict EXISTS check. The audit log preserves the
+  -- lifecycle (access_granted → ... → access_revoked); a cashier with
+  -- an `access_revoked` audit row for the shop is history, not an
+  -- orphan. The check still catches the real failure mode: a cashier_id
+  -- with neither a current membership row nor any audit lineage.
+  -- TODO(v2.10): when soft-delete lands, drop the audit-exception clause
+  -- in favor of a usa.is_active=false read.
   select count(*) as n from (
     select i.id, i.cashier_id, i.shop_id
       from public.invoices i
@@ -604,6 +614,12 @@ aq05 as (
        and not exists (
          select 1 from public.user_shop_access usa
          where usa.user_id = i.cashier_id and usa.shop_id = i.shop_id
+       )
+       and not exists (
+         select 1 from public.user_shop_permission_audit uspa
+         where uspa.target_user_id = i.cashier_id
+           and uspa.shop_id = i.shop_id
+           and uspa.action = 'access_revoked'
        )
        and i.created_at >= (select min(joined_at) from public.user_shop_access)
   ) x
@@ -843,17 +859,24 @@ aq21 as (
 ),
 aq22 as (
   -- AQ-22: permission audit log is non-empty and consistent.
-  -- Verifies: every preset_applied action has a corresponding row with
-  -- action='preset_applied' for each user_shop_access that has preset_applied set.
+  -- Verifies: every user_shop_access row with preset_applied set has a
+  -- corresponding audit row recording the preset assignment.
+  -- Refined 2026-05-13 (post-v2.9.1-pilot, ADR 2026-05-13-v291-aq22-aq23-refinements):
+  -- accept_invitation writes audit action='access_granted' (carrying
+  -- new_value.preset), not action='preset_applied' — yet the assignment
+  -- is fully recorded. The accepted preset-emitting actions are now
+  -- ('preset_applied', 'access_granted'); both still cross-check
+  -- new_value.preset against usa.preset_applied so a bypass that wrote
+  -- no audit row at all is still caught.
   -- SOFT-ASSERT (visual review).
   -- LEGITIMATE NON-ZERO: a preset was applied to a user via direct SQL
-  -- INSERT into user_shop_access (bypassing apply_preset_to_user RPC) —
-  -- e.g. during the v2.9.0.1 owner backfill in migration 0071, or any
-  -- admin-driven seeding script that didn't route through the RPC. The
-  -- pre-v2.9.1 owner row falls into this bucket and is expected.
+  -- INSERT into user_shop_access (bypassing both apply_preset_to_user
+  -- and accept_invitation) — e.g. during the v2.9.0.1 owner backfill in
+  -- migration 0071, or any admin-driven seeding script. The pre-v2.9.1
+  -- owner row falls into this bucket and is expected.
   -- Action: if every "missing-audit-row" row corresponds to an owner
   -- (is_owner=true), accept — those were seeded by 0071. If a non-owner
-  -- row appears, escalate — someone bypassed apply_preset_to_user.
+  -- row appears, escalate — someone bypassed both RPCs.
   select count(*) as n from (
     select usa.id, usa.user_id, usa.shop_id, usa.preset_applied
       from public.user_shop_access usa
@@ -862,7 +885,7 @@ aq22 as (
          select 1 from public.user_shop_permission_audit uspa
          where uspa.target_user_id = usa.user_id
            and uspa.shop_id = usa.shop_id
-           and uspa.action = 'preset_applied'
+           and uspa.action in ('preset_applied', 'access_granted')
            and uspa.new_value->>'preset' = usa.preset_applied)
   ) x
 ),
@@ -902,7 +925,12 @@ aq23 as (
           'set_active_shop','user_has_permission','user_has_shop_access',
           'user_permissions_in_shop',
           'get_active_shop','get_shop_settings',
-          'get_invitation_for_acceptance'
+          'get_invitation_for_acceptance',
+          -- v2.9.1 hot-patch mig 0090, added 2026-05-13 post-pilot.
+          -- Same pre-shop-access rationale as get_invitation_for_acceptance:
+          -- the invitee has no user_shop_access row when RequireOnboarded
+          -- calls this. ADR 2026-05-13-v291-aq22-aq23-refinements.
+          'get_my_pending_invitation'
         ) then true else false end as is_exempt
       from f
     )
