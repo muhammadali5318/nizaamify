@@ -4,18 +4,37 @@
 // is sent and the server falls back to single-shop resolution
 // (migration 0085).
 //
+// It also post-inspects responses for `no_access_to_shop` — the
+// owner-revoked-this-member case. See lib/accessRevoked.ts.
+//
 // Wired into createClient via { global: { fetch: customFetch } }.
 
 import { getActiveShopId } from './activeShop'
+import { triggerAccessRevoked } from './accessRevoked'
 
-export const customFetch: typeof fetch = (input, init) => {
+export const customFetch: typeof fetch = async (input, init) => {
   const shopId = getActiveShopId()
-  if (shopId == null) return fetch(input, init)
-
   const headers = new Headers(init?.headers)
-  // Don't overwrite if caller already provided one (defensive)
-  if (!headers.has('app-shop-id')) {
+  if (shopId != null && !headers.has('app-shop-id')) {
     headers.set('app-shop-id', shopId)
   }
-  return fetch(input, { ...init, headers })
+  const response = await fetch(input, { ...init, headers })
+
+  // PostgREST surfaces RAISE EXCEPTION as a JSON body with the
+  // message in `message`. 401/403/4xx with body containing
+  // `no_access_to_shop` means the caller's user_shop_access row is
+  // gone — sign them out + redirect. Clone so the caller's body
+  // remains untouched.
+  if (response.status >= 400 && response.status < 500) {
+    const cloned = response.clone()
+    try {
+      const text = await cloned.text()
+      if (text.includes('no_access_to_shop')) {
+        void triggerAccessRevoked()
+      }
+    } catch {
+      // Body wasn't readable; ignore
+    }
+  }
+  return response
 }
