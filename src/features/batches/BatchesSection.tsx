@@ -29,7 +29,9 @@ type Row = {
   batch_no: string
   qty_received: number
   qty_remaining: number
-  cost_per_unit: number
+  /** v2.10b: NULL when caller lacks view_batch_cost. Column renders
+   *  only when canViewBatchCost === true, so cell never sees null. */
+  cost_per_unit: number | null
   manufactured_date: string | null
   expiry_date: string | null
   warranty_expires_at: string | null
@@ -56,7 +58,8 @@ export default function BatchesSection({ variantId, productName }: Props) {
           batch_no: r.batch_no,
           qty_received: r.qty_received,
           qty_remaining: r.qty_remaining,
-          cost_per_unit: Number(r.cost_per_unit),
+          cost_per_unit:
+            r.cost_per_unit == null ? null : Number(r.cost_per_unit),
           manufactured_date: r.manufactured_date,
           expiry_date: r.expiry_date,
           warranty_expires_at: r.warranty_expires_at,
@@ -127,7 +130,7 @@ export default function BatchesSection({ variantId, productName }: Props) {
             header: t('batches:fields.cost_per_unit'),
             align: 'end' as const,
             hideOnMobile: true,
-            cell: (r: Row) => formatPKR(r.cost_per_unit, locale)
+            cell: (r: Row) => formatPKR(r.cost_per_unit ?? 0, locale)
           }
         ]
       : []),
