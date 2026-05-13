@@ -472,3 +472,112 @@ Unblocked by v2.8.4. Ships the manual-override UI deferred from v2.8 §4.4 so sp
 - ✅ Insufficient-stock card layout fix in `PosBatchPicker`: switched the two-column row layout to a vertical stack (batch_no + badges row, then meta row, then full-width hint). Hint text rewritten in plain language with `{available}` / `{needed}` interpolation and a soft red-tinted background; new key `batches:errors.selected_batch_insufficient_long`.
 - ✅ Cache-invalidation fix: `useRecordSale` + `useRecordPurchase` now invalidate `['product']` (singular), `['batches']`, and `['alerts']` on success — without these the POS batch picker, product-detail page, and dashboard alert widgets all showed stale qty_remaining until a hard reload. Gotcha added to `docs/gotchas.md` so future RPC hooks that mutate stock or batches follow the same pattern.
 - ✅ Gotchas updated: future contributors won't reintroduce "FEFO" in visible strings, and the auto-pick highlight is documented as purely visual (no auto-dispatch on render).
+
+---
+
+## v2.9 — Permission-based RBAC (3 sports + 10 mobile shop pipeline)
+
+Specs (locked 2026-05-13):
+- Audit: `audit/2026-05-13-rbac-pre-design-audit.md`
+- Design: `design/2026-05-13-rbac-model-design.md` (Rev 2 — permission-based)
+- Attack surface: `design/2026-05-13-rbac-attack-surface.md` (Rev 2)
+- Implementation plan: `design/2026-05-13-rbac-implementation-plan.md`
+- ADR index: `decisions/v29-rbac-INDEX.md` (20 ADRs scaffolded; 6 filed in Phase A)
+
+### Phase A — Foundation migrations
+
+- ✅ ADRs #1-#6 filed
+- ✅ Pre-flight: production baseline verified (2 shops, 2 profiles, 0 NULL owner_user_id, fallback header-read works)
+- ✅ 0068: permissions_catalog table + invitation_status enum + seed 50 rows
+- ✅ 0069: user_shop_access + user_shop_permissions + user_shop_permission_audit + pending_invitations tables
+- ✅ 0070: 7 helper functions (fallback path). `current_shop_id()` v2.8.5 body preserved for stabilization-week deny-wins safety.
+- ✅ 0071: backfill 2 owner rows (idempotent)
+- ✅ 0072: 14 audit `_by_user_id` columns + soft-delete + cap column + FK→RESTRICT
+
+### Phase B — RLS + Views (additive)
+
+- ✅ 0073: 22 new v29_* RLS policies + 2 trigger gates + column-level revokes
+- ✅ 0074: 14 permission-aware views (11 new + 1 revised customer_outstanding + 1 replaced total_outstanding + 1 new shop_effective_subscription)
+- ✅ AQ-01 through AQ-22 audit queries: refined (AQ-13 / AQ-14a / AQ-14b) and verified clean
+
+### Phase C — RPC layer
+
+- ✅ 0075: 17 new DEFINER RPCs
+- ✅ 0076: 41 existing RPCs wrapped via rename-and-wrap pattern + complete_onboarding full rewrite + batch trigger hardening
+- ✅ 0076b: conditional projection in search_products / recent_purchase_products / list_customers / recent_customers wrappers + record_sale wrapper (discount cap + implicit-discount + confirm_expired) + receive_payment wrapper (non-owner cap with pg_advisory_xact_lock)
+- ✅ Synthetic test pass: 12 ST-* tests + 4 setup checkpoints + 1 dep-validation, all PASS
+
+### Phase D — Client integration
+
+- 🟦 Supabase client `customFetch` wrapper for `app-shop-id` header
+- 🟦 `localStorage.nizaamify.active_shop_id` keyed storage + TopBar shop switcher
+- 🟦 TanStack Query `['permissions', shop_id, user_id]` with `staleTime: 60_000` + `refetchOnWindowFocus: true`
+- 🟦 Permission-aware UI: `usePermission(key)` hook + permission-gated buttons/routes
+- 🟦 All cost-bearing reads switched to `_view` query path
+- 🟦 All direct DML writes that became RPC-gated switched to the new RPCs
+- 🟦 `<RequireActiveSubscription>` rewired to `shop_effective_subscription` view (closes F-H-17)
+- 🟦 Feature flag `RBAC_TEAM_UI_ENABLED` defaulted off
+
+### Phase E — Team management UI
+
+- 🟦 `/settings/team` page (gated by `view_team`)
+- 🟦 Invite-modal: preset radio + permission override toggles + discount-limit overrides
+- 🟦 Pending-invitations list + cancel action
+- 🟦 `/invite/accept` route (password set + 4-digit code + accept_invitation call)
+- 🟦 Per-user permission editor with dependency-error surfacing
+- 🟦 Discount-limits editor (update_user_discount_limits)
+- 🟦 Revoke-access button (revoke_user_access)
+- 🟦 Audit log viewer at `/settings/team/audit` (gated by `view_user_audit_log`)
+- 🟦 i18n: new `team` namespace EN + UR
+
+### Phase F — Stabilization (COMPRESSED: synthetic-test substituted for 7-day calendar)
+
+- ✅ Synthetic test pass executed inside BEGIN..ROLLBACK transaction with transient current_shop_id alias; real test users created via invitation flow; 14 boundary tests; cleanup automatic via rollback.
+
+### Phase G — Cutover (same session)
+
+- ✅ 0077: drop 34 legacy RLS policies + add v29_uom_manage_write policy for direct-UoM-DML gating
+- ✅ 0078: cleanup_invitations cron (daily 00:30 UTC) + permanent current_shop_id() → current_active_shop_id() alias
+- ✅ 0079: idempotent hardening confirmation (batch trigger revokes + _v28 grant audit loop)
+- 🟦 Flip `RBAC_TEAM_UI_ENABLED` to true for production owners (Phase D client work)
+- ✅ AQ-01 through AQ-22 final pass: ALL ZERO
+
+### Phase H — Documentation
+
+- 🟦 CLAUDE.md updated with v2.9 build-trail entry + 4-6 new gotchas
+- 🟦 `docs/build-trail.md` v2.9 entry
+- 🟦 `docs/gotchas.md` additions
+- 🟦 `docs/todos.md` updates
+- 🟦 ADRs #7-#20 filed per `decisions/v29-rbac-INDEX.md`
+
+### Phase I — Pilot rollout
+
+- 🟦 Pilot shop owner invited to test team UI in production
+- 🟦 First real invitation sent to a staff member
+- 🟦 2-week pilot observation
+- 🟦 Roll out to remaining shops in the 3 sports + 10 mobile pipeline
+
+## v2.9.0.1 — Frontend regression sweep — 2026-05-12
+
+Triggered when the first real authenticated owner workflow surfaced
+four pre-existing v2.9 bugs in quick succession. Backend hot-patches
+(migrations 0082–0085) restored DB state; this sweep migrated the
+three broken frontend write paths to their v2.9 DEFINER RPC
+counterparts and removed the unsupported customer-delete UI. Working
+Group C UPDATE paths (11 call sites) were intentionally left direct-
+write — their `_by_user_id` audit-column migration is paired with the
+broader v2.9.1 frontend sweep, not pulled forward.
+
+- ✅ `useCreateCustomer` (`customers/hooks.ts:68`) → `create_customer_full` RPC
+- ✅ `useUpdateShopAlertDefaults` (`batches/hooks.ts:232`) → `update_shop_settings` RPC
+- ✅ `useUpdateShopExpiredSaleSettings` (`batches/hooks.ts:276`) → `update_shop_settings` RPC
+- ✅ `useDeleteCustomer` hook removed; `CustomersListPage` delete UI (trash icon, `ConfirmDialog`, `onDelete` handler) stripped
+- ✅ Type-check + lint green post-sweep
+- ✅ 23-query audit suite returns 0 across the board
+- ✅ Synthetic test pass under `SET ROLE authenticated` covers profile self-read, `current_active_shop_id()` fallback, `create_customer_full`, both `update_shop_settings` invocations, and owner-implicit permission resolution
+- ✅ ADR `decisions/2026-05-12-v2-9-0-1-frontend-sweep.md` filed
+- ✅ `docs/gotchas.md` updated with the "no customer-delete in v2.9" note + the forward-looking discipline rule ("backend RPC migrations that remove write-target policies MUST ship with the matching frontend sweep in the same ticket")
+
+### Deferred to v2.10
+
+- **Customer deactivation / hard-delete.** The lifecycle semantics (soft vs hard delete, khata impact, reactivation, archival) are paired with returns/refunds/warranty design and cannot be resolved in isolation. Adding `customers.is_active` + a `deactivate_customer` RPC now would pre-commit one design path before the broader v2.10 customer-management ticket can weigh trade-offs.

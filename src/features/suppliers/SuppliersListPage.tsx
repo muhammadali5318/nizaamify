@@ -26,6 +26,7 @@ import {
   type DataTableColumn
 } from 'src/components/ui'
 import { PageHeader } from 'src/components/layout'
+import { PermissionGated } from 'src/components/ui/PermissionGated'
 
 const PAGE_SIZE = 10
 
@@ -148,13 +149,15 @@ export default function SuppliersListPage() {
         title={t('suppliers:title')}
         subtitle={t('suppliers:subtitle')}
         actions={
-          <Button
-            variant='primary'
-            startIcon={<AddIcon />}
-            onClick={() => navigate(paths.newSupplier)}
-          >
-            {t('suppliers:actions.new_supplier')}
-          </Button>
+          <PermissionGated permission='manage_suppliers'>
+            <Button
+              variant='primary'
+              startIcon={<AddIcon />}
+              onClick={() => navigate(paths.newSupplier)}
+            >
+              {t('suppliers:actions.new_supplier')}
+            </Button>
+          </PermissionGated>
         }
       />
 

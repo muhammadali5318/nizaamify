@@ -227,20 +227,21 @@ export function useProductVariants(productId: string | undefined) {
 export function useUpdateVariantInline() {
   const qc = useQueryClient()
   return useMutation({
+    // v2.9.1 D.6 — migrated to update_variant_inline RPC (migration 0087).
+    // Server gates sku/price on edit_product, is_active on archive_product.
+    // Writes updated_by_user_id audit column.
     mutationFn: async (input: {
       variant_id: string
       sku?: string | null
       price?: number | null
       is_active?: boolean
     }) => {
-      const patch: Record<string, unknown> = {}
-      if (input.sku !== undefined) patch.sku = input.sku
-      if (input.price !== undefined) patch.price = input.price
-      if (input.is_active !== undefined) patch.is_active = input.is_active
-      const { error } = await supabase
-        .from('product_variants')
-        .update(patch)
-        .eq('id', input.variant_id)
+      const { error } = await supabase.rpc('update_variant_inline', {
+        p_variant_id: input.variant_id,
+        p_sku: input.sku ?? null,
+        p_price: input.price ?? null,
+        p_is_active: input.is_active ?? null
+      })
       if (error) throw error
     },
     onSuccess: () => {
@@ -473,7 +474,6 @@ export type UpdateProductInput = {
   category_id: string
   description: string | null
   price: number
-  is_active: boolean
   is_scan_only: boolean
   /** v2.8 — null leaves unchanged when omitted from the patch. */
   has_batches?: boolean
@@ -481,6 +481,9 @@ export type UpdateProductInput = {
   warranty_alert_days?: number | null
   /** v2.8.4 — null = use shop default; explicit enum overrides. */
   expired_sale_policy?: 'block' | 'warn' | 'allow' | null
+  // v2.9.1 task #23: is_active intentionally NOT in this type. Archive
+  // semantics are separated; callers route is_active changes via
+  // useArchiveProduct (which cascades to ALL variants, not just default).
 }
 
 export type CreateProductWithVariantsInput = {
@@ -537,101 +540,35 @@ export function useCreateProductWithVariants() {
 export function useUpdateProduct() {
   const qc = useQueryClient()
   return useMutation({
+    // v2.9.1 task #23 — migrated to update_product RPC (migration 0089,
+    // extending the 0087 base). Server-side:
+    //   * gates on edit_product (+ edit_product_expiry_overrides when
+    //     overrides change)
+    //   * syncs legacy products.type from category name per ADR-0019
+    //   * enforces has_batches guard rails (cannot_enable_with_stock /
+    //     cannot_disable_with_active_batches)
+    //   * raises multi_variant_price_split if caller sends price for a
+    //     multi-variant product
+    //   * writes updated_by_user_id on both products + product_variants
+    //
+    // Archive concerns (is_active) intentionally OUT of this RPC — callers
+    // route is_active changes via useArchiveProduct (which also cascades
+    // to all variants, not just default).
     mutationFn: async (values: UpdateProductInput) => {
-      const { id, ...rest } = values
-      // v2.6: products.price is deprecated — variant.price is the source of
-      // truth. We update both: the products row (name/category/description/
-      // is_active/is_scan_only) AND the default variant (price). Writing
-      // products.price too is harmless and keeps the legacy column stable
-      // until a future cleanup migration drops it.
-      const { data: cat, error: catErr } = await supabase
-        .from('product_categories')
-        .select('name')
-        .eq('id', rest.category_id)
-        .single()
-      if (catErr) throw catErr
-
-      // v2.8: guard rails for has_batches toggle — frontend pre-checks
-      // happen in the dialog, but enforce again here so a stale form
-      // can't slip past.
-      if (rest.has_batches !== undefined) {
-        const { data: existing } = await supabase
-          .from('products')
-          .select('has_batches')
-          .eq('id', id)
-          .maybeSingle()
-        const currentFlag = existing?.has_batches ?? false
-        if (rest.has_batches !== currentFlag) {
-          if (rest.has_batches === true) {
-            // Going false → true: every variant must have stock = 0.
-            const { count } = await supabase
-              .from('product_variants')
-              .select('id', { count: 'exact', head: true })
-              .eq('product_id', id)
-              .gt('stock', 0)
-            if ((count ?? 0) > 0) {
-              throw new Error('cannot_enable_batches_with_stock')
-            }
-          } else {
-            // Going true → false: no active batches anywhere on this product.
-            const { count } = await supabase
-              .from('inventory_batches')
-              .select('id', {
-                count: 'exact',
-                head: true
-              })
-              .eq('is_active', true)
-              .in(
-                'variant_id',
-                (
-                  await supabase
-                    .from('product_variants')
-                    .select('id')
-                    .eq('product_id', id)
-                ).data?.map((v) => v.id) ?? []
-              )
-            if ((count ?? 0) > 0) {
-              throw new Error('cannot_disable_batches_with_active_batches')
-            }
-          }
-        }
-      }
-
-      const patch: ProductUpdate = {
-        name: rest.name,
-        type: cat.name,
-        category_id: rest.category_id,
-        description: rest.description,
-        price: rest.price,
-        is_active: rest.is_active,
-        is_scan_only: rest.is_scan_only
-      }
-      if (rest.has_batches !== undefined) patch.has_batches = rest.has_batches
-      if (rest.expiry_alert_days !== undefined) {
-        patch.expiry_alert_days = rest.expiry_alert_days
-      }
-      if (rest.warranty_alert_days !== undefined) {
-        patch.warranty_alert_days = rest.warranty_alert_days
-      }
-      if (rest.expired_sale_policy !== undefined) {
-        patch.expired_sale_policy = rest.expired_sale_policy
-      }
-      const { error: prodErr } = await supabase
-        .from('products')
-        .update(patch)
-        .eq('id', id)
-      if (prodErr) throw prodErr
-
-      // Variant price is the source of truth post-v2.6.
-      const { error: variantErr } = await supabase
-        .from('product_variants')
-        .update({ price: rest.price })
-        .eq('product_id', id)
-        .eq('is_default', true)
-        .eq('is_active', true)
-      if (variantErr) throw variantErr
-
-      return id
+      const { error } = await supabase.rpc('update_product', {
+        p_id: values.id,
+        p_name: values.name,
+        p_description: values.description ?? null,
+        p_category_id: values.category_id,
+        p_price_for_default_variant: values.price,
+        p_is_scan_only: values.is_scan_only,
+        p_has_batches: values.has_batches ?? null,
+        p_expiry_alert_days: values.expiry_alert_days ?? null,
+        p_warranty_alert_days: values.warranty_alert_days ?? null,
+        p_expired_sale_policy: values.expired_sale_policy ?? null
+      })
+      if (error) throw error
+      return values.id
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['products'] })
@@ -644,21 +581,17 @@ export function useUpdateProduct() {
 export function useArchiveProduct() {
   const qc = useQueryClient()
   return useMutation({
+    // v2.9.1 D.6 — migrated to archive_product RPC (migration 0087). Server
+    // cascades is_active to ALL variants (not just default). For pilot's
+    // single-variant products the semantic is identical; for multi-variant
+    // products this is more correct (archive product → archive every variant).
+    // Writes updated_by_user_id audit column on products + product_variants.
     mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
-      const { error } = await supabase
-        .from('products')
-        .update({ is_active: isActive })
-        .eq('id', id)
+      const { error } = await supabase.rpc('archive_product', {
+        p_id: id,
+        p_is_active: isActive
+      })
       if (error) throw error
-      // v2.6: keep the default variant's is_active in sync with the product's
-      // — the compat view joins on v.is_active, so a "live" variant under an
-      // "archived" product would leak into reads.
-      const { error: variantErr } = await supabase
-        .from('product_variants')
-        .update({ is_active: isActive })
-        .eq('product_id', id)
-        .eq('is_default', true)
-      if (variantErr) throw variantErr
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['products'] })

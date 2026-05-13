@@ -17,6 +17,9 @@ import tiers from './tiers.json'
 import variant_attributes from './variant_attributes.json'
 import variants from './variants.json'
 import batches from './batches.json'
+import shop_switcher from './shop_switcher.json'
+import team from './team.json'
+import invitation from './invitation.json'
 
 export default {
   common,
@@ -37,5 +40,8 @@ export default {
   tiers,
   variant_attributes,
   variants,
-  batches
+  batches,
+  shop_switcher,
+  team,
+  invitation
 }

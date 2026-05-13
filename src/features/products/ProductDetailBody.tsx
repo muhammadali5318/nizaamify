@@ -6,6 +6,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility'
 import { useTranslation } from 'react-i18next'
 import { Badge, Button, Card, EmptyState, Skeleton } from 'src/components/ui'
 import { formatPKR } from 'src/features/subscription/env'
+import { usePermission } from 'src/lib/permissions'
 import {
   useProductActivity,
   type Product,
@@ -53,6 +54,10 @@ export default function ProductDetailBody({
   const { t, i18n } = useTranslation(['products', 'common'])
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
   const dateLocale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
+  // v2.9.1: avg_cost + last_purchase_cost rows gate on view_product_cost.
+  // Single-variant case only — multi-variant rows live in VariantsTable
+  // which has its own gate. HOOKS ORDER: top.
+  const canViewProductCost = usePermission('view_product_cost')
 
   const { data: category } = useCategory(product.category_id)
   const { data: bdMap } = useProductStockBreakdowns([product.id])
@@ -175,18 +180,23 @@ export default function ProductDetailBody({
                 label={t('products:detail.field.stock')}
                 value={formatStockSummary(breakdown, product.stock)}
               />
-              <DetailRow
-                label={t('products:detail.field.avg_cost')}
-                value={formatPKR(Number(product.avg_cost), locale)}
-              />
-              <DetailRow
-                label={t('products:detail.field.last_purchase')}
-                value={
-                  product.last_purchase_cost === null
-                    ? '—'
-                    : formatPKR(Number(product.last_purchase_cost), locale)
-                }
-              />
+              {/* v2.9.1: cost rows gated on view_product_cost. */}
+              {canViewProductCost && (
+                <DetailRow
+                  label={t('products:detail.field.avg_cost')}
+                  value={formatPKR(Number(product.avg_cost), locale)}
+                />
+              )}
+              {canViewProductCost && (
+                <DetailRow
+                  label={t('products:detail.field.last_purchase')}
+                  value={
+                    product.last_purchase_cost === null
+                      ? '—'
+                      : formatPKR(Number(product.last_purchase_cost), locale)
+                  }
+                />
+              )}
             </>
           )}
           {product.description && (

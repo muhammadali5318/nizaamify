@@ -20,7 +20,7 @@ import {
 import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
 import { editProductSchema, type EditProductValues } from './schemas'
-import { useUpdateProduct, type Product } from './hooks'
+import { useArchiveProduct, useUpdateProduct, type Product } from './hooks'
 import {
   useShopAlertDefaults,
   useShopExpiredSaleSettings
@@ -59,6 +59,10 @@ export default function ProductEditDialog({
   const { t } = useTranslation(['products', 'common', 'batches'])
   const notify = useNotifier()
   const update = useUpdateProduct()
+  // v2.9.1 task #23: archive vs. edit semantics separated. is_active changes
+  // route to archive_product (which cascades to all variants); update_product
+  // never touches is_active.
+  const archive = useArchiveProduct()
   const { data: shopDefaults } = useShopAlertDefaults()
   const { data: shopExpiredSettings } = useShopExpiredSaleSettings()
   const [duplicateError, setDuplicateError] = useState(false)
@@ -121,13 +125,21 @@ export default function ProductEditDialog({
         category_id: values.category_id,
         description: values.description?.trim() ? values.description : null,
         price: values.price,
-        is_active: values.is_active,
         is_scan_only: values.is_scan_only,
         has_batches: values.has_batches,
         expiry_alert_days: values.expiry_alert_days,
         warranty_alert_days: values.warranty_alert_days,
         expired_sale_policy: values.expired_sale_policy ?? null
       })
+      // Route is_active changes to archive_product (variant cascade) when
+      // the user toggled the Active checkbox. Skipping the no-op preserves
+      // the archive_product permission gate for users who can only edit.
+      if (values.is_active !== product.is_active) {
+        await archive.mutateAsync({
+          id: product.id,
+          isActive: values.is_active
+        })
+      }
       notify.success(t('products:messages.saved'))
       onSaved?.()
       onClose()

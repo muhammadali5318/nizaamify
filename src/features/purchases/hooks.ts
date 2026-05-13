@@ -5,6 +5,7 @@ import {
   useQueryClient
 } from '@tanstack/react-query'
 import { supabase } from 'src/lib/supabase'
+import { useSession } from 'src/features/auth/AuthProvider'
 import type { Database } from 'src/types/database'
 
 export type Purchase = Database['public']['Tables']['purchases']['Row']
@@ -209,17 +210,21 @@ export type PurchaseDetail = Purchase & {
 }
 
 export function usePurchaseDetail(id: string | undefined) {
+  const { user } = useSession()
   return useQuery({
-    queryKey: ['purchase', id],
+    queryKey: ['purchase', id, user?.id],
     enabled: !!id,
     queryFn: async (): Promise<PurchaseDetail | null> => {
       if (!id) return null
+      // v2.9.1 hot-patch — same fix as useSale: profiles team-read RLS is
+      // gone (mig 0083), so the implicit cashier:profiles join returns
+      // NULL whenever the viewer isn't the cashier. Resolve separately
+      // via get_team_member_profiles (DEFINER, view_team) with self-fallback.
       const { data, error } = await supabase
         .from('purchases')
         .select(
           `
           *,
-          cashier:profiles!purchases_cashier_id_fkey ( email ),
           supplier:suppliers ( name ),
           purchase_items (
             id, product_id, qty, cost_at_purchase, overhead_per_unit,
@@ -237,7 +242,21 @@ export function usePurchaseDetail(id: string | undefined) {
         .eq('id', id)
         .single()
       if (error) throw error
-      const cashier = (data.cashier as { email: string } | null) ?? null
+      const cashierId = (data as { cashier_id: string | null }).cashier_id
+      let cashier: { email: string } | null = null
+      if (cashierId) {
+        if (cashierId === user?.id) {
+          cashier = { email: user.email ?? '—' }
+        } else {
+          const { data: profiles } = await supabase.rpc(
+            'get_team_member_profiles',
+            { p_user_ids: [cashierId] }
+          )
+          const email = (profiles as Array<{ email: string }> | null)?.[0]
+            ?.email
+          cashier = email ? { email } : null
+        }
+      }
       const supplier = (data.supplier as { name: string } | null) ?? null
 
       // v2.6c: parallel fetch server-computed per-line financials.

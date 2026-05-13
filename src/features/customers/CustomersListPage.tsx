@@ -5,20 +5,13 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { paths } from 'src/paths'
-import {
-  useDeleteCustomer,
-  useListCustomers,
-  type CustomerListRow
-} from './hooks'
-import { useNotifier } from 'src/components/notistack/NotificationProvider'
+import { useListCustomers, type CustomerListRow } from './hooks'
 import { formatPKR } from 'src/features/subscription/env'
 import {
   Button,
-  ConfirmDialog,
   DataTable,
   EmptyState,
   Input,
@@ -27,6 +20,8 @@ import {
   type DataTableColumn
 } from 'src/components/ui'
 import { PageHeader } from 'src/components/layout'
+import { PermissionGated } from 'src/components/ui/PermissionGated'
+import { usePermission } from 'src/lib/permissions'
 
 const PAGE_SIZE = 25
 
@@ -36,14 +31,11 @@ const truncate = (s: string, n = 40) =>
 export default function CustomersListPage() {
   const { t, i18n } = useTranslation(['customers', 'common'])
   const navigate = useNavigate()
-  const notify = useNotifier()
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
-  const remove = useDeleteCustomer()
 
   const [search, setSearch] = useState('')
   const [debounced, setDebounced] = useState('')
   const [page, setPage] = useState(0)
-  const [confirm, setConfirm] = useState<CustomerListRow | null>(null)
 
   useEffect(() => {
     const h = setTimeout(() => setDebounced(search.trim()), 250)
@@ -62,16 +54,11 @@ export default function CustomersListPage() {
   const rows = data?.rows ?? []
   const total = data?.total ?? 0
 
-  const onDelete = async () => {
-    if (!confirm) return
-    try {
-      await remove.mutateAsync(confirm.id)
-      notify.success(t('customers:messages.deleted'))
-      setConfirm(null)
-    } catch {
-      notify.error(t('customers:errors.delete_failed'))
-    }
-  }
+  // v2.9.1 hot-patch — outstanding numeric gated on view_customer_outstanding.
+  // Without the permission, render "Has khata"/"No khata" indicator instead
+  // of the formatted PKR amount, per catalog: "user sees only a has_khata
+  // boolean without the numeric value."
+  const canViewCustomerOutstanding = usePermission('view_customer_outstanding')
 
   const columns: DataTableColumn<CustomerListRow>[] = [
     {
@@ -108,20 +95,36 @@ export default function CustomersListPage() {
       id: 'outstanding',
       header: t('customers:outstanding'),
       align: 'end',
-      cell: (c) => (
-        <Typography
-          variant='body1'
-          sx={{
-            fontWeight: 600,
-            color:
-              c.outstanding > 0
-                ? 'var(--status-warning-text)'
-                : 'var(--text-muted)'
-          }}
-        >
-          {formatPKR(c.outstanding, locale)}
-        </Typography>
-      )
+      cell: (c) =>
+        canViewCustomerOutstanding ? (
+          <Typography
+            variant='body1'
+            sx={{
+              fontWeight: 600,
+              color:
+                c.outstanding > 0
+                  ? 'var(--status-warning-text)'
+                  : 'var(--text-muted)'
+            }}
+          >
+            {formatPKR(c.outstanding, locale)}
+          </Typography>
+        ) : (
+          <Typography
+            variant='body2'
+            sx={{
+              fontWeight: 500,
+              color:
+                c.outstanding > 0
+                  ? 'var(--status-warning-text)'
+                  : 'var(--text-muted)'
+            }}
+          >
+            {c.outstanding > 0
+              ? t('customers:has_khata')
+              : t('customers:no_khata')}
+          </Typography>
+        )
     },
     {
       id: 'last_activity',
@@ -141,47 +144,26 @@ export default function CustomersListPage() {
       align: 'end',
       width: 200,
       cardRole: 'actions',
-      cell: (c) => {
-        const hasHistory = c.invoice_count > 0 || c.outstanding > 0
-        return (
-          <Stack direction='row' spacing={0.5} justifyContent='flex-end'>
-            <Button
-              variant='link'
-              size='sm'
-              onClick={() => navigate(paths.gotoCustomer(c.id))}
+      cell: (c) => (
+        <Stack direction='row' spacing={0.5} justifyContent='flex-end'>
+          <Button
+            variant='link'
+            size='sm'
+            onClick={() => navigate(paths.gotoCustomer(c.id))}
+          >
+            {t('customers:actions.view_history')}
+          </Button>
+          <Tooltip title={t('customers:actions.edit')}>
+            <IconButton
+              size='small'
+              onClick={() => navigate(paths.gotoCustomerEdit(c.id))}
+              aria-label={t('customers:actions.edit')}
             >
-              {t('customers:actions.view_history')}
-            </Button>
-            <Tooltip title={t('customers:actions.edit')}>
-              <IconButton
-                size='small'
-                onClick={() => navigate(paths.gotoCustomerEdit(c.id))}
-                aria-label={t('customers:actions.edit')}
-              >
-                <EditIcon fontSize='small' />
-              </IconButton>
-            </Tooltip>
-            <Tooltip
-              title={
-                hasHistory
-                  ? t('customers:actions.delete_blocked')
-                  : t('customers:actions.delete')
-              }
-            >
-              <span>
-                <IconButton
-                  size='small'
-                  disabled={hasHistory}
-                  onClick={() => setConfirm(c)}
-                  aria-label={t('customers:actions.delete')}
-                >
-                  <DeleteOutlineIcon fontSize='small' />
-                </IconButton>
-              </span>
-            </Tooltip>
-          </Stack>
-        )
-      }
+              <EditIcon fontSize='small' />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      )
     }
   ]
 
@@ -190,13 +172,15 @@ export default function CustomersListPage() {
       <PageHeader
         title={t('customers:title')}
         actions={
-          <Button
-            variant='primary'
-            startIcon={<AddIcon />}
-            onClick={() => navigate(paths.newCustomer)}
-          >
-            {t('customers:add_customer')}
-          </Button>
+          <PermissionGated permission='create_customer_basic'>
+            <Button
+              variant='primary'
+              startIcon={<AddIcon />}
+              onClick={() => navigate(paths.newCustomer)}
+            >
+              {t('customers:add_customer')}
+            </Button>
+          </PermissionGated>
         }
       />
 
@@ -228,20 +212,6 @@ export default function CustomersListPage() {
           onChange={(p) => setPage(p - 1)}
         />
       )}
-
-      <ConfirmDialog
-        open={!!confirm}
-        onClose={() => setConfirm(null)}
-        onConfirm={onDelete}
-        title={t('customers:actions.confirm_delete_title')}
-        description={t('customers:actions.confirm_delete_body', {
-          name: confirm?.name ?? ''
-        })}
-        confirmLabel={t('customers:actions.confirm_delete_ok')}
-        cancelLabel={t('customers:actions.confirm_delete_cancel')}
-        loading={remove.isPending}
-        destructive
-      />
     </Box>
   )
 }

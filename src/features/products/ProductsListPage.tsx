@@ -12,6 +12,7 @@ import { useNavigate, useSearchParams } from 'react-router'
 import { paths } from 'src/paths'
 import { Button } from 'src/components/ui'
 import { PageHeader } from 'src/components/layout'
+import { PermissionGated } from 'src/components/ui/PermissionGated'
 import ProductTable, { type StockDisplayMode } from './ProductTable'
 import CategoryFilter from './CategoryFilter'
 
@@ -101,13 +102,15 @@ export default function ProductsListPage() {
                 </MenuItem>
               </TextField>
             </Stack>
-            <Button
-              variant='primary'
-              startIcon={<AddIcon />}
-              onClick={() => navigate(paths.newProduct)}
-            >
-              {t('products:new_product')}
-            </Button>
+            <PermissionGated permission='create_product'>
+              <Button
+                variant='primary'
+                startIcon={<AddIcon />}
+                onClick={() => navigate(paths.newProduct)}
+              >
+                {t('products:new_product')}
+              </Button>
+            </PermissionGated>
           </Stack>
         }
       />

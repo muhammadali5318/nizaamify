@@ -55,6 +55,11 @@ export const paths = {
   support: '/settings/support',
   tiers: '/settings/tiers',
   variantAttributes: '/settings/variant-attributes',
+  team: '/settings/team',
+  teamAudit: '/settings/team/audit',
+
+  acceptInvitation: '/invite/accept/:invitation_id',
+  gotoAcceptInvitation: (id: string) => `/invite/accept/${id}`,
 
   notFound: '/404'
 }

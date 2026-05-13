@@ -16,6 +16,7 @@ import {
   type DataTableColumn
 } from 'src/components/ui'
 import { PageHeader } from 'src/components/layout'
+import { usePermission } from 'src/lib/permissions'
 
 type DailyRow = { date: string; total: number }
 type MonthlyRow = {
@@ -35,6 +36,12 @@ type OutstandingRow = {
 export default function ReportsPage() {
   const { t, i18n } = useTranslation(['reports', 'common', 'expenses'])
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
+  // v2.9.1: route admits anyone with view_reports. Inside, cost / profit
+  // columns gate on view_sale_cost; expense breakdown on view_expenses;
+  // outstanding section on view_customer_outstanding. HOOKS ORDER: top.
+  const canViewSaleCost = usePermission('view_sale_cost')
+  const canViewExpenses = usePermission('view_expenses')
+  const canViewCustomerOutstanding = usePermission('view_customer_outstanding')
 
   const daily = useDailySalesLast7()
   const monthly = useMonthlySummaryLast6()
@@ -64,6 +71,10 @@ export default function ReportsPage() {
   ]
 
   const monthlyRows = (monthly.data ?? []) as MonthlyRow[]
+  // v2.9.1: gross_profit, expenses, net_profit are cost-derived. Hide if
+  // view_sale_cost is missing (net_profit also requires expenses subtraction,
+  // but the catalog binds those columns to view_sale_cost — matches the
+  // monthly_summary.* hide list in the design doc).
   const monthlyColumns: DataTableColumn<MonthlyRow>[] = [
     {
       id: 'month',
@@ -83,44 +94,58 @@ export default function ReportsPage() {
       align: 'end',
       cell: (m) => formatPKR(Number(m.total_sales ?? 0), locale)
     },
-    {
-      id: 'gross_profit',
-      header: t('reports:fields.gross_profit'),
-      align: 'end',
-      hideOnMobile: true,
-      cell: (m) => formatPKR(Number(m.gross_profit ?? 0), locale)
-    },
-    {
-      id: 'expenses',
-      header: t('reports:fields.expenses'),
-      align: 'end',
-      hideOnMobile: true,
-      cell: (m) => formatPKR(Number(m.total_expenses ?? 0), locale)
-    },
-    {
-      id: 'net_profit',
-      header: t('reports:fields.net_profit'),
-      align: 'end',
-      cell: (m) => {
-        const gross = Number(m.gross_profit ?? 0)
-        const exp = Number(m.total_expenses ?? 0)
-        const net = gross - exp
-        return (
-          <Box
-            component='span'
-            sx={{
-              fontWeight: 700,
-              color:
-                net >= 0
-                  ? 'var(--status-success-text)'
-                  : 'var(--status-error-text)'
-            }}
-          >
-            {formatPKR(net, locale)}
-          </Box>
-        )
-      }
-    }
+    ...(canViewSaleCost
+      ? [
+          {
+            id: 'gross_profit',
+            header: t('reports:fields.gross_profit'),
+            align: 'end' as const,
+            hideOnMobile: true,
+            cell: (m: MonthlyRow) =>
+              formatPKR(Number(m.gross_profit ?? 0), locale)
+          }
+        ]
+      : []),
+    ...(canViewExpenses
+      ? [
+          {
+            id: 'expenses',
+            header: t('reports:fields.expenses'),
+            align: 'end' as const,
+            hideOnMobile: true,
+            cell: (m: MonthlyRow) =>
+              formatPKR(Number(m.total_expenses ?? 0), locale)
+          }
+        ]
+      : []),
+    ...(canViewSaleCost
+      ? [
+          {
+            id: 'net_profit',
+            header: t('reports:fields.net_profit'),
+            align: 'end' as const,
+            cell: (m: MonthlyRow) => {
+              const gross = Number(m.gross_profit ?? 0)
+              const exp = Number(m.total_expenses ?? 0)
+              const net = gross - exp
+              return (
+                <Box
+                  component='span'
+                  sx={{
+                    fontWeight: 700,
+                    color:
+                      net >= 0
+                        ? 'var(--status-success-text)'
+                        : 'var(--status-error-text)'
+                  }}
+                >
+                  {formatPKR(net, locale)}
+                </Box>
+              )
+            }
+          }
+        ]
+      : [])
   ]
 
   const breakdownRows = (breakdown.data ?? []) as BreakdownRow[]
@@ -191,35 +216,43 @@ export default function ReportsPage() {
           />
         </Section>
 
-        <Section title={t('reports:sections.expense_breakdown')}>
-          <DataTable
-            columns={breakdownColumns}
-            rows={breakdownRows}
-            getRowId={(b) => b.category}
-            loading={breakdown.isLoading}
-            empty={
-              <Box sx={{ py: 4 }}>
-                <EmptyState title={t('reports:no_data')} />
-              </Box>
-            }
-            ariaLabel={t('reports:sections.expense_breakdown')}
-          />
-        </Section>
+        {/* v2.9.1: expense breakdown gated on view_expenses. HIDE the whole
+         *  section if missing — no boolean fallback for category-level data. */}
+        {canViewExpenses && (
+          <Section title={t('reports:sections.expense_breakdown')}>
+            <DataTable
+              columns={breakdownColumns}
+              rows={breakdownRows}
+              getRowId={(b) => b.category}
+              loading={breakdown.isLoading}
+              empty={
+                <Box sx={{ py: 4 }}>
+                  <EmptyState title={t('reports:no_data')} />
+                </Box>
+              }
+              ariaLabel={t('reports:sections.expense_breakdown')}
+            />
+          </Section>
+        )}
 
-        <Section title={t('reports:sections.outstanding')}>
-          <DataTable
-            columns={outstandingColumns}
-            rows={outstandingRows}
-            getRowId={(c) => c.customer_id ?? c.name}
-            loading={outstanding.isLoading}
-            empty={
-              <Box sx={{ py: 4 }}>
-                <EmptyState title={t('reports:no_data')} />
-              </Box>
-            }
-            ariaLabel={t('reports:sections.outstanding')}
-          />
-        </Section>
+        {/* v2.9.1: outstanding section gated on view_customer_outstanding.
+         *  No has_khata boolean substitute at the report level — HIDE. */}
+        {canViewCustomerOutstanding && (
+          <Section title={t('reports:sections.outstanding')}>
+            <DataTable
+              columns={outstandingColumns}
+              rows={outstandingRows}
+              getRowId={(c) => c.customer_id ?? c.name}
+              loading={outstanding.isLoading}
+              empty={
+                <Box sx={{ py: 4 }}>
+                  <EmptyState title={t('reports:no_data')} />
+                </Box>
+              }
+              ariaLabel={t('reports:sections.outstanding')}
+            />
+          </Section>
+        )}
       </Stack>
     </Box>
   )

@@ -1,0 +1,31 @@
+{
+  "page": {
+    "loading": "Loading invitation…",
+    "header_left": "Join {{shopName}}",
+    "invited_by": "Invited by {{email}}",
+    "you_will_join_as": "You'll join as:",
+    "preset_manager": "Manager",
+    "preset_salesperson": "Salesperson",
+    "code_label": "4-digit code from your shop owner",
+    "code_helper": "Ask them to read it to you verbally — it shouldn't be sent over email or SMS.",
+    "submit": "Accept invitation",
+    "submitting": "Accepting…",
+    "attempts_remaining": "{{count}} attempt left before this invitation is auto-cancelled",
+    "attempts_remaining_plural": "{{count}} attempts left before this invitation is auto-cancelled"
+  },
+  "errors": {
+    "not_found_title": "Invitation not found",
+    "not_found_body": "This invitation link is invalid. Ask your shop owner for a new one.",
+    "email_mismatch_title": "Different email expected",
+    "email_mismatch_body": "This invitation was sent to a different email. Sign in with the right account or ask your shop owner to re-invite.",
+    "expired_title": "Invitation expired",
+    "expired_body": "This invitation has expired. Ask your shop owner for a new one.",
+    "cancelled_title": "Invitation cancelled",
+    "cancelled_body": "This invitation was cancelled by your shop owner.",
+    "accepted_title": "Already accepted",
+    "accepted_body": "You've already accepted this invitation.",
+    "auto_cancelled_5_strike": "Too many wrong codes — this invitation was auto-cancelled. Ask your shop owner for a new one.",
+    "back_to_dashboard": "Back to dashboard",
+    "sign_out_and_retry": "Sign out and use the right email"
+  }
+}

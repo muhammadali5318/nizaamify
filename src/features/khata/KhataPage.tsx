@@ -18,6 +18,7 @@ import {
   type DataTableColumn
 } from 'src/components/ui'
 import { PageHeader } from 'src/components/layout'
+import { usePermission } from 'src/lib/permissions'
 
 const PAGE_SIZE = 50
 
@@ -34,10 +35,15 @@ type KhataRow = {
 }
 
 export default function KhataPage() {
-  const { t, i18n } = useTranslation(['khata', 'common'])
+  const { t, i18n } = useTranslation(['khata', 'common', 'customers'])
   const navigate = useNavigate()
   const locale = i18n.language === 'ur' ? 'ur-PK' : 'en-PK'
   const [params, setParams] = useSearchParams()
+  // v2.9.1: route already gated on view_customer_khata. Inside, the numeric
+  // outstanding column gates on view_customer_outstanding (a user could
+  // hold khata-history view but not numeric outstanding via overrides).
+  // HOOKS ORDER: top of body, before any early returns.
+  const canViewCustomerOutstanding = usePermission('view_customer_outstanding')
 
   const initialStatus: KhataStatus = isStatus(params.get('status'))
     ? (params.get('status') as KhataStatus)
@@ -138,6 +144,25 @@ export default function KhataPage() {
       align: 'end',
       cell: (c) => {
         const balance = Number(c.outstanding_balance)
+        // v2.9.1: numeric → has_khata boolean substitute when permission is
+        // missing. The row already passed the page-level view_customer_khata
+        // gate; only the magnitude is hidden.
+        if (!canViewCustomerOutstanding) {
+          return (
+            <Typography
+              variant='body2'
+              sx={{
+                fontWeight: 600,
+                color:
+                  balance > 0
+                    ? 'var(--status-warning-text)'
+                    : 'var(--text-muted)'
+              }}
+            >
+              {balance > 0 ? t('customers:has_khata') : t('customers:no_khata')}
+            </Typography>
+          )
+        }
         const color =
           balance > 0
             ? 'var(--status-warning-text)'

@@ -14,6 +14,7 @@ import {
 } from './hooks'
 import AddCustomerDialog from 'src/features/pos/AddCustomerDialog'
 import { Spinner } from 'src/components/ui'
+import { usePermission } from 'src/lib/permissions'
 
 const PAGE_SIZE = 10
 const ADD_NEW_ID = '__add_new'
@@ -57,6 +58,13 @@ export default function CustomerPicker({
   disabled = false
 }: Props) {
   const { t } = useTranslation(['pos', 'customers', 'common'])
+  // v2.9.1 D.5 — POS-internal permission gates. HIDE rule:
+  //   - canAddNew: gate the "+ Add new" affordance on create_customer_full
+  //     (the RPC the dialog calls). Users with only create_customer_basic
+  //     can still create via /customers/new.
+  //   - canViewContact: gate phone + address columns in the dropdown rows.
+  const canAddNew = usePermission('create_customer_full')
+  const canViewContact = usePermission('view_customer_contact')
   const [open, setOpen] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const [debounced, setDebounced] = useState('')
@@ -147,14 +155,16 @@ export default function CustomerPicker({
         address: null
       })
     }
-    out.push({
-      id: ADD_NEW_ID,
-      name: t('pos:customer.add_new'),
-      phone: '',
-      address: null
-    })
+    if (canAddNew) {
+      out.push({
+        id: ADD_NEW_ID,
+        name: t('pos:customer.add_new'),
+        phone: '',
+        address: null
+      })
+    }
     return out
-  }, [baseOptions, showLoadMore, t])
+  }, [baseOptions, showLoadMore, t, canAddNew])
 
   const isLoading =
     (debounced.length === 0 ? recent.isLoading : search.isFetching) && open
@@ -224,19 +234,23 @@ export default function CustomerPicker({
                   <Typography variant='body1' sx={{ fontWeight: 600 }}>
                     {option.name}
                   </Typography>
-                  <Typography
-                    variant='caption'
-                    sx={{ color: 'var(--text-muted)' }}
-                  >
-                    {option.phone}
-                  </Typography>
-                  {option.address && (
-                    <Typography
-                      variant='caption'
-                      sx={{ color: 'var(--text-muted)', display: 'block' }}
-                    >
-                      {truncate(option.address, 40)}
-                    </Typography>
+                  {canViewContact && (
+                    <>
+                      <Typography
+                        variant='caption'
+                        sx={{ color: 'var(--text-muted)' }}
+                      >
+                        {option.phone}
+                      </Typography>
+                      {option.address && (
+                        <Typography
+                          variant='caption'
+                          sx={{ color: 'var(--text-muted)', display: 'block' }}
+                        >
+                          {truncate(option.address, 40)}
+                        </Typography>
+                      )}
+                    </>
                   )}
                 </Box>
               )}

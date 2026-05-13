@@ -116,6 +116,8 @@ export function useCreateSupplier() {
 export function useUpdateSupplier() {
   const qc = useQueryClient()
   return useMutation({
+    // v2.9.1 D.7 — migrated to update_supplier RPC (migration 0087).
+    // Server gates on manage_suppliers; writes updated_by_user_id.
     mutationFn: async (values: {
       id: string
       name: string
@@ -123,20 +125,16 @@ export function useUpdateSupplier() {
       address?: string | null
       notes?: string | null
     }) => {
-      const { id, ...rest } = values
-      const { data, error } = await supabase
-        .from('suppliers')
-        .update({
-          name: rest.name,
-          contact: rest.contact ?? null,
-          address: rest.address ?? null,
-          notes: rest.notes ?? null
-        })
-        .eq('id', id)
-        .select('*')
-        .single()
+      const { error } = await supabase.rpc('update_supplier', {
+        p_id: values.id,
+        p_name: values.name,
+        p_contact: values.contact ?? null,
+        p_address: values.address ?? null,
+        p_notes: values.notes ?? null
+      })
       if (error) throw error
-      return data
+      // RPC returns void; caller refetches via the supplier query
+      return values.id
     },
     onSuccess: (_data, vars) => {
       void qc.invalidateQueries({ queryKey: ['supplier', vars.id] })
@@ -149,11 +147,10 @@ export function useUpdateSupplier() {
 export function useArchiveSupplier() {
   const qc = useQueryClient()
   return useMutation({
+    // v2.9.1 D.7 — migrated to archive_supplier RPC (migration 0087).
+    // Server gates on manage_suppliers; writes updated_by_user_id.
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('suppliers')
-        .update({ is_active: false })
-        .eq('id', id)
+      const { error } = await supabase.rpc('archive_supplier', { p_id: id })
       if (error) throw error
       return id
     },

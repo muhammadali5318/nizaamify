@@ -25,6 +25,7 @@ import {
   type DataTableColumn
 } from 'src/components/ui'
 import { PageHeader } from 'src/components/layout'
+import { PermissionGated } from 'src/components/ui/PermissionGated'
 
 const todayISO = () => new Date().toISOString().slice(0, 10)
 
@@ -109,13 +110,15 @@ export default function ExpensesPage() {
       <PageHeader
         title={t('expenses:title')}
         actions={
-          <Button
-            variant='primary'
-            startIcon={<AddIcon />}
-            onClick={() => setOpen(true)}
-          >
-            {t('expenses:add')}
-          </Button>
+          <PermissionGated permission='create_expense'>
+            <Button
+              variant='primary'
+              startIcon={<AddIcon />}
+              onClick={() => setOpen(true)}
+            >
+              {t('expenses:add')}
+            </Button>
+          </PermissionGated>
         }
       />
 

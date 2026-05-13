@@ -34,28 +34,21 @@ export function useTargetForMonth(month: string = firstOfMonth()) {
 export function useUpsertTarget() {
   const qc = useQueryClient()
   return useMutation({
+    // v2.9.1 D.7 — migrated to upsert_monthly_target RPC (migration 0075).
+    // Server resolves shop_id from active-shop header + writes
+    // updated_by_user_id; gates on manage_monthly_targets permission.
     mutationFn: async (args: {
       month: string
       target_sale: number
       target_gross_profit: number
       target_net_profit: number
     }) => {
-      const { data: shop, error: shopErr } = await supabase
-        .from('shops')
-        .select('id')
-        .single()
-      if (shopErr) throw shopErr
-      const { error } = await supabase.from('monthly_targets').upsert(
-        {
-          shop_id: shop.id,
-          month: args.month,
-          target_sale: args.target_sale,
-          target_gross_profit: args.target_gross_profit,
-          target_net_profit: args.target_net_profit,
-          updated_at: new Date().toISOString()
-        },
-        { onConflict: 'shop_id,month' }
-      )
+      const { error } = await supabase.rpc('upsert_monthly_target', {
+        p_month: args.month,
+        p_target_sale: args.target_sale,
+        p_target_gross_profit: args.target_gross_profit,
+        p_target_net_profit: args.target_net_profit
+      })
       if (error) throw error
     },
     onSuccess: () => {

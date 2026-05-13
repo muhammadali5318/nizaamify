@@ -30,6 +30,24 @@
   "loading": "لوڈ ہو رہا ہے…",
   "errors": {
     "generic": "کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔",
-    "network": "نیٹ ورک کی خرابی۔ اپنا کنکشن چیک کریں۔"
-  }
+    "network": "نیٹ ورک کی خرابی۔ اپنا کنکشن چیک کریں۔",
+    "unknown": "کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔",
+    "not_authenticated": "براہ کرم دوبارہ لاگ ان کریں۔",
+    "no_shop_for_user": "دکان تک رسائی نہیں۔ اپنے دکان کے مالک سے رابطہ کریں۔",
+    "insufficient_permissions": "آپ کو اس کام کی اجازت نہیں ہے۔ اپنے دکان کے مالک سے کہیں۔",
+    "invalid_app_shop_id_header": "فعال دکان درست نہیں۔ صفحہ تازہ کریں۔",
+    "no_access_to_shop": "آپ کی اس دکان تک رسائی ختم ہو چکی ہے۔",
+    "invalid_confirmation_code": "چار ہندسوں کا کوڈ غلط ہے۔ دوبارہ کوشش کریں۔",
+    "invitation_expired": "یہ دعوت ختم ہو چکی ہے۔ نئی دعوت کے لیے دکان کے مالک سے کہیں۔",
+    "invitation_email_mismatch": "یہ دعوت کسی اور ای میل کے لیے ہے۔",
+    "salesperson_payment_cap_exceeded": "یہ رقم آپ کی روزانہ حد سے زیادہ ہے۔ بڑی رقم وصول کرنے کے لیے دکان کے مالک سے کہیں۔",
+    "discount_exceeds_line_pct_limit": "لائن کا ڈسکاؤنٹ آپ کی فیصد حد سے زیادہ ہے۔",
+    "discount_exceeds_line_pkr_limit": "لائن کا ڈسکاؤنٹ آپ کی زیادہ سے زیادہ رقم سے زیادہ ہے۔",
+    "discount_exceeds_invoice_pct_limit": "انوائس کا ڈسکاؤنٹ آپ کی فیصد حد سے زیادہ ہے۔",
+    "discount_exceeds_invoice_pkr_limit": "انوائس کا ڈسکاؤنٹ آپ کی زیادہ سے زیادہ رقم سے زیادہ ہے۔",
+    "expired_stock_blocked": "یہ بیچ ختم ہو چکا ہے۔ ختم شدہ اسٹاک کی فروخت بند ہے۔",
+    "expired_stock_needs_confirmation": "ختم شدہ اسٹاک کی فروخت کی تصدیق کریں۔",
+    "duplicate_phone_in_shop": "ایک اور گاہک کا یہی نمبر پہلے سے موجود ہے۔"
+  },
+  "permission_tooltip": "اجازت درکار: {{permission}}۔ اپنے دکان کے مالک سے رابطہ کریں۔"
 }

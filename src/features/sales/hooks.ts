@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from 'src/lib/supabase'
+import { useSession } from 'src/features/auth/AuthProvider'
 import type { Database } from 'src/types/database'
 
 export type Invoice = Database['public']['Tables']['invoices']['Row']
@@ -14,7 +15,11 @@ export type SaleDetailItem = {
   product_id: string
   qty: number
   price_at_sale: number
-  cost_at_sale: number
+  /** v2.10a: cost_at_sale now comes from sale_item_financials (DEFINER +
+   *  permission-aware) since the column was revoked at the grant layer
+   *  on the raw sale_items table. NULL when the caller lacks
+   *  view_sale_cost. */
+  cost_at_sale: number | null
   /** v2.2 per-line discount snapshot. */
   line_discount_type: 'percent' | 'fixed' | null
   line_discount_value: number | null
@@ -26,10 +31,12 @@ export type SaleDetailItem = {
   line_revenue: number
   /** v2.6c: server-computed line value (price*qty − line_disc, BEFORE sale disc). */
   line_value: number
-  /** v2.6b: server-computed line cost (cost_at_sale × qty). */
-  line_cost: number
-  /** v2.6b: server-computed line profit. */
-  line_profit: number
+  /** v2.6b: server-computed line cost (cost_at_sale × qty).
+   *  v2.10a: NULL when caller lacks view_sale_cost. */
+  line_cost: number | null
+  /** v2.6b: server-computed line profit.
+   *  v2.10a: NULL when caller lacks view_sale_cost. */
+  line_profit: number | null
   product: { id: string; name: string } | null
   /** v2.8: which batch this line drew from. NULL for non-batched products. */
   batch_id: string | null
@@ -61,12 +68,16 @@ export type SaleDetail = Invoice & {
    * Σ line_value (post-line-discount, pre-sale-discount); revenue + gross_profit
    * + outstanding all come from invoice_financials. Frontend reads these
    * directly per no-JS-Number-on-money discipline. */
+  /** v2.6c invoice-level financials, v2.10a-revised: total_cost +
+   *  gross_profit are NULL when caller lacks view_sale_cost;
+   *  gross_margin_percent is NULL when caller lacks view_profit_margin
+   *  or revenue is 0. */
   financials: {
     items_subtotal: number
     post_discount_items: number
     revenue: number
-    total_cost: number
-    gross_profit: number
+    total_cost: number | null
+    gross_profit: number | null
     gross_margin_percent: number | null
     outstanding: number
   } | null
@@ -126,21 +137,32 @@ export function useSales(filters: SalesFilters) {
 }
 
 export function useSale(id: string | undefined) {
+  const { user } = useSession()
   return useQuery({
-    queryKey: ['sale', id],
+    queryKey: ['sale', id, user?.id],
     enabled: !!id,
     queryFn: async (): Promise<SaleDetail | null> => {
       if (!id) return null
+      // v2.9.1 hot-patch — the implicit `cashier:profiles!...` join is gone
+      // because v2.9 dropped the team-read policy on profiles (mig 0083).
+      // Resolve cashier email separately via get_team_member_profiles
+      // (DEFINER, view_team-gated) after the invoice fetch lands, with a
+      // self-email fallback for the case where the viewer IS the cashier.
+      // v2.10a — `cost_at_sale` was revoked at the column-grant layer
+      // (mig 0093). Authenticated callers (even owners) cannot SELECT it
+      // from the raw sale_items table. Read it via sale_item_financials
+      // below, which is DEFINER + projects cost_at_sale conditionally on
+      // view_sale_cost (mig 0092). The nested select here intentionally
+      // omits cost_at_sale.
       const { data, error } = await supabase
         .from('invoices')
         .select(
           `
           *,
           customer:customers ( id, name, phone, tier_id ),
-          cashier:profiles!invoices_cashier_id_fkey ( email ),
           tier:customer_tiers ( name ),
           sale_items (
-            id, product_id, qty, price_at_sale, cost_at_sale,
+            id, product_id, qty, price_at_sale,
             line_discount_type, line_discount_value, line_discount_amount,
             batch_id, sold_expired,
             product:products ( id, name ),
@@ -200,20 +222,25 @@ export function useSale(id: string | undefined) {
       // profit) and the invoice-level totals. Both come from the single
       // sources of truth (sale_item_financials + invoice_financials).
       // Frontend reads, never computes.
+      // v2.10a: cost_at_sale + line_cost + line_profit are NULL'd by the
+      // DEFINER view when caller lacks view_sale_cost. total_cost +
+      // gross_profit + gross_margin_percent on invoice_financials are
+      // also conditionally NULL'd.
       type FinRow = {
         sale_item_id: string
+        cost_at_sale: number | string | null
         allocated_sale_discount: number | string
         line_value: number | string
         line_revenue: number | string
-        line_cost: number | string
-        line_profit: number | string
+        line_cost: number | string | null
+        line_profit: number | string | null
       }
       type InvFin = {
         items_subtotal: number | string
         post_discount_items: number | string
         revenue: number | string
-        total_cost: number | string
-        gross_profit: number | string
+        total_cost: number | string | null
+        gross_profit: number | string | null
         gross_margin_percent: number | string | null
         outstanding: number | string
       }
@@ -221,7 +248,7 @@ export function useSale(id: string | undefined) {
         supabase
           .from('sale_item_financials')
           .select(
-            'sale_item_id, allocated_sale_discount, line_value, line_revenue, line_cost, line_profit'
+            'sale_item_id, cost_at_sale, allocated_sale_discount, line_value, line_revenue, line_cost, line_profit'
           )
           .eq('invoice_id', data.id),
         supabase
@@ -243,10 +270,13 @@ export function useSale(id: string | undefined) {
         const fin = finById.get(it.id)
         return {
           ...it,
+          cost_at_sale:
+            fin?.cost_at_sale == null ? null : Number(fin.cost_at_sale),
           allocated_sale_discount: Number(fin?.allocated_sale_discount ?? 0),
           line_revenue: Number(fin?.line_revenue ?? 0),
-          line_cost: Number(fin?.line_cost ?? 0),
-          line_profit: Number(fin?.line_profit ?? 0),
+          line_cost: fin?.line_cost == null ? null : Number(fin.line_cost),
+          line_profit:
+            fin?.line_profit == null ? null : Number(fin.line_profit),
           // line_value = price_at_sale × qty − line_discount_amount, server-computed
           line_value: Number(fin?.line_value ?? 0)
         }
@@ -258,20 +288,39 @@ export function useSale(id: string | undefined) {
             items_subtotal: Number(invFin.items_subtotal),
             post_discount_items: Number(invFin.post_discount_items),
             revenue: Number(invFin.revenue),
-            total_cost: Number(invFin.total_cost),
-            gross_profit: Number(invFin.gross_profit),
+            total_cost:
+              invFin.total_cost == null ? null : Number(invFin.total_cost),
+            gross_profit:
+              invFin.gross_profit == null ? null : Number(invFin.gross_profit),
             gross_margin_percent:
-              invFin.gross_margin_percent === null
+              invFin.gross_margin_percent == null
                 ? null
                 : Number(invFin.gross_margin_percent),
             outstanding: Number(invFin.outstanding)
           }
         : null
 
+      // Resolve cashier email via DEFINER helper (with self-fallback)
+      const cashierId = (data as { cashier_id: string | null }).cashier_id
+      let cashier: SaleDetail['cashier'] = null
+      if (cashierId) {
+        if (cashierId === user?.id) {
+          cashier = { email: user.email ?? '—' }
+        } else {
+          const { data: profiles } = await supabase.rpc(
+            'get_team_member_profiles',
+            { p_user_ids: [cashierId] }
+          )
+          const email = (profiles as Array<{ email: string }> | null)?.[0]
+            ?.email
+          cashier = email ? { email } : null
+        }
+      }
+
       return {
         ...(data as unknown as Invoice),
         customer: (data.customer as SaleDetail['customer']) ?? null,
-        cashier: (data.cashier as SaleDetail['cashier']) ?? null,
+        cashier,
         tier: (data.tier as SaleDetail['tier']) ?? null,
         items,
         financials,

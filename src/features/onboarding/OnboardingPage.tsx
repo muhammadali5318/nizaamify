@@ -81,8 +81,19 @@ export default function OnboardingPage() {
       setServerError(t('onboarding:errors.submit_failed'))
       return
     }
-    await queryClient.invalidateQueries({ queryKey: ['profile'] })
-    await queryClient.invalidateQueries({ queryKey: ['shop'] })
+    // Optimistic: the very next render of RequireOnboarded must see
+    // onboarding_completed=true, otherwise the guard bounces back here
+    // before the background refetch lands. setQueryData is synchronous.
+    if (user) {
+      queryClient.setQueryData<{ onboarding_completed: boolean } | null>(
+        ['profile', user.id],
+        (old) => (old ? { ...old, onboarding_completed: true } : old)
+      )
+    }
+    await Promise.all([
+      queryClient.refetchQueries({ queryKey: ['profile'] }),
+      queryClient.refetchQueries({ queryKey: ['shop'] })
+    ])
     navigate(paths.dashboard, { replace: true })
   }
 

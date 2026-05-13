@@ -11,7 +11,8 @@ export type BatchPickerRow = {
   qty_remaining: number
   expiry_date: string | null
   received_at: string
-  cost_per_unit: number
+  /** v2.10b: NULL when caller lacks view_batch_cost. */
+  cost_per_unit: number | null
 }
 
 /** Active batches for a variant, ordered FEFO. Used by:
@@ -26,25 +27,27 @@ export function useActiveBatchesForVariant(
     enabled: !!variantId,
     queryFn: async (): Promise<BatchPickerRow[]> => {
       if (!variantId) return []
+      // v2.10b — `cost_per_unit` is revoked at the column-grant layer
+      // (mig 0095). Read via `inventory_batches_view` (DEFINER, mig 0074)
+      // which projects the column conditionally on view_batch_cost.
       const { data, error } = await supabase
-        .from('inventory_batches')
+        .from('inventory_batches_view')
         .select(
           'id, batch_no, qty_remaining, expiry_date, received_at, cost_per_unit'
         )
         .eq('variant_id', variantId)
         .eq('is_active', true)
         .gt('qty_remaining', 0)
-        // FEFO: expiry asc nulls last, then received_at asc — matches record_sale.
         .order('expiry_date', { ascending: true, nullsFirst: false })
         .order('received_at', { ascending: true })
       if (error) throw error
       return (data ?? []).map((r) => ({
-        id: r.id,
-        batch_no: r.batch_no,
-        qty_remaining: r.qty_remaining,
+        id: r.id ?? '',
+        batch_no: r.batch_no ?? '',
+        qty_remaining: r.qty_remaining ?? 0,
         expiry_date: r.expiry_date,
-        received_at: r.received_at,
-        cost_per_unit: Number(r.cost_per_unit)
+        received_at: r.received_at ?? '',
+        cost_per_unit: r.cost_per_unit == null ? null : Number(r.cost_per_unit)
       }))
     }
   })
@@ -57,8 +60,10 @@ export function useAllBatchesForVariant(variantId: string | null | undefined) {
     enabled: !!variantId,
     queryFn: async () => {
       if (!variantId) return []
+      // v2.10b — read from inventory_batches_view to keep cost_per_unit
+      // permission-aware. Note: supplier_id is also exposed via the view.
       const { data, error } = await supabase
-        .from('inventory_batches')
+        .from('inventory_batches_view')
         .select(
           'id, batch_no, qty_received, qty_remaining, cost_per_unit, manufactured_date, expiry_date, supplier_warranty_days, warranty_expires_at, received_at, is_active, notes, supplier_id'
         )
@@ -233,16 +238,10 @@ export function useUpdateShopAlertDefaults() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (args: ShopAlertDefaults) => {
-      const { error } = await supabase
-        .from('shops')
-        .update({
-          default_expiry_alert_days: args.default_expiry_alert_days,
-          default_warranty_alert_days: args.default_warranty_alert_days
-        })
-        .eq(
-          'owner_user_id',
-          (await supabase.auth.getUser()).data.user?.id ?? ''
-        )
+      const { error } = await supabase.rpc('update_shop_settings', {
+        p_default_expiry_alert_days: args.default_expiry_alert_days,
+        p_default_warranty_alert_days: args.default_warranty_alert_days
+      })
       if (error) throw error
     },
     onSuccess: () => {
@@ -277,16 +276,10 @@ export function useUpdateShopExpiredSaleSettings() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (args: ShopExpiredSaleSettings) => {
-      const { error } = await supabase
-        .from('shops')
-        .update({
-          default_expired_sale_policy: args.default_expired_sale_policy,
-          expired_sale_receipt_disclaimer: args.expired_sale_receipt_disclaimer
-        })
-        .eq(
-          'owner_user_id',
-          (await supabase.auth.getUser()).data.user?.id ?? ''
-        )
+      const { error } = await supabase.rpc('update_shop_settings', {
+        p_default_expired_sale_policy: args.default_expired_sale_policy,
+        p_expired_sale_receipt_disclaimer: args.expired_sale_receipt_disclaimer
+      })
       if (error) throw error
     },
     onSuccess: () => {
