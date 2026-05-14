@@ -385,39 +385,68 @@ WHERE ABS(customer_drift) > 0.01 OR ABS(supplier_drift) > 0.01;
 -- Expected: 0 rows
 ```
 
-### AQ-32 — no v2.10-surface view/table carries an unintended anon/public SELECT grant
+### AQ-32 — no NEW table/view leaks an anon/public SELECT grant
 
 Added 2026-05-14 after the 0102 anon-grant gap (`contacts_view` +
 `contact_balance_reconciliation` carried the Supabase auto-`anon` SELECT
 grant; it slipped past all 24 AQs **and** 0102's own verification block —
-the signal that a new bug class needs a permanent guard). Catches the
-same class in 0103/0104/0105. The scanned set is the **v2.10 object
-surface** — objects the v2.10 chain creates or retires; it grows
-per-migration. The allowlist documents objects expected to still carry
-the grant.
+the signal that a new bug class needs a *permanent* guard).
+
+**Rewritten 2026-05-14 (0103 review).** The first cut hardcoded a 4-name
+`table_name IN (...)` scan set — which re-created the exact blind spot
+AQ-32 was created to eliminate: a hand-maintained scan list only guards
+what was known when it was written, and every future migration has to
+remember to extend it. This version uses the AQ-23 / AQ-24 shape — a
+**blanket dynamic scan** of every `public` table and view, minus a
+**frozen baseline allowlist** — so it needs *zero* per-migration edits: a
+new object that leaks the anon grant is caught automatically; a legacy
+object the v2.10 chain DROPs simply falls out of the scan (a stale
+allowlist entry is a harmless no-op).
+
+The allowlist is the **v2.10 anon-grant baseline frozen 2026-05-14**: the
+43 pre-v2.10 objects (26 tables + 17 views) that already carried the
+Supabase-default `anon` SELECT grant before the v2.10 chain. They are
+RLS-gated, so functionally safe; the v1.8 ADR-0015 sweep did not
+retro-revoke `anon` from them — eventual cleanup is the v2.9.x backlog
+item in `docs/todos.md` ("audit v2.9 conditional-projection views for
+stray anon SELECT grants"). AQ-32 is deliberately **SELECT-only**: SELECT
+is the read-leak vector for DEFINER views; `anon` INSERT/UPDATE/DELETE
+auto-grants are either RLS-gated (tables) or inert (complex views) and
+are a separate, lower-priority surface.
 
 ```sql
-SELECT g.table_name, g.grantee
+SELECT c.relkind, g.table_name, lower(g.grantee) AS grantee
 FROM information_schema.role_table_grants g
+JOIN pg_class c ON c.relname = g.table_name
+JOIN pg_namespace n ON n.oid = c.relnamespace AND n.nspname = g.table_schema
 WHERE g.table_schema = 'public'
   AND g.privilege_type = 'SELECT'
   AND lower(g.grantee) IN ('anon', 'public')
-  AND g.table_name IN (
-    -- v2.10 object surface (created or retired by the v2.10 chain):
-    'contacts',                       -- table, created 0096 (anon revoked there)
-    'contacts_view',                  -- view, created 0102 / anon revoked 0102b
-    'contact_balance_reconciliation', -- view, created 0102 / anon revoked 0102b
-    'customer_balance_reconciliation' -- legacy view, retired by 0104 — see allowlist
-    -- (0103 adds: customer_outstanding rebuild, supplier_outstanding;
-    --  0104 adds/removes: customers_view, etc.)
-  )
+  AND c.relkind IN ('r','v','m','p')   -- tables, views, matviews, partitioned tables
   AND g.table_name NOT IN (
-    -- known-legacy allowlist — entries here are EXPECTED to still carry
-    -- the anon grant. AQ-32 SEES them (they are in the scanned set above)
-    -- but does not fail on them.
-    'customer_balance_reconciliation' -- known-legacy, removed by 0104; see docs/todos.md
+    -- ===== v2.10 anon-grant baseline (frozen 2026-05-14) =====
+    -- pre-v2.10 objects carrying the Supabase-default anon SELECT grant.
+    -- RLS-gated; v1.8 ADR-0015 did not retro-revoke. As the v2.10 chain
+    -- drops some of these (suppliers @ 0106, customer_balance_reconciliation
+    -- @ 0104, ...) their entries go stale-but-harmless — no edit needed.
+    -- tables (26):
+    'customer_tiers','expenses','invoices','ledger_entries','monthly_targets',
+    'pending_invitations','permissions_catalog','product_categories','product_packs',
+    'product_variant_attribute_values','product_variants','products','profiles',
+    'purchase_items','purchase_overhead_items','purchases','shop_owner_details',
+    'shops','subscriptions','suppliers','units_of_measure','user_shop_access',
+    'user_shop_permission_audit','user_shop_permissions','variant_attribute_values',
+    'variant_attributes',
+    -- views (17):
+    'batches_already_expired','batches_expiring_soon','batches_warranty_expiring_soon',
+    'customer_balance_reconciliation','daily_sales_7','daily_sales_today',
+    'expenses_by_category_mtd','invoice_financials','invoice_with_discount_detail',
+    'ledger_entries_view','monthly_summary','product_stock_display',
+    'product_variant_full','product_with_default_variant','purchase_item_financials',
+    'sale_item_financials','subscription_effective'
   );
--- Expected: 0 rows
+-- Expected: 0 rows. A non-zero row is a NEW object that leaked the anon
+-- SELECT grant — REVOKE per ADR-0015 (revoke from public, anon).
 ```
 
 ### Existing AQ suite
