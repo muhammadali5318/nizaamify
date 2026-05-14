@@ -153,10 +153,24 @@ CREATE TRIGGER v210_contacts_promotion_audit_required
 
 ## 2. Collateral schema changes
 
+**Column lifecycle (corrected 2026-05-14 — ADR
+`2026-05-14-v210-contact-id-add-not-rename`).** `contact_id` on the four
+dependent tables is a **new column added by migration 0098**, NOT a
+rename of `customer_id` / `supplier_id`. The 0099 backfill creates
+`contacts` rows with fresh ids and merges a supplier into an existing
+customer's contact row on phone collision, so the legacy UUIDs do not
+map 1:1 to `contacts.id` — a rename would orphan the column. The legacy
+`customer_id` / `supplier_id` columns (with their indexes + FKs) are
+dropped in migration 0104, before the legacy tables are dropped in 0106.
+The SQL in §2.1–§2.5 below reflects what migration **0100** (collateral
+changes) does — it assumes 0098's `contact_id` columns exist and 0099 has
+backfilled them.
+
 ### 2.1 `ledger_entries` — unified ledger
 
 ```sql
-ALTER TABLE ledger_entries RENAME COLUMN customer_id TO contact_id;
+-- contact_id already added (nullable, FK -> contacts) by migration 0098;
+-- 0099 has backfilled it. 0100 does the rest:
 
 ALTER TABLE ledger_entries ADD COLUMN direction text NOT NULL
   DEFAULT 'receivable'
@@ -165,13 +179,18 @@ ALTER TABLE ledger_entries ADD COLUMN direction text NOT NULL
 -- existing 5 ledger rows (all customer-side) backfilled by DEFAULT
 ALTER TABLE ledger_entries ALTER COLUMN direction DROP DEFAULT;
 
--- indexes follow the rename
-ALTER INDEX idx_ledger_entries_customer_created
-  RENAME TO idx_ledger_entries_contact_created;
-ALTER INDEX idx_ledger_entries_customer_occurred
-  RENAME TO idx_ledger_entries_contact_occurred;
-ALTER INDEX ledger_shop_customer_idx
-  RENAME TO ledger_shop_contact_idx;
+-- the legacy customer_id was NOT NULL; once 0099 has populated every
+-- row, the NOT NULL constraint moves onto contact_id
+ALTER TABLE ledger_entries ALTER COLUMN contact_id SET NOT NULL;
+
+-- contact_id indexes, parallel to the legacy customer_id indexes
+-- (the legacy indexes are dropped with the legacy column in 0104)
+CREATE INDEX idx_ledger_entries_contact_created
+  ON ledger_entries (contact_id, created_at DESC);
+CREATE INDEX idx_ledger_entries_contact_occurred
+  ON ledger_entries (contact_id, occurred_at DESC);
+CREATE INDEX ledger_shop_contact_idx
+  ON ledger_entries (shop_id, contact_id);
 
 -- direction-filtered partial indexes for the two khata toggles
 CREATE INDEX idx_ledger_entries_receivable
@@ -203,20 +222,23 @@ to cover the new `direction` column — once written, immutable.
 ### 2.2 `purchases` — credit purchases support
 
 ```sql
+-- contact_id already added (nullable, FK -> contacts, ON DELETE RESTRICT)
+-- by migration 0098; 0099 has backfilled it. 0100 does the rest:
+
 ALTER TABLE purchases ADD COLUMN amount_paid numeric(12,2)
   NOT NULL DEFAULT 0;
 
 ALTER TABLE purchases ADD COLUMN outstanding numeric(12,2)
   GENERATED ALWAYS AS (GREATEST(0::numeric, total_cost - amount_paid)) STORED;
 
-ALTER TABLE purchases RENAME COLUMN supplier_id TO contact_id;
+-- 0099 backfills amount_paid = total_cost for every pre-v2.10 purchase
+-- (all v1.x/v2.9 purchases were implicitly fully paid).
 
--- existing 6 production purchases backfill: amount_paid = total_cost
--- (since all v1.x/v2.9 purchases were implicitly fully paid)
--- This is done in the data migration step 0098.
-
--- index rename
-ALTER INDEX idx_purchases_supplier RENAME TO idx_purchases_contact;
+-- contact_id index, parallel to the legacy idx_purchases_supplier
+-- (the legacy index is dropped with the legacy column in 0104)
+CREATE INDEX idx_purchases_contact
+  ON purchases (contact_id)
+  WHERE contact_id IS NOT NULL;
 ```
 
 ### 2.3 `shops` — non-owner supplier payment cap
@@ -226,24 +248,30 @@ ALTER TABLE shops ADD COLUMN salesperson_supplier_payment_cap_pkr
   numeric(12,2) NOT NULL DEFAULT 0;
 ```
 
-### 2.4 `invoices` — passthrough rename
+### 2.4 `invoices` — passthrough column
 
 ```sql
-ALTER TABLE invoices RENAME COLUMN customer_id TO contact_id;
+-- contact_id already added (nullable, FK -> contacts) by migration 0098;
+-- 0099 has backfilled it. 0100 adds the index:
 
-ALTER INDEX idx_invoices_customer_created
-  RENAME TO idx_invoices_contact_created;
+-- contact_id index, parallel to the legacy idx_invoices_customer_created
+-- (the legacy index is dropped with the legacy column in 0104)
+CREATE INDEX idx_invoices_contact_created
+  ON invoices (contact_id, created_at DESC);
 ```
 
-### 2.5 `inventory_batches` — passthrough rename
+### 2.5 `inventory_batches` — passthrough column
 
 ```sql
-ALTER TABLE inventory_batches RENAME COLUMN supplier_id TO contact_id;
+-- contact_id already added (nullable, FK -> contacts) by migration 0098;
+-- 0099 has backfilled it. 0100 does the rest:
 
--- batch_immutable_fields trigger body updated: references contact_id
--- instead of supplier_id.
+-- batch_immutable_fields trigger body updated: the immutable-field list
+-- gains contact_id. Legacy supplier_id stays in the list until it is
+-- dropped in 0104.
 
--- new index (was missing on supplier_id per audit §1.6)
+-- contact_id index. inventory_batches.supplier_id never had a covering
+-- index (audit §1.6), so there is no legacy index to parallel here.
 CREATE INDEX idx_inventory_batches_contact
   ON inventory_batches (contact_id)
   WHERE contact_id IS NOT NULL;
