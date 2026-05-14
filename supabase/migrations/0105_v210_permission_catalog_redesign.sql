@@ -49,18 +49,28 @@
 --    refs — INERT: those objects are frozen-dead post-0104 and dropped at
 --    0106. Part 2 §6.)
 --
+-- CATEGORY CHECK (found at the first apply attempt, 2026-05-14):
+--   permissions_catalog.category carries a CHECK constraint
+--   (permissions_catalog_category_check) enumerating the valid category
+--   strings — it is NOT a free-text column. The v2.9 set has no
+--   'contacts'. §1 widens the constraint (+contacts, keeping
+--   customers/suppliers) BEFORE the INSERT; §7 tightens it to the final
+--   7-category set (-customers, -suppliers) AFTER the DROP; §8 check 10
+--   verifies the end state. The design docs' "category disappears
+--   emergently / no separate DDL" claim was wrong and is corrected.
+--
 -- Ordering inside the single transaction is load-bearing — consumers
 -- deployed since 0096 (contacts RLS, contacts_view, total_outstanding,
 -- total_payable, the 0102/0103 RPCs) reference the new keys, and nothing
 -- may reference a key being dropped:
 --   §0 precondition + pre-migration snapshot
---   §1 INSERT 12 new keys           (activates the already-deployed consumers)
+--   §1 widen the category CHECK, then INSERT 12 new keys
 --   §2 rebind 3 dangling requires arrays
 --   §3 CREATE OR REPLACE 4 tier wrappers   (key-string swap only)
 --   §4 swap v29_ledger_read -> v210_ledger_read
 --   §5 CREATE OR REPLACE reverse_ledger_entry  (add the base gate)
 --   §6 migrate user_shop_permissions  (INSERT new, DELETE old)
---   §7 DROP the 11 retired keys
+--   §7 DROP the 11 retired keys, then tighten the category CHECK
 --   §8 verification — RAISE EXCEPTION on any mismatch
 --
 -- STAGING ONLY. Production untouched until v2.10 + v2.11 ship together.
@@ -132,10 +142,23 @@ BEGIN
 END $precheck_0105$;
 
 -- =====================================================================
--- §1 — INSERT the 12 new keys (attack-surface §1.2, B.4 "strict, folded,
---      owner-conservative"). Inserting these activates every consumer
---      already deployed by 0096/0102/0104 that gates on them.
+-- §1 — widen the category CHECK, then INSERT the 12 new keys
+--      (attack-surface §1.2, B.4 "strict, folded, owner-conservative").
+--      Inserting the keys activates every consumer already deployed by
+--      0096/0102/0104 that gates on them.
 -- =====================================================================
+-- permissions_catalog.category carries a CHECK constraint enumerating
+-- the valid category strings; the v2.9 set has no 'contacts', so the 11
+-- new contacts-category keys below would violate it. Widen it first:
+-- ADD 'contacts', KEEP 'customers'/'suppliers' (their rows still exist
+-- until §7, so the constraint must still admit them here). §7 tightens
+-- it to the final set once those rows are gone.
+ALTER TABLE public.permissions_catalog DROP CONSTRAINT permissions_catalog_category_check;
+ALTER TABLE public.permissions_catalog ADD CONSTRAINT permissions_catalog_category_check
+  CHECK (category = ANY (ARRAY[
+    'sales','products','inventory','customers','suppliers','financial','settings','team','contacts'
+  ]::text[]));
+
 -- display_order: the 11 contacts keys take the 30-40 band the retired
 -- customers/suppliers keys vacate; pay_supplier slots at the end of the
 -- financial band (58) to avoid renumbering the existing financial rows.
@@ -537,20 +560,29 @@ DELETE FROM public.user_shop_permissions
    'manage_customer_tiers','view_suppliers','manage_suppliers');
 
 -- =====================================================================
--- §7 — DROP the 11 retired keys from permissions_catalog. Safe now: no
+-- §7 — DROP the 11 retired keys from permissions_catalog, then tighten
+--      the category CHECK to the final post-0105 set. Safe now: no
 --      user_shop_permissions row (§6), no live-table RLS policy (§4), no
 --      surviving function (§3), no view, and no surviving key's requires
 --      array (§2) references them. The customers/suppliers RLS policies
 --      and check_customer_tier_change_gate keep dangling refs — INERT,
---      cleaned up at 0106 with the tables (Part 2 §6). 'customers' and
---      'suppliers' categories disappear emergently with their last keys —
---      category is a plain text column, so there is no separate DDL.
+--      cleaned up at 0106 with the tables (Part 2 §6).
 -- =====================================================================
 DELETE FROM public.permissions_catalog
  WHERE key IN (
    'view_customers','view_customer_contact','view_customer_outstanding','view_customer_khata',
    'create_customer_basic','create_customer_full','edit_customer','assign_customer_tier',
    'manage_customer_tiers','view_suppliers','manage_suppliers');
+
+-- With the last 'customers'/'suppliers' keys gone, tighten the category
+-- CHECK to the final post-0105 set: 'contacts' in, 'customers' +
+-- 'suppliers' out. The categories "disappear" because §7 removes them
+-- from the constraint — not because category is free-text (it is not).
+ALTER TABLE public.permissions_catalog DROP CONSTRAINT permissions_catalog_category_check;
+ALTER TABLE public.permissions_catalog ADD CONSTRAINT permissions_catalog_category_check
+  CHECK (category = ANY (ARRAY[
+    'sales','products','inventory','financial','settings','team','contacts'
+  ]::text[]));
 
 -- =====================================================================
 -- §8 — verification. Structural only; behavioural correctness (the
@@ -571,6 +603,7 @@ DECLARE
   v_live_pol_refs bigint;
   v_live_fn_refs  bigint;
   v_view_refs     bigint;
+  v_cat_check_def text;
 BEGIN
   -- 1. catalog category totals
   SELECT count(*) INTO v_contacts_cat FROM public.permissions_catalog WHERE category = 'contacts';
@@ -696,8 +729,23 @@ BEGIN
     RAISE EXCEPTION '0105 verify 9: % view(s) still reference a retired key', v_view_refs;
   END IF;
 
+  -- 10. the category CHECK now reflects the redesigned set: 'contacts'
+  --     present, 'customers'/'suppliers' absent. Catches a typo in §7's
+  --     ARRAY literal — and stands as the verification this migration's
+  --     first apply attempt lacked (the missed-CHECK-constraint bug).
+  SELECT pg_get_constraintdef(oid) INTO v_cat_check_def
+  FROM pg_constraint
+  WHERE conname = 'permissions_catalog_category_check'
+    AND conrelid = 'public.permissions_catalog'::regclass;
+  IF v_cat_check_def IS NULL
+     OR v_cat_check_def !~ '''contacts'''
+     OR v_cat_check_def ~ '''customers'''
+     OR v_cat_check_def ~ '''suppliers''' THEN
+    RAISE EXCEPTION '0105 verify 10: category CHECK does not reflect the redesigned set (got: %)', v_cat_check_def;
+  END IF;
+
   SELECT count(*) INTO v_total FROM public.permissions_catalog;
-  RAISE NOTICE '0105 OK: catalog now % keys (11 retired, 12 added). contacts category=11, customers/suppliers=0. receive_payment/reverse_ledger_entry/record_purchase requires rebound; reverse_ledger_entry kept as a base gate (P3a); manage_contact_tiers requires assign_contact_tier; 4 tier wrappers swapped to manage_contact_tiers; v210_ledger_read live. % pre-existing access row(s) migrated (each: -legacy_in_scope_count +12).',
+  RAISE NOTICE '0105 OK: catalog now % keys (11 retired, 12 added). contacts category=11, customers/suppliers=0, category CHECK tightened to the 7-category set. receive_payment/reverse_ledger_entry/record_purchase requires rebound; reverse_ledger_entry kept as a base gate (P3a); manage_contact_tiers requires assign_contact_tier; 4 tier wrappers swapped to manage_contact_tiers; v210_ledger_read live. % pre-existing access row(s) migrated (each: -legacy_in_scope_count +12).',
     v_total, (SELECT count(*) FROM _0105_pre_counts);
 END $verify_0105$;
 

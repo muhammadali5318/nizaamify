@@ -29,9 +29,15 @@ its real work only at the combined v2.10+v2.11 production deploy.
 
 **Catalog shape.** Insert the 12 B.4 keys (11 `contacts`-category +
 `pay_supplier` in `financial`); retire the 11 legacy customer/supplier
-keys; keep `receive_payment` by name. The `customers` and `suppliers`
-category labels disappear emergently with their last keys (`category` is
-a plain text column — no separate DDL).
+keys; keep `receive_payment` by name. `permissions_catalog.category`
+carries a CHECK constraint (`permissions_catalog_category_check`)
+enumerating valid categories — it is **not** a free-text column. (An
+early draft assumed it was; the first 0105 apply attempt failed on the
+constraint, which is how this was caught.) 0105 widens that CHECK to
+admit `'contacts'` before inserting the new keys, then tightens it —
+dropping `'customers'` and `'suppliers'` — after the 11 retired keys are
+deleted. The two legacy categories disappear because 0105 removes them
+from the constraint, not emergently.
 
 **Policy 2 — intersect.** Fold mappings grant the new key only on the
 *intersection* of the old keys; 1:1 and union maps copy the legacy
