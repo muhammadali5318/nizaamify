@@ -228,11 +228,20 @@ to cover the new `direction` column — once written, immutable.
 ALTER TABLE purchases ADD COLUMN amount_paid numeric(12,2)
   NOT NULL DEFAULT 0;
 
+-- Backfill amount_paid = total_cost for every pre-v2.10 purchase (all
+-- v1.x/v2.9 purchases had no amount_paid concept — treated as fully
+-- paid). This is the ONLY DML in 0100 and is a real UPDATE, so it runs
+-- inside a tight purchases_no_modify DISABLE -> UPDATE -> ENABLE window
+-- (the trigger blanket-blocks UPDATE). It must run BEFORE the generated
+-- `outstanding` column is added, so `outstanding` is born = 0 for legacy
+-- rows. (NOTE: this backfill cannot be in 0099 — the amount_paid column
+-- does not exist until this migration creates it.)
+ALTER TABLE purchases DISABLE TRIGGER purchases_no_modify;
+UPDATE purchases SET amount_paid = total_cost;
+ALTER TABLE purchases ENABLE TRIGGER purchases_no_modify;
+
 ALTER TABLE purchases ADD COLUMN outstanding numeric(12,2)
   GENERATED ALWAYS AS (GREATEST(0::numeric, total_cost - amount_paid)) STORED;
-
--- 0099 backfills amount_paid = total_cost for every pre-v2.10 purchase
--- (all v1.x/v2.9 purchases were implicitly fully paid).
 
 -- contact_id index, parallel to the legacy idx_purchases_supplier
 -- (the legacy index is dropped with the legacy column in 0104)
@@ -279,12 +288,32 @@ CREATE INDEX idx_inventory_batches_contact
 
 ### 2.6 `customer_balance_reconciliation` view → `contact_balance_reconciliation`
 
-Renamed and updated to use `contact_id` + the new ledger schema. The
-direction filter applies on read.
+**Sequencing (corrected 2026-05-14, 0100 design review).** This view
+transition is **NOT** part of migration 0100. Migration 0100 touches no
+views at all — it stays purely additive (columns + indexes + one trigger
+function body). Reasons:
+
+- `customer_balance_reconciliation` is queried by name by **AQ-12**.
+  Dropping it in 0100 would make AQ-12 error (`relation does not exist`)
+  — a halt criterion under "AQ-01..AQ-24 stay green after every
+  migration."
+- The old view still functions correctly after 0100 (it reads
+  `customers` + `ledger_entries.customer_id`, both still present until
+  0104).
+
+Split:
+
+- **0102** creates the new `contact_balance_reconciliation` view, grouped
+  with the other new views (`contacts_view`, `customer_outstanding`
+  rebuild, `supplier_outstanding`). It needs the `direction` column,
+  which 0100 adds.
+- **0104** drops `customer_balance_reconciliation` as part of the
+  legacy-column cleanup, at which point AQ-12 migrates to its v2.10 form.
+
+The new view shape:
 
 ```sql
-DROP VIEW customer_balance_reconciliation;
-
+-- created in migration 0102, not 0100
 CREATE VIEW contact_balance_reconciliation AS
 SELECT
   c.id AS contact_id,
