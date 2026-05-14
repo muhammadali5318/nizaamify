@@ -179,9 +179,13 @@ ALTER TABLE ledger_entries ADD COLUMN direction text NOT NULL
 -- existing 5 ledger rows (all customer-side) backfilled by DEFAULT
 ALTER TABLE ledger_entries ALTER COLUMN direction DROP DEFAULT;
 
--- the legacy customer_id was NOT NULL; once 0099 has populated every
--- row, the NOT NULL constraint moves onto contact_id
-ALTER TABLE ledger_entries ALTER COLUMN contact_id SET NOT NULL;
+-- The NOT NULL constraint SWAP is split across two migrations:
+--   0100 adds NOT NULL to contact_id (every row is backfilled by 0099).
+--   0101 drops NOT NULL from the legacy customer_id — a 'payable' ledger
+--        entry is supplier-side and has no customer, so customer_id must
+--        become nullable before payable entries can be created (0102/0103).
+ALTER TABLE ledger_entries ALTER COLUMN contact_id SET NOT NULL;        -- 0100
+-- ALTER TABLE ledger_entries ALTER COLUMN customer_id DROP NOT NULL;   -- 0101
 
 -- contact_id indexes, parallel to the legacy customer_id indexes
 -- (the legacy indexes are dropped with the legacy column in 0104)
@@ -202,22 +206,36 @@ CREATE INDEX idx_ledger_entries_payable
   WHERE direction = 'payable';
 ```
 
-**Trigger update:** `ledger_entries_update_balance` retargets from
-`customers.outstanding_balance` to one of `contacts.customer_outstanding_balance`
-or `contacts.supplier_outstanding_balance` based on `direction`:
+**Trigger update (migration 0101).** `ledger_entries_update_balance` is
+rebuilt to be **direction-aware with a dual-write on the receivable
+side**. The `v_delta` arithmetic is unchanged (`debit` raises the owed
+amount, `credit` lowers it — same convention both sides); `direction`
+selects the target(s):
 
 ```
+v_delta := CASE WHEN NEW.type = 'debit' THEN NEW.amount ELSE -NEW.amount END;
+
 IF NEW.direction = 'receivable' THEN
-  -- customer side: debit increases balance, credit decreases
-  UPDATE contacts SET customer_outstanding_balance = ... WHERE id = NEW.contact_id;
+  -- new target
+  UPDATE contacts  SET customer_outstanding_balance = ... + v_delta WHERE id = NEW.contact_id;
+  -- legacy dual-write: keeps customers.outstanding_balance (and therefore
+  -- customer_balance_reconciliation / AQ-12) in lockstep through the
+  -- 0101->0104 window. Guarded on NEW.customer_id IS NOT NULL.
+  IF NEW.customer_id IS NOT NULL THEN
+    UPDATE customers SET outstanding_balance = ... + v_delta WHERE id = NEW.customer_id;
+  END IF;
 ELSE  -- 'payable'
-  -- supplier side: debit (we owe more) increases, credit (we paid) decreases
-  UPDATE contacts SET supplier_outstanding_balance = ... WHERE id = NEW.contact_id;
+  -- supplier side only — suppliers never had an outstanding_balance
+  -- column, so there is no legacy dual-write target.
+  UPDATE contacts SET supplier_outstanding_balance = ... + v_delta WHERE id = NEW.contact_id;
 END IF;
 ```
 
-The append-only invariant (`ledger_entries_immutable` trigger) extends
-to cover the new `direction` column — once written, immutable.
+`ledger_entries_immutable` needs **no change**. It is a blanket
+`UPDATE`/`DELETE` block (no column inspection), so the `direction`
+column added above is already immutable the moment it exists — unlike
+`batch_immutable_fields`, which is column-by-column and did need an
+explicit `contact_id` line in 0100.
 
 ### 2.2 `purchases` — credit purchases support
 
