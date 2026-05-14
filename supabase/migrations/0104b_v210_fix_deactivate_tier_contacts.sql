@@ -144,12 +144,23 @@ BEGIN
   END IF;
 
   -- AQ-33 (new standing guard, run here at apply time): no surviving
-  -- function writes the legacy customers / suppliers tables. The \M
-  -- word boundary keeps public.customer_tiers (legitimately written by
-  -- the tier shims/wrappers) from being false-matched.
-  SELECT count(*) INTO v_writes_legacy FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
-   WHERE n.nspname='public'
-     AND pg_get_functiondef(p.oid) ~* '(insert\s+into\s+|update\s+|delete\s+from\s+)public\.(customers|suppliers)\M';
+  -- function writes the legacy customers / suppliers tables. The public
+  -- function/procedure set is filtered + MATERIALIZED *before*
+  -- pg_get_functiondef runs: pg_get_functiondef errors on aggregate
+  -- functions, and a plain `WHERE n.nspname='public' AND
+  -- pg_get_functiondef(p.oid) ~* ...` lets the planner push
+  -- pg_get_functiondef (a pg_proc-only filter) below the pg_namespace
+  -- join, onto pg_catalog aggregates like array_agg. The MATERIALIZED
+  -- CTE is an optimization fence — pg_get_functiondef only ever runs on
+  -- the already-filtered (public, prokind in f/p) set. The \M word
+  -- boundary keeps public.customer_tiers (legitimately written by the
+  -- tier shims/wrappers) from being false-matched.
+  WITH public_fns AS MATERIALIZED (
+    SELECT p.oid FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public' AND p.prokind IN ('f','p')
+  )
+  SELECT count(*) INTO v_writes_legacy FROM public_fns
+   WHERE pg_get_functiondef(oid) ~* '(insert\s+into\s+|update\s+|delete\s+from\s+)public\.(customers|suppliers)\M';
   IF v_writes_legacy <> 0 THEN
     RAISE EXCEPTION '0104b: AQ-33 — % function(s) still write public.customers/suppliers', v_writes_legacy;
   END IF;

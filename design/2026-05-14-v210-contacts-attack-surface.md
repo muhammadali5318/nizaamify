@@ -460,15 +460,28 @@ than verified once. 0104b rewrote `deactivate_tier_v28` onto
 `contacts.customer_tier_id`; AQ-33 promotes 0104's one-off check 6 to a
 permanent guard so the class can never again be silently mis-trusted.
 **0106 — which drops the `customers` / `suppliers` tables — inherits this
-guard automatically.** The `\M` word boundary keeps `public.customer_tiers`
-(legitimately written by the tier shims/wrappers) from being false-matched
-— `public.customers` is not a prefix of `public.customer_tiers`.
+guard automatically.**
+
+The query is built to survive the planner: `pg_get_functiondef` **errors
+on aggregate functions**, and a plain `WHERE n.nspname='public' AND
+pg_get_functiondef(p.oid) ~* …` lets the planner push `pg_get_functiondef`
+(a `pg_proc`-only filter) *below* the `pg_namespace` join — evaluating it
+on every `pg_proc` row across all schemas, including `pg_catalog`'s
+`array_agg` aggregates. So the `public` function/procedure set is filtered
+**and `MATERIALIZED`** first — an optimization fence — and
+`pg_get_functiondef` only ever runs on that pre-filtered set. The `\M`
+word boundary keeps `public.customer_tiers` (legitimately written by the
+tier shims/wrappers) from being false-matched — `public.customers` is not
+a prefix of `public.customer_tiers`.
 
 ```sql
-SELECT p.proname
-FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
-WHERE n.nspname = 'public'
-  AND pg_get_functiondef(p.oid) ~*
+WITH public_fns AS MATERIALIZED (
+  SELECT p.oid, p.proname
+  FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+  WHERE n.nspname = 'public' AND p.prokind IN ('f','p')
+)
+SELECT proname FROM public_fns
+WHERE pg_get_functiondef(oid) ~*
       '(insert\s+into\s+|update\s+|delete\s+from\s+)public\.(customers|suppliers)\M';
 -- Expected: 0 rows
 ```
