@@ -502,35 +502,35 @@ INSERT INTO public.user_shop_permissions
   (id, user_shop_access_id, permission_key, granted, granted_by_user_id, granted_at, source)
 -- ----- 1:1 maps — granted copied straight from the legacy grant -----
 SELECT gen_random_uuid(), access_id, 'view_contacts',
-       had_view_customers,            NULL, now(), 'preset' FROM legacy
+       had_view_customers,            NULL::uuid, now(), 'preset' FROM legacy
 UNION ALL
 SELECT gen_random_uuid(), access_id, 'view_contact_contact_info',
-       had_view_customer_contact,     NULL, now(), 'preset' FROM legacy
+       had_view_customer_contact,     NULL::uuid, now(), 'preset' FROM legacy
 UNION ALL
 -- ----- intersect (Policy 2): granted iff BOTH legacy keys were held -----
 SELECT gen_random_uuid(), access_id, 'view_contact_customer_data',
        (had_view_customer_outstanding AND had_view_customer_khata),
-                                      NULL, now(), 'preset' FROM legacy
+                                      NULL::uuid, now(), 'preset' FROM legacy
 UNION ALL
 SELECT gen_random_uuid(), access_id, 'view_contact_supplier_data',
-       had_view_suppliers,            NULL, now(), 'preset' FROM legacy
+       had_view_suppliers,            NULL::uuid, now(), 'preset' FROM legacy
 UNION ALL
 SELECT gen_random_uuid(), access_id, 'create_contact_basic',
-       had_create_customer_basic,     NULL, now(), 'preset' FROM legacy
+       had_create_customer_basic,     NULL::uuid, now(), 'preset' FROM legacy
 UNION ALL
 SELECT gen_random_uuid(), access_id, 'create_contact_full',
-       had_create_customer_full,      NULL, now(), 'preset' FROM legacy
+       had_create_customer_full,      NULL::uuid, now(), 'preset' FROM legacy
 UNION ALL
 -- ----- union: edit_customer OR the edit-half of manage_suppliers -----
 SELECT gen_random_uuid(), access_id, 'edit_contact',
        (had_edit_customer OR had_manage_suppliers),
-                                      NULL, now(), 'preset' FROM legacy
+                                      NULL::uuid, now(), 'preset' FROM legacy
 UNION ALL
 SELECT gen_random_uuid(), access_id, 'assign_contact_tier',
-       had_assign_customer_tier,      NULL, now(), 'preset' FROM legacy
+       had_assign_customer_tier,      NULL::uuid, now(), 'preset' FROM legacy
 UNION ALL
 SELECT gen_random_uuid(), access_id, 'manage_contact_tiers',
-       had_manage_customer_tiers,     NULL, now(), 'preset' FROM legacy
+       had_manage_customer_tiers,     NULL::uuid, now(), 'preset' FROM legacy
 UNION ALL
 -- ----- net-new keys (no v2.9 analog) — Ruling P3 = B: migrate to a
 -- FALSE literal for every existing non-owner. The B.4 new-catalog preset
@@ -543,11 +543,11 @@ UNION ALL
 -- TRUE for every existing manager under a preset-default policy — P3 = B
 -- makes it false, so an owner grants it explicitly + audited
 -- post-migration to whoever should have it.
-SELECT gen_random_uuid(), access_id, 'view_contact_net_position', false, NULL, now(), 'preset' FROM legacy
+SELECT gen_random_uuid(), access_id, 'view_contact_net_position', false, NULL::uuid, now(), 'preset' FROM legacy
 UNION ALL
-SELECT gen_random_uuid(), access_id, 'promote_contact',           false, NULL, now(), 'preset' FROM legacy
+SELECT gen_random_uuid(), access_id, 'promote_contact',           false, NULL::uuid, now(), 'preset' FROM legacy
 UNION ALL
-SELECT gen_random_uuid(), access_id, 'pay_supplier',              false, NULL, now(), 'preset' FROM legacy;
+SELECT gen_random_uuid(), access_id, 'pay_supplier',              false, NULL::uuid, now(), 'preset' FROM legacy;
 
 -- DELETE the in-scope legacy-key rows: the 11-key IN-list removes
 -- whatever subset of the 11 each access actually holds (production is
