@@ -114,11 +114,12 @@ VALUES (
   'Regular'
 );
 
+-- code must satisfy uom_code_format: lowercase, letter-led, [a-z0-9_] only
 INSERT INTO public.units_of_measure (id, shop_id, code, name)
 VALUES (
   '21100000-0000-4000-8000-000000000004',
   '21100000-0000-4000-8000-000000000002',
-  'PC',
+  'pc',
   'Piece'
 );
 
