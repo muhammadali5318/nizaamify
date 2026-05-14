@@ -1940,22 +1940,32 @@ select b.id from public.inventory_batches b
 
 -- AQ-15: Functions granted to authenticated WITHOUT auth.uid() or
 -- current_active_shop_id() or user_has_permission in body.
-select p.proname
-  from pg_proc p
-  join pg_namespace n on n.oid = p.pronamespace
- where n.nspname = 'public'
-   and p.prosecdef = true
-   and exists (
+-- Hardened 2026-05-14 (after the 0104b AQ-33 incident): the public
+-- DEFINER-function set is filtered + MATERIALIZED before pg_get_functiondef
+-- runs. pg_get_functiondef ERRORS on aggregate functions, and an unfenced
+-- `WHERE n.nspname='public' AND ... pg_get_functiondef(p.oid) ...` lets the
+-- planner push pg_get_functiondef (a pg_proc-only filter) below the
+-- pg_namespace join, onto pg_catalog aggregates (array_agg). prosecdef=true
+-- excludes aggregates — but only if the planner evaluates it first, which
+-- is not guaranteed. The MATERIALIZED CTE makes it guaranteed.
+with public_definer_fns as materialized (
+  select p.oid, p.proname
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public' and p.prosecdef = true and p.prokind in ('f','p')
+)
+select proname
+  from public_definer_fns pdf
+ where exists (
      select 1 from information_schema.routine_privileges r
      where r.specific_schema = 'public'
-       and r.routine_name = p.proname
+       and r.routine_name = pdf.proname
        and r.privilege_type = 'EXECUTE'
        and r.grantee = 'authenticated')
    and not (
-     pg_get_functiondef(p.oid) like '%auth.uid()%'
-     or pg_get_functiondef(p.oid) like '%current_active_shop_id%'
-     or pg_get_functiondef(p.oid) like '%user_has_permission%'
-     or pg_get_functiondef(p.oid) like '%user_has_shop_access%'
+     pg_get_functiondef(pdf.oid) like '%auth.uid()%'
+     or pg_get_functiondef(pdf.oid) like '%current_active_shop_id%'
+     or pg_get_functiondef(pdf.oid) like '%user_has_permission%'
+     or pg_get_functiondef(pdf.oid) like '%user_has_shop_access%'
    );
 
 -- AQ-16: Every shop has a corresponding shop_owner_details row.
@@ -2057,14 +2067,21 @@ select usa.id, usa.user_id, usa.shop_id, usa.preset_applied
 -- rationale as get_invitation_for_acceptance. P1 is present.
 -- Exempt list now 15 entries.
 -- Halt on any non-exempt row missing P1, P2, or P3.
-with f as (
-  select n.nspname as schema, p.proname as name,
-         pg_get_functiondef(p.oid) as body
+-- Hardened 2026-05-14 (0104b AQ-33 incident): the public-DEFINER-function
+-- set is filtered + MATERIALIZED before pg_get_functiondef /
+-- pg_get_function_result run — see AQ-15's note for the planner-pushdown
+-- failure mode. prokind in ('f','p') excludes aggregates explicitly.
+with public_definer_fns as materialized (
+  select p.oid, p.proname
     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-   where n.nspname='public' and p.prosecdef=true
-     and has_function_privilege('authenticated', p.oid, 'execute')
-     and pg_get_function_result(p.oid) <> 'trigger'
+   where n.nspname='public' and p.prosecdef=true and p.prokind in ('f','p')
      and p.proname not like '%\_v28' escape '\'
+),
+f as (
+  select proname as name, pg_get_functiondef(oid) as body
+    from public_definer_fns
+   where has_function_privilege('authenticated', oid, 'execute')
+     and pg_get_function_result(oid) <> 'trigger'
 ),
 graded as (
   select name,
@@ -2111,10 +2128,21 @@ select name,
 -- Any NEW SQL outside the allowlist that references current_shop_id()
 -- without also referencing current_active_shop_id() is a discipline
 -- violation; v2.9.1+ code must call current_active_shop_id() directly.
-select name, kind from (
-  select p.proname as name, 'function' as kind, pg_get_functiondef(p.oid) as body
+-- Hardened 2026-05-14 (0104b AQ-33 incident): the public function/procedure
+-- set is filtered + MATERIALIZED before pg_get_functiondef runs — see
+-- AQ-15's note. This query was the most exposed of the three: it had NO
+-- prosecdef/prokind filter at all on the functions arm, so it "passed" only
+-- by planner luck (its union/subquery shape happened to avoid the pushdown).
+-- prokind in ('f','p') excludes aggregates explicitly; the views arm is
+-- unaffected (pg_get_viewdef does not error on aggregates).
+with public_fns as materialized (
+  select p.oid, p.proname
     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-   where n.nspname='public'
+   where n.nspname='public' and p.prokind in ('f','p')
+)
+select name, kind from (
+  select proname as name, 'function' as kind, pg_get_functiondef(oid) as body
+    from public_fns
   union all
   select v.viewname as name, 'view' as kind, pg_get_viewdef(v.viewname::regclass) as body
     from pg_views v where v.schemaname='public'
