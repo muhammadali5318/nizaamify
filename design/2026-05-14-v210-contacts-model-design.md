@@ -356,10 +356,21 @@ FROM contacts c;
 
 ## 3. New views
 
-### 3.1 `contacts_view` — conditional-projection per v2.9.2
+**0102 scope (corrected 2026-05-14, Round 1 review).** Migration 0102
+creates only **two** of the views below — §3.1 `contacts_view` and the
+§2.6 `contact_balance_reconciliation`. The §3.2 `customer_outstanding`
+rebuild and §3.3 `supplier_outstanding` are **deferred out of 0102**:
+rebuilding `customer_outstanding` requires `DROP … CASCADE`
+(`total_outstanding` depends on it, `list_customers` reads it), which is
+legacy-teardown work — their placement (0103 with the khata RPCs, or
+0104 cleanup) is decided at the 0103 design checkpoint. §3.4
+`purchases_view` extension also lands later (with the 0103 RPC work).
 
-Replaces `customers_view` + `suppliers_view`. Single view; permission
-projection per side.
+### 3.1 `contacts_view` — conditional-projection per v2.9.2 (migration 0102)
+
+Replaces `customers_view`. It is also the *first* projection view for
+the supplier side — `suppliers_view` never existed in v2.9. Single view;
+permission projection per side.
 
 ```sql
 CREATE VIEW contacts_view
@@ -387,14 +398,21 @@ SELECT
   CASE WHEN cp.can_see_contact_info THEN c.phone    ELSE NULL END AS phone,
   CASE WHEN cp.can_see_contact_info THEN c.address  ELSE NULL END AS address,
   c.customer_tier_id,
-  -- Customer side
+  -- Customer side. The has_* existence booleans are GATED too (0102
+  -- Round-1 decision): an ungated has_supplier_payable would leak the
+  -- existence of a supplier relationship to a caller without
+  -- view_contact_supplier_data — undermining the L7 per-side split.
+  -- Tighter than v2.9's ungated customers_view.has_khata, consistent
+  -- with v2.9.2's direction.
   CASE WHEN cp.can_see_customer_data THEN c.customer_outstanding_balance ELSE NULL END
     AS customer_outstanding_balance,
-  (c.customer_outstanding_balance > 0) AS has_customer_khata,
+  CASE WHEN cp.can_see_customer_data THEN (c.customer_outstanding_balance > 0) ELSE NULL END
+    AS has_customer_khata,
   -- Supplier side
   CASE WHEN cp.can_see_supplier_data THEN c.supplier_outstanding_balance ELSE NULL END
     AS supplier_outstanding_balance,
-  (c.supplier_outstanding_balance > 0) AS has_supplier_payable,
+  CASE WHEN cp.can_see_supplier_data THEN (c.supplier_outstanding_balance > 0) ELSE NULL END
+    AS has_supplier_payable,
   -- Net position: requires both, conditional projection of the arithmetic
   CASE
     WHEN cp.can_see_net
@@ -413,7 +431,11 @@ CROSS JOIN caller_perms cp
 WHERE c.shop_id = cp.active_shop_id AND cp.can_view;
 ```
 
-### 3.2 `customer_outstanding` (rebuilt for direction='receivable')
+### 3.2 `customer_outstanding` (rebuilt for direction='receivable') — DEFERRED out of 0102
+
+> **Not in migration 0102.** See the §3 scope note — the rebuild needs
+> `DROP … CASCADE` (legacy-teardown); placement decided at 0103 design.
+> The shape below is the target form.
 
 ```sql
 CREATE OR REPLACE VIEW customer_outstanding AS
@@ -441,7 +463,10 @@ WHERE c.shop_id = cp.active_shop_id
 GROUP BY c.shop_id, c.id, c.name, c.phone, cp.can_see;
 ```
 
-### 3.3 `supplier_outstanding` (new — mirror of customer_outstanding)
+### 3.3 `supplier_outstanding` (new — mirror of customer_outstanding) — DEFERRED out of 0102
+
+> **Not in migration 0102.** See the §3 scope note — deferred to pair
+> with `customer_outstanding` (0103/0104). The shape below is the target.
 
 ```sql
 CREATE VIEW supplier_outstanding AS
