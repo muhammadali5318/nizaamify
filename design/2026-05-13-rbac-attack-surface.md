@@ -1896,10 +1896,16 @@ select id, expires_at, status
   from public.pending_invitations
  where status = 'pending' and expires_at < now() - interval '6 hours';
 
--- AQ-12: Customer balance reconciliation (preserved).
-select customer_id, stored_balance, computed_balance, drift
-  from public.customer_balance_reconciliation
- where drift <> 0;
+-- AQ-12: Customer balance reconciliation. REPOINTED 2026-05-14 (v2.10
+-- mig 0104): customer_balance_reconciliation AND ledger_entries.customer_id
+-- are both dropped by 0104 — the v2.9 form is doubly un-runnable. Now
+-- reconciles the customer side via contact_balance_reconciliation (the
+-- v2.10 view, created in mig 0102). Overlaps AQ-31's customer-side half
+-- by design — AQ-12 keeps its identity as the dedicated customer-balance
+-- check; AQ-31 is the both-sides check.
+select contact_id, customer_drift
+  from public.contact_balance_reconciliation
+ where abs(customer_drift) > 0.01;
 
 -- AQ-13 (refined 2026-05-13): every ACTIVE product has at least one active variant.
 -- Filter on p.is_active=true added because inactive products are correctly

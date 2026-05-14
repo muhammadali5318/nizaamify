@@ -283,10 +283,14 @@ error strings are absent from `errorMap.ts` and currently render as
 ### D.8 — Reports + dashboard
 
 - `src/features/dashboard/DashboardPage.tsx`:
-  - "Customers owe us" widget reads `customer_outstanding` view total.
-  - "We owe suppliers" widget (new) reads `supplier_outstanding` view
-    total.
-  - "Net owed" widget (new, owner-only) = customers − suppliers.
+  - "Customers owe us" widget reads the `total_outstanding` view
+    (rebuilt off `contacts` by mig 0104; gated `view_contact_customer_data`).
+  - "We owe suppliers" widget (new) reads the `total_payable` view
+    (new in mig 0104; gated `view_contact_supplier_data`).
+  - "Net owed" widget (new, owner-only) = computed **client-side** as
+    `total_outstanding.total − total_payable.total`. No third view —
+    locked 2026-05-14 (0104 review), consistent with B.2's "no third
+    cached column / computed at read time".
 - Reports widgets that filtered by `customer_id` / `supplier_id` rewrite
   for `contact_id`.
 

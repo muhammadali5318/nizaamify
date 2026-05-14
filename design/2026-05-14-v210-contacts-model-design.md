@@ -519,10 +519,19 @@ GROUP BY c.shop_id, c.id, c.name, c.phone, cp.can_see;
 Update `purchases_view` to project `amount_paid`, `outstanding`,
 `contact_id`, `contact_name`. Permission still `view_purchases`.
 
-### 3.5 `invoices_view`, `invoice_financials`, `invoice_with_discount_detail`
+### 3.5 `invoices_view`, `invoice_financials`, `invoice_with_discount_detail`, `ledger_entries_view`
 
 Mechanical rename: `customer_id` → `contact_id` throughout. No projection
-logic change.
+logic change. (`ledger_entries_view` added 2026-05-14, 0104 Part B — it
+references `customer_id` but the original §3.5 list omitted it; surfaced
+by the 0104 reverse-dependency audit. Pure id rename — the `direction`
+column is not added here, that's a Phase-D enhancement if needed.)
+
+**`invoice_financials` is not an isolated rename** — it has 2 dependent
+views, `daily_sales_7` and `monthly_summary`. Neither references
+`customer_id` (pure structural dependents), so 0104 drops both, rebuilds
+`invoice_financials` with `contact_id`, and recreates the 2 dependents
+**verbatim** — a 3-view drop+recreate chain, not a 1-view rename.
 
 ### 3.6 `inventory_batches_view`
 
@@ -569,7 +578,7 @@ Update LEFT JOIN target from `suppliers` to `contacts`. The
 
 | Retired | Reason |
 |---|---|
-| `create_customer_basic`, `create_customer_full` + `_v28` shims (if exist) | Folded into `create_contact_basic`/`_full` |
+| `create_customer_basic`, `create_customer_full` (no `_v28` shims — confirmed by the 0104 audit) | Folded into `create_contact_basic`/`_full` |
 | `update_customer` | Folded into `update_contact` |
 | `create_supplier_inline` + `_v28` | Folded into `create_contact_basic` |
 | `update_supplier` | Folded into `update_contact` |
@@ -578,6 +587,12 @@ Update LEFT JOIN target from `suppliers` to `contacts`. The
 | `list_customers` + `_v28`, `search_suppliers` + `_v28` | Folded into `list_contacts` |
 | `search_khata_customers` + `_v28`, `search_khata_customers_count` + `_v28` | Renamed (direction param added) |
 | `record_sale_v28`, `record_purchase_v28`, `receive_payment_v28`, `reverse_ledger_entry_v28`, `search_purchases_v28`, `search_purchases_count_v28` | The 6 collapsed-in-place shims (public name kept) — retired in 0103, not 0104, per Decision C |
+
+**0104 audit (2026-05-14):** mig 0104 executes all 19 customer/supplier-world
+function retirements — 7 wrappers + 7 `_v28` shims + the 5 standalone RPCs
+above with no `_v28` shim (`create_customer_basic`, `create_customer_full`,
+`update_customer`, `update_supplier`, `archive_supplier`) — every one confirmed
+unreferenced by any other DB function; clean drops.
 
 Total `_v28` shims retired in v2.10: **13** (finalized at the 0103 design
 checkpoint — flag F1: the tier-side `define_tier_v28` / `update_tier_v28`
