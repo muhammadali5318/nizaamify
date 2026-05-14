@@ -426,15 +426,24 @@ AQ-01 through AQ-24 (the v2.9 + v2.9.1 baseline) must remain zero.
 AQ-23 (DEFINER-wrapper shape-drift) and AQ-24 (legacy
 `current_shop_id()` allowlist) extend to cover the new RPCs.
 
-### AQ allowlist updates
+### AQ-23 / AQ-24 — no allowlist edits needed (flag F2)
 
-- **AQ-23:** The 14 exempt entries grow to include any new shape
-  variants introduced by the contact RPCs that legitimately drift from
-  the standard wrapper shape. Expect 0–2 additions; document in the
-  related ADR.
-- **AQ-24:** The legacy `current_shop_id()` allowlist (38 `_v28` + 2
-  pre-v2.9 views) shrinks by the 14 retired `_v28` shims. Net allowlist
-  after v2.10: ~26 entries.
+AQ-23 and AQ-24 are written as **blanket `name NOT LIKE '%_v28'`
+patterns**, not enumerated allowlists — so the v2.10 chain needs **zero**
+per-migration allowlist edits:
+
+- **AQ-23** (DEFINER-wrapper shape-drift): scans wrappers via the LIKE
+  pattern. The new contact RPCs (0102's 7 + 0103's rewrites and fresh
+  functions) all carry the P1/P2/P3 substrings AQ-23 checks for — order
+  is irrelevant to a LIKE check, so `reverse_ledger_entry`'s
+  fetch-then-gate ordering and `search_khata_contacts`' direction-split
+  gate both pass. No exempt-list additions.
+- **AQ-24** (legacy `current_shop_id()` callers): the blanket pattern
+  means dropping a `_v28` shim automatically removes it from AQ-24's
+  scope — no allowlist edit. Every new v2.10 function uses
+  `current_active_shop_id()`. The only standing AQ-24 baseline entries
+  are the 2 pre-v2.9 views (`daily_sales_7`, `expenses_by_category_mtd`),
+  tracked for cleanup in `docs/todos.md` (v2.9.3).
 
 ---
 

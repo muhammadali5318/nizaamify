@@ -33,10 +33,20 @@
 -- legacy and new targets reconcile against the ledger, which is the
 -- precondition for the dual-write to stay correct going forward.
 --
--- SEQUENCING: receivable ledger inserts after 0101 must populate BOTH
--- customer_id and contact_id for the dual-write to keep AQ-12 green;
--- the RPCs do this from 0103. Between 0101 and 0103 staging has no app
--- traffic, so no ledger inserts occur.
+-- SEQUENCING (corrected 2026-05-14, 0103 Round 2 §B finding): an earlier
+-- draft of this note said receivable ledger inserts after 0101 must
+-- populate BOTH customer_id and contact_id. That is infeasible (post-0099
+-- there is no contact->customer reverse map) and unnecessary. Corrected
+-- mechanism — "frozen legacy world + copy-on-reverse": the 0103 CREATE
+-- RPCs (record_sale / receive_payment) write customer_id = NULL on new
+-- receivable entries; the dual-write's legacy customers branch is guarded
+-- on NEW.customer_id IS NOT NULL, so it cleanly no-ops for them. AQ-12
+-- stays green because the legacy customers rows AND the customer_id-keyed
+-- ledger sum are both frozen as of 0103 — they stay mutually consistent.
+-- reverse_ledger_entry is the one exception: it COPIES customer_id from
+-- the reversed entry, so reversing a pre-0103 entry keeps the legacy
+-- customers row in lockstep. Between 0101 and 0103 staging has no app
+-- traffic, so no ledger inserts occur in that window regardless.
 --
 -- STAGING ONLY. Production untouched until v2.10 + v2.11 ship together.
 --

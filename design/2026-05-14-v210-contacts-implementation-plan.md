@@ -86,8 +86,8 @@ drop. Lifecycle:
 | `0100_v210_collateral_schema_changes.sql` | `ledger_entries` add `direction` + swap the `NOT NULL` constraint onto `contact_id`; `purchases` add `amount_paid` (backfilled `= total_cost` for legacy rows inside a tight `purchases_no_modify` disable window — the only DML in 0100) + `outstanding` (generated); `shops` add cap column; `contact_id` indexes on all four dependent tables; `batch_immutable_fields` gains a `contact_id` check. **No column renames. No view changes** — `customer_balance_reconciliation` is left intact so AQ-12 stays green (the new `contact_balance_reconciliation` lands in 0102, the old view drops in 0104). | Pre-auth required |
 | `0101_v210_unified_ledger_trigger.sql` | `ledger_entries` drop `NOT NULL` from legacy `customer_id` (completes the swap 0100 half-did — required before supplier-side `payable` entries, which have no customer, can be created in 0102/0103); `ledger_entries_update_balance` rebuilt direction-aware with a dual-write on the receivable side (updates `contacts.customer_outstanding_balance` **and** legacy `customers.outstanding_balance` so AQ-12 stays green; `payable` updates only `contacts.supplier_outstanding_balance` — no legacy target). `ledger_entries_immutable` is **not** touched — it is a blanket `UPDATE`/`DELETE` block, so `direction` is already immutable. | Pre-auth required |
 | `0102_v210_create_contact_rpcs.sql` | 7 new RPCs: `create_contact_basic`, `create_contact_full`, `update_contact`, `archive_contact`, `promote_contact`, `pay_supplier`, `get_contact_unified_history`. **2 new views** (not 4): `contacts_view` (DEFINER, conditional-projection) + `contact_balance_reconciliation` (INVOKER, audit-only — moved here from 0100). `customer_outstanding` rebuild + `supplier_outstanding` are **deferred out of 0102** — rebuilding `customer_outstanding` needs `DROP … CASCADE` (`total_outstanding` depends on it, `list_customers` reads it), which is legacy-teardown work; their placement (0103 with the khata RPCs, or 0104 cleanup) is decided at the 0103 design checkpoint. `customer_balance_reconciliation` stays intact until 0104. | Pre-auth required |
-| `0103_v210_modify_existing_rpcs.sql` | `record_sale` / `record_purchase` / `receive_payment` / `reverse_ledger_entry` / `list_contacts` / `recent_contacts` / `search_khata_contacts` / `search_purchases` rewritten for `contact_id`. **Plus — agenda items surfaced by 0102:** (a) add `ledger_entries.purchase_id` (nullable FK → `purchases`, mirrors `invoice_id`) — the supplier-side ledger→transaction link `get_contact_unified_history` showed is missing; `record_purchase` populates it when it posts a `payable` debit. (b) decide `customer_outstanding` rebuild + `supplier_outstanding` placement (deferred from 0102). | Pre-auth required |
-| `0104_v210_retire_legacy_rpcs_and_v28_shims.sql` | DROP retired RPCs and 14 `_v28` shims per B.6 narrow scope. Drop `customers_view` and `customer_balance_reconciliation` (the latter superseded by `contact_balance_reconciliation`; AQ-12 migrates to its v2.10 form here). (`suppliers_view` is a phantom — it never existed; v2.9 suppliers had no projection view.) Resolve `customer_outstanding` here — rebuild to its v2.10 form or drop — via `DROP … CASCADE` with `total_outstanding`, per the placement decided at 0103 design. **Drop the legacy `customer_id` / `supplier_id` columns + their indexes + FKs** from `invoices` / `ledger_entries` / `purchases` / `inventory_batches` — must precede the 0106 table drop; also drop the `supplier_id` check from `batch_immutable_fields`. | Pre-auth required |
+| `0103_v210_modify_existing_rpcs.sql` | `record_sale` / `record_purchase` / `receive_payment` / `reverse_ledger_entry` / `list_contacts` / `recent_contacts` / `search_khata_contacts` / `search_khata_contacts_count` / `search_purchases` / `search_purchases_count` rewritten for `contact_id` (10 RPCs — see §2.0 for the call-site deltas). **Plus — agenda items surfaced by 0102:** (a) add `ledger_entries.purchase_id` (nullable FK → `purchases`, mirrors `invoice_id`) — the supplier-side ledger→transaction link `get_contact_unified_history` showed is missing; `record_purchase` populates it when it posts a `payable` debit. (b) Decision B (0103 Round 1): **no** standalone `customer_outstanding` / `supplier_outstanding` views are built — the renamed list/khata RPCs read `contacts.*` cached columns directly; the legacy `customer_outstanding` + its `total_outstanding` dependent are resolved in 0104. Plus the §3.4 `purchases_view` extension. | Pre-auth required |
+| `0104_v210_retire_legacy_rpcs_and_v28_shims.sql` | DROP retired RPCs and the **7** `_v28` shims that retire here (of v2.10's **13** total — flag F1; the other 6 are collapsed-in-place in 0103 per Decision C) per B.6 narrow scope. Drop `customers_view` and `customer_balance_reconciliation` (the latter superseded by `contact_balance_reconciliation`; AQ-12 migrates to its v2.10 form here). (`suppliers_view` is a phantom — it never existed; v2.9 suppliers had no projection view.) Resolve `customer_outstanding` here — rebuild to its v2.10 form or drop — via `DROP … CASCADE` with `total_outstanding`, per the placement decided at 0103 design. **Drop the legacy `customer_id` / `supplier_id` columns + their indexes + FKs** from `invoices` / `ledger_entries` / `purchases` / `inventory_batches` — must precede the 0106 table drop; also drop the `supplier_id` check from `batch_immutable_fields`. | Pre-auth required |
 | `0105_v210_permission_catalog_redesign.sql` | Insert 12 new keys; migrate 24 `user_shop_permissions` rows per §1.3 of attack-surface doc; drop 12 retired keys; update `permissions_catalog` category from `customers` → `contacts` and drop `suppliers` category | Pre-auth required |
 | `0106_v210_drop_legacy_tables.sql` | `DROP TABLE customers CASCADE; DROP TABLE suppliers CASCADE;` — runs last because every reference must be migrated first | Pre-auth required — **second confirmation point: this migration commits the data drop** |
 
@@ -129,11 +129,79 @@ After each migration applies cleanly:
 If any halt fires, the corresponding migration's down-migration runs and
 the user is notified.
 
+### 1.4 — 0105 design agenda (open questions for the 0105 design checkpoint)
+
+Surfaced during the 0103 design rounds; to be resolved when 0105
+(permission catalog redesign) is designed.
+
+- **`reverse_ledger_entry` permission key — retire, or keep as a base
+  gate?** 0103 implements C2's pure direction-split (attack-surface
+  §4.2): reversing a receivable entry needs `receive_payment`, a payable
+  entry needs `pay_supplier`; the v2.9 `reverse_ledger_entry` key is no
+  longer referenced by the function. Two consequences 0105 must weigh:
+  1. **Salesperson escalation.** Salespeople hold `receive_payment` by
+     default (§3.2). Pure direction-split therefore lets them reverse
+     *receivable* ledger entries — a capability the dedicated v2.9
+     `reverse_ledger_entry` key did not grant them. Keeping the old key
+     as a base gate (checked first) closes this; retiring it accepts it
+     ("if you can take payments, you can correct them").
+  2. **`entry_not_in_shop` disclosure.** The direction-split forces the
+     permission check *after* the entry fetch (direction is unknown until
+     the row is read), so `entry_not_in_shop` can now surface to a caller
+     holding neither payment permission. A base gate checked first would
+     restore fetch-after-permission ordering.
+
 ---
 
 ## 2. Phase D — frontend implementation
 
 Cluster sequence per PRD D.9, refined with the locked decisions:
+
+### 2.0 — Hard RPC call-site dependencies (from the 0103 rewrites)
+
+Migration 0103 renames RPC parameters and return columns. These are
+**hard frontend call-site dependencies** — the TypeScript regen (D.1)
+surfaces them as compile errors, but the fix is manual per call site, and
+they are distinct from the `contact_id` *value* threading:
+
+- **`record_sale`** — first param `p_customer_id` → `p_contact_id`. Every
+  `supabase.rpc('record_sale', { p_customer_id: … })` named-arg call must
+  update. Call site: `src/features/pos/hooks.ts`.
+- **`record_purchase`** — first param `p_supplier_id` → `p_contact_id`,
+  plus a new optional `p_amount_paid` (NULL = fully paid; the stock-in UI
+  should start sending it for partial payments — D.5). Call site:
+  `src/features/purchases/hooks.ts`.
+- **`receive_payment`** — first param `p_customer_id` → `p_contact_id`.
+  Call site: `src/features/khata/hooks.ts`.
+- **`search_purchases` / `search_purchases_count`** — param
+  `p_supplier_id` → `p_contact_id`; **return columns** `supplier_id` /
+  `supplier_name` → `contact_id` / `contact_name`.
+- **`list_contacts`** (was `list_customers`) — new `p_contact_type`
+  filter param; new return columns `contact_type`, `is_active`,
+  `supplier_outstanding_balance`.
+- **`recent_contacts`** (was `recent_customers` + `recent_suppliers`) —
+  ONE RPC now subsumes two; new `p_contact_type` param. Both legacy hooks
+  collapse to one.
+- **`search_khata_contacts` / `search_khata_contacts_count`** (was
+  `search_khata_customers*`) — new `p_direction` ('receivable' /
+  'payable') param.
+
+**Hard ordering dependency (R3-3):** D.1/D.2 must cut every call site
+over to the `_contacts` functions **before any real traffic** hits a
+pilot shop. The v2.9 originals (`list_customers` etc.) survive until
+0104, but post-0103 they show **frozen data** (new ledger / invoice rows
+carry the legacy id columns NULL per §B). "Frozen" is acceptable *only*
+because nothing real reads them in the 0103→0104 window — this is a
+release gate, not a note.
+
+Also Phase D (D.1, `src/lib/errorMap.ts`) — the v2.10 ledger/payment RPC
+error strings are absent from `errorMap.ts` and currently render as
+`errors.unknown` (F-R2-4): add `overpayment_customer`,
+`overpayment_supplier`, `supplier_payment_cap_exceeded`,
+`cannot_reverse_purchase_tied_debit`, `contact_not_found`,
+`contact_not_in_shop`, `contact_not_a_customer`, `contact_not_a_supplier`,
+`invalid_direction`, `invalid_contact_type`,
+`unpaid_purchase_requires_supplier`, `invalid_amount_paid`.
 
 ### D.1 — Types + hooks (no UI change)
 

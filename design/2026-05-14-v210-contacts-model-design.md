@@ -231,6 +231,18 @@ ELSE  -- 'payable'
 END IF;
 ```
 
+**Receivable-side write mechanism (§B finding, 0103 Round 2).** The 0103
+CREATE RPCs (`record_sale` / `receive_payment`) write `customer_id = NULL`
+on new receivable entries — the "frozen legacy world". The dual-write's
+legacy branch above is guarded on `NEW.customer_id IS NOT NULL`, so it
+no-ops for them. `reverse_ledger_entry` is the sole exception: it copies
+`customer_id` verbatim from the reversed entry, keeping a pre-0103
+entry's legacy `customers` row in lockstep on reversal. AQ-12 stays green
+because the legacy `customers` rows and the `customer_id`-keyed ledger
+sum are both frozen as of 0103. (An earlier 0101-header draft claimed the
+RPCs must populate both `customer_id` and `contact_id` — infeasible
+post-0099, superseded by this mechanism.)
+
 `ledger_entries_immutable` needs **no change**. It is a blanket
 `UPDATE`/`DELETE` block (no column inspection), so the `direction`
 column added above is already immutable the moment it exists — unlike
@@ -433,9 +445,13 @@ WHERE c.shop_id = cp.active_shop_id AND cp.can_view;
 
 ### 3.2 `customer_outstanding` (rebuilt for direction='receivable') — DEFERRED out of 0102
 
-> **Not in migration 0102.** See the §3 scope note — the rebuild needs
-> `DROP … CASCADE` (legacy-teardown); placement decided at 0103 design.
-> The shape below is the target form.
+> **SUPERSEDED (2026-05-14, 0103 Round 1 Decision B).** This standalone
+> view is **not built in v2.10**. `list_contacts` (mig 0103) reads
+> `contacts.customer_outstanding_balance` (the cached column) directly —
+> there is no `customer_outstanding` view to rebuild. The shape below is
+> retained only as a historical record of the Phase B target. The legacy
+> `customer_outstanding` view + its `total_outstanding` dependent are
+> resolved (rebuilt-or-dropped) in 0104's legacy teardown.
 
 ```sql
 CREATE OR REPLACE VIEW customer_outstanding AS
@@ -465,8 +481,12 @@ GROUP BY c.shop_id, c.id, c.name, c.phone, cp.can_see;
 
 ### 3.3 `supplier_outstanding` (new — mirror of customer_outstanding) — DEFERRED out of 0102
 
-> **Not in migration 0102.** See the §3 scope note — deferred to pair
-> with `customer_outstanding` (0103/0104). The shape below is the target.
+> **SUPERSEDED (2026-05-14, 0103 Round 1 Decision B).** This standalone
+> view is **not built in v2.10**. `search_khata_contacts` (mig 0103, with
+> `p_direction='payable'`) and `list_contacts` read
+> `contacts.supplier_outstanding_balance` (the cached column) directly.
+> The shape below is retained only as a historical record of the Phase B
+> target.
 
 ```sql
 CREATE VIEW supplier_outstanding AS
@@ -557,13 +577,20 @@ Update LEFT JOIN target from `suppliers` to `contacts`. The
 | `recent_customers` + `_v28`, `recent_suppliers` + `_v28` | Folded into `recent_contacts` |
 | `list_customers` + `_v28`, `search_suppliers` + `_v28` | Folded into `list_contacts` |
 | `search_khata_customers` + `_v28`, `search_khata_customers_count` + `_v28` | Renamed (direction param added) |
-| `receive_payment_v28`, `record_sale_v28`, `record_purchase_v28`, `search_purchases_v28`, `search_purchases_count_v28` | Inner shims become dead pointers when `customers`/`suppliers` are dropped; retired per B.6 |
+| `record_sale_v28`, `record_purchase_v28`, `receive_payment_v28`, `reverse_ledger_entry_v28`, `search_purchases_v28`, `search_purchases_count_v28` | The 6 collapsed-in-place shims (public name kept) — retired in 0103, not 0104, per Decision C |
 
-Total `_v28` shims retired in v2.10: **14** (per audit §2.2 + tier-side
-`define_tier_v28` / `update_tier_v28` / `deactivate_tier_v28` /
-`set_default_tier_v28` if the contact-touching path warrants it —
-finalized in Phase C migration 0103). Remaining 27 unrelated `_v28`
-shims stay; v2.11 cleanup migration handles them per the queued ADR.
+Total `_v28` shims retired in v2.10: **13** (finalized at the 0103 design
+checkpoint — flag F1: the tier-side `define_tier_v28` / `update_tier_v28`
+/ `deactivate_tier_v28` / `set_default_tier_v28` shims are NOT
+contact-touching and stay). Split: **6 in 0103** (record_sale,
+record_purchase, receive_payment, reverse_ledger_entry, search_purchases,
+search_purchases_count — collapsed in place, public name kept) + **7 in
+0104** (list_customers, recent_customers, search_khata_customers,
+search_khata_customers_count, create_supplier_inline, recent_suppliers,
+search_suppliers — renamed or folded, so the v2.9 originals + shims
+survive to 0104). Remaining **28** unrelated `_v28` shims stay (41 live
+in staging − 13 retired); the v2.11 cleanup migration handles them per
+the queued ADR.
 
 ---
 
