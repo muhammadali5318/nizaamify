@@ -547,10 +547,14 @@ BEGIN
      AND pg_get_functiondef(p.oid) NOT LIKE '%public.customers%';
   IF v_leb_clean <> 1 THEN RAISE EXCEPTION '0104: ledger_entries_update_balance still references customer_id/customers'; END IF;
 
-  -- total_outstanding rebuilt: reads contacts, no longer reads customer_outstanding
+  -- total_outstanding rebuilt: reads contacts, no longer reads the
+  -- customer_outstanding VIEW. The negative check uses a \m..\M word
+  -- boundary so it matches the standalone view name but NOT the column
+  -- customer_outstanding_balance, which the rebuilt view legitimately
+  -- reads (SUM(c.customer_outstanding_balance)).
   SELECT count(*) INTO v_to_ok FROM pg_views
    WHERE schemaname='public' AND viewname='total_outstanding'
-     AND definition LIKE '%contacts%' AND definition NOT LIKE '%customer_outstanding%';
+     AND definition LIKE '%contacts%' AND definition !~ '\mcustomer_outstanding\M';
   IF v_to_ok <> 1 THEN RAISE EXCEPTION '0104: total_outstanding not rebuilt off contacts'; END IF;
 
   -- total_payable exists, is DEFINER, carries no anon SELECT
