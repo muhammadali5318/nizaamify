@@ -595,9 +595,19 @@ above with no `_v28` shim (`create_customer_basic`, `create_customer_full`,
 unreferenced by any other DB function; clean drops.
 
 Total `_v28` shims retired in v2.10: **13** (finalized at the 0103 design
-checkpoint — flag F1: the tier-side `define_tier_v28` / `update_tier_v28`
-/ `deactivate_tier_v28` / `set_default_tier_v28` shims are NOT
-contact-touching and stay). Split: **6 in 0103** (record_sale,
+checkpoint — flag F1. The 4 tier-side shims — `define_tier_v28` /
+`update_tier_v28` / `deactivate_tier_v28` / `set_default_tier_v28` —
+**stay** (not retired). **F1's "all 4 not contact-touching"
+classification was corrected by mig 0104b:** a per-shim scan (shown
+evidence — all 4 bodies read in full, corroborated by an independent
+broader scan) confirmed `define_tier_v28` / `update_tier_v28` /
+`set_default_tier_v28` touch **only** `customer_tiers` (which v2.10
+keeps) — but `deactivate_tier_v28` **was** contact-touching: it
+re-pointed `customers.tier_id`, so 0104b rewrote its body to re-point
+`contacts.customer_tier_id`. The shims still stay; only
+`deactivate_tier_v28`'s body changed. AQ-33 now permanently guards the
+"no surviving function writes public.customers/suppliers" class so the
+classification can never again be silently mis-trusted). Split: **6 in 0103** (record_sale,
 record_purchase, receive_payment, reverse_ledger_entry, search_purchases,
 search_purchases_count — collapsed in place, public name kept) + **7 in
 0104** (list_customers, recent_customers, search_khata_customers,

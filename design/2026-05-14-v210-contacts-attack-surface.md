@@ -449,6 +449,30 @@ WHERE g.table_schema = 'public'
 -- SELECT grant — REVOKE per ADR-0015 (revoke from public, anon).
 ```
 
+### AQ-33 — no surviving function writes the legacy customers/suppliers tables
+
+Added 2026-05-14 (mig 0104b). 0104's post-migration verification (check
+6) caught `deactivate_tier_v28` still doing `update public.customers set
+tier_id = …` — F1 had classified the 4 tier-side `_v28` shims as "not
+contact-touching" and 0104's audit inherited that classification instead
+of re-scanning. The defect class: a classification trusted twice rather
+than verified once. 0104b rewrote `deactivate_tier_v28` onto
+`contacts.customer_tier_id`; AQ-33 promotes 0104's one-off check 6 to a
+permanent guard so the class can never again be silently mis-trusted.
+**0106 — which drops the `customers` / `suppliers` tables — inherits this
+guard automatically.** The `\M` word boundary keeps `public.customer_tiers`
+(legitimately written by the tier shims/wrappers) from being false-matched
+— `public.customers` is not a prefix of `public.customer_tiers`.
+
+```sql
+SELECT p.proname
+FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE n.nspname = 'public'
+  AND pg_get_functiondef(p.oid) ~*
+      '(insert\s+into\s+|update\s+|delete\s+from\s+)public\.(customers|suppliers)\M';
+-- Expected: 0 rows
+```
+
 ### Existing AQ suite
 
 AQ-01 through AQ-24 (the v2.9 + v2.9.1 baseline) must remain zero.
