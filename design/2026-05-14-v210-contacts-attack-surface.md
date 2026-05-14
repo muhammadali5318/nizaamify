@@ -376,8 +376,47 @@ WHERE (le.direction = 'receivable' AND c.contact_type NOT IN ('customer','both')
 ### AQ-31 — cached balance matches ledger sum (per direction)
 
 ```sql
-SELECT contact_id, side, stored, computed, drift FROM contact_balance_reconciliation
+-- Corrected 2026-05-14: the original SELECT list referenced non-existent
+-- columns (side/stored/computed/drift); contact_balance_reconciliation
+-- exposes customer_drift / supplier_drift.
+SELECT contact_id, customer_drift, supplier_drift
+FROM contact_balance_reconciliation
 WHERE ABS(customer_drift) > 0.01 OR ABS(supplier_drift) > 0.01;
+-- Expected: 0 rows
+```
+
+### AQ-32 — no v2.10-surface view/table carries an unintended anon/public SELECT grant
+
+Added 2026-05-14 after the 0102 anon-grant gap (`contacts_view` +
+`contact_balance_reconciliation` carried the Supabase auto-`anon` SELECT
+grant; it slipped past all 24 AQs **and** 0102's own verification block —
+the signal that a new bug class needs a permanent guard). Catches the
+same class in 0103/0104/0105. The scanned set is the **v2.10 object
+surface** — objects the v2.10 chain creates or retires; it grows
+per-migration. The allowlist documents objects expected to still carry
+the grant.
+
+```sql
+SELECT g.table_name, g.grantee
+FROM information_schema.role_table_grants g
+WHERE g.table_schema = 'public'
+  AND g.privilege_type = 'SELECT'
+  AND lower(g.grantee) IN ('anon', 'public')
+  AND g.table_name IN (
+    -- v2.10 object surface (created or retired by the v2.10 chain):
+    'contacts',                       -- table, created 0096 (anon revoked there)
+    'contacts_view',                  -- view, created 0102 / anon revoked 0102b
+    'contact_balance_reconciliation', -- view, created 0102 / anon revoked 0102b
+    'customer_balance_reconciliation' -- legacy view, retired by 0104 — see allowlist
+    -- (0103 adds: customer_outstanding rebuild, supplier_outstanding;
+    --  0104 adds/removes: customers_view, etc.)
+  )
+  AND g.table_name NOT IN (
+    -- known-legacy allowlist — entries here are EXPECTED to still carry
+    -- the anon grant. AQ-32 SEES them (they are in the scanned set above)
+    -- but does not fail on them.
+    'customer_balance_reconciliation' -- known-legacy, removed by 0104; see docs/todos.md
+  );
 -- Expected: 0 rows
 ```
 
@@ -424,7 +463,7 @@ Coverage matrix file: `audit/2026-05-XX-v210-phase-e-coverage-matrix.md`
 
 Per PRD G.3, ANY of the following blocks v2.10 ship:
 
-- Any AQ-25 through AQ-31 returning non-zero rows.
+- Any AQ-25 through AQ-32 returning non-zero rows.
 - Any AQ-01 through AQ-24 returning non-zero rows (regression).
 - Owner smoke test failure on any locked use case from §A.5 of audit.
 - Synthetic non-owner test failure: permission gate not enforced, OR
